@@ -1,4 +1,4 @@
-[中文版](https://github.com/sjn4048/311MemoryResearch/README(简体中文).md)
+[中文版](https://github.com/sjn4048/311MemoryResearch/blob/master/README(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87).md)
 # 311MemoryResearch
 Collection of memory research for game "Romance of the Three Kingdoms XI" (hereinafter referred to as "the game") by KOEI. Extremely helpful in understanding game logic and making game modifiers.
 
