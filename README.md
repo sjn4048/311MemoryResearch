@@ -14,10 +14,14 @@ ryan_knight_12
 
 txz_mk
 
+sjn4048
+
 # Index
 
 (TODO)
 
 # License
 
-These research data are published under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which allows very broad use for both academic and commercial purposes. You are very welcome to modify these research and use them in your own projects. Please keep a link to the [original repository.](https://github.com/sjn4048/311MemoryResearch)
+These research data are published under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) which allows very broad use for both academic and commercial purposes. You are very welcome to modify these research and use them in your own projects. 
+
+Please keep a link to the [original repository.](https://github.com/sjn4048/311MemoryResearch)
