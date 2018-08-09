@@ -1,6 +1,6 @@
 [中文版](https://github.com/sjn4048/311MemoryResearch/blob/master/README(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87).md)
 # 311MemoryResearch
-Collection of memory research for game "Romance of the Three Kingdoms XI" (hereinafter referred to as "the game") by KOEI. Extremely helpful in understanding game logic and making game modifiers.
+Collection of memory research for game "Sangokushi XI Power-up Kit" (hereinafter referred to as "the game") by KOEI. Extremely helpful in understanding game logic and making game modifiers.
 
 # Introduction
 This project contains the research of the game's memory data. By referring to the project, you will have a thorough knowledge of most of the major assembly functions on which the game rely, and you can easily change game logic on your own or furtherly build a game modifier based on these data.
