@@ -1,0 +1,80 @@
+ 005974C0 - 8b 44 24 14                - mov eax,[esp+14]                      eax应该是使用战法的ID
+ 005974C4 - 81 ec d0 03 00 00          - sub esp,000003d0
+ 005974CA - 55                         - push ebp
+ 005974CB - 83 c0 fa                   - add eax,fa                            eax - 6（这样弩兵的1－3级战法的EAX此时为0、1、2）
+ 005974CE - 33 ed                      - xor ebp,ebp                           受伤率ebp = 0
+ 005974D0 - 83 f8 0a                   - cmp eax,0a                            如果eax>10
+ 005974D3 - 0f 87 d9 00 00 00          - ja 005975b2                           则直接返回
+ 005974D9 - 0f b6 80 cc 75 59 00       - movzx eax,byte ptr [eax+005975cc]     eax映射（火矢=0、贯射=1、乱射=2、3、3、3、火矢[井栏]＝0、3、3、3、火矢[船]=0）
+ 005974E0 - ff 24 85 bc 75 59 00       - jmp dword ptr [eax*4+005975bc]        eax = 0-3(eax = 3直接返回)
+ 005974E7 - bd 01 00 00 00             - mov ebp,00000001                      eax = 1
+ 005974EC - eb 05                      - jmp 005974f3
+ 005974EE - bd 02 00 00 00             - mov ebp,00000002                      eax = 2
+*005974EC - 0f b6 a8 4c 82 8a 00       - movzx ebp,byte ptr [eax+008a824c]     //基础狙伤率自定
+ 005974F3 - 53                         - push ebx                              eax = 0
+ 005974F4 - 8b 9c 24 dc 03 00 00       - mov ebx,[esp+000003dc]                ebx是被攻击部队指针
+ 005974FB - 53                         - push ebx
+ 005974FC - e8 2f 31 ee ff             - call 0047a630                         校验指针
+ 00597501 - 83 c4 04                   - add esp,04
+ 00597504 - 85 c0                      - test eax,eax
+ 00597506 - 0f 84 a5 00 00 00          - je 005975b1
+ 0059750C - 57                         - push edi
+ 0059750D - e8 de fc ff ff             - call 005971f0                         预定受伤人员（判断对方部队中是否有护卫或强运），返回预定受伤人员首地址
+ 00597512 - 8b f8                      - mov edi,eax                           预定受伤人员首地址置入EDI
+ 00597514 - 85 ff                      - test edi,edi                          如果EDI=0
+ 00597516 - 0f 84 94 00 00 00          - je 005975b0                           则返回
+ 0059751C - 8b 9f fc 00 00 00          - mov ebx,[edi+000000fc]                预定受伤武将性格
+ 00597522 - 56                         - push esi
+ 00597523 - 8b b4 24 e8 03 00 00       - mov esi,[esp+000003e8]                esi中应该是攻击部队主将指针
+ 0059752A - e8 51 ef ff ff             - call 00596480                         比较部队主将统武较高值，与预定受伤武将统武较高值进行比较，根据差值返回eax为-2/-1/0/1四种结果，
+ 0059752F - 8b b4 24 f0 03 00 00       - mov esi,[esp+000003f0]                这里引入爆击因素
+ 00597536 - 33 c9                      - xor ecx,ecx                           ecx＝0
+ 00597538 - 85 f6                      - test esi,esi                          esi是否=1
+ 0059753A - 0f 95 c1                   - setnc cl                              esi不为0则CL置1
+*00597536 - 85 f6                      - test esi,esi
+*00597538 - 74 03                      - je 0059753d
+*0059753A - 83 c0 01                   - add eax,01                            //爆击增加概率
+ 0059753D - 03 c3                      - add eax,ebx
+ 0059753F - 03 c8                      - add ecx,eax
+ 00597541 - 8d 44 29 ff                - lea eax,[ecx+ebp-01]                  最终狙伤率＝战法基本狙伤率＋统武差比较结果＋武将性格＋爆击（1％）－1
+*00597541 - 8d 44 05 ff                - lea eax,[ebp+eax-01]
+ 00597545 - 50                         - push eax
+ 00597546 - e8 85 ac ed ff             - call 004721d0
+ 0059754B - 83 c4 04                   - add esp,04
+ 0059754E - 85 c0                      - test eax,eax
+ 00597550 - 74 5d                      - je 005975af
+ 00597552 - 8b cf                      - mov ecx,edi
+ 00597554 - e8 e7 27 ef ff             - call 00489d40
+ 00597559 - 50                         - push eax
+ 0059755A - b9 58 19 20 07             - mov ecx,07201958
+ 0059755F - e8 9c 95 ef ff             - call 00490b00
+ 00597564 - 8b f0                      - mov esi,eax
+ 00597566 - 56                         - push esi
+ 00597567 - e8 c4 30 ee ff             - call 0047a630
+ 0059756C - 83 c4 04                   - add esp,04
+ 0059756F - 85 c0                      - test eax,eax
+ 00597571 - 74 25                      - je 00597598
+ 00597573 - 6a 00                      - push 00
+ 00597575 - 57                         - push edi
+ 00597576 - 56                         - push esi
+ 00597577 - 57                         - push edi
+ 00597578 - 68 26 1d 00 00             - push 00001d26
+ 0059757D - 8d 4c 24 24                - lea ecx,[esp+24]
+ 00597581 - e8 ca 0d 00 00             - call 00598350
+ 00597586 - 50                         - push eax
+ 00597587 - e8 04 3e f0 ff             - call 0049b390
+ 0059758C - 83 c4 04                   - add esp,04
+ 0059758F - 50                         - push eax
+ 00597590 - e8 fb f0 f5 ff             - call 004f6690
+ 00597595 - 83 c4 0c                   - add esp,0c
+ 00597598 - 8b 94 24 e4 03 00 00       - mov edx,[esp+000003e4]
+ 0059759F - 8b 84 24 ec 03 00 00       - mov eax,[esp+000003ec]
+ 005975A6 - 52                         - push edx
+ 005975A7 - e8 34 ee ff ff             - call 005963e0                  具体的受伤处理
+ 005975AC - 83 c4 04                   - add esp,04
+ 005975AF - 5e                         - pop esi
+ 005975B0 - 5f                         - pop edi
+ 005975B1 - 5b                         - pop ebx
+ 005975B2 - 5d                         - pop ebp
+ 005975B3 - 81 c4 d0 03 00 00          - add esp,000003d0
+ 005975B9 - c2 14 00                   - ret 0014

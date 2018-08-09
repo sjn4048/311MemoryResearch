@@ -1,0 +1,99 @@
+功能: 每旬兵临城下逃兵处理
+参数表: ecx=??
+
+*****************************************************************************************************************************************************
+
+00599AA0 - 83 ec 08                   - sub esp,08
+00599AA3 - 53                         - push ebx
+00599AA4 - 55                         - push ebp
+00599AA5 - 56                         - push esi
+00599AA6 - 33 c0                      - xor eax,eax                    eax = 0
+00599AA8 - 57                         - push edi
+00599AA9 - 8b e9                      - mov ebp,ecx
+00599AAB - 89 44 24 10                - mov [esp+10],eax
+00599AAF - 90                         - nop
+
+【获取设施指针和兵力】
+00599AB0 - 50                         - push eax
+00599AB1 - b9 58 19 20 07             - mov ecx,07201958
+00599AB6 - e8 45 72 ef ff             - call 00490d00                  根据设施ID获取设施指针
+00599ABB - 8b f8                      - mov edi,eax                    edi = 设施指针
+00599ABD - 57                         - push edi
+00599ABE - e8 6d 0b ee ff             - call 0047a630                  校验指针
+00599AC3 - 83 c4 04                   - add esp,04
+00599AC6 - 85 c0                      - test eax,eax
+00599AC8 - 0f 84 a2 00 00 00          - je 00599b70
+00599ACE - 8b 07                      - mov eax,[edi]
+00599AD0 - 8b cf                      - mov ecx,edi
+00599AD2 - ff 50 40                   - call dword ptr [eax+40]        获取设施所属势力ID
+00599AD5 - 85 c0                      - test eax,eax
+00599AD7 - 0f 8c 93 00 00 00          - jl 00599b70
+00599ADD - 83 f8 2e                   - cmp eax,2e
+00599AE0 - 0f 8f 8a 00 00 00          - jg 00599b70                    无所属势力则循环下一个
+00599AE6 - 8b 17                      - mov edx,[edi]
+00599AE8 - 8b cf                      - mov ecx,edi
+00599AEA - ff 52 50                   - call dword ptr [edx+50]        获取设施兵力
+00599AED - 8b d8                      - mov ebx,eax                    ebx = 设施内的兵力
+00599AEF - 85 db                      - test ebx,ebx
+00599AF1 - 7e 7d                      - jle 00599b70                   兵力为0则循环下一个
+
+【计算兵临城下时逃兵数量】
+00599AF3 - 57                         - push edi                       edi = 设施指针
+00599AF4 - b9 5c 89 99 07             - mov ecx,0799895c
+00599AF9 - e8 b2 fe f1 ff             - call 004b99b0                  判断城市、港关附近（城市3格，港关2格）是否有敌方部队
+00599AFE - 85 c0                      - test eax,eax
+00599B00 - 74 6e                      - je 00599b70                                                                    【修改】jmp 00599b70  //兵临城下不会有逃兵
+00599B02 - 83 fb 64                   - cmp ebx,64
+00599B05 - 7f 05                      - jg 00599b0c
+00599B07 - bb 64 00 00 00             - mov ebx,00000064               如果设施内兵力小于100以100计算
+00599B0C - 6a 32                      - push 32
+00599B0E - e8 3d 86 ed ff             - call 00472150                  0～49随机
+00599B13 - 0f b7 f0                   - movzx esi,ax
+00599B16 - b8 1f 85 eb 51             - mov eax,51eb851f
+00599B1B - f7 eb                      - imul ebx
+00599B1D - c1 fa 05                   - sar dl,05
+00599B20 - 8b c2                      - mov eax,edx
+00599B22 - c1 e8 1f                   - shr eax,1f
+00599B25 - 03 c2                      - add eax,edx                    eax = 城市兵力*0.01
+00599B27 - 89 44 24 18                - mov [esp+18],eax
+00599B2B - 83 c4 04                   - add esp,04
+00599B2E - db 44 24 14                - fild dword ptr [esp+14]        加载浮点计算乘数
+00599B32 - d9 fa                      - fsqrt                          开平方根
+00599B34 - d8 0d a0 b0 84 00          - fmul dword ptr [0084b0a0]      逃兵数量 = 平方根(城市兵力×0.01)×(-30)
+00599B3A - e8 35 df 16 00             - call 00707a74
+00599B3F - 2b f0                      - sub esi,eax
+00599B41 - f7 de                      - neg esi                        esi = 逃兵数量(负值)
+
+【逃兵处理】
+00599B43 - 56                         - push esi
+00599B44 - 57                         - push edi                       edi = 设施指针
+00599B45 - b9 5c 89 99 07             - mov ecx,0799895c
+00599B4A - e8 71 48 f1 ff             - call 004ae3c0                  城市、港、关增减士兵
+00599B4F - 6a 00                      - push 00
+00599B51 - 57                         - push edi
+00599B52 - 6a 01                      - push 01
+00599B54 - 50                         - push eax
+00599B55 - 8b cd                      - mov ecx,ebp
+00599B57 - e8 f4 ef fe ff             - call 00588b50
+00599B5C - 8b 17                      - mov edx,[edi]
+00599B5E - 8b cf                      - mov ecx,edi
+00599B60 - ff 52 50                   - call dword ptr [edx+50]        获取设施兵力
+00599B63 - 85 c0                      - test eax,eax
+00599B65 - 7f 09                      - jg 00599b70                    兵力大于0则跳转盗循环下一个设施
+00599B67 - 6a 00                      - push 00                        气力为0(兵力为0则把城市、港、关的气力设置为0)
+00599B69 - 8b cf                      - mov ecx,edi
+00599B6B - e8 50 da ee ff             - call 004875c0                  设置城市、港、关气力
+
+【循环】
+00599B70 - 8b 44 24 10                - mov eax,[esp+10]
+00599B74 - 40                         - inc eax
+00599B75 - 83 f8 57                   - cmp eax,57
+00599B78 - 89 44 24 10                - mov [esp+10],eax
+00599B7C - 0f 8c 2e ff ff ff          - jl 00599ab0                    循环下一个设施
+
+00599B82 - 5f                         - pop edi
+00599B83 - 5e                         - pop esi
+00599B84 - 5d                         - pop ebp
+00599B85 - 5b                         - pop ebx
+00599B86 - 83 c4 08                   - add esp,08
+00599B89 - c3                         - ret

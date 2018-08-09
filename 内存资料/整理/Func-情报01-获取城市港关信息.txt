@@ -1,0 +1,995 @@
+功能: 获取城市、港、关信息
+参数表: [esp+04]=设施指针，[esp+08]=命令编号
+
+*****************************************************************************************************************************************************
+
+004C69A0 - 81 ec 94 01 00 00          - sub esp,00000194
+004C69A6 - 56                         - push esi
+004C69A7 - 8b b4 24 9c 01 00 00       - mov esi,[esp+0000019c]             esi = 设施指针
+004C69AE - 56                         - push esi
+004C69AF - e8 7c 3c fb ff             - call 0047a630                      校验指针
+004C69B4 - 83 c4 04                   - add esp,04
+004C69B7 - 85 c0                      - test eax,eax
+004C69B9 - 75 08                      - jne 004c69c3                       校验成功则跳转到后续处理
+004C69BB - 5e                         - pop esi
+004C69BC - 81 c4 94 01 00 00          - add esp,00000194
+004C69C2 - c3                         - ret
+004C69C3 - 53                         - push ebx
+004C69C4 - 8b 9c 24 a4 01 00 00       - mov ebx,[esp+000001a4]             ebx = 命令编号
+004C69CB - 57                         - push edi
+004C69CC - 83 cf ff                   - or edi,ff                          edi = -1(返回值)
+
+【命令编号45～56：返回城市、港、关指定兵装数量(0～11)】
+004C69CF - 83 fb 2d                   - cmp ebx,2d
+004C69D2 - 7c 1c                      - jnge 004c69f0
+004C69D4 - 83 fb 38                   - cmp ebx,38
+004C69D7 - 7f 17                      - jg 004c69f0                        如果命令编号在45～56之间则进行下面的处理
+004C69D9 - 83 c3 d3                   - add ebx,d3                         ebx在0～11之间
+004C69DC - 53                         - push ebx
+004C69DD - 8b ce                      - mov ecx,esi                        esi = 设施指针
+004C69DF - e8 6c ff fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C69E4 - 8b f8                      - mov edi,eax                        返回城市、港、关兵装数量
+004C69E6 - 5f                         - pop edi
+004C69E7 - 5b                         - pop ebx
+004C69E8 - 5e                         - pop esi
+004C69E9 - 81 c4 94 01 00 00          - add esp,00000194
+004C69EF - c3                         - ret
+
+【命令编号57～59：返回城市是否处于指定状态(0～2)】
+004C69F0 - 83 fb 39                   - cmp ebx,39
+004C69F3 - 7c 48                      - jnge 004c6a3d
+004C69F5 - 83 fb 3b                   - cmp ebx,3b
+004C69F8 - 7f 43                      - jg 004c6a3d                        如果命令编号在57～59之间则进行下面的处理
+004C69FA - 8b ce                      - mov ecx,esi                        esi = 设施指针
+004C69FC - e8 1f 0f fc ff             - call 00487920                      获取设施所属城市ID
+004C6A01 - 50                         - push eax
+004C6A02 - b9 58 19 20 07             - mov ecx,07201958
+004C6A07 - e8 04 a0 fc ff             - call 00490a10                      根据城市ID获取城市指针
+004C6A0C - 8b f0                      - mov esi,eax                        esi = 城市指针
+004C6A0E - 56                         - push esi
+004C6A0F - 33 ff                      - xor edi,edi
+004C6A11 - e8 1a 3c fb ff             - call 0047a630                      校验指针
+004C6A16 - 83 c4 04                   - add esp,04
+004C6A19 - 85 c0                      - test eax,eax
+004C6A1B - 74 0d                      - je 004c6a2a
+004C6A1D - 83 c3 c7                   - add ebx,c7                         ebx在0～2之间
+004C6A20 - 53                         - push ebx
+004C6A21 - 8b ce                      - mov ecx,esi
+004C6A23 - e8 98 49 fb ff             - call 0047b3c0                      判定城市是否处于指定状态(是为1，否为0)
+004C6A28 - 8b f8                      - mov edi,eax
+004C6A2A - 33 c0                      - xor eax,eax
+004C6A2C - 85 ff                      - test edi,edi
+004C6A2E - 0f 95 c0                   - setnc al
+004C6A31 - 8b f8                      - mov edi,eax                        返回城市是否处于指定状态(是为0，否为1)
+004C6A33 - 5f                         - pop edi
+004C6A34 - 5b                         - pop ebx
+004C6A35 - 5e                         - pop esi
+004C6A36 - 81 c4 94 01 00 00          - add esp,00000194
+004C6A3C - c3                         - ret
+
+【命令编号60～103：作用未明】
+004C6A3D - 83 fb 3c                   - cmp ebx,3c
+004C6A40 - 7c 27                      - jnge 004c6a69
+004C6A42 - 83 fb 67                   - cmp ebx,67
+004C6A45 - 7f 22                      - jg 004c6a69                        如果命令编号在60～103之间则进行下面的处理
+004C6A47 - 8b 16                      - mov edx,[esi]                      esi = 设施指针
+004C6A49 - 83 c3 c4                   - add ebx,c4                         ebx在0～43之间
+004C6A4C - 53                         - push ebx
+004C6A4D - 8b ce                      - mov ecx,esi
+004C6A4F - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004C6A52 - 50                         - push eax
+004C6A53 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6A58 - e8 d3 89 fd ff             - call 0049f430
+004C6A5D - 8b f8                      - mov edi,eax
+004C6A5F - 5f                         - pop edi
+004C6A60 - 5b                         - pop ebx
+004C6A61 - 5e                         - pop esi
+004C6A62 - 81 c4 94 01 00 00          - add esp,00000194
+004C6A68 - c3                         - ret
+
+【其他命令处理】
+004C6A69 - 83 fb 6a                   - cmp ebx,6a
+004C6A6C - 55                         - push ebp
+004C6A6D - 0f 87 53 07 00 00          - ja 004c71c6                        如果命令编号大于106则直接跳转到结束
+004C6A73 - 0f b6 83 a0 72 4c 00       - movzx eax,byte ptr [ebx+004c72a0]  取得0号-106号命令编码对应的处理编码
+004C6A7A - ff 24 85 e0 71 4c 00       - jmp dword ptr [eax*4+004c71e0]     根据处理编码取得跳转地址
+[命令编号为3：返回设施类型ID]
+004C6A81 - 8b 7e 08                   - mov edi,[esi+08]                   edi = 设施类型ID
+004C6A84 - 5d                         - pop ebp
+004C6A85 - 8b c7                      - mov eax,edi                        返回设施类型ID
+004C6A87 - 5f                         - pop edi
+004C6A88 - 5b                         - pop ebx
+004C6A89 - 5e                         - pop esi
+004C6A8A - 81 c4 94 01 00 00          - add esp,00000194
+004C6A90 - c3                         - ret
+[命令编号为4：返回设施所属势力ID]
+004C6A91 - 8b 16                      - mov edx,[esi]
+004C6A93 - 8b ce                      - mov ecx,esi
+004C6A95 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004C6A98 - 5d                         - pop ebp
+004C6A99 - 8b f8                      - mov edi,eax                        返回设施所属势力ID
+004C6A9B - 5f                         - pop edi
+004C6A9C - 5b                         - pop ebx
+004C6A9D - 5e                         - pop esi
+004C6A9E - 81 c4 94 01 00 00          - add esp,00000194
+004C6AA4 - c3                         - ret
+[命令编号为5：返回设施耐久]
+004C6AA5 - 0f bf 7e 10                - movsx edi,word ptr [esi+10]        edi = 设施耐久
+004C6AA9 - 5d                         - pop ebp
+004C6AAA - 8b c7                      - mov eax,edi                        返回设施耐久
+004C6AAC - 5f                         - pop edi
+004C6AAD - 5b                         - pop ebx
+004C6AAE - 5e                         - pop esi
+004C6AAF - 81 c4 94 01 00 00          - add esp,00000194
+004C6AB5 - c3                         - ret
+[命令编号为7：返回设施是否建设完成]
+004C6AB6 - 8b 7e 14                   - mov edi,[esi+14]                   edi = 设施是否建设完成
+004C6AB9 - 5d                         - pop ebp
+004C6ABA - 8b c7                      - mov eax,edi                        返回设施是否建设完成
+004C6ABC - 5f                         - pop edi
+004C6ABD - 5b                         - pop ebx
+004C6ABE - 5e                         - pop esi
+004C6ABF - 81 c4 94 01 00 00          - add esp,00000194
+004C6AC5 - c3                         - ret
+[命令编号为8：返回设施是否着火]
+004C6AC6 - 8b 06                      - mov eax,[esi]                      esi = 设施指针
+004C6AC8 - 8b ce                      - mov ecx,esi
+004C6ACA - ff 50 4c                   - call dword ptr [eax+4c]            判断设施是否着火
+004C6ACD - 5d                         - pop ebp
+004C6ACE - 8b f8                      - mov edi,eax                        返回设施是否着火
+004C6AD0 - 5f                         - pop edi
+004C6AD1 - 5b                         - pop ebx
+004C6AD2 - 5e                         - pop esi
+004C6AD3 - 81 c4 94 01 00 00          - add esp,00000194
+004C6AD9 - c3                         - ret
+[命令编号为6：作用未明]
+004C6ADA - 0f b6 7e 1c                - movzx edi,byte ptr [esi+1c]
+004C6ADE - 5d                         - pop ebp
+004C6ADF - 8b c7                      - mov eax,edi
+004C6AE1 - 5f                         - pop edi
+004C6AE2 - 5b                         - pop ebx
+004C6AE3 - 5e                         - pop esi
+004C6AE4 - 81 c4 94 01 00 00          - add esp,00000194
+004C6AEA - c3                         - ret
+[命令编号为9：返回设施所在坐标X]
+004C6AEB - 8b 16                      - mov edx,[esi]
+004C6AED - 8b ce                      - mov ecx,esi
+004C6AEF - ff 52 3c                   - call dword ptr [edx+3c]            获取坐标数组指针
+004C6AF2 - 0f bf 38                   - movsx edi,word ptr [eax]           edi = 设施所在坐标X
+004C6AF5 - 5d                         - pop ebp
+004C6AF6 - 8b c7                      - mov eax,edi                        返回设施所在坐标X
+004C6AF8 - 5f                         - pop edi
+004C6AF9 - 5b                         - pop ebx
+004C6AFA - 5e                         - pop esi
+004C6AFB - 81 c4 94 01 00 00          - add esp,00000194
+004C6B01 - c3                         - ret
+[命令编号为10：返回设施所在坐标Y]
+004C6B02 - 8b 06                      - mov eax,[esi]
+004C6B04 - 8b ce                      - mov ecx,esi
+004C6B06 - ff 50 3c                   - call dword ptr [eax+3c]            获取坐标数组指针
+004C6B09 - 8b 08                      - mov ecx,[eax]
+004C6B0B - 8b f9                      - mov edi,ecx                        edi = 设施所在坐标X
+004C6B0D - c1 ff 10                   - sar bh,10
+004C6B10 - 5d                         - pop ebp
+004C6B11 - 8b c7                      - mov eax,edi                        返回设施所在坐标Y
+004C6B13 - 5f                         - pop edi
+004C6B14 - 5b                         - pop ebx
+004C6B15 - 89 4c 24 04                - mov [esp+04],ecx
+004C6B19 - 5e                         - pop esi
+004C6B1A - 81 c4 94 01 00 00          - add esp,00000194
+004C6B20 - c3                         - ret
+[命令编号为11：返回设施最大耐久]
+004C6B21 - 8b ce                      - mov ecx,esi
+004C6B23 - e8 28 06 fc ff             - call 00487150                      获取设施最大耐久
+004C6B28 - 0f b7 f8                   - movzx edi,ax
+004C6B2B - 5d                         - pop ebp
+004C6B2C - 8b c7                      - mov eax,edi                        返回设施最大耐久
+004C6B2E - 5f                         - pop edi
+004C6B2F - 5b                         - pop ebx
+004C6B30 - 5e                         - pop esi
+004C6B31 - 81 c4 94 01 00 00          - add esp,00000194
+004C6B37 - c3                         - ret
+[命令编号为12：返回设施所属军团ID]
+004C6B38 - 8b 16                      - mov edx,[esi]                      esi = 设施指针
+004C6B3A - 8b ce                      - mov ecx,esi
+004C6B3C - ff 52 44                   - call dword ptr [edx+44]            获取所属军团ID
+004C6B3F - 5d                         - pop ebp
+004C6B40 - 8b f8                      - mov edi,eax                        返回设施所属军团ID
+004C6B42 - 5f                         - pop edi
+004C6B43 - 5b                         - pop ebx
+004C6B44 - 5e                         - pop esi
+004C6B45 - 81 c4 94 01 00 00          - add esp,00000194
+004C6B4B - c3                         - ret
+[命令编号为13：作用未明]
+004C6B4C - 8b 06                      - mov eax,[esi]                      esi = 设施指针
+004C6B4E - 8b ce                      - mov ecx,esi
+004C6B50 - ff 50 44                   - call dword ptr [eax+44]            获取所属军团ID
+004C6B53 - 6a 04                      - push 04
+004C6B55 - 50                         - push eax
+004C6B56 - b9 58 19 20 07             - mov ecx,07201958
+004C6B5B - e8 70 9f fc ff             - call 00490ad0                      根据军团ID获取军团指针
+004C6B60 - 50                         - push eax
+004C6B61 - e8 fa bd ff ff             - call 004c2960                      获取军团信息【暂时未研究】
+004C6B66 - 83 c4 08                   - add esp,08
+004C6B69 - 5d                         - pop ebp
+004C6B6A - 8b f8                      - mov edi,eax
+004C6B6C - 5f                         - pop edi
+004C6B6D - 5b                         - pop ebx
+004C6B6E - 5e                         - pop esi
+004C6B6F - 81 c4 94 01 00 00          - add esp,00000194
+004C6B75 - c3                         - ret
+[命令编号为14：返回城市、港、关太守ID]
+004C6B76 - 8b ce                      - mov ecx,esi
+004C6B78 - e8 13 fd fb ff             - call 00486890                      获取城市、港、关太守ID
+004C6B7D - 5d                         - pop ebp
+004C6B7E - 8b f8                      - mov edi,eax                        返回城市、港、关太守ID
+004C6B80 - 5f                         - pop edi
+004C6B81 - 5b                         - pop ebx
+004C6B82 - 5e                         - pop esi
+004C6B83 - 81 c4 94 01 00 00          - add esp,00000194
+004C6B89 - c3                         - ret
+[命令编号为15：返回城市、港、关现役武将个数]
+004C6B8A - 6a 0f                      - push 0f                            0x0f = 00001111b(君主、都督、太守、一般)
+004C6B8C - 56                         - push esi                           esi = 设施指针
+004C6B8D - e8 6e fb ff ff             - call 004c6700                      获取城市、港、关指定状态武将的个数
+004C6B92 - 83 c4 08                   - add esp,08
+004C6B95 - 5d                         - pop ebp
+004C6B96 - 8b f8                      - mov edi,eax                        返回城市、港、关现役武将个数
+004C6B98 - 5f                         - pop edi
+004C6B99 - 5b                         - pop ebx
+004C6B9A - 5e                         - pop esi
+004C6B9B - 81 c4 94 01 00 00          - add esp,00000194
+004C6BA1 - c3                         - ret
+[命令编号为16：返回城市、港、关俘虏武将个数]
+004C6BA2 - 6a 20                      - push 20                            0x20 = 00100000(俘虏)
+004C6BA4 - 56                         - push esi
+004C6BA5 - e8 56 fb ff ff             - call 004c6700                      获取城市、港、关指定状态武将的个数
+004C6BAA - 83 c4 08                   - add esp,08
+004C6BAD - 5d                         - pop ebp
+004C6BAE - 8b f8                      - mov edi,eax                        返回城市、港、关俘虏武将个数
+004C6BB0 - 5f                         - pop edi
+004C6BB1 - 5b                         - pop ebx
+004C6BB2 - 5e                         - pop esi
+004C6BB3 - 81 c4 94 01 00 00          - add esp,00000194
+004C6BB9 - c3                         - ret
+[命令编号为17：返回城市、港、关金钱]
+004C6BBA - 8b ce                      - mov ecx,esi
+004C6BBC - e8 bf 00 fc ff             - call 00486c80                      获取城市、港、关金钱
+004C6BC1 - 5d                         - pop ebp
+004C6BC2 - 8b f8                      - mov edi,eax                        返回城市、港、关金钱
+004C6BC4 - 5f                         - pop edi
+004C6BC5 - 5b                         - pop ebx
+004C6BC6 - 5e                         - pop esi
+004C6BC7 - 81 c4 94 01 00 00          - add esp,00000194
+004C6BCD - c3                         - ret
+[命令编号为18：返回城市、港、关兵粮]
+004C6BCE - 8b ce                      - mov ecx,esi
+004C6BD0 - e8 1b 02 fc ff             - call 00486df0                      获取城市、港、关兵粮
+004C6BD5 - 5d                         - pop ebp
+004C6BD6 - 8b f8                      - mov edi,eax                        返回城市、港、关兵粮
+004C6BD8 - 5f                         - pop edi
+004C6BD9 - 5b                         - pop ebx
+004C6BDA - 5e                         - pop esi
+004C6BDB - 81 c4 94 01 00 00          - add esp,00000194
+004C6BE1 - c3                         - ret
+[命令编号为19：返回城市、港、关的兵力]
+004C6BE2 - 8b 16                      - mov edx,[esi]                      esi = 设施指针
+004C6BE4 - 8b ce                      - mov ecx,esi
+004C6BE6 - ff 52 50                   - call dword ptr [edx+50]            获取设施(城市、港、关)的兵力
+004C6BE9 - 5d                         - pop ebp
+004C6BEA - 8b f8                      - mov edi,eax                        返回城市、港、关的兵力
+004C6BEC - 5f                         - pop edi
+004C6BED - 5b                         - pop ebx
+004C6BEE - 5e                         - pop esi
+004C6BEF - 81 c4 94 01 00 00          - add esp,00000194
+004C6BF5 - c3                         - ret
+[命令编号为20：返回城市、港、关的气力]
+004C6BF6 - 8b 06                      - mov eax,[esi]                      esi = 设施指针
+004C6BF8 - 8b ce                      - mov ecx,esi
+004C6BFA - ff 50 54                   - call dword ptr [eax+54]            获取设施(城市、港、关)的气力
+004C6BFD - 5d                         - pop ebp
+004C6BFE - 8b f8                      - mov edi,eax                        返回城市、港、关的气力
+004C6C00 - 5f                         - pop edi
+004C6C01 - 5b                         - pop ebx
+004C6C02 - 5e                         - pop esi
+004C6C03 - 81 c4 94 01 00 00          - add esp,00000194
+004C6C09 - c3                         - ret
+[命令编号为21：返回城市、港、关的预计收钱]
+004C6C0A - 8b ce                      - mov ecx,esi                        esi = 设施指针
+004C6C0C - 33 ff                      - xor edi,edi
+004C6C0E - e8 0d 0d fc ff             - call 00487920                      获取设施所属城市ID
+004C6C13 - 50                         - push eax
+004C6C14 - e8 67 44 fb ff             - call 0047b080                      校验城市ID是否在0～41之间
+004C6C19 - 83 c4 04                   - add esp,04
+004C6C1C - 50                         - push eax
+004C6C1D - b9 58 19 20 07             - mov ecx,07201958
+004C6C22 - e8 d9 a0 fc ff             - call 00490d00                      根据设施ID获取设施指针
+004C6C27 - 8b d8                      - mov ebx,eax                        ebx = 设施指针(设施所属城市)
+004C6C29 - 53                         - push ebx
+004C6C2A - e8 01 3a fb ff             - call 0047a630                      校验指针
+004C6C2F - 83 c4 04                   - add esp,04
+004C6C32 - 85 c0                      - test eax,eax
+004C6C34 - 0f 84 99 05 00 00          - je 004c71d3                        校验失败则跳转到返回，返回值为edi = 0
+004C6C3A - 8b 13                      - mov edx,[ebx]
+004C6C3C - 8b cb                      - mov ecx,ebx
+004C6C3E - ff 52 40                   - call dword ptr [edx+40]            获取设施所属城市的所属势力ID
+004C6C41 - 8b e8                      - mov ebp,eax
+004C6C43 - 8b 06                      - mov eax,[esi]
+004C6C45 - 8b ce                      - mov ecx,esi
+004C6C47 - ff 50 40                   - call dword ptr [eax+40]            获取设施的所属势力ID
+004C6C4A - 3b e8                      - cmp ebp,eax
+004C6C4C - 0f 85 81 05 00 00          - jne 004c71d3                       如果不是同一势力则跳转到返回，返回值为edi = 0        【修改】jne 004c6c52  //非所占城市港关也能收钱
+004C6C52 - 53                         - push ebx                           ebx = 设施指针(设施所属城市)
+004C6C53 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6C58 - e8 13 7b fd ff             - call 0049e770                      计算城市、港、关金钱收入(城市100%，港关20%，港关城市不同势力无收入)
+004C6C5D - 57                         - push edi
+004C6C5E - 53                         - push ebx
+004C6C5F - 8d 4c 24 1c                - lea ecx,[esp+1c]
+004C6C63 - 8b e8                      - mov ebp,eax                        ebp = 金钱收入
+004C6C65 - e8 76 7e 00 00             - call 004ceae0                      获取城市、港、关的武将所拥有的特技数组
+004C6C6A - 8b 84 24 78 01 00 00       - mov eax,[esp+00000178]             eax = 城市是否有征税
+004C6C71 - 85 c0                      - test eax,eax
+004C6C73 - 74 0f                      - je 004c6c84
+004C6C75 - 8b c5                      - mov eax,ebp
+004C6C77 - 99                         - cdq
+004C6C78 - 2b c2                      - sub eax,edx
+004C6C7A - d1 f8                      - sar eax,1
+004C6C7C - 8b e8                      - mov ebp,eax
+004C6C7E - 8d 7c 6d 00                - lea edi,[ebp+ebp*2]                征税金钱收入*1.5
+004C6C82 - eb 02                      - jmp 004c6c86
+004C6C84 - 8b fd                      - mov edi,ebp
+004C6C86 - 8b 84 24 70 01 00 00       - mov eax,[esp+00000170]             eax = 城市是否有富豪
+004C6C8D - 85 c0                      - test eax,eax
+004C6C8F - 74 09                      - je 004c6c9a
+004C6C91 - 8b c5                      - mov eax,ebp
+004C6C93 - 99                         - cdq
+004C6C94 - 2b c2                      - sub eax,edx
+004C6C96 - d1 f8                      - sar eax,1
+004C6C98 - 03 f8                      - add edi,eax                        富豪金钱收入*1.5
+004C6C9A - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C6C9D - 85 c0                      - test eax,eax
+004C6C9F - 0f 84 2e 05 00 00          - je 004c71d3                        如果设施类型是城市则跳转到返回，返回城市预计收钱
+004C6CA5 - b8 67 66 66 66             - mov eax,66666667
+004C6CAA - f7 ef                      - imul edi
+004C6CAC - d1 fa                      - sar edx,1
+004C6CAE - 8b ca                      - mov ecx,edx
+004C6CB0 - c1 e9 1f                   - shr ecx,1f
+004C6CB3 - 03 ca                      - add ecx,edx                        如果设施类型是港关，则预计收钱为城市预计收钱的20%
+004C6CB5 - 8b f9                      - mov edi,ecx
+004C6CB7 - 5d                         - pop ebp
+004C6CB8 - 8b c7                      - mov eax,edi                        返回港关预计收钱
+004C6CBA - 5f                         - pop edi
+004C6CBB - 5b                         - pop ebx
+004C6CBC - 5e                         - pop esi
+004C6CBD - 81 c4 94 01 00 00          - add esp,00000194
+004C6CC3 - c3                         - ret
+[命令编号为22：返回城市、港、关金钱预计支出]
+004C6CC4 - 56                         - push esi                           esi = 设施指针
+004C6CC5 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6CCA - e8 71 8c fd ff             - call 0049f940                      计算城市、港、关金钱支出
+004C6CCF - 5d                         - pop ebp
+004C6CD0 - 8b f8                      - mov edi,eax                        返回城市、港、关金钱预计支出
+004C6CD2 - 5f                         - pop edi
+004C6CD3 - 5b                         - pop ebx
+004C6CD4 - 5e                         - pop esi
+004C6CD5 - 81 c4 94 01 00 00          - add esp,00000194
+004C6CDB - c3                         - ret
+[命令编号为23：返回城市、港、关预计收支后的金钱]
+004C6CDC - 6a 11                      - push 11                            0x11 = 17
+004C6CDE - 56                         - push esi
+004C6CDF - e8 bc fc ff ff             - call 004c69a0                      调用自身，命令编号17：返回城市、港、关金钱
+004C6CE4 - 6a 15                      - push 15                            0x15 = 21
+004C6CE6 - 56                         - push esi
+004C6CE7 - 8b f8                      - mov edi,eax                        edi = 现有金钱
+004C6CE9 - e8 b2 fc ff ff             - call 004c69a0                      调用自身，命令编号21：返回城市、港、关的预计收钱
+004C6CEE - 6a 16                      - push 16                            0x16 = 22
+004C6CF0 - 56                         - push esi
+004C6CF1 - 03 f8                      - add edi,eax                        edi = 现有金钱+预计收钱
+004C6CF3 - e8 a8 fc ff ff             - call 004c69a0                      调用自身，命令编号22：返回城市、港、关金钱预计支出
+004C6CF8 - 83 c4 18                   - add esp,18
+004C6CFB - 8b ce                      - mov ecx,esi
+004C6CFD - 2b f8                      - sub edi,eax                        edi = 现有金钱+预计收钱-预计支出
+004C6CFF - e8 2c 00 fc ff             - call 00486d30                      获取城市、港、关金钱上限
+004C6D04 - 85 ff                      - test edi,edi
+004C6D06 - 0f 8f 84 01 00 00          - jg 004c6e90                        金钱足够则跳转到比较金钱上限
+004C6D0C - 33 ff                      - xor edi,edi
+004C6D0E - 5d                         - pop ebp
+004C6D0F - 8b c7                      - mov eax,edi                        金钱不足返回0
+004C6D11 - 5f                         - pop edi
+004C6D12 - 5b                         - pop ebx
+004C6D13 - 5e                         - pop esi
+004C6D14 - 81 c4 94 01 00 00          - add esp,00000194
+004C6D1A - c3                         - ret
+[命令编号为24：返回城市、港、关金钱是否足够]
+004C6D1B - 6a 11                      - push 11                            0x11 = 17
+004C6D1D - 56                         - push esi
+004C6D1E - e8 7d fc ff ff             - call 004c69a0                      调用自身，命令编号17：返回城市、港、关金钱
+004C6D23 - 6a 15                      - push 15                            0x15 = 21
+004C6D25 - 56                         - push esi
+004C6D26 - 8b f8                      - mov edi,eax                        edi = 现有金钱
+004C6D28 - e8 73 fc ff ff             - call 004c69a0                      调用自身，命令编号21：返回城市、港、关的预计收钱
+004C6D2D - 6a 16                      - push 16
+004C6D2F - 56                         - push esi
+004C6D30 - 03 f8                      - add edi,eax                        edi = 现有金钱+预计收钱
+004C6D32 - e8 69 fc ff ff             - call 004c69a0                      调用自身，命令编号22：返回城市、港、关金钱预计支出
+004C6D37 - 83 c4 18                   - add esp,18
+004C6D3A - 2b f8                      - sub edi,eax                        edi = 现有金钱+预计收钱-预计支出
+004C6D3C - ba 00 00 00 00             - mov edx,00000000
+004C6D41 - 0f 99 c2                   - setns dl                           
+004C6D44 - 5d                         - pop ebp
+004C6D45 - 8b fa                      - mov edi,edx
+004C6D47 - 8b c7                      - mov eax,edi                        返回城市、港、关金钱是否足够
+004C6D49 - 5f                         - pop edi
+004C6D4A - 5b                         - pop ebx
+004C6D4B - 5e                         - pop esi
+004C6D4C - 81 c4 94 01 00 00          - add esp,00000194
+004C6D52 - c3                         - ret
+[命令编号为25：返回城市、港、关的预计收粮]
+004C6D53 - 8b ce                      - mov ecx,esi                        esi = 设施指针
+004C6D55 - 33 ff                      - xor edi,edi
+004C6D57 - e8 c4 0b fc ff             - call 00487920                      获取设施所属城市ID
+004C6D5C - 50                         - push eax
+004C6D5D - e8 1e 43 fb ff             - call 0047b080                      校验城市ID是否在0～41之间
+004C6D62 - 83 c4 04                   - add esp,04
+004C6D65 - 50                         - push eax
+004C6D66 - b9 58 19 20 07             - mov ecx,07201958
+004C6D6B - e8 90 9f fc ff             - call 00490d00                      根据设施ID获取设施指针
+004C6D70 - 8b d8                      - mov ebx,eax                        ebx = 设施指针(设施所属城市)
+004C6D72 - 53                         - push ebx
+004C6D73 - e8 b8 38 fb ff             - call 0047a630                      校验指针
+004C6D78 - 83 c4 04                   - add esp,04
+004C6D7B - 85 c0                      - test eax,eax
+004C6D7D - 0f 84 50 04 00 00          - je 004c71d3                        校验失败则跳转到返回，返回值为edi = 0
+004C6D83 - 8b 06                      - mov eax,[esi]
+004C6D85 - 8b ce                      - mov ecx,esi
+004C6D87 - ff 50 40                   - call dword ptr [eax+40]            获取设施所属势力ID
+004C6D8A - 8b 13                      - mov edx,[ebx]
+004C6D8C - 8b cb                      - mov ecx,ebx
+004C6D8E - 8b e8                      - mov ebp,eax
+004C6D90 - ff 52 40                   - call dword ptr [edx+40]            获取设施所属城市的所属势力ID
+004C6D93 - 3b c5                      - cmp eax,ebp
+004C6D95 - 0f 85 38 04 00 00          - jne 004c71d3                       如果不是同一势力则跳转到返回，返回值为edi = 0        【修改】jne 004c6d9b  //非所占城市港关也能收粮
+004C6D9B - 53                         - push ebx                           ebx = 设施指针(设施所属城市)
+004C6D9C - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6DA1 - e8 8a 7c fd ff             - call 0049ea30                      计算城市、港、关兵粮收入(城市100%，港关20%，港关城市不同势力无收入)
+004C6DA6 - 57                         - push edi
+004C6DA7 - 53                         - push ebx
+004C6DA8 - 8d 4c 24 1c                - lea ecx,[esp+1c]
+004C6DAC - 8b e8                      - mov ebp,eax
+004C6DAE - e8 2d 7d 00 00             - call 004ceae0                      获取城市、港、关的武将所拥有的特技数组
+004C6DB3 - 8b 84 24 7c 01 00 00       - mov eax,[esp+0000017c]             eax = 城市是否有征收
+004C6DBA - 85 c0                      - test eax,eax
+004C6DBC - 74 0f                      - je 004c6dcd
+004C6DBE - 8b c5                      - mov eax,ebp
+004C6DC0 - 99                         - cdq
+004C6DC1 - 2b c2                      - sub eax,edx
+004C6DC3 - d1 f8                      - sar eax,1
+004C6DC5 - 8b e8                      - mov ebp,eax
+004C6DC7 - 8d 7c 6d 00                - lea edi,[ebp+ebp*2]                征收兵粮收入*1.5
+004C6DCB - eb 02                      - jmp 004c6dcf
+004C6DCD - 8b fd                      - mov edi,ebp
+004C6DCF - 8b 84 24 74 01 00 00       - mov eax,[esp+00000174]             eax = 城市是否有米道
+004C6DD6 - 85 c0                      - test eax,eax
+004C6DD8 - 74 09                      - je 004c6de3
+004C6DDA - 8b c5                      - mov eax,ebp
+004C6DDC - 99                         - cdq
+004C6DDD - 2b c2                      - sub eax,edx
+004C6DDF - d1 f8                      - sar eax,1
+004C6DE1 - 03 f8                      - add edi,eax                        米道兵粮收入*1.5
+004C6DE3 - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C6DE6 - 85 c0                      - test eax,eax
+004C6DE8 - 0f 84 e5 03 00 00          - je 004c71d3                        如果设施类型是城市则跳转到返回，返回城市预计收粮
+004C6DEE - b8 67 66 66 66             - mov eax,66666667
+004C6DF3 - f7 ef                      - imul edi
+004C6DF5 - d1 fa                      - sar edx,1
+004C6DF7 - 8b c2                      - mov eax,edx
+004C6DF9 - c1 e8 1f                   - shr eax,1f
+004C6DFC - 5d                         - pop ebp
+004C6DFD - 03 c2                      - add eax,edx                        如果设施类型是港关，则预计收钱为城市预计收粮的20%
+004C6DFF - 8b f8                      - mov edi,eax                        返回港关预计收粮
+004C6E01 - 5f                         - pop edi
+004C6E02 - 5b                         - pop ebx
+004C6E03 - 5e                         - pop esi
+004C6E04 - 81 c4 94 01 00 00          - add esp,00000194
+004C6E0A - c3                         - ret
+[命令编号为26：返回城市、港、关兵粮预计支出]
+004C6E0B - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C6E0E - 85 c0                      - test eax,eax
+004C6E10 - 74 1a                      - je 004c6e2c                        如果设施类型是城市跳过屯田判定                   【修改】je 004c6e12  //屯田对城市有效
+004C6E12 - 8b 16                      - mov edx,[esi]
+004C6E14 - 6a 4e                      - push 4e                            0x4e = 屯田                                    【修改】push fe  //取消屯田效果
+004C6E16 - 8b ce                      - mov ecx,esi
+004C6E18 - ff 52 5c                   - call dword ptr [edx+5c]            获取设施持有指定特技的武将ID
+004C6E1B - 50                         - push eax
+004C6E1C - e8 6f b5 f4 ff             - call 00412390                      校验武将ID是否在0～1099之间
+004C6E21 - 83 c4 04                   - add esp,04
+004C6E24 - 85 c0                      - test eax,eax
+004C6E26 - 0f 85 e0 fe ff ff          - jne 004c6d0c                       有屯田则跳转到返回0
+004C6E2C - 56                         - push esi
+004C6E2D - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6E32 - e8 c9 63 fd ff             - call 0049d200                      计算城市、港、关兵粮支出(每旬)
+004C6E37 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6E3C - 8b f0                      - mov esi,eax
+004C6E3E - e8 9d 65 fd ff             - call 0049d3e0                      获取当前旬到下次季初之间的旬数
+004C6E43 - 8b f8                      - mov edi,eax                        edi = 当前旬到下次季初收粮余下的旬数
+004C6E45 - 0f af fe                   - imul edi,esi                       edi = 每旬兵粮支出*当前旬到下次季初收粮余下的旬数
+004C6E48 - 5d                         - pop ebp
+004C6E49 - 8b c7                      - mov eax,edi                        返回到下次季初收粮为止的总预计兵粮支出
+004C6E4B - 5f                         - pop edi
+004C6E4C - 5b                         - pop ebx
+004C6E4D - 5e                         - pop esi
+004C6E4E - 81 c4 94 01 00 00          - add esp,00000194
+004C6E54 - c3                         - ret
+[命令编号为27：返回城市、港、关预计收支后的兵粮]
+004C6E55 - 6a 12                      - push 12                            0x12 = 18
+004C6E57 - 56                         - push esi
+004C6E58 - e8 43 fb ff ff             - call 004c69a0                      调用自身，命令编号18：返回城市、港、关兵粮
+004C6E5D - 6a 19                      - push 19                            0x19 = 25
+004C6E5F - 56                         - push esi
+004C6E60 - 8b f8                      - mov edi,eax                        edi = 现有兵粮
+004C6E62 - e8 39 fb ff ff             - call 004c69a0                      调用自身，命令编号25：返回城市、港、关的预计收粮
+004C6E67 - 6a 1a                      - push 1a                            0x1a = 26
+004C6E69 - 56                         - push esi
+004C6E6A - 03 f8                      - add edi,eax                        edi = 现有兵粮+预计收粮
+004C6E6C - e8 2f fb ff ff             - call 004c69a0                      调用自身，命令编号26：返回城市、港、关兵粮预计支出
+004C6E71 - 83 c4 18                   - add esp,18
+004C6E74 - 8b ce                      - mov ecx,esi
+004C6E76 - 2b f8                      - sub edi,eax                        edi = 现有兵粮+预计收粮-预计支出
+004C6E78 - e8 23 00 fc ff             - call 00486ea0                      获取城市、港、关兵粮上限
+004C6E7D - 85 ff                      - test edi,edi
+004C6E7F - 7f 0f                      - jg 004c6e90                        兵粮足够则跳转到比较兵粮上限
+004C6E81 - 33 ff                      - xor edi,edi
+004C6E83 - 5d                         - pop ebp
+004C6E84 - 8b c7                      - mov eax,edi                        兵粮不足返回0
+004C6E86 - 5f                         - pop edi
+004C6E87 - 5b                         - pop ebx
+004C6E88 - 5e                         - pop esi
+004C6E89 - 81 c4 94 01 00 00          - add esp,00000194
+004C6E8F - c3                         - ret
+004C6E90 - 3b c7                      - cmp eax,edi                        比较预计收支后的钱粮与城市港关钱粮上限(命令编号23跳转到此)
+004C6E92 - 0f 8f 3b 03 00 00          - jg 004c71d3                        跳转到返回，返回预计收支后的钱粮
+004C6E98 - 5d                         - pop ebp
+004C6E99 - 8b f8                      - mov edi,eax                        返回城市港关钱粮上限
+004C6E9B - 5f                         - pop edi
+004C6E9C - 5b                         - pop ebx
+004C6E9D - 5e                         - pop esi
+004C6E9E - 81 c4 94 01 00 00          - add esp,00000194
+004C6EA4 - c3                         - ret
+[命令编号为28：返回城市、港、关兵粮是否足够]
+004C6EA5 - 6a 12                      - push 12                            0x12 = 18                                       【修改】以下一直到屯田判定有BUG导致不能正确计算兵粮预计收入
+004C6EA7 - 56                         - push esi
+004C6EA8 - e8 f3 fa ff ff             - call 004c69a0                      调用自身，命令编号18：返回城市、港、关兵粮
+004C6EAD - 83 c4 08                   - add esp,08
+004C6EB0 - 8b ce                      - mov ecx,esi
+004C6EB2 - 8b d8                      - mov ebx,eax                        ebx = 现有兵粮
+004C6EB4 - e8 67 0a fc ff             - call 00487920                      获取设施所属城市ID
+004C6EB9 - 50                         - push eax
+004C6EBA - e8 c1 41 fb ff             - call 0047b080                      校验城市ID是否在0～41之间
+004C6EBF - 83 c4 04                   - add esp,04
+004C6EC2 - 50                         - push eax
+004C6EC3 - b9 58 19 20 07             - mov ecx,07201958
+004C6EC8 - e8 33 9e fc ff             - call 00490d00                      根据设施ID获取设施指针
+004C6ECD - 8b f8                      - mov edi,eax                        edi = 设施指针(设施所属城市)
+004C6ECF - 57                         - push edi
+004C6ED0 - e8 5b 37 fb ff             - call 0047a630                      校验指针
+004C6ED5 - 83 c4 04                   - add esp,04
+004C6ED8 - 85 c0                      - test eax,eax
+004C6EDA - 74 60                      - je 004c6f3c                        校验失败则跳转到支出计算
+004C6EDC - 8b 07                      - mov eax,[edi]
+004C6EDE - 8b cf                      - mov ecx,edi
+004C6EE0 - ff 50 40                   - call dword ptr [eax+40]            获取设施所属城市的所属势力ID
+004C6EE3 - 8b 16                      - mov edx,[esi]
+004C6EE5 - 8b ce                      - mov ecx,esi
+004C6EE7 - 8b e8                      - mov ebp,eax
+004C6EE9 - ff 52 40                   - call dword ptr [edx+40]            获取设施所属势力ID
+004C6EEC - 3b e8                      - cmp ebp,eax
+004C6EEE - 75 4c                      - jne 004c6f3c                       如果不是同一势力则跳转到支出计算                  【修改】jne 004c6ef0  //非所占城市港关也能收粮，此处不用修改因为有统一的BUG修正代码
+004C6EF0 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6EF5 - e8 e6 64 fd ff             - call 0049d3e0                      获取当前旬到下次季初之间的旬数
+004C6EFA - 83 f8 01                   - cmp eax,01
+004C6EFD - 75 0e                      - jne 004c6f0d                       当前旬到下次季初之间的旬数大于1则跳转到征收有效判定
+004C6EFF - 6a 00                      - push 00
+004C6F01 - 57                         - push edi                           edi = 设施指针(设施所属城市)
+004C6F02 - 8d 4c 24 1c                - lea ecx,[esp+1c]
+004C6F06 - e8 d5 7b 00 00             - call 004ceae0                      获取城市、港、关的武将所拥有的特技数组
+004C6F0B - eb 24                      - jmp 004c6f31
+004C6F0D - 99                         - cdq
+004C6F0E - b9 03 00 00 00             - mov ecx,00000003
+004C6F13 - f7 f9                      - idiv ecx                           eax = 当前旬到下次季初之间的旬数/3(即当前旬到下次季初之间的月数)
+004C6F15 - 83 fa 01                   - cmp edx,01
+004C6F18 - 75 22                      - jne 004c6f3c                       余数不为1则跳转到屯田判定
+004C6F1A - 6a 00                      - push 00
+004C6F1C - 57                         - push edi
+004C6F1D - 8d 4c 24 1c                - lea ecx,[esp+1c]
+004C6F21 - e8 ba 7b 00 00             - call 004ceae0                      获取城市、港、关的武将所拥有的特技数组
+004C6F26 - 8b 84 24 7c 01 00 00       - mov eax,[esp+0000017c]             eax = 城市是否有征收
+004C6F2D - 85 c0                      - test eax,eax
+004C6F2F - 74 0b                      - je 004c6f3c                        城市没有征收则跳转到屯田判定
+004C6F31 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6F36 - 57                         - push edi                           edi = 设施指针(设施所属城市)
+004C6F37 - e8 34 78 fd ff             - call 0049e770                      计算城市、港、关金钱收入(城市100%，港关20%，港关城市不同势力无收入)
+004C6F3C - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C6F3F - 85 c0                      - test eax,eax
+004C6F41 - 74 16                      - je 004c6f59                        如果设施类型是城市跳过屯田判定                    【修改】je 004c6f43  //屯田对城市有效
+004C6F43 - 8b 16                      - mov edx,[esi]
+004C6F45 - 6a 4e                      - push 4e                            0x4e = 屯田                                     【修改】push fe  //取消屯田效果
+004C6F47 - 8b ce                      - mov ecx,esi
+004C6F49 - ff 52 5c                   - call dword ptr [edx+5c]            获取设施持有指定特技的武将ID
+004C6F4C - 50                         - push eax
+004C6F4D - e8 3e b4 f4 ff             - call 00412390                      判断武将ID是否在0～1099之间
+004C6F52 - 83 c4 04                   - add esp,04
+004C6F55 - 85 c0                      - test eax,eax
+004C6F57 - 75 0d                      - jne 004c6f66                       有屯田则跳过计算兵粮支出
+004C6F59 - 56                         - push esi
+004C6F5A - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6F5F - e8 9c 62 fd ff             - call 0049d200                      计算城市、港、关兵粮支出(每旬)
+004C6F64 - 2b d8                      - sub ebx,eax                        ebx = 现有兵粮+预计收粮-预计支出
+004C6F66 - 33 c0                      - xor eax,eax
+004C6F68 - 85 db                      - test ebx,ebx
+004C6F6A - 0f 9d c0                   - setge al
+004C6F6D - 5d                         - pop ebp
+004C6F6E - 8b f8                      - mov edi,eax                        返回城市、港、关兵粮是否足够
+004C6F70 - 5f                         - pop edi
+004C6F71 - 5b                         - pop ebx
+004C6F72 - 5e                         - pop esi
+004C6F73 - 81 c4 94 01 00 00          - add esp,00000194
+004C6F79 - c3                         - ret
+[命令编号为29：返回城市、港关附近（城市3格，港关2格）是否有敌方部队]
+004C6F7A - 56                         - push esi
+004C6F7B - b9 5c 89 99 07             - mov ecx,0799895c
+004C6F80 - e8 2b 2a ff ff             - call 004b99b0                      判断城市、港关附近（城市3格，港关2格）是否有敌方部队
+004C6F85 - 5d                         - pop ebp
+004C6F86 - 8b f8                      - mov edi,eax                        返回城市、港关附近（城市3格，港关2格）是否有敌方部队
+004C6F88 - 5f                         - pop edi
+004C6F89 - 5b                         - pop ebx
+004C6F8A - 5e                         - pop esi
+004C6F8B - 81 c4 94 01 00 00          - add esp,00000194
+004C6F91 - c3                         - ret
+[命令编号为30：返回设施所属城市ID]
+004C6F92 - 8b ce                      - mov ecx,esi
+004C6F94 - e8 87 09 fc ff             - call 00487920                      获取设施所属城市ID
+004C6F99 - 5d                         - pop ebp
+004C6F9A - 8b f8                      - mov edi,eax                        返回设施所属城市ID
+004C6F9C - 5f                         - pop edi
+004C6F9D - 5b                         - pop ebx
+004C6F9E - 5e                         - pop esi
+004C6F9F - 81 c4 94 01 00 00          - add esp,00000194
+004C6FA5 - c3                         - ret
+[命令编号为31：返回城市、港、关的训练状态]
+004C6FA6 - 56                         - push esi
+004C6FA7 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6FAC - e8 af 5e fd ff             - call 0049ce60                      获取城市、港、关的训练状态
+004C6FB1 - 5d                         - pop ebp
+004C6FB2 - 8b f8                      - mov edi,eax                        返回城市、港、关的训练状态
+004C6FB4 - 5f                         - pop edi
+004C6FB5 - 5b                         - pop ebx
+004C6FB6 - 5e                         - pop esi
+004C6FB7 - 81 c4 94 01 00 00          - add esp,00000194
+004C6FBD - c3                         - ret
+[命令编号为32：返回城市治安]
+004C6FBE - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C6FC1 - 85 c0                      - test eax,eax
+004C6FC3 - 0f 85 0a 02 00 00          - jne 004c71d3                       设施类型不是城市则跳转到返回
+004C6FC9 - 8b ce                      - mov ecx,esi
+004C6FCB - e8 20 f7 fb ff             - call 004866f0                      根据设施指针获取城市指针
+004C6FD0 - 0f b6 b8 85 00 00 00       - movzx edi,byte ptr [eax+00000085]  edi = 城市治安
+004C6FD7 - 5d                         - pop ebp
+004C6FD8 - 8b c7                      - mov eax,edi                        返回城市治安
+004C6FDA - 5f                         - pop edi
+004C6FDB - 5b                         - pop ebx
+004C6FDC - 5e                         - pop esi
+004C6FDD - 81 c4 94 01 00 00          - add esp,00000194
+004C6FE3 - c3                         - ret
+[命令编号为33：返回城市、港、关金钱上限]
+004C6FE4 - 8b ce                      - mov ecx,esi
+004C6FE6 - e8 45 fd fb ff             - call 00486d30                      获取城市、港、关金钱上限
+004C6FEB - 5d                         - pop ebp
+004C6FEC - 8b f8                      - mov edi,eax                        返回城市、港、关金钱上限
+004C6FEE - 5f                         - pop edi
+004C6FEF - 5b                         - pop ebx
+004C6FF0 - 5e                         - pop esi
+004C6FF1 - 81 c4 94 01 00 00          - add esp,00000194
+004C6FF7 - c3                         - ret
+[命令编号为34：返回城市、港、关兵粮上限]
+004C6FF8 - 8b ce                      - mov ecx,esi
+004C6FFA - e8 a1 fe fb ff             - call 00486ea0                      获取城市、港、关兵粮上限
+004C6FFF - 5d                         - pop ebp
+004C7000 - 8b f8                      - mov edi,eax                        返回城市、港、关兵粮上限
+004C7002 - 5f                         - pop edi
+004C7003 - 5b                         - pop ebx
+004C7004 - 5e                         - pop esi
+004C7005 - 81 c4 94 01 00 00          - add esp,00000194
+004C700B - c3                         - ret
+[命令编号为35：返回城市、港、关兵力上限]
+004C700C - 8b ce                      - mov ecx,esi
+004C700E - e8 ad fb fb ff             - call 00486bc0                      获取城市、港、关兵力上限
+004C7013 - 5d                         - pop ebp
+004C7014 - 8b f8                      - mov edi,eax                        返回城市、港、关兵力上限
+004C7016 - 5f                         - pop edi
+004C7017 - 5b                         - pop ebx
+004C7018 - 5e                         - pop esi
+004C7019 - 81 c4 94 01 00 00          - add esp,00000194
+004C701F - c3                         - ret
+[命令编号为36：返回城市、港、关枪数量]
+004C7020 - 6a 01                      - push 01                            0x01 = 枪
+004C7022 - 8b ce                      - mov ecx,esi
+004C7024 - e8 27 f9 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C7029 - 5d                         - pop ebp
+004C702A - 8b f8                      - mov edi,eax                        返回城市、港、关枪数量
+004C702C - 5f                         - pop edi
+004C702D - 5b                         - pop ebx
+004C702E - 5e                         - pop esi
+004C702F - 81 c4 94 01 00 00          - add esp,00000194
+004C7035 - c3                         - ret
+[命令编号为37：返回城市、港、关戟数量]
+004C7036 - 6a 02                      - push 02                            0x02 = 戟
+004C7038 - 8b ce                      - mov ecx,esi
+004C703A - e8 11 f9 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C703F - 5d                         - pop ebp
+004C7040 - 8b f8                      - mov edi,eax                        返回城市、港、关戟数量
+004C7042 - 5f                         - pop edi
+004C7043 - 5b                         - pop ebx
+004C7044 - 5e                         - pop esi
+004C7045 - 81 c4 94 01 00 00          - add esp,00000194
+004C704B - c3                         - ret
+[命令编号为38：返回城市、港、关弩数量]
+004C704C - 6a 03                      - push 03                            0x03 = 弩
+004C704E - 8b ce                      - mov ecx,esi
+004C7050 - e8 fb f8 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C7055 - 5d                         - pop ebp
+004C7056 - 8b f8                      - mov edi,eax                        返回城市、港、关弩数量
+004C7058 - 5f                         - pop edi
+004C7059 - 5b                         - pop ebx
+004C705A - 5e                         - pop esi
+004C705B - 81 c4 94 01 00 00          - add esp,00000194
+004C7061 - c3                         - ret
+[命令编号为39：返回城市、港、关马数量]
+004C7062 - 6a 04                      - push 04                            0x04 = 马
+004C7064 - 8b ce                      - mov ecx,esi
+004C7066 - e8 e5 f8 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C706B - 5d                         - pop ebp
+004C706C - 8b f8                      - mov edi,eax                        返回城市、港、关马数量
+004C706E - 5f                         - pop edi
+004C706F - 5b                         - pop ebx
+004C7070 - 5e                         - pop esi
+004C7071 - 81 c4 94 01 00 00          - add esp,00000194
+004C7077 - c3                         - ret
+[命令编号为40：返回城市、港、关冲车或木兽数量]
+004C7078 - 8b 16                      - mov edx,[esi]                      esi = 设施指针
+004C707A - 8b ce                      - mov ecx,esi
+004C707C - bb 05 00 00 00             - mov ebx,00000005                   0x05 = 冲车
+004C7081 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004C7084 - 50                         - push eax
+004C7085 - b9 58 19 20 07             - mov ecx,07201958
+004C708A - e8 11 9a fc ff             - call 00490aa0                      根据势力ID获取势力指针
+004C708F - 8b f8                      - mov edi,eax                        edi = 势力指针
+004C7091 - 57                         - push edi
+004C7092 - e8 99 35 fb ff             - call 0047a630                      校验指针
+004C7097 - 83 c4 04                   - add esp,04
+004C709A - 85 c0                      - test eax,eax
+004C709C - 74 12                      - je 004c70b0
+004C709E - 6a 1c                      - push 1c                            0x1c = 开发木兽
+004C70A0 - 8b cf                      - mov ecx,edi
+004C70A2 - e8 39 a1 fb ff             - call 004811e0                      判断势力是否拥有某项科技
+004C70A7 - 85 c0                      - test eax,eax
+004C70A9 - 74 05                      - je 004c70b0
+004C70AB - bb 08 00 00 00             - mov ebx,00000008                   0x08 = 木兽
+004C70B0 - 53                         - push ebx
+004C70B1 - 8b ce                      - mov ecx,esi
+004C70B3 - e8 98 f8 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C70B8 - 5d                         - pop ebp
+004C70B9 - 8b f8                      - mov edi,eax                        返回城市、港、关冲车或木兽数量
+004C70BB - 5f                         - pop edi
+004C70BC - 5b                         - pop ebx
+004C70BD - 5e                         - pop esi
+004C70BE - 81 c4 94 01 00 00          - add esp,00000194
+004C70C4 - c3                         - ret
+[命令编号为41：返回城市、港、关井栏或投石数量]
+004C70C5 - 8b 06                      - mov eax,[esi]                      esi = 设施指针
+004C70C7 - 8b ce                      - mov ecx,esi
+004C70C9 - bb 06 00 00 00             - mov ebx,00000006                   0x06 = 井栏
+004C70CE - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+004C70D1 - 50                         - push eax
+004C70D2 - b9 58 19 20 07             - mov ecx,07201958
+004C70D7 - e8 c4 99 fc ff             - call 00490aa0                      根据势力ID获取势力指针
+004C70DC - 8b f8                      - mov edi,eax
+004C70DE - 57                         - push edi
+004C70DF - e8 4c 35 fb ff             - call 0047a630                      校验指针
+004C70E4 - 83 c4 04                   - add esp,04
+004C70E7 - 85 c0                      - test eax,eax
+004C70E9 - 74 12                      - je 004c70fd
+004C70EB - 6a 16                      - push 16                            0x16 = 开发投石
+004C70ED - 8b cf                      - mov ecx,edi
+004C70EF - e8 ec a0 fb ff             - call 004811e0                      判断势力是否拥有某项科技
+004C70F4 - 85 c0                      - test eax,eax
+004C70F6 - 74 05                      - je 004c70fd
+004C70F8 - bb 07 00 00 00             - mov ebx,00000007                   0x07 = 投石
+004C70FD - 53                         - push ebx
+004C70FE - 8b ce                      - mov ecx,esi
+004C7100 - e8 4b f8 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C7105 - 5d                         - pop ebp
+004C7106 - 8b f8                      - mov edi,eax                        返回城市、港、关井栏或投石数量
+004C7108 - 5f                         - pop edi
+004C7109 - 5b                         - pop ebx
+004C710A - 5e                         - pop esi
+004C710B - 81 c4 94 01 00 00          - add esp,00000194
+004C7111 - c3                         - ret
+[命令编号为42：返回城市、港、关艨艟或斗舰数量]
+004C7112 - 8b 16                      - mov edx,[esi]                      esi = 设施指针
+004C7114 - 8b ce                      - mov ecx,esi
+004C7116 - bb 0a 00 00 00             - mov ebx,0000000a                   0x0a = 艨艟
+004C711B - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004C711E - 50                         - push eax
+004C711F - b9 58 19 20 07             - mov ecx,07201958
+004C7124 - e8 77 99 fc ff             - call 00490aa0                      根据势力ID获取势力指针
+004C7129 - 8b f8                      - mov edi,eax
+004C712B - 57                         - push edi
+004C712C - e8 ff 34 fb ff             - call 0047a630                      校验指针
+004C7131 - 83 c4 04                   - add esp,04
+004C7134 - 85 c0                      - test eax,eax
+004C7136 - 74 12                      - je 004c714a
+004C7138 - 6a 16                      - push 16                            0x16 = 开发投石
+004C713A - 8b cf                      - mov ecx,edi
+004C713C - e8 9f a0 fb ff             - call 004811e0                      判断势力是否拥有某项科技
+004C7141 - 85 c0                      - test eax,eax
+004C7143 - 74 05                      - je 004c714a
+004C7145 - bb 0b 00 00 00             - mov ebx,0000000b                   0x0b = 斗舰
+004C714A - 53                         - push ebx
+004C714B - 8b ce                      - mov ecx,esi
+004C714D - e8 fe f7 fb ff             - call 00486950                      获取城市、港、关指定兵装数量
+004C7152 - 5d                         - pop ebp
+004C7153 - 8b f8                      - mov edi,eax                        返回城市、港、关艨艟或斗舰数量
+004C7155 - 5f                         - pop edi
+004C7156 - 5b                         - pop ebx
+004C7157 - 5e                         - pop esi
+004C7158 - 81 c4 94 01 00 00          - add esp,00000194
+004C715E - c3                         - ret
+[命令编号为43：作用未明]
+004C715F - 8b 7e 28                   - mov edi,[esi+28]
+004C7162 - 5d                         - pop ebp
+004C7163 - 8b c7                      - mov eax,edi
+004C7165 - 5f                         - pop edi
+004C7166 - 5b                         - pop ebx
+004C7167 - 5e                         - pop esi
+004C7168 - 81 c4 94 01 00 00          - add esp,00000194
+004C716E - c3                         - ret
+[命令编号为44：作用未明]
+004C716F - 8b 7e 2c                   - mov edi,[esi+2c]
+004C7172 - 5d                         - pop ebp
+004C7173 - 8b c7                      - mov eax,edi
+004C7175 - 5f                         - pop edi
+004C7176 - 5b                         - pop ebx
+004C7177 - 5e                         - pop esi
+004C7178 - 81 c4 94 01 00 00          - add esp,00000194
+004C717E - c3                         - ret
+[命令编号为104：返回城市可开发用地数]
+004C717F - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+004C7182 - 85 c0                      - test eax,eax
+004C7184 - 75 4d                      - jne 004c71d3                       设施类型不是城市则跳转到返回
+004C7186 - 6a 20                      - push 20                            0x20 = 32(返回可开发用地数)
+004C7188 - eb 1f                      - jmp 004c71a9                       跳转到调用获取城市信息
+[命令编号为105：返回城市、港、关未行动的现役武将个数]
+004C718A - 56                         - push esi
+004C718B - e8 f0 f5 ff ff             - call 004c6780                      获取城市、港、关未行动的现役武将个数(排除在部队中的、有留守计数的、已行动的现役武将)
+004C7190 - 83 c4 04                   - add esp,04
+004C7193 - 5d                         - pop ebp
+004C7194 - 8b f8                      - mov edi,eax                        返回城市、港、关未行动的现役武将个数
+004C7196 - 5f                         - pop edi
+004C7197 - 5b                         - pop ebx
+004C7198 - 5e                         - pop esi
+004C7199 - 81 c4 94 01 00 00          - add esp,00000194
+004C719F - c3                         - ret
+[命令编号为106：返回城市在野武将个数]
+004C71A0 - 8b 46 08                   - mov eax,[esi+08]
+004C71A3 - 85 c0                      - test eax,eax
+004C71A5 - 75 2c                      - jne 004c71d3                       设施类型不是城市则跳转到返回
+004C71A7 - 6a 25                      - push 25                            0x25 = 37(返回城市在野武将个数)
+004C71A9 - 8b ce                      - mov ecx,esi
+004C71AB - e8 40 f5 fb ff             - call 004866f0                      根据设施指针获取城市指针
+004C71B0 - 50                         - push eax
+004C71B1 - e8 7a 9a ff ff             - call 004c0c30                      获取城市信息
+004C71B6 - 83 c4 08                   - add esp,08
+004C71B9 - 5d                         - pop ebp
+004C71BA - 8b f8                      - mov edi,eax
+004C71BC - 5f                         - pop edi
+004C71BD - 5b                         - pop ebx
+004C71BE - 5e                         - pop esi
+004C71BF - 81 c4 94 01 00 00          - add esp,00000194
+004C71C5 - c3                         - ret
+[命令编号为0、2：返回设施ID]
+004C71C6 - b9 58 19 20 07             - mov ecx,07201958
+004C71CB - 56                         - push esi
+004C71CC - e8 9f a5 fc ff             - call 00491770                      根据设施指针获取设施ID
+004C71D1 - 8b f8                      - mov edi,eax                        返回设施ID
+[命令编号为1：返回-1]
+004C71D3 - 5d                         - pop ebp
+004C71D4 - 8b c7                      - mov eax,edi                        返回edi
+004C71D6 - 5f                         - pop edi
+004C71D7 - 5b                         - pop ebx
+004C71D8 - 5e                         - pop esi
+004C71D9 - 81 c4 94 01 00 00          - add esp,00000194
+004C71DF - c3                         - ret
+
+数据区
+004C71E0 - C6 71 4C 00 D3 71 4C 00 81 6A 4C 00 91 6A 4C 00 
+           A5 6A 4C 00 DA 6A 4C 00 B6 6A 4C 00 C6 6A 4C 00 
+           EB 6A 4C 00 02 6B 4C 00 21 6B 4C 00 38 6B 4C 00 
+           4C 6B 4C 00 76 6B 4C 00 8A 6B 4C 00 A2 6B 4C 00 
+           BA 6B 4C 00 CE 6B 4C 00 E2 6B 4C 00 F6 6B 4C 00 
+           0A 6C 4C 00 C4 6C 4C 00 DC 6C 4C 00 1B 6D 4C 00 
+           53 6D 4C 00 0B 6E 4C 00 55 6E 4C 00 A5 6E 4C 00 
+           7A 6F 4C 00 92 6F 4C 00 A6 6F 4C 00 BE 6F 4C 00 
+           E4 6F 4C 00 F8 6F 4C 00 0C 70 4C 00 20 70 4C 00 
+           36 70 4C 00 4C 70 4C 00 62 70 4C 00 78 70 4C 00 
+           C5 70 4C 00 12 71 4C 00 5F 71 4C 00 6F 71 4C 00 
+           7F 71 4C 00 8A 71 4C 00 A0 71 4C 00 C6 71 4C 00 
+004C72A0 - 00 01 2F 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 
+           0F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 
+           1F 20 21 22 23 24 25 26 27 28 29 2A 2B 2F 2F 2F 
+           2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 
+           2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 
+           2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 2F 
+           2F 2F 2F 2F 2F 2F 2F 2F 2C 2D 2E
+
+
+=====================================================================================================================================================
+
+修改1 - 富豪米道效果自定义
+004C6C93 - e8 38 38 3e 00             - call 008aa4d0                  富豪(情报表示)
+004C6DDC - e8 ff 36 3e 00             - call 008aa4e0                  米道(情报表示)
+
+008AA4D0 - 69 c0 32 00 00 00          - imul eax,eax,00000032          富豪效果倍率(0x32表示50%，每增加或减少1表示倍率上调或下降1%)
+008AA4D6 - b9 64 00 00 00             - mov ecx,00000064
+008AA4DB - 99                         - cdq
+008AA4DC - f7 f9                      - idiv ecx
+008AA4DE - c3                         - ret
+008AA4DF - cc                         - int 3
+
+008AA4E0 - 69 c0 32 00 00 00          - imul eax,eax,00000032          米道效果倍率(0x32表示50%，每增加或减少1表示倍率上调或下降1%)
+008AA4E6 - b9 64 00 00 00             - mov ecx,00000064
+008AA4EB - 99                         - cdq
+008AA4EC - f7 f9                      - idiv ecx
+008AA4EE - c3                         - ret
+008AA4EF - cc                         - int 3
+
+
+=====================================================================================================================================================
+
+修改2 - 修正无法正确计算城市、港、关兵粮是否足够的BUG
+
+[获取特技数组]
+004C6EDC - 6a 00                      - push 00
+004C6EDE - 57                         - push edi                           edi = 设施指针(设施所属城市)
+004C6EDF - 8d 4c 24 1c                - lea ecx,[esp+1c]
+004C6EE3 - e8 f8 7b 00 00             - call 004ceae0                      获取城市、港、关的武将所拥有的特技数组
+[时间和征收判定]
+004C6EE8 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C6EED - e8 ee 64 fd ff             - call 0049d3e0                      获取当前旬到下次季初之间的旬数
+004C6EF2 - 83 f8 01                   - cmp eax,01                         0x01 = 季度底(判断是否是季度底)
+004C6EF5 - 74 18                      - je 004c6f0f                        是季度底则跳转到计算收粮
+004C6EF7 - 99                         - cdq
+004C6EF8 - b9 03 00 00 00             - mov ecx,00000003
+004C6EFD - f7 f9                      - idiv ecx
+004C6EFF - 83 fa 01                   - cmp edx,01                         0x01 = 月底(判断是否是月底)
+004C6F02 - 75 2d                      - jne 004c6f31                       不是月底则跳过计算收粮
+004C6F04 - 8b 84 24 7c 01 00 00       - mov eax,[esp+0000017c]             eax = 城市是否有征收
+004C6F0B - 85 c0                      - test eax,eax
+004C6F0D - 74 22                      - je 004c6f31                        没有征收则跳过计算收粮
+[计算收粮]
+004C6F0F - 6a 19                      - push 19                            0x19 = 25
+004C6F11 - 56                         - push esi
+004C6F12 - e8 89 fa ff ff             - call 004c69a0                      调用自身，命令编号25：返回城市、港、关的预计收粮
+004C6F17 - 83 c4 08                   - add esp,08
+004C6F1A - 8b 8c 24 7c 01 00 00       - mov ecx,[esp+0000017c]             eax = 城市是否有征收
+004C6F21 - 85 c9                      - test ecx,ecx
+004C6F23 - 74 08                      - je 004c6f2d                        无征收则跳过预计收粮除以3
+004C6F25 - 99                         - cdq
+004C6F26 - b9 03 00 00 00             - mov ecx,00000003
+004C6F2B - f7 f9                      - idiv ecx                           预计收粮除以3
+004C6F2D - 85 c0                      - test eax,eax
+004C6F2F - 01 c3                      - add ebx,eax                        ebx = 现有兵粮+预计收粮
+[跳转到耗粮计算]
+004C6F31 - eb 09                      - jmp 004c6f3c
+004C6F33 - 90 90 90                   - nop nop nop 
+004C6F36 - 90 90 90                   - nop nop nop
+004C6F39 - 90 90 90                   - nop nop nop

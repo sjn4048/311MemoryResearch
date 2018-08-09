@@ -1,0 +1,213 @@
+功能: 计算城市收钱
+参数表: [esp+04]=城市指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+【获取城市指针并校验】
+0049E590 - 83 ec 0c                   - sub esp,0c
+0049E593 - 53                         - push ebx
+0049E594 - 8b 5c 24 14                - mov ebx,[esp+14]                   ebx = 城市指针
+0049E598 - 53                         - push ebx
+0049E599 - 89 4c 24 10                - mov [esp+10],ecx
+0049E59D - e8 8e c0 fd ff             - call 0047a630                      校验指针
+0049E5A2 - 83 c4 04                   - add esp,04
+0049E5A5 - 85 c0                      - test eax,eax
+0049E5A7 - 0f 84 8f 01 00 00          - je 0049e73c                        校验失败跳转到返回0
+0049E5AD - 8b 03                      - mov eax,[ebx]                      ebx = 城市指针
+0049E5AF - 8b cb                      - mov ecx,ebx
+0049E5B1 - ff 50 40                   - call dword ptr [eax+40]            获取城市所属势力ID
+0049E5B4 - 85 c0                      - test eax,eax
+0049E5B6 - 0f 8c 80 01 00 00          - jl 0049e73c
+0049E5BC - 83 f8 2e                   - cmp eax,2e
+0049E5BF - 0f 8f 77 01 00 00          - jg 0049e73c                        如果势力ID不在0～46范围内则跳转到返回0
+
+【基础收钱】
+0049E5C5 - 55                         - push ebp
+0049E5C6 - 0f b7 6b 7e                - movzx ebp,word ptr [ebx+7e]        ebp = 城市基础收钱
+
+【循环内政设施】
+0049E5CA - 56                         - push esi
+0049E5CB - 8d 8b f4 00 00 00          - lea ecx,[ebx+000000f4]             ecx = 城市内政设施数组指针
+0049E5D1 - 57                         - push edi
+0049E5D2 - 89 4c 24 10                - mov [esp+10],ecx
+0049E5D6 - c7 44 24 14 1e 00 00 00    - mov [esp+14],0000001e              0x1e = 30(城市内政设施上限)
+0049E5DE - 8b ff                      - mov edi,edi
+0049E5E0 - 8b 54 24 10                - mov edx,[esp+10]                   edx = 城市内政设施数组指针
+0049E5E4 - 8b 3a                      - mov edi,[edx]                      edi = 设施指针
+0049E5E6 - 57                         - push edi
+0049E5E7 - e8 44 c0 fd ff             - call 0047a630                      校验指针
+0049E5EC - 83 c4 04                   - add esp,04
+0049E5EF - 85 c0                      - test eax,eax
+0049E5F1 - 0f 84 a0 00 00 00          - je 0049e697                        校验失败则跳转到循环下一个内政设施
+
+【内政设施产量计算】
+0049E5F7 - 8b 77 08                   - mov esi,[edi+08]                   esi = 设施类型
+0049E5FA - 8d 46 e1                   - lea eax,[esi-1f]                   eax = 设施类型-31(内政设施从31号开始)
+0049E5FD - 83 f8 14                   - cmp eax,14                         0x14 = 市场Lv3
+0049E600 - 0f 87 91 00 00 00          - ja 0049e697                        设施类型编号大于市场Lv3则跳转到循环下一个内政设施
+0049E606 - 0f b6 80 58 e7 49 00       - movzx eax,byte ptr [eax+0049e758]  取得31号-51号内政设施类型的对应处理编码
+0049E60D - ff 24 85 48 e7 49 00       - jmp dword ptr [eax*4+0049e748]     根据处理编码取得跳转地址
+[市场Lv1、大市场、鱼市、黑市]
+0049E614 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E617 - 85 c0                      - test eax,eax
+0049E619 - 74 7c                      - je 0049e697                        设施未建设完成则跳转到循环下一个内政设施
+0049E61B - 83 fe ff                   - cmp esi,ff
+0049E61E - 74 77                      - je 0049e697
+[获取设施类型指针]
+0049E620 - 56                         - push esi
+0049E621 - b9 58 19 20 07             - mov ecx,07201958
+0049E626 - e8 65 25 ff ff             - call 00490b90                      根据设施类型ID获取设施类型指针
+0049E62B - 8b d8                      - mov ebx,eax
+0049E62D - 53                         - push ebx
+0049E62E - e8 fd bf fd ff             - call 0047a630                      校验指针
+0049E633 - 83 c4 04                   - add esp,04
+0049E636 - 85 c0                      - test eax,eax
+0049E638 - 74 59                      - je 0049e693                        校验失败则跳转到循环下一个内政设施
+[造币场判定]
+0049E63A - 83 fe 1f                   - cmp esi,1f                         0x1f = 市场Lv1
+0049E63D - 0f b7 9b c0 00 00 00       - movzx ebx,word ptr [ebx+000000c0]  ebx = 设施产量
+0049E644 - 74 0a                      - je 0049e650                                                                    【修改】jmp 0049e650  //造币场对大市场、鱼市、黑市都有效
+0049E646 - 83 fe 32                   - cmp esi,32                         0x32 = 市场Lv2
+0049E649 - 74 05                      - je 0049e650
+0049E64B - 83 fe 33                   - cmp esi,33                         0x33 = 市场Lv3
+0049E64E - 75 41                      - jne 0049e691                       如果是黑市、鱼市、大市场，不进行造币场处理，跳转到累计设施产量
+0049E650 - 8b 17                      - mov edx,[edi]
+0049E652 - 8b cf                      - mov ecx,edi
+0049E654 - ff 52 3c                   - call dword ptr [edx+3c]            获取设施坐标数组指针
+0049E657 - 8b 00                      - mov eax,[eax]                      eax = 设施坐标
+0049E659 - 8b 4c 24 18                - mov ecx,[esp+18]                   ecx = 0x0780b3cc
+0049E65D - 6a 26                      - push 26                            0x26 = 造币场
+0049E65F - 50                         - push eax
+0049E660 - e8 9b fe ff ff             - call 0049e500                      判断坐标周边一格有无指定设施
+0049E665 - 85 c0                      - test eax,eax
+0049E667 - 74 28                      - je 0049e691                        若无造币场则跳转到累计设施产量
+0049E669 - 8d 04 5b                   - lea eax,[ebx+ebx*2]
+0049E66C - 99                         - cdq
+0049E66D - 2b c2                      - sub eax,edx
+0049E66F - d1 f8                      - sar eax,1                          以上4句，有造币场设施产量*1.5
+0049E671 - 03 e8                      - add ebp,eax                        ebp = 城市收钱累加+考虑造币场的设施产量
+0049E673 - eb 1e                      - jmp 0049e693                       跳转到循环下一个内政设施
+[市场Lv2]
+0049E675 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E678 - 85 c0                      - test eax,eax
+0049E67A - 75 9f                      - jne 0049e61b
+0049E67C - be 1f 00 00 00             - mov esi,0000001f                   如果市场Lv2未建设完成，则按市场Lv1处理
+0049E681 - eb 9d                      - jmp 0049e620                       跳转到获取设施类型指针
+[市场Lv3]
+0049E683 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E686 - 85 c0                      - test eax,eax
+0049E688 - 75 91                      - jne 0049e61b
+0049E68A - be 32 00 00 00             - mov esi,00000032                   如果市场Lv3未建设完成，则按市场Lv2处理
+0049E68F - eb 8f                      - jmp 0049e620                       跳转到获取设施类型指针
+[累计设施产量]
+0049E691 - 03 eb                      - add ebp,ebx                        ebp = 城市收钱累加+设施产量
+
+【循环内政设施】
+0049E693 - 8b 5c 24 20                - mov ebx,[esp+20]
+0049E697 - 8b 4c 24 10                - mov ecx,[esp+10]
+0049E69B - 8b 44 24 14                - mov eax,[esp+14]                   计数器(从30开始自减)
+0049E69F - 83 c1 08                   - add ecx,08                         ecx = 下一个内政设施指针
+0049E6A2 - 48                         - dec eax
+0049E6A3 - 89 4c 24 10                - mov [esp+10],ecx
+0049E6A7 - 89 44 24 14                - mov [esp+14],eax
+0049E6AB - 0f 85 2f ff ff ff          - jne 0049e5e0                       不为0则循环下一个内政设施
+
+【简单难度收入增加与超级难度玩家收入减少】
+0049E6B1 - a1 78 19 20 07             - mov eax,[07201978]                 eax = 游戏难度
+0049E6B6 - 6b ed 64                   - imul ebp,ebp,64                    ebp = 城市收钱累加*100
+0049E6B9 - 83 e8 00                   - sub eax,00                         0x00 = 简单难度
+0049E6BC - 8b f5                      - mov esi,ebp                        esi = 城市收钱累加*100
+0049E6BE - 74 28                      - je 0049e6e8
+0049E6C0 - 83 e8 02                   - sub eax,02                         0x02 = 超级难度
+0049E6C3 - 75 39                      - jne 0049e6fe
+0049E6C5 - 8b 13                      - mov edx,[ebx]                      ebx = 城市指针
+0049E6C7 - 8b cb                      - mov ecx,ebx
+0049E6C9 - ff 52 48                   - call dword ptr [edx+48]            是否是玩家势力
+0049E6CC - 85 c0                      - test eax,eax
+0049E6CE - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E6D3 - 74 18                      - je 0049e6ed                        如果是电脑势力则跳转到简单难度收入增加
+[超级难度玩家收入减少]
+0049E6D5 - 6b f6 4b                   - imul esi,esi,4b                    超级难度收入减少到75%
+0049E6D8 - f7 ee                      - imul esi
+0049E6DA - c1 fa 05                   - sar dl,05
+0049E6DD - 8b ca                      - mov ecx,edx
+0049E6DF - c1 e9 1f                   - shr ecx,1f
+0049E6E2 - 03 ca                      - add ecx,edx
+0049E6E4 - 8b f1                      - mov esi,ecx                        esi = 超级难度减少后的收入
+0049E6E6 - eb 16                      - jmp 0049e6fe
+[简单难度收入增加]
+0049E6E8 - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E6ED - 6b f6 7d                   - imul esi,esi,7d                    简单难度收入增加到125%
+0049E6F0 - f7 ee                      - imul esi
+0049E6F2 - c1 fa 05                   - sar dl,05
+0049E6F5 - 8b c2                      - mov eax,edx
+0049E6F7 - c1 e8 1f                   - shr eax,1f
+0049E6FA - 03 c2                      - add eax,edx
+0049E6FC - 8b f0                      - mov esi,eax                        esi = 简单难度增加后的收入
+
+【治安影响收入】
+0049E6FE - 8a 83 85 00 00 00          - mov al,[ebx+00000085]              al = 城市治安
+0049E704 - 3c 32                      - cmp al,32
+0049E706 - 73 02                      - jae 0049e70a
+0049E708 - b0 32                      - mov al,32                          如果治安小于50则按50计算
+0049E70A - 0f b6 c8                   - movzx ecx,al                       ecx = 城市治安
+0049E70D - 0f af ce                   - imul ecx,esi                       治安50-100之间，收入线性衰减
+0049E710 - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E715 - f7 e9                      - imul ecx
+0049E717 - c1 fa 05                   - sar dl,05
+0049E71A - 8b ca                      - mov ecx,edx
+0049E71C - c1 e9 1f                   - shr ecx,1f                         以上6句，eax = eax*0.01
+0049E71F - 03 ca                      - add ecx,edx
+[最后除以100，和0049E6B6处乘以100相呼应]
+0049E721 - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E726 - f7 e9                      - imul ecx
+0049E728 - 5f                         - pop edi
+0049E729 - c1 fa 05                   - sar dl,05
+0049E72C - 5e                         - pop esi
+0049E72D - 8b c2                      - mov eax,edx
+0049E72F - c1 e8 1f                   - shr eax,1f                         以上6句，eax = eax*0.01
+0049E732 - 5d                         - pop ebp
+0049E733 - 03 c2                      - add eax,edx                        eax = 城市收钱计算结果
+0049E735 - 5b                         - pop ebx
+0049E736 - 83 c4 0c                   - add esp,0c
+0049E739 - c2 04 00                   - ret 0004
+
+0049E73C - 33 c0                      - xor eax,eax                        eax = 0
+0049E73E - 5b                         - pop ebx
+0049E73F - 83 c4 0c                   - add esp,0c
+0049E742 - c2 04 00                   - ret 0004
+
+数据区：
+0049E748 - 14 E6 49 00 75 E6 49 00 83 E6 49 00 97 E6 49 00 
+0049E758 - 00 03 03 03 03 03 03 03 03 03 03 03 03 03 03 00 00 00 03 01 02
+
+
+=====================================================================================================================================================
+
+修改1 - 造币场对不邻接设施也有效果
+0049E659 - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 城市指针
+0049E65D - 6a 26                      - push 26
+0049E65F - 51                         - push ecx
+0049E660 - e8 4b f4 ff ff             - call 0049dab0                      判断城市是否有指定设施
+
+
+=====================================================================================================================================================
+
+修改2 - 有“变法”特技则造币场效果升为2倍
+0049E667 - e9 7b 20 47 00             - jmp 009106e7
+
+009106E7 - 0f 84 a4 df b8 ff          - je 0049e691
+009106ED - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 城市指针
+009106F1 - e8 d6 ff ff ff             - call 009106cc                      调用变法判定公共函数
+009106F6 - e9 71 df b8 ff             - jmp 0049e66c
+
+009106CC - e8 ef bd b6 ff             - call 0047c4c0                      根据城市指针获取设施指针
+009106D1 - 8b c8                      - mov ecx,eax
+009106D3 - 8b 01                      - mov eax,[ecx]
+009106D5 - 68 8b 00 00 00             - push 0000008b                      0x8b = 变法
+009106DA - ff 50 58                   - call dword ptr [eax+58]            判断城市中是否有持有变法特技的武将
+009106DD - 85 c0                      - test eax,eax
+009106DF - 8d 04 5b                   - lea eax,[ebx+ebx*2]                没有变法则eax = 3*设施产量(返回去再除以2，所以是1.5倍效果)
+009106E2 - 74 02                      - je 009106e6
+009106E4 - 01 d8                      - add eax,ebx                        有变法则eax = 4*设施产量(返回去再除以2，所以是2倍效果)
+009106E6 - c3                         - ret

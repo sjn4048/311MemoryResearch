@@ -1,0 +1,309 @@
+功能: 执行巡查
+参数表: [esp+04]=存放执行巡查系列参数的数组指针
+
+*****************************************************************************************************************************************************005CBD90 - 55                         - push ebp
+
+005CBD91 - 8b ec                      - mov ebp,esp
+005CBD93 - 83 e4 f8                   - and esp,f8
+005CBD96 - 81 ec bc 07 00 00          - sub esp,000007bc
+005CBD9C - 53                         - push ebx
+005CBD9D - 56                         - push esi
+
+【获取指针并校验】
+005CBD9E - 8b 75 08                   - mov esi,[ebp+08]
+005CBDA1 - 8b 06                      - mov eax,[esi]
+005CBDA3 - 57                         - push edi
+005CBDA4 - 50                         - push eax
+005CBDA5 - e8 66 fd ff ff             - call 005cbb10
+005CBDAA - 83 c4 04                   - add esp,04
+005CBDAD - 85 c0                      - test eax,eax
+005CBDAF - 74 3e                      - je 005cbdef
+005CBDB1 - 8b ce                      - mov ecx,esi
+005CBDB3 - e8 68 c5 fe ff             - call 005b8320
+005CBDB8 - 85 c0                      - test eax,eax
+005CBDBA - 74 33                      - je 005cbdef
+[获取城市指针]
+005CBDBC - 8b 06                      - mov eax,[esi]                      eax = 设施指针
+005CBDBE - 50                         - push eax
+005CBDBF - b9 58 19 20 07             - mov ecx,07201958
+005CBDC4 - e8 a7 59 ec ff             - call 00491770                      根据设施指针获取设施ID
+005CBDC9 - 85 c0                      - test eax,eax
+005CBDCB - 7c 05                      - jnge 005cbdd2
+005CBDCD - 83 f8 29                   - cmp eax,29
+005CBDD0 - 7e 03                      - jle 005cbdd5
+005CBDD2 - 83 c8 ff                   - or eax,ff                          设施ID不在0～41之间则设置为-1
+005CBDD5 - 50                         - push eax
+005CBDD6 - b9 58 19 20 07             - mov ecx,07201958
+005CBDDB - e8 30 4c ec ff             - call 00490a10                      根据城市ID获取城市指针
+005CBDE0 - 8b d8                      - mov ebx,eax                        ebx = 城市指针
+005CBDE2 - 53                         - push ebx
+005CBDE3 - e8 48 e8 ea ff             - call 0047a630                      校验指针
+005CBDE8 - 83 c4 04                   - add esp,04
+005CBDEB - 85 c0                      - test eax,eax
+005CBDED - 75 09                      - jne 005cbdf8                       校验成功则跳转到后续处理
+[校验失败返回]
+005CBDEF - 33 c0                      - xor eax,eax
+005CBDF1 - 5f                         - pop edi
+005CBDF2 - 5e                         - pop esi
+005CBDF3 - 5b                         - pop ebx
+005CBDF4 - 8b e5                      - mov esp,ebp
+005CBDF6 - 5d                         - pop ebp
+005CBDF7 - c3                         - ret
+
+【巡查处理】
+005CBDF8 - 83 c6 04                   - add esi,04
+005CBDFB - 8b 0e                      - mov ecx,[esi]
+005CBDFD - 8b 56 04                   - mov edx,[esi+04]
+005CBE00 - 8b 46 08                   - mov eax,[esi+08]
+005CBE03 - 89 4c 24 18                - mov [esp+18],ecx
+005CBE07 - 89 54 24 1c                - mov [esp+1c],edx
+005CBE0B - 89 44 24 20                - mov [esp+20],eax
+005CBE0F - bf 00 00 00 80             - mov edi,80000000
+005CBE14 - c7 44 24 10 00 00 00 00    - mov [esp+10],00000000
+005CBE1C - 8d 64 24 00                - lea esp,[esp+00]
+[设置武将已行动]
+005CBE20 - 8b 4c 24 10                - mov ecx,[esp+10]                   ecx = 计数器
+005CBE24 - 8b 74 8c 18                - mov esi,[esp+ecx*4+18]             esi = 武将指针
+005CBE28 - 56                         - push esi
+005CBE29 - e8 02 e8 ea ff             - call 0047a630                      校验指针
+005CBE2E - 83 c4 04                   - add esp,04
+005CBE31 - 85 c0                      - test eax,eax
+005CBE33 - 74 21                      - je 005cbe56                        校验失败则跳转循环下一个武将
+005CBE35 - 8b ce                      - mov ecx,esi
+005CBE37 - e8 34 d2 eb ff             - call 00489070                      获取武将统率
+005CBE3C - 6a 01                      - push 01                            0x01 = 已行动
+005CBE3E - 56                         - push esi
+005CBE3F - b9 5c 89 99 07             - mov ecx,0799895c
+005CBE44 - e8 b7 97 ed ff             - call 004a5600                      设置武将状态是否为已行动
+[获取执行武将中勋功最高的武将用于消息演示(这里没计算统帅最高的武将)]
+005CBE49 - 0f b7 86 ae 00 00 00       - movzx eax,word ptr [esi+000000ae]  eax = 武将勋功
+005CBE50 - 3b f8                      - cmp edi,eax
+005CBE52 - 7d 02                      - jnl 005cbe56
+005CBE54 - 8b f8                      - mov edi,eax                        edi = 武将勋功
+005CBE56 - 8b 44 24 10                - mov eax,[esp+10]
+005CBE5A - 40                         - inc eax
+005CBE5B - 83 f8 03                   - cmp eax,03                         最多循环3个武将
+005CBE5E - 89 44 24 10                - mov [esp+10],eax
+005CBE62 - 72 bc                      - jb 005cbe20                        循环下一个武将
+[设置城市已巡查状态]
+005CBE64 - 6a 01                      - push 01
+005CBE66 - 8b cb                      - mov ecx,ebx                        ecx = 城市指针
+005CBE68 - e8 83 57 eb ff             - call 004815f0                      设置城市的巡查状态
+[城市扣除巡查费用]
+005CBE6D - 8b 55 08                   - mov edx,[ebp+08]
+005CBE70 - 8b 02                      - mov eax,[edx]                      eax = 设施指针
+005CBE72 - 6a 9c                      - push 9c                            0x9c = -100
+005CBE74 - 50                         - push eax
+005CBE75 - b9 5c 89 99 07             - mov ecx,0799895c
+005CBE7A - e8 21 24 ee ff             - call 004ae2a0                      城市、港、关金钱增减
+[城市治安增加]
+005CBE7F - 8d 4c 24 18                - lea ecx,[esp+18]
+005CBE83 - 51                         - push ecx
+005CBE84 - 8b cb                      - mov ecx,ebx                        ecx = 城市指针
+005CBE86 - e8 35 06 eb ff             - call 0047c4c0                      根据城市指针获取设施指针
+005CBE8B - 50                         - push eax
+005CBE8C - e8 7f fb ff ff             - call 005cba10                      计算巡查效果
+005CBE91 - 83 c4 08                   - add esp,08
+005CBE94 - 50                         - push eax
+005CBE95 - 53                         - push ebx
+005CBE96 - b9 5c 89 99 07             - mov ecx,0799895c
+005CBE9B - e8 30 80 ee ff             - call 004b3ed0                      城市治安增加，返回考虑城市治安上限后的增加治安值
+005CBEA0 - 8b f8                      - mov edi,eax                        edi = 考虑城市治安上限后的增加治安值
+005CBEA2 - 8b cb                      - mov ecx,ebx
+005CBEA4 - 89 7c 24 24                - mov [esp+24],edi
+[军团相关处理一]
+005CBEA8 - e8 13 06 eb ff             - call 0047c4c0                      根据城市指针获取设施指针
+005CBEAD - 50                         - push eax
+005CBEAE - e8 cd c2 fe ff             - call 005b8180                      判断设施是否属于玩家势力第一军团
+005CBEB3 - 83 c4 04                   - add esp,04
+005CBEB6 - 85 c0                      - test eax,eax
+005CBEB8 - 74 10                      - je 005cbeca
+005CBEBA - 6a 00                      - push 00
+005CBEBC - 53                         - push ebx
+005CBEBD - 6a 06                      - push 06
+005CBEBF - 57                         - push edi
+005CBEC0 - b9 d8 59 6a 09             - mov ecx,096a59d8 : [0084A918]
+005CBEC5 - e8 86 cc fb ff             - call 00588b50
+[武将增加属性经验]
+005CBECA - c7 44 24 10 00 00 00 00    - mov [esp+10],00000000
+005CBED2 - 8b 54 24 10                - mov edx,[esp+10]                   edx = 计数器
+005CBED6 - 8b 74 94 18                - mov esi,[esp+edx*4+18]             esi = 武将指针
+005CBEDA - 56                         - push esi
+005CBEDB - e8 50 e7 ea ff             - call 0047a630                      校验指针
+005CBEE0 - 83 c4 04                   - add esp,04
+005CBEE3 - 85 c0                      - test eax,eax
+005CBEE5 - 74 11                      - je 005cbef8                        校验失败则跳转循环下一个武将
+005CBEE7 - 6a 01                      - push 01
+005CBEE9 - 6a 02                      - push 02                            增加经验2点
+005CBEEB - 6a 00                      - push 00                            0x00 = 统率
+005CBEED - 56                         - push esi
+005CBEEE - b9 5c 89 99 07             - mov ecx,0799895c
+005CBEF3 - e8 d8 b1 ed ff             - call 004a70d0                      武将增加属性经验
+005CBEF8 - 8b 44 24 10                - mov eax,[esp+10]
+005CBEFC - 40                         - inc eax
+005CBEFD - 83 f8 03                   - cmp eax,03                         最多循环3个武将
+005CBF00 - 89 44 24 10                - mov [esp+10],eax
+005CBF04 - 72 cc                      - jb 005cbed2
+[武将增加勋功]
+005CBF06 - c7 44 24 10 00 00 00 00    - mov [esp+10],00000000
+005CBF0E - 8b ff                      - mov edi,edi
+005CBF10 - 8b 44 24 10                - mov eax,[esp+10]                   eax = 计数器
+005CBF14 - 8b 74 84 18                - mov esi,[esp+eax*4+18]             esi = 武将指针
+005CBF18 - 56                         - push esi
+005CBF19 - e8 12 e7 ea ff             - call 0047a630                      校验指针
+005CBF1E - 83 c4 04                   - add esp,04
+005CBF21 - 85 c0                      - test eax,eax
+005CBF23 - 74 0d                      - je 005cbf32                        校验失败则跳转循环下一个武将
+005CBF25 - 6a 32                      - push 32                            增加勋功50点
+005CBF27 - 56                         - push esi
+005CBF28 - b9 5c 89 99 07             - mov ecx,0799895c
+005CBF2D - e8 1e ae ed ff             - call 004a6d50                      武将增加勋功
+005CBF32 - 8b 44 24 10                - mov eax,[esp+10]
+005CBF36 - 40                         - inc eax
+005CBF37 - 83 f8 03                   - cmp eax,03                         最多循环3个武将
+005CBF3A - 89 44 24 10                - mov [esp+10],eax
+005CBF3E - 72 d0                      - jb 005cbf10
+[势力技巧点增加]
+005CBF40 - 8b 13                      - mov edx,[ebx]
+005CBF42 - 8b cb                      - mov ecx,ebx                        ecx = 城市指针
+005CBF44 - ff 52 40                   - call dword ptr [edx+40]            获取城市所属的势力ID
+005CBF47 - 50                         - push eax
+005CBF48 - b9 58 19 20 07             - mov ecx,07201958
+005CBF4D - e8 4e 4b ec ff             - call 00490aa0                      根据势力ID获取势力指针
+005CBF52 - 8b f0                      - mov esi,eax
+005CBF54 - 56                         - push esi
+005CBF55 - e8 d6 e6 ea ff             - call 0047a630                      校验指针
+005CBF5A - 83 c4 04                   - add esp,04
+005CBF5D - 85 c0                      - test eax,eax
+005CBF5F - 74 25                      - je 005cbf86                        校验失败则跳过势力增加技巧值处理
+005CBF61 - 8d 0c bf                   - lea ecx,[edi+edi*4]                edi = 考虑城市治安上限后的增加治安值
+005CBF64 - b8 93 24 49 92             - mov eax,92492493
+005CBF69 - f7 e9                      - imul ecx
+005CBF6B - 03 d1                      - add edx,ecx
+005CBF6D - c1 fa 02                   - sar dl,02
+005CBF70 - 8b c2                      - mov eax,edx
+005CBF72 - c1 e8 1f                   - shr eax,1f
+005CBF75 - 53                         - push ebx
+005CBF76 - 8d 4c 02 05                - lea ecx,[edx+eax+05]               ecx = 5+增加治安数量×1/7
+005CBF7A - 51                         - push ecx
+005CBF7B - 56                         - push esi
+005CBF7C - b9 5c 89 99 07             - mov ecx,0799895c
+005CBF81 - e8 fa a5 ee ff             - call 004b6580                      势力增加技巧值
+[扣除军团行动力]
+005CBF86 - 8b 55 08                   - mov edx,[ebp+08]
+005CBF89 - 8b 02                      - mov eax,[edx]                      edx = 设施指针
+005CBF8B - 6a 14                      - push 14                            0x14 = 20(扣除的行动力)
+005CBF8D - 6a 03                      - push 03
+005CBF8F - 50                         - push eax
+005CBF90 - b9 90 15 77 09             - mov ecx,09771590 : [0084C068]
+005CBF95 - e8 a6 d3 fe ff             - call 005b9340                      扣除军团行动力
+
+【显示执行消息和武将语言】
+005CBF9A - 8b 4d 08                   - mov ecx,[ebp+08]
+005CBF9D - 8b 11                      - mov edx,[ecx]
+005CBF9F - 52                         - push edx
+005CBFA0 - e8 db c1 fe ff             - call 005b8180                      判断设施是否属于玩家势力第一军团
+005CBFA5 - 83 c4 04                   - add esp,04
+005CBFA8 - 85 c0                      - test eax,eax
+005CBFAA - 0f 84 31 01 00 00          - je 005cc0e1
+005CBFB0 - 6a 03                      - push 03
+005CBFB2 - e8 99 61 ea ff             - call 00472150                      0～2随机函数
+005CBFB7 - 0f b7 c0                   - movzx eax,ax
+005CBFBA - 8b 44 84 1c                - mov eax,[esp+eax*4+1c]
+005CBFBE - 83 c4 04                   - add esp,04
+005CBFC1 - 85 c0                      - test eax,eax
+005CBFC3 - 89 44 24 10                - mov [esp+10],eax
+005CBFC7 - 74 e7                      - je 005cbfb0
+005CBFC9 - 8b 46 04                   - mov eax,[esi+04]                   eax = 君主ID
+005CBFCC - 50                         - push eax
+005CBFCD - b9 58 19 20 07             - mov ecx,07201958
+005CBFD2 - e8 29 4b ec ff             - call 00490b00                      根据武将ID获取武将指针
+005CBFD7 - 68 7e 14 00 00             - push 0000147e
+005CBFDC - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005CBFE0 - 8b f0                      - mov esi,eax
+005CBFE2 - e8 79 0b ed ff             - call 0049cb60
+005CBFE7 - 8b 4c 24 10                - mov ecx,[esp+10]
+005CBFEB - 51                         - push ecx
+005CBFEC - 6a 00                      - push 00
+005CBFEE - 8d 4c 24 30                - lea ecx,[esp+30]
+005CBFF2 - e8 89 0b ed ff             - call 0049cb80
+005CBFF7 - 56                         - push esi
+005CBFF8 - 6a 01                      - push 01
+005CBFFA - 8d 4c 24 30                - lea ecx,[esp+30]
+005CBFFE - e8 7d 0b ed ff             - call 0049cb80
+005CC003 - 53                         - push ebx
+005CC004 - 6a 00                      - push 00
+005CC006 - 8d 4c 24 30                - lea ecx,[esp+30]
+005CC00A - e8 71 0b ed ff             - call 0049cb80
+005CC00F - 57                         - push edi
+005CC010 - 6a 00                      - push 00
+005CC012 - 8d 4c 24 30                - lea ecx,[esp+30]
+005CC016 - e8 65 09 ed ff             - call 0049c980
+005CC01B - 8d 94 24 f8 03 00 00       - lea edx,[esp+000003f8]
+005CC022 - b9 f4 00 00 00             - mov ecx,000000f4
+005CC027 - 8d 74 24 28                - lea esi,[esp+28]
+005CC02B - 8d bc 24 f8 03 00 00       - lea edi,[esp+000003f8]
+005CC032 - 52                         - push edx
+005CC033 - f3 a5                      - repe movsd
+005CC035 - e8 56 f3 ec ff             - call 0049b390
+005CC03A - 83 c4 04                   - add esp,04
+005CC03D - 6a 00                      - push 00
+005CC03F - 6a 00                      - push 00
+005CC041 - 68 00 00 80 bf             - push bf800000
+005CC046 - 6a 00                      - push 00
+005CC048 - 6a 06                      - push 06
+005CC04A - b9 10 98 11 09             - mov ecx,09119810 : [07999810]
+005CC04F - 8b f0                      - mov esi,eax
+005CC051 - e8 1a 45 f0 ff             - call 004d0570
+005CC056 - 8b 44 24 10                - mov eax,[esp+10]
+005CC05A - 6a 00                      - push 00
+005CC05C - 50                         - push eax
+005CC05D - 56                         - push esi
+005CC05E - e8 2d a6 f2 ff             - call 004f6690
+005CC063 - 8a 8b 85 00 00 00          - mov cl,[ebx+00000085]
+005CC069 - 83 c4 0c                   - add esp,0c
+005CC06C - 88 4c 24 17                - mov [esp+17],cl
+005CC070 - 68 97 20 00 00             - push 00002097
+005CC075 - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005CC079 - e8 e2 0a ed ff             - call 0049cb60
+005CC07E - 53                         - push ebx
+005CC07F - 6a 00                      - push 00
+005CC081 - 8d 4c 24 30                - lea ecx,[esp+30]
+005CC085 - e8 f6 0a ed ff             - call 0049cb80
+005CC08A - 0f b6 54 24 17             - movzx edx,byte ptr [esp+17]
+005CC08F - 52                         - push edx
+005CC090 - 6a 00                      - push 00
+005CC092 - 8d 4c 24 30                - lea ecx,[esp+30]
+005CC096 - e8 e5 08 ed ff             - call 0049c980
+005CC09B - 8b 44 24 24                - mov eax,[esp+24]
+005CC09F - 50                         - push eax
+005CC0A0 - 6a 01                      - push 01
+005CC0A2 - 8d 4c 24 30                - lea ecx,[esp+30]
+005CC0A6 - e8 d5 08 ed ff             - call 0049c980
+005CC0AB - 8d 4c 24 28                - lea ecx,[esp+28]
+005CC0AF - 51                         - push ecx
+005CC0B0 - 8d 8c 24 fc 03 00 00       - lea ecx,[esp+000003fc]
+005CC0B7 - e8 e4 04 ed ff             - call 0049c5a0
+005CC0BC - 8d 94 24 f8 03 00 00       - lea edx,[esp+000003f8]
+005CC0C3 - 52                         - push edx
+005CC0C4 - e8 c7 f2 ec ff             - call 0049b390
+005CC0C9 - 83 c4 04                   - add esp,04
+005CC0CC - 6a 00                      - push 00
+005CC0CE - 50                         - push eax
+005CC0CF - 8b cb                      - mov ecx,ebx
+005CC0D1 - e8 ea 03 eb ff             - call 0047c4c0                      根据城市指针获取设施指针
+005CC0D6 - 50                         - push eax
+005CC0D7 - b9 00 4e c2 09             - mov ecx,09c24e00
+005CC0DC - e8 9f f0 06 00             - call 0063b180
+005CC0E1 - 8b 45 08                   - mov eax,[ebp+08]
+005CC0E4 - 50                         - push eax
+005CC0E5 - 6a 03                      - push 03
+005CC0E7 - b9 2c 61 3f 07             - mov ecx,073f612c
+005CC0EC - e8 0f 74 fa ff             - call 00573500
+005CC0F1 - 5f                         - pop edi
+005CC0F2 - 5e                         - pop esi
+005CC0F3 - b8 01 00 00 00             - mov eax,00000001
+005CC0F8 - 5b                         - pop ebx
+005CC0F9 - 8b e5                      - mov esp,ebp
+005CC0FB - 5d                         - pop ebp
+005CC0FC - c3                         - ret

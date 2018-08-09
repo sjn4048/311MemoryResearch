@@ -1,0 +1,53 @@
+获取港关指定兵装上限
+参数表: [esp+04]=兵装类型，ecx=港关指针
+
+*****************************************************************************************************************************************************
+
+0048D8A0 - 56                         - push esi
+0048D8A1 - 8b 74 24 08                - mov esi,[esp+08]               esi = 兵装类型
+0048D8A5 - 33 c0                      - xor eax,eax
+0048D8A7 - 85 f6                      - test esi,esi
+0048D8A9 - 7c 60                      - jnge 0048d90b
+0048D8AB - 83 fe 0b                   - cmp esi,0b
+0048D8AE - 7f 5b                      - jg 0048d90b                    确保兵装类型在0～11之间
+
+0048D8B0 - 8b 01                      - mov eax,[ecx]                  ecx = 港关指针
+0048D8B2 - 57                         - push edi
+0048D8B3 - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID
+0048D8B6 - 50                         - push eax
+0048D8B7 - b9 58 19 20 07             - mov ecx,07201958
+0048D8BC - e8 df 31 00 00             - call 00490aa0                  根据势力ID获取势力指针
+0048D8C1 - 8b f8                      - mov edi,eax                    edi = 势力指针
+0048D8C3 - 57                         - push edi
+0048D8C4 - e8 67 cd fe ff             - call 0047a630                   
+0048D8C9 - 83 c4 04                   - add esp,04
+0048D8CC - 85 c0                      - test eax,eax
+0048D8CE - 74 26                      - je 0048d8f6
+
+0048D8D0 - 6a 21                      - push 21                        0x21 = 扩展港关
+0048D8D2 - 8b cf                      - mov ecx,edi
+0048D8D4 - e8 07 39 ff ff             - call 004811e0                  判断势力是否拥有扩展港关科技
+0048D8D9 - 85 c0                      - test eax,eax
+0048D8DB - 74 19                      - je 0048d8f6
+[有扩展港关]
+0048D8DD - 33 c0                      - xor eax,eax
+0048D8DF - 83 fe 04                   - cmp esi,04                     比较是否是枪戟弩骑
+0048D8E2 - 0f 9e c0                   - setle al
+0048D8E5 - 5f                         - pop edi
+0048D8E6 - 5e                         - pop esi
+0048D8E7 - f7 d8                      - neg eax
+0048D8E9 - 1b c0                      - sbb eax,eax
+0048D8EB - 25 fc e9 00 00             - and eax,0000e9fc               0xe9fc = 59900(加下面一行正好是60000，枪戟弩骑上限)  【修改】枪戟弩骑上限(有扩展港关)
+0048D8F0 - 83 c0 64                   - add eax,64                     0x64 = 100(攻具和舰船上限)
+0048D8F3 - c2 04 00                   - ret 0004
+[无扩展港关]
+0048D8F6 - 33 c0                      - xor eax,eax
+0048D8F8 - 83 fe 04                   - cmp esi,04                     比较是否是枪戟弩骑
+0048D8FB - 0f 9e c0                   - setle al
+0048D8FE - 5f                         - pop edi
+0048D8FF - f7 d8                      - neg eax
+0048D901 - 1b c0                      - sbb eax,eax
+0048D903 - 25 cc 74 00 00             - and eax,000074cc               0xe9fc = 29900(加下面一行正好是30000，枪戟弩骑上限)  【修改】枪戟弩骑上限(无扩展港关)
+0048D908 - 83 c0 64                   - add eax,64                     0x64 = 100(攻具和舰船上限)
+0048D90B - 5e                         - pop esi
+0048D90C - c2 04 00                   - ret 0004

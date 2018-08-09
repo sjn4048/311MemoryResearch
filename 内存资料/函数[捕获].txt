@@ -1,0 +1,529 @@
+004B1280 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+004B1286 - 8b 4c 24 04                - mov ecx,[esp+04]
+004B128A - 6a ff                      - push ff
+004B128C - 68 48 f8 72 00             - push 0072f848 : [88CD14B8]
+004B1291 - 50                         - push eax
+004B1292 - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+004B1299 - 83 ec 70                   - sub esp,70
+004B129C - 56                         - push esi
+004B129D - 57                         - push edi
+004B129E - e8 ad ab fc ff             - call 0047be50
+004B12A3 - 8b 8c 24 8c 00 00 00       - mov ecx,[esp+0000008c]
+004B12AA - e8 a1 ab fc ff             - call 0047be50
+004B12AF - 8b 84 24 94 00 00 00       - mov eax,[esp+00000094]
+004B12B6 - 8b 8c 24 90 00 00 00       - mov ecx,[esp+00000090]
+004B12BD - 6a 00                      - push 00
+004B12BF - 50                         - push eax
+004B12C0 - 51                         - push ecx
+004B12C1 - 8d 4c 24 34                - lea ecx,[esp+34]
+004B12C5 - e8 56 fb ff ff             - call 004b0e20
+004B12CA - 8b 74 24 28                - mov esi,[esp+28]
+004B12CE - 56                         - push esi
+004B12CF - e8 5c 93 fc ff             - call 0047a630
+004B12D4 - 83 c4 04                   - add esp,04
+004B12D7 - 85 c0                      - test eax,eax
+004B12D9 - 74 11                      - je 004b12ec
+004B12DB - 8b 7c 24 2c                - mov edi,[esp+2c]
+004B12DF - 57                         - push edi
+004B12E0 - e8 4b 93 fc ff             - call 0047a630
+004B12E5 - 83 c4 04                   - add esp,04
+004B12E8 - 85 c0                      - test eax,eax
+004B12EA - 75 15                      - jne 004b1301
+004B12EC - 5f                         - pop edi
+004B12ED - 33 c0                      - xor eax,eax
+004B12EF - 5e                         - pop esi
+004B12F0 - 8b 4c 24 70                - mov ecx,[esp+70]
+004B12F4 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+004B12FB - 83 c4 7c                   - add esp,7c
+004B12FE - c2 20 00                   - ret 0020
+004B1301 - 8b 17                      - mov edx,[edi]
+004B1303 - 53                         - push ebx
+004B1304 - 55                         - push ebp
+004B1305 - 8b cf                      - mov ecx,edi
+004B1307 - ff 52 40                   - call dword ptr [edx+40]
+004B130A - 50                         - push eax
+004B130B - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004B1310 - e8 8b f7 fd ff             - call 00490aa0
+004B1315 - 50                         - push eax
+004B1316 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004B131B - e8 50 ff fd ff             - call 00491270
+004B1320 - 89 44 24 18                - mov [esp+18],eax
+004B1324 - 8b 06                      - mov eax,[esi]
+004B1326 - 8b ce                      - mov ecx,esi
+004B1328 - ff 50 40                   - call dword ptr [eax+40]
+004B132B - 50                         - push eax
+004B132C - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004B1331 - e8 6a f7 fd ff             - call 00490aa0
+004B1336 - 50                         - push eax
+004B1337 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004B133C - e8 2f ff fd ff             - call 00491270
+004B1341 - 8b 17                      - mov edx,[edi]
+004B1343 - 8b cf                      - mov ecx,edi
+004B1345 - 89 44 24 28                - mov [esp+28],eax
+004B1349 - c7 44 24 20 00 00 00 00    - mov [esp+20],00000000
+004B1351 - ff 52 24                   - call dword ptr [edx+24]
+004B1354 - 8b d8                      - mov ebx,eax
+004B1356 - 8b 07                      - mov eax,[edi]
+004B1358 - 83 eb 05                   - sub ebx,05
+004B135B - f7 db                      - neg ebx
+004B135D - 1b db                      - sbb ebx,ebx
+004B135F - f7 d3                      - not ebx
+004B1361 - 8b cf                      - mov ecx,edi
+004B1363 - 23 df                      - and ebx,edi
+004B1365 - ff 50 24                   - call dword ptr [eax+24]
+004B1368 - 8b 16                      - mov edx,[esi]
+004B136A - 8b e8                      - mov ebp,eax
+004B136C - 83 ed 0b                   - sub ebp,0b
+004B136F - f7 dd                      - neg ebp
+004B1371 - 1b ed                      - sbb ebp,ebp
+004B1373 - f7 d5                      - not ebp
+004B1375 - 8b ce                      - mov ecx,esi
+004B1377 - 23 ef                      - and ebp,edi
+004B1379 - ff 52 24                   - call dword ptr [edx+24]
+004B137C - 8b f8                      - mov edi,eax
+004B137E - 8b 06                      - mov eax,[esi]
+004B1380 - 83 ef 05                   - sub edi,05
+004B1383 - f7 df                      - neg edi
+004B1385 - 1b ff                      - sbb edi,edi
+004B1387 - f7 d7                      - not edi
+004B1389 - 8b ce                      - mov ecx,esi
+004B138B - 23 fe                      - and edi,esi
+004B138D - ff 50 24                   - call dword ptr [eax+24]
+004B1390 - 83 e8 0b                   - sub eax,0b
+004B1393 - f7 d8                      - neg eax
+004B1395 - 1b c0                      - sbb eax,eax
+004B1397 - f7 d0                      - not eax
+004B1399 - 23 c6                      - and eax,esi
+004B139B - 57                         - push edi
+004B139C - 89 44 24 30                - mov [esp+30],eax
+004B13A0 - e8 8b 92 fc ff             - call 0047a630
+004B13A5 - 83 c4 04                   - add esp,04
+004B13A8 - 85 c0                      - test eax,eax
+004B13AA - 74 0f                      - je 004b13bb
+004B13AC - 8b 47 08                   - mov eax,[edi+08]
+004B13AF - 85 c0                      - test eax,eax
+004B13B1 - c7 44 24 1c 02 00 00 00    - mov [esp+1c],00000002
+004B13B9 - 74 08                      - je 004b13c3
+004B13BB - c7 44 24 1c 01 00 00 00               - mov [esp+1c],00000001
+004B13C3 - 8b 8c 24 9c 00 00 00                  - mov ecx,[esp+0000009c]
+004B13CA - 8b 11                                 - mov edx,[ecx]
+004B13CC - ff 52 3c                              - call dword ptr [edx+3c]
+004B13CF - 8b 8c 24 98 00 00 00                  - mov ecx,[esp+00000098]
+004B13D6 - 8b f0                                 - mov esi,eax
+004B13D8 - 8b 01                                 - mov eax,[ecx]
+004B13DA - ff 50 3c                              - call dword ptr [eax+3c]
+004B13DD - 8b 0e                                 - mov ecx,[esi]
+004B13DF - 8b 54 24 1c                           - mov edx,[esp+1c]
+004B13E3 - 8b 00                                 - mov eax,[eax]
+004B13E5 - 51                                    - push ecx
+004B13E6 - 52                                    - push edx
+004B13E7 - 50                                    - push eax
+004B13E8 - b9 cc b3 80 07                        - mov ecx,0780b3cc : [00000000]
+004B13ED - e8 4e c2 fe ff                        - call 0049d640
+004B13F2 - 8b 15 78 19 20 07                     - mov edx,[07201978]              游戏难度置入EDX
+004B13F8 - 8b b4 24 9c 00 00 00                  - mov esi,[esp+0000009c]          取得击破部队地址，置入ESI
+004B13FF - 33 c9                                 - xor ecx,ecx                     ECX=0
+004B1401 - 83 fa 02                              - cmp edx,02                      如果EDX=2(超级难度)
+004B1404 - 0f 94 c1                              - sete cl                         则ECX=1
+004B1407 - 56                                    - push esi
+004B1408 - 89 44 24 28                           - mov [esp+28],eax
+004B140C - c7 44 24 14 00 00 00 00               - mov [esp+14],00000000           [esp+14]=0(此参数直接参与捕获率计算)
+004B1414 - 89 4c 24 18                           - mov [esp+18],ecx                ECX(是否是超级难度)置入[esp+18]
+004B1418 - e8 13 92 fc ff                        - call 0047a630                   校验ESI指针
+004B141D - 83 c4 04                              - add esp,04
+004B1420 - 85 c0                                 - test eax,eax
+004B1422 - 74 12                                 - je 004b1436                     如果校验失败跳转到004B1436(EAX=0)
+004B1424 - 8b 16                                 - mov edx,[esi]
+004B1426 - 8b ce                                 - mov ecx,esi
+004B1428 - ff 52 48                              - call dword ptr [edx+48]         判断击破部队是否是玩家部队
+004B142B - 85 c0                                 - test eax,eax
+004B142D - 74 07                                 - je 004b1436                     如果不是则跳转到004B1436(EAX=0)
+004B142F - b8 01 00 00 00                        - mov eax,00000001                击破部队是玩家部队则EAX=1
+004B1434 - eb 02                                 - jmp 004b1438
+004B1436 - 33 c0                                 - xor eax,eax                     EAX=0
+004B1438 - 8b 54 24 14                           - mov edx,[esp+14]                EDX=0
+004B143C - 23 d0                                 - and edx,eax                     EAX、EDX都为1则EDX置1
+004B143E - 8b 84 24 98 00 00 00                  - mov eax,[esp+00000098]          取得被击破部队地址，置入EAX
+004B1445 - 50                                    - push eax
+004B1446 - 89 54 24 18                           - mov [esp+18],edx                EDX置入[esp+18]
+004B144A - e8 e1 91 fc ff                        - call 0047a630                   校验EAX指针
+004B144F - 83 c4 04                              - add esp,04
+004B1452 - 85 c0                                 - test eax,eax
+004B1454 - 74 17                                 - je 004b146d                     如果校验失败跳转到004B146D(EAX=0)
+004B1456 - 8b 8c 24 98 00 00 00                  - mov ecx,[esp+00000098]
+004B145D - 8b 11                                 - mov edx,[ecx]
+004B145F - ff 52 48                              - call dword ptr [edx+48]         判断击破部队是否是玩家部队
+004B1462 - 85 c0                                 - test eax,eax
+004B1464 - 75 07                                 - jne 004b146d                    是则跳转到004B146D(EAX=0)
+004B1466 - b8 01 00 00 00                        - mov eax,00000001                被击破部队不是玩家部队则EAX=1
+004B146B - eb 02                                 - jmp 004b146f
+004B146D - 33 c0                                 - xor eax,eax                     EAX=0
+004B146F - 8b 54 24 14                           - mov edx,[esp+14]
+004B1473 - 23 d0                                 - and edx,eax                     EAX、EDX都为1则EDX置1
+004B1475 - 8b 44 24 18                           - mov eax,[esp+18]
+004B1479 - 85 c0                                 - test eax,eax
+004B147B - 89 54 24 14                           - mov [esp+14],edx                EDX置入[esp+14](即超级难度下玩家部队击破非玩家部队时为1，其余为0)
+004B147F - 7c 12                                 - jnge 004b1493
+004B1481 - 83 f8 29                              - cmp eax,29
+004B1484 - 7f 0d                                 - jg 004b1493
+004B1486 - 8b 44 24 28                           - mov eax,[esp+28]
+004B148A - 85 c0                                 - test eax,eax
+004B148C - 7c 05                                 - jnge 004b1493
+004B148E - 83 f8 29                              - cmp eax,29
+004B1491 - 7e 08                                 - jle 004b149b
+004B1493 - c7 44 24 10 01 00 00 00               - mov [esp+10],00000001
+004B149B - b9 80 3e c4 09                        - mov ecx,09c43e80 : [0085FA9C]
+004B14A0 - e8 ab e2 1c 00                        - call 0067f750
+004B14A5 - 85 c0                                 - test eax,eax
+004B14A7 - 74 1b                                 - je 004b14c4
+004B14A9 - a1 80 3e c4 09                        - mov eax,[09c43e80] : [0085FA9C]
+004B14AE - 6a 18                                 - push 18
+004B14B0 - b9 80 3e c4 09                        - mov ecx,09c43e80 : [0085FA9C]
+004B14B5 - ff 50 04                              - call dword ptr [eax+04]
+004B14B8 - 85 c0                                 - test eax,eax
+004B14BA - 74 08                                 - je 004b14c4
+004B14BC - c7 44 24 10 01 00 00 00               - mov [esp+10],00000001
+004B14C4 - 53                                    - push ebx
+004B14C5 - e8 66 91 fc ff                        - call 0047a630
+004B14CA - 83 c4 04                              - add esp,04
+004B14CD - 85 c0                                 - test eax,eax
+004B14CF - 0f 84 cc 00 00 00                     - je 004b15a1
+004B14D5 - 33 f6                                 - xor esi,esi
+004B14D7 - 89 74 24 6c                           - mov [esp+6c],esi
+004B14DB - 89 74 24 70                           - mov [esp+70],esi
+004B14DF - 89 74 24 68                           - mov [esp+68],esi
+004B14E3 - 89 74 24 64                           - mov [esp+64],esi
+004B14E7 - 89 74 24 74                           - mov [esp+74],esi
+004B14EB - c7 44 24 78 0a 00 00 00               - mov [esp+78],0000000a
+004B14F3 - 89 74 24 7c                           - mov [esp+7c],esi
+004B14F7 - c7 44 24 60 44 bf 79 00               - mov [esp+60],0079bf44 : [0047C0E0]
+004B14FF - 53                                    - push ebx
+004B1500 - b9 58 19 20 07                        - mov ecx,07201958 : [0079C134]
+004B1505 - 89 b4 24 8c 00 00 00                  - mov [esp+0000008c],esi
+004B150C - e8 5f 02 fe ff                        - call 00491770
+004B1511 - 50                                    - push eax
+004B1512 - e8 39 6e fd ff                        - call 00488350
+004B1517 - 83 c4 04                              - add esp,04
+004B151A - 6a 0f                                 - push 0f
+004B151C - 50                                    - push eax
+004B151D - 8d 4c 24 68                           - lea ecx,[esp+68]
+004B1521 - 51                                    - push ecx
+004B1522 - b9 08 98 99 07                        - mov ecx,07999808 : [00000000]
+004B1527 - e8 c4 dd 01 00                        - call 004cf2f0
+004B152C - 8b 54 24 18                           - mov edx,[esp+18]
+004B1530 - 56                                    - push esi
+004B1531 - 52                                    - push edx
+004B1532 - 6a 4b                                 - push 4b
+004B1534 - 8d 4c 24 6c                           - lea ecx,[esp+6c]
+004B1538 - e8 c3 de ff ff                        - call 004af400
+004B153D - 39 74 24 6c                           - cmp [esp+6c],esi
+004B1541 - 7f 08                                 - jg 004b154b
+004B1543 - c7 44 24 10 01 00 00 00               - mov [esp+10],00000001
+004B154B - 39 74 24 24                           - cmp [esp+24],esi
+004B154F - 74 3a                                 - je 004b158b
+004B1551 - 8b 44 24 64                           - mov eax,[esp+64]
+004B1555 - 3b c6                                 - cmp eax,esi
+004B1557 - 89 44 24 24                           - mov [esp+24],eax
+004B155B - 74 2e                                 - je 004b158b
+004B155D - 8d 49 00                              - lea ecx,[ecx+00]
+004B1560 - 8d 44 24 24                           - lea eax,[esp+24]
+004B1564 - 50                                    - push eax
+004B1565 - 8d 4c 24 64                           - lea ecx,[esp+64]
+004B1569 - e8 62 a9 fc ff                        - call 0047bed0
+004B156E - 8b 08                                 - mov ecx,[eax]
+004B1570 - 6a 13                                 - push 13                         13＝19(捕获)
+004B1572 - e8 79 7b fd ff                        - call 004890f0
+004B1577 - 85 c0                                 - test eax,eax
+004B1579 - 75 08                                 - jne 004b1583
+004B157B - 39 74 24 24                           - cmp [esp+24],esi
+004B157F - 75 df                                 - jne 004b1560
+004B1581 - eb 08                                 - jmp 004b158b
+004B1583 - c7 44 24 20 01 00 00 00               - mov [esp+20],00000001
+004B158B - 8d 4c 24 60                           - lea ecx,[esp+60]
+004B158F - c7 84 24 88 00 00 00 ff ff ff ff      - mov [esp+00000088],ffffffff
+004B159A - e8 61 ab fc ff                        - call 0047c100
+004B159F - eb 24                                 - jmp 004b15c5
+004B15A1 - 55                                    - push ebp
+004B15A2 - e8 89 90 fc ff                        - call 0047a630
+004B15A7 - 83 c4 04                              - add esp,04
+004B15AA - 85 c0                                 - test eax,eax
+004B15AC - 74 15                                 - je 004b15c3
+004B15AE - 8b 44 24 24                           - mov eax,[esp+24]
+004B15B2 - 85 c0                                 - test eax,eax
+004B15B4 - 74 0d                                 - je 004b15c3
+004B15B6 - 8b 16                                 - mov edx,[esi]
+004B15B8 - 6a 13                                 - push 13                         13＝19(捕获)
+004B15BA - 8b ce                                 - mov ecx,esi
+004B15BC - ff 52 58                              - call dword ptr [edx+58]         判断部队中是否有捕获
+004B15BF - 89 44 24 20                           - mov [esp+20],eax                0或1置入[esp+20]
+004B15C3 - 33 f6                                 - xor esi,esi                     esi=0
+004B15C5 - 89 74 24 4c                           - mov [esp+4c],esi                [esp+4c]=0
+004B15C9 - 89 74 24 50                           - mov [esp+50],esi                [esp+50]=0
+004B15CD - 89 74 24 48                           - mov [esp+48],esi                [esp+48]=0
+004B15D1 - 89 74 24 44                           - mov [esp+44],esi                [esp+44]=0
+004B15D5 - 89 74 24 54                           - mov [esp+54],esi                [esp+54]=0
+004B15D9 - c7 44 24 58 0a 00 00 00               - mov [esp+58],0000000a           [esp+58]=10
+004B15E1 - 89 74 24 5c                           - mov [esp+5c],esi                [esp+5c]=0
+004B15E5 - c7 44 24 40 44 bf 79 00               - mov [esp+40],0079bf44           [esp+40]=0x0079bf44(某地址)
+
+004B15ED - 8b 6c 24 2c                           - mov ebp,[esp+2c]                [esp+2c]置入ebp，可能是被击破部队地址(当攻击对象是部队时)
+004B15F1 - 55                                    - push ebp
+004B15F2 - c7 84 24 8c 00 00 00 01 00 00 00      - mov [esp+0000008c],00000001     [esp+8c]=1
+004B15FD - e8 2e 90 fc ff                        - call 0047a630                   校验EBP(击破部队地址)指针
+004B1602 - 83 c4 04                              - add esp,04
+004B1605 - 85 c0                                 - test eax,eax
+004B1607 - 74 3b                                 - je 004b1644                     校验失败则跳转到跳转到004B1644
+004B1609 - 33 db                                 - xor ebx,ebx                     EBX＝0
+004B160B - eb 03                                 - jmp 004b1610
+004B160D - 8d 49 00                              - lea ecx,[ecx+00]
+004B1610 - 53                                    - push ebx
+004B1611 - 8b cd                                 - mov ecx,ebp
+004B1613 - e8 78 3c fe ff                        - call 00495290                   获得部队中第X位武将的ID
+004B1618 - 50                                    - push eax                        
+004B1619 - b9 58 19 20 07                        - mov ecx,07201958
+004B161E - e8 dd f4 fd ff                        - call 00490b00                   根据武将ID获得武将地址
+004B1623 - 8b f8                                 - mov edi,eax                     置入武将地址EDI
+004B1625 - 57                                    - push edi
+004B1626 - e8 05 90 fc ff                        - call 0047a630                   校验EDI(武将地址)指针
+004B162B - 83 c4 04                              - add esp,04
+004B162E - 85 c0                                 - test eax,eax
+004B1630 - 74 0a                                 - je 004b163c                     校验失败则直接下一次循环
+004B1632 - 57                                    - push edi
+004B1633 - 8d 4c 24 44                           - lea ecx,[esp+44]                ？？？？
+004B1637 - e8 74 ab fc ff                        - call 0047c1b0                   ？？？？
+004B163C - 43                                    - inc ebx                         EBX++
+004B163D - 83 fb 03                              - cmp ebx,03                      循环3次
+004B1640 - 7c ce                                 - jnge 004b1610                   下一个循环
+004B1642 - eb 44                                 - jmp 004b1688                    跳转到004B1688
+004B1644 - 57                                    - push edi                        
+004B1645 - e8 e6 8f fc ff                        - call 0047a630                   校验EDI(????)指针
+004B164A - 83 c4 04                              - add esp,04
+004B164D - 85 c0                                 - test eax,eax
+004B164F - 74 37                                 - je 004b1688                     校验失败则跳转到跳转到004B1688
+
+【以下到004B1688应该时当被击破对象是据点的处理】
+004B1651 - 57                                    - push edi
+004B1652 - b9 58 19 20 07                        - mov ecx,07201958
+004B1657 - e8 14 01 fe ff                        - call 00491770
+004B165C - 50                                    - push eax
+004B165D - e8 ee 6c fd ff                        - call 00488350
+004B1662 - 83 c4 04                              - add esp,04
+004B1665 - 6a 0f                                 - push 0f
+004B1667 - 50                                    - push eax
+004B1668 - 8d 44 24 48                           - lea eax,[esp+48]
+004B166C - 50                                    - push eax
+004B166D - b9 08 98 99 07                        - mov ecx,07999808 : [00000000]
+004B1672 - e8 79 dc 01 00                        - call 004cf2f0
+004B1677 - 8b 4c 24 28                           - mov ecx,[esp+28]
+004B167B - 56                                    - push esi
+004B167C - 51                                    - push ecx
+004B167D - 6a 4b                                 - push 4b
+004B167F - 8d 4c 24 4c                           - lea ecx,[esp+4c]
+004B1683 - e8 78 dd ff ff                        - call 004af400
+
+004B1688 - 39 b4 24 a4 00 00 00                  - cmp [esp+000000a4],esi          比较[esp+a4]是否为0
+004B168F - 8b bc 24 98 00 00 00                  - mov edi,[esp+00000098]          edi=[esp+98](应该还是一个指针)
+004B1696 - 7d 58                                 - jnl 004b16f0
+004B1698 - 8b 17                                 - mov edx,[edi]
+004B169A - 8b cf                                 - mov ecx,edi
+004B169C - 89 b4 24 a4 00 00 00                  - mov [esp+000000a4],esi
+004B16A3 - ff 52 3c                              - call dword ptr [edx+3c]
+004B16A6 - 8b 08                                 - mov ecx,[eax]
+004B16A8 - 8b d1                                 - mov edx,ecx
+004B16AA - 89 4c 24 2c                           - mov [esp+2c],ecx
+004B16AE - 0f bf c9                              - movsx ecx,cx
+004B16B1 - c1 fa 10                              - sar dl,10
+004B16B4 - 3b ce                                 - cmp ecx,esi
+004B16B6 - 7c 38                                 - jnge 004b16f0
+004B16B8 - 81 f9 c8 00 00 00                     - cmp ecx,000000c8
+004B16BE - 7d 30                                 - jnl 004b16f0
+004B16C0 - 3b d6                                 - cmp edx,esi
+004B16C2 - 7c 2c                                 - jnge 004b16f0
+004B16C4 - 81 fa c8 00 00 00                     - cmp edx,000000c8
+004B16CA - 7d 24                                 - jnl 004b16f0
+004B16CC - 8b 4c 24 18                           - mov ecx,[esp+18]
+004B16D0 - 8b 54 24 1c                           - mov edx,[esp+1c]
+004B16D4 - 8b 00                                 - mov eax,[eax]
+004B16D6 - 56                                    - push esi
+004B16D7 - 51                                    - push ecx
+004B16D8 - 68 f0 da 4a 00                        - push 004adaf0
+004B16DD - 52                                    - push edx
+004B16DE - 50                                    - push eax
+004B16DF - b9 68 0e fb 06                        - mov ecx,06fb0e68
+004B16E4 - e8 27 2e fd ff                        - call 00484510
+004B16E9 - 89 84 24 a4 00 00 00                  - mov [esp+000000a4],eax
+
+004B16F0 - 8b 84 24 a8 00 00 00                  - mov eax,[esp+000000a8]
+004B16F7 - 3b c6                                 - cmp eax,esi
+004B16F9 - 7c 05                                 - jnge 004b1700
+004B16FB - 83 f8 1f                              - cmp eax,1f
+004B16FE - 7e 5a                                 - jle 004b175a
+004B1700 - 8b 17                                 - mov edx,[edi]
+004B1702 - 8b cf                                 - mov ecx,edi
+004B1704 - ff 52 3c                              - call dword ptr [edx+3c]
+004B1707 - 8b 00                                 - mov eax,[eax]
+004B1709 - 0f bf c8                              - movsx ecx,ax
+004B170C - 8b d0                                 - mov edx,eax
+004B170E - c1 fa 10                              - sar dl,10
+004B1711 - 3b ce                                 - cmp ecx,esi
+004B1713 - 89 44 24 2c                           - mov [esp+2c],eax
+004B1717 - 7c 41                                 - jnge 004b175a
+004B1719 - 81 f9 c8 00 00 00                     - cmp ecx,000000c8
+004B171F - 7d 39                                 - jnl 004b175a
+004B1721 - 3b d6                                 - cmp edx,esi
+004B1723 - 7c 35                                 - jnge 004b175a
+004B1725 - 81 fa c8 00 00 00                     - cmp edx,000000c8
+004B172B - 7d 2d                                 - jnl 004b175a
+004B172D - 89 44 24 2c                           - mov [esp+2c],eax
+004B1731 - 8b 4c 24 2c                           - mov ecx,[esp+2c]
+004B1735 - 0f bf c0                              - movsx eax,ax
+004B1738 - 69 c0 c8 00 00 00                     - imul eax,eax,000000c8
+004B173E - c1 f9 10                              - sar cl,10
+004B1741 - 03 c1                                 - add eax,ecx
+004B1743 - 8d 04 80                              - lea eax,[eax+eax*4]
+004B1746 - 8d 04 85 68 0e fb 06                  - lea eax,[eax*4+06fb0e68]
+004B174D - 8b 40 04                              - mov eax,[eax+04]
+004B1750 - 83 e0 1f                              - and eax,1f
+004B1753 - 89 84 24 a8 00 00 00                  - mov [esp+000000a8],eax
+
+004B175A - 8b 44 24 44                           - mov eax,[esp+44]
+004B175E - 3b c6                                 - cmp eax,esi
+004B1760 - 89 44 24 28                           - mov [esp+28],eax
+004B1764 - 0f 84 78 01 00 00                     - je 004b18e2
+004B176A - 8d 9b 00 00 00 00                     - lea ebx,[ebx+00000000]
+
+004B1770 - 8d 54 24 28                           - lea edx,[esp+28]
+004B1774 - 52                                    - push edx
+004B1775 - 8d 4c 24 44                           - lea ecx,[esp+44]
+004B1779 - e8 52 a7 fc ff                        - call 0047bed0
+004B177E - 8b 28                                 - mov ebp,[eax]
+004B1780 - 39 74 24 10                           - cmp [esp+10],esi
+004B1784 - 0f 85 41 01 00 00                     - jne 004b18cb
+004B178A - 39 74 24 38                           - cmp [esp+38],esi
+004B178E - 75 0c                                 - jne 004b179c
+004B1790 - 8b 8c 24 90 00 00 00                  - mov ecx,[esp+00000090]
+004B1797 - e9 36 01 00 00                        - jmp 004b18d2
+004B179C - 56                                    - push esi
+004B179D - 55                                    - push ebp
+004B179E - b9 cc b3 80 07                        - mov ecx,0780b3cc
+004B17A3 - e8 e8 ed fe ff                        - call 004a0590
+004B17A8 - 85 c0                                 - test eax,eax
+004B17AA - 0f 85 1b 01 00 00                     - jne 004b18cb
+004B17B0 - 6a 20                                 - push 20                         20＝32(强运)
+004B17B2 - 8b cd                                 - mov ecx,ebp                     ebp是预定被捕获武将内存首地址
+004B17B4 - e8 37 79 fd ff                        - call 004890f0                   判断指定武将的特技是否是所PUSH的特技
+004B17B9 - 85 c0                                 - test eax,eax
+004B17BB - 0f 85 0a 01 00 00                     - jne 004b18cb                    如果是则无法被捕获
+004B17C1 - 8b cd                                 - mov ecx,ebp
+004B17C3 - e8 c8 78 fd ff                        - call 00489090                   获取预定被捕获武将智力
+004B17C8 - 8b cd                                 - mov ecx,ebp
+004B17CA - 8a d8                                 - mov bl,al
+004B17CC - e8 af 78 fd ff                        - call 00489080                   获取预定被捕获武将武力
+004B17D1 - 3a c3                                 - cmp al,bl
+004B17D3 - 77 02                                 - ja 004b17d7
+004B17D5 - 8a c3                                 - mov al,bl                       预定被捕获武将的武力和智力取较大值置入EAX
+004B17E0 - 0f b6 f8                              - movzx edi,al                    EAX(预定被捕获武将的武力和智力取较大值)置入EDI [此句正确顺序在2句以后]
+
+【合围判定】
+004B17D7 - 8b 9c 24 a4 00 00 00                  - mov ebx,[esp+000000a4]          EBX=[esp+a4]，为周围合围部队数量
+004B17DE - 3b de                                 - cmp ebx,esi                     比较周围合围部队数量是否大于0
+004B17E3 - c7 44 24 1c 01 00 00 00               - mov [esp+1c],00000001           [esp+1c]置1
+004B17EB - 7e 28                                 - jle 004b1815                    如果EBX比ESI小则跳转到004B1815
+004B17ED - 6a 1d                                 - push 1d                         1d＝29(铁壁)
+004B17EF - 8b cd                                 - mov ecx,ebp                     ebp是预定被捕获武将内存首地址
+004B17F1 - e8 fa 78 fd ff                        - call 004890f0                   判断指定武将的特技是否是所PUSH的特技
+004B17F6 - 85 c0                                 - test eax,eax                    以下4句：如果不持有铁壁特技则EAX＝1，否则EAX＝EBX(周围合围部队数量)
+004B17F8 - b8 01 00 00 00                        - mov eax,00000001                
+004B17FD - 75 02                                 - jne 004b1801                    有铁壁则EAX=1
+004B17FF - 8b c3                                 - mov eax,ebx                     无铁壁则EAX=EBX(合围部队数)                   
+004B1801 - 6b c0 64                              - imul eax,eax,64                 EAX=EAX*100
+004B1804 - 83 f8 01                              - cmp eax,01                      以下4句：如果EAX<=1，则[esp+1c]置1，否则直接置EAX(只有周围合围部队是0时才可能置1)
+004B1807 - 89 44 24 1c                           - mov [esp+1c],eax
+004B180B - 7d 08                                 - jnl 004b1815
+004B180D - c7 44 24 1c 01 00 00 00               - mov [esp+1c],00000001
+
+004B1815 - 8b 84 24 a8 00 00 00                  - mov eax,[esp+000000a8]          [esp+a8]置入EAX（经测试不是战法ID...）
+004B181C - 83 f8 03                              - cmp eax,03
+004B181F - 74 0d                                 - je 004b182e
+004B1821 - 83 f8 04                              - cmp eax,04
+004B1824 - 74 08                                 - je 004b182e
+004B1826 - d9 05 18 e7 74 00                     - fld dword ptr [0074e718]        EAX为3、4外的数，加载乘数[0074e718]＝(float)1.0
+004B182C - eb 06                                 - jmp 004b1834
+004B182E - d9 05 34 b3 77 00                     - fld dword ptr [0077b334]        EAX为3、4时，加载乘数[0077b334]＝(float)1.5
+
+004B1834 - 8b 44 24 20                           - mov eax,[esp+20]                [esp+20]中存放的是部队是否有捕获
+004B1838 - 8b 5c 24 14                           - mov ebx,[esp+14]                [esp+14]从前面的程序来看是超级难度玩家击破非玩家的判定
+004B183C - f7 d8                                 - neg eax
+004B183E - 1b c0                                 - sbb eax,eax
+004B1840 - 83 e0 64                              - and eax,64                      有捕获时EAX=100
+004B1843 - 33 c9                                 - xor ecx,ecx                     ECX=0
+004B1845 - 3b de                                 - cmp ebx,esi                     
+004B1847 - 0f 95 c1                              - setnc cl                        如果是超级难度玩家击破非玩家的情况ECX=1
+004B184A - 89 44 24 18                           - mov [esp+18],eax                EAX置入[esp+18]
+004B184E - b8 56 55 55 55                        - mov eax,55555556
+004B1853 - 41                                    - inc ecx                         ECX自增1(即超级难度玩家击破非玩家的情况)
+004B1854 - 89 4c 24 24                           - mov [esp+24],ecx                ECX置入[esp+24]
+004B1858 - b9 78 00 00 00                        - mov ecx,00000078
+004B185D - 2b cf                                 - sub ecx,edi                     ECX=120-EDI(预定被捕获武将的武力和智力的较大值)
+004B185F - f7 e9                                 - imul ecx
+004B1861 - 8b c2                                 - mov eax,edx
+004B1863 - c1 e8 1f                              - shr eax,1f
+004B1866 - 03 c2                                 - add eax,edx                     EAX=ECX×1/3
+004B1868 - 89 44 24 2c                           - mov [esp+2c],eax                EAX置入[esp+2c]
+004B186C - db 44 24 2c                           - fild dword ptr [esp+2c]
+004B1870 - da 4c 24 1c                           - fimul [esp+1c]
+004B1874 - d8 c9                                 - fmul st(0),st(1)                
+004B1876 - d8 0d 88 aa 77 00                     - fmul dword ptr [0077aa88]       [esp+2c]×[esp+1c]×倍率(1.5或1.0)×0.01
+004B187C - da 74 24 24                           - fidiv [esp+24]                  乘法所得到的值除1或2(超级难度玩家击破非玩家的情况)
+004B1880 - da 44 24 18                           - fiadd [esp+18]                  加上捕获的增值(100)
+004B1884 - e8 eb 61 25 00                        - call 00707a74                   结果转换成整型置入EAX(捕获概率)
+004B1889 - dd d8                                 - fstp st(0)
+004B188B - 83 f8 64                              - cmp eax,64                      以下3句确保概率不大于100
+004B188E - 7c 05                                 - jnge 004b1895
+*004B188B - 83 c0 00                             - add eax, 00
+*004B188E - eb 05                                - jmp 004b1895
+004B1890 - b8 64 00 00 00                        - mov eax,00000064
+004B1895 - 39 b4 24 ac 00 00 00                  - cmp [esp+000000ac],esi          判断[esp+ac]是否是戟兵战法
+004B189C - 74 0d                                 - je 004b18ab    
+*004B189C - 74 03                                 - je 004b18a1 
+004B189E - 83 c0 1e                              - add eax,1e                      (戟兵，因为其它兵种调该值无效)则概率＋30
+004B18A1 - 83 f8 64                              - cmp eax,64                      以下3句确保概率不大于100
+004B18A4 - 7c 05                                 - jnge 004b18ab
+004B18A6 - b8 64 00 00 00                        - mov eax,00000064
+004B18AB - 50                                    - push eax                        push概率
+004B18AC - e8 1f 09 fc ff                        - call 004721d0                   调用随机函数
+004B18B1 - 83 c4 04                              - add esp,04
+004B18B4 - 85 c0                                 - test eax,eax
+004B18B6 - 55                                    - push ebp
+004B18B7 - 74 09                                 - je 004b18c2
+004B18B9 - 8b 8c 24 94 00 00 00                  - mov ecx,[esp+00000094]          被捕获
+004B18C0 - eb 11                                 - jmp 004b18d3
+004B18C2 - 8b 8c 24 98 00 00 00                  - mov ecx,[esp+00000098]          不被捕获
+004B18C9 - eb 08                                 - jmp 004b18d3
+004B18CB - 8b 8c 24 94 00 00 00                  - mov ecx,[esp+00000094]
+004B18D2 - 55                                    - push ebp
+004B18D3 - e8 d8 a8 fc ff                        - call 0047c1b0
+004B18D8 - 39 74 24 28                           - cmp [esp+28],esi
+004B18DC - 0f 85 8e fe ff ff                     - jne 004b1770
+004B18E2 - 8b 8c 24 90 00 00 00                  - mov ecx,[esp+00000090]
+004B18E9 - 8b 41 0c                              - mov eax,[ecx+0c]
+004B18EC - 8b 94 24 94 00 00 00                  - mov edx,[esp+00000094]
+004B18F3 - 8b 4a 0c                              - mov ecx,[edx+0c]
+004B18F6 - 8d 3c 01                              - lea edi,[ecx+eax]
+004B18F9 - c7 44 24 40 34 bf 79 00               - mov [esp+40],0079bf34
+004B1901 - 8d 4c 24 40                           - lea ecx,[esp+40]
+004B1905 - c7 84 24 88 00 00 00 02 00 00 00      - mov [esp+00000088],00000002
+004B1910 - e8 3b a5 fc ff                        - call 0047be50
+004B1915 - 8d 4c 24 40                           - lea ecx,[esp+40]
+004B1919 - c7 84 24 88 00 00 00 ff ff ff ff      - mov [esp+00000088],ffffffff
+004B1924 - c7 44 24 40 14 bf 79 00               - mov [esp+40],0079bf14
+004B192C - e8 1f a5 fc ff                        - call 0047be50
+004B1931 - 8b 8c 24 80 00 00 00                  - mov ecx,[esp+00000080]
+004B1938 - 5d                                    - pop ebp
+004B1939 - 5b                                    - pop ebx
+004B193A - 8b c7                                 - mov eax,edi
+004B193C - 5f                                    - pop edi
+004B193D - 5e                                    - pop esi
+004B193E - 64 89 0d 00 00 00 00                  - mov fs:[00000000],ecx
+004B1945 - 83 c4 7c                              - add esp,7c
+004B1948 - c2 20 00                              - ret 0020

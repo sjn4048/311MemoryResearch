@@ -1,0 +1,124 @@
+功能: 增加势力技巧点
+参数表: [esp+04]=势力指针，[esp+08]=技巧增加值，[esp+0c]=事件坐标
+
+*****************************************************************************************************************************************************
+
+004B6460 - 83 ec 10                   - sub esp,10
+004B6463 - 53                         - push ebx
+004B6464 - 56                         - push esi
+
+【技巧获取速度减半】
+004B6465 - 8b 74 24 20                - mov esi,[esp+20]                   esi = 技巧增加值
+004B6469 - 85 f6                      - test esi,esi
+004B646B - 7e 13                      - jle 004b6480
+004B646D - 8b c6                      - mov eax,esi
+004B646F - 99                         - cdq
+004B6470 - 2b c2                      - sub eax,edx
+004B6472 - d1 f8                      - sar eax,1                          技巧值减半
+004B6474 - 83 f8 01                   - cmp eax,01
+004B6477 - be 01 00 00 00             - mov esi,00000001
+004B647C - 7c 02                      - jnge 004b6480
+004B647E - 8b f0                      - mov esi,eax                        esi = 技巧增加值
+
+【校验势力指针和势力ID】
+004B6480 - 8b 5c 24 1c                - mov ebx,[esp+1c]                   ebx = 势力指针
+004B6484 - 53                         - push ebx
+004B6485 - e8 a6 41 fc ff             - call 0047a630                      校验指针
+004B648A - 83 c4 04                   - add esp,04
+004B648D - 85 c0                      - test eax,eax
+004B648F - 0f 84 dc 00 00 00          - je 004b6571
+004B6495 - 8b cb                      - mov ecx,ebx
+004B6497 - e8 b4 ae fc ff             - call 00481350                      校验势力ID是否在0～41号之间
+004B649C - 85 c0                      - test eax,eax
+004B649E - 0f 84 cd 00 00 00          - je 004b6571
+
+【设置势力技巧值】
+004B64A4 - 57                         - push edi
+004B64A5 - 0f b7 bb a2 00 00 00       - movzx edi,word ptr [ebx+000000a2]  edi = 原势力技巧值
+004B64AC - 03 f7                      - add esi,edi                        技巧值增加
+004B64AE - 85 f6                      - test esi,esi
+004B64B0 - 7f 04                      - jg 004b64b6
+004B64B2 - 33 f6                      - xor esi,esi
+004B64B4 - eb 0d                      - jmp 004b64c3
+004B64B6 - 81 fe 10 27 00 00          - cmp esi,00002710                   0x2710 = 10000(技巧封顶值)             【修改】技巧上限
+004B64BC - 7c 05                      - jnge 004b64c3
+004B64BE - be 10 27 00 00             - mov esi,00002710                   0x2710 = 10000(技巧封顶值)             【修改】技巧上限
+004B64C3 - 56                         - push esi
+004B64C4 - 8b cb                      - mov ecx,ebx
+004B64C6 - e8 b5 b5 fc ff             - call 00481a80                      设置势力技巧点
+004B64CB - 2b f7                      - sub esi,edi                        esi = 考虑势力技巧点上限值后的技巧点增加值
+004B64CD - 0f 84 93 00 00 00          - je 004b6566
+004B64D3 - 8b cb                      - mov ecx,ebx                        ebx = 势力指针
+004B64D5 - e8 f6 41 fc ff             - call 0047a6d0                      与军团有关的处理，未明
+004B64DA - 85 c0                      - test eax,eax
+004B64DC - 0f 84 84 00 00 00          - je 004b6566
+
+【获取技巧值动画演示】
+004B64E2 - 8b 7c 24 28                - mov edi,[esp+28]
+004B64E6 - 55                         - push ebp
+004B64E7 - 57                         - push edi
+004B64E8 - 33 db                      - xor ebx,ebx
+004B64EA - e8 d1 a1 0e 00             - call 005a06c0
+004B64EF - 83 c4 04                   - add esp,04
+004B64F2 - 68 d0 c1 79 00             - push 0079c1d0
+004B64F7 - 8d 4c 24 30                - lea ecx,[esp+30]
+004B64FB - 8b e8                      - mov ebp,eax
+004B64FD - e8 9e fe ff ff             - call 004b63a0
+004B6502 - 84 c0                      - test al,al
+004B6504 - 74 4e                      - je 004b6554
+004B6506 - 85 f6                      - test esi,esi
+004B6508 - 7e 4a                      - jle 004b6554
+004B650A - 85 ed                      - test ebp,ebp
+004B650C - 75 46                      - jne 004b6554
+004B650E - 57                         - push edi
+004B650F - 8d 44 24 14                - lea eax,[esp+14]
+004B6513 - 50                         - push eax
+004B6514 - b9 68 08 26 03             - mov ecx,03260868
+004B6519 - e8 62 13 f6 ff             - call 00417880
+004B651E - 8b 15 b0 02 26 03          - mov edx,[032602b0]
+004B6524 - 8d 4c 24 10                - lea ecx,[esp+10]
+004B6528 - 51                         - push ecx
+004B6529 - b9 b0 02 26 03             - mov ecx,032602b0
+004B652E - ff 12                      - call dword ptr [edx]
+004B6530 - 50                         - push eax
+004B6531 - b9 20 45 43 09             - mov ecx,09434520
+004B6536 - e8 15 b2 0a 00             - call 00561750
+004B653B - 55                         - push ebp
+004B653C - 68 00 00 80 bf             - push bf800000
+004B6541 - 55                         - push ebp
+004B6542 - 57                         - push edi
+004B6543 - 6a 22                      - push 22
+004B6545 - b9 10 98 11 09             - mov ecx,09119810
+004B654A - e8 a1 a3 01 00             - call 004d08f0
+004B654F - bb 01 00 00 00             - mov ebx,00000001
+004B6554 - e8 e7 cc 1b 00             - call 00673240
+004B6559 - 85 c0                      - test eax,eax
+004B655B - 5d                         - pop ebp
+004B655C - 74 08                      - je 004b6566
+004B655E - 53                         - push ebx
+004B655F - 8b c8                      - mov ecx,eax
+004B6561 - e8 da 33 16 00             - call 00619940
+004B6566 - 5f                         - pop edi
+004B6567 - 8b c6                      - mov eax,esi
+004B6569 - 5e                         - pop esi
+004B656A - 5b                         - pop ebx
+004B656B - 83 c4 10                   - add esp,10
+004B656E - c2 0c 00                   - ret 000c
+
+004B6571 - 5e                         - pop esi
+004B6572 - 33 c0                      - xor eax,eax
+004B6574 - 5b                         - pop ebx
+004B6575 - 83 c4 10                   - add esp,10
+004B6578 - c2 0c 00                   - ret 000c
+
+
+=====================================================================================================================================================
+
+修改 - 技巧点获取速度可调整
+004B646D - 6b c6 64                   - imul eax,esi,64
+004B6470 - b9 c8 00 00 00             - mov ecx,000000c8               技巧点获取倍率(0xc8表示100%，0x64表示200%)
+004B6475 - 99                         - cdq
+004B6476 - f7 f9                      - idiv ecx
+004B6478 - 85 c0                      - test eax,eax
+004B647A - 75 02                      - jne 004b647e
+004B647C - b0 01                      - mov al,01

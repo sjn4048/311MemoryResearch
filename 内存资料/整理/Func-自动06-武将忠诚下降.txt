@@ -1,0 +1,331 @@
+功能: 季初武将忠诚下降
+参数表: eax=当前月份，esi=城市指针
+
+*****************************************************************************************************************************************************
+
+0058E510 - 6a ff                      - push ff
+0058E512 - 68 10 38 73 00             - push 00733810
+0058E517 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+0058E51D - 50                         - push eax
+0058E51E - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+0058E525 - 83 ec 30                   - sub esp,30
+0058E528 - 53                         - push ebx
+0058E529 - 55                         - push ebp
+0058E52A - 56                         - push esi
+0058E52B - 57                         - push edi
+
+【设施循环】
+0058E52C - 33 ff                      - xor edi,edi
+0058E52E - 33 f6                      - xor esi,esi                        esi = 设施计数器
+0058E530 - 89 74 24 18                - mov [esp+18],esi
+0058E534 - 56                         - push esi
+0058E535 - b9 58 19 20 07             - mov ecx,07201958
+0058E53A - e8 c1 27 f0 ff             - call 00490d00                      根据设施ID获取设施指针
+0058E53F - 8b d8                      - mov ebx,eax                        ebx = 设施指针
+0058E541 - 53                         - push ebx
+0058E542 - 89 5c 24 20                - mov [esp+20],ebx
+0058E546 - e8 e5 c0 ee ff             - call 0047a630                      校验指针
+0058E54B - 83 c4 04                   - add esp,04
+0058E54E - 85 c0                      - test eax,eax
+0058E550 - 0f 84 b5 02 00 00          - je 0058e80b                        校验失败则跳转到循环下一个设施
+0058E556 - 8b 03                      - mov eax,[ebx]
+0058E558 - 8b cb                      - mov ecx,ebx
+0058E55A - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+0058E55D - 3b c7                      - cmp eax,edi
+0058E55F - 0f 8c a6 02 00 00          - jl 0058e80b
+0058E565 - 83 f8 2e                   - cmp eax,2e
+0058E568 - 0f 8f 9d 02 00 00          - jg 0058e80b                        势力ID不在0～46之间则跳转到循环下一个设施
+
+【获取武将列表】
+0058E56E - 89 7c 24 2c                - mov [esp+2c],edi
+0058E572 - 89 7c 24 30                - mov [esp+30],edi
+0058E576 - 89 7c 24 28                - mov [esp+28],edi
+0058E57A - 89 7c 24 24                - mov [esp+24],edi
+0058E57E - 89 7c 24 34                - mov [esp+34],edi
+0058E582 - c7 44 24 38 0a 00 00 00    - mov [esp+38],0000000a
+0058E58A - 89 7c 24 3c                - mov [esp+3c],edi
+0058E58E - c7 44 24 20 44 bf 79 00    - mov [esp+20],0079bf44
+0058E596 - 6a 2f                      - push 2f                            0x2f = 00101111(君主、都督、太守、一般、俘虏)
+0058E598 - 53                         - push ebx                           ebx = 设施指针
+0058E599 - 8d 4c 24 28                - lea ecx,[esp+28]                   ecx = 输入及返回参数列表指针
+0058E59D - 51                         - push ecx
+0058E59E - b9 08 98 99 07             - mov ecx,07999808
+0058E5A3 - 89 7c 24 54                - mov [esp+54],edi
+0058E5A7 - e8 b4 0d f4 ff             - call 004cf360                      获取城市、港、关指定状态的武将列表
+0058E5AC - 85 c0                      - test eax,eax
+0058E5AE - 7f 16                      - jg 0058e5c6                        设施中的武将数不为0则跳转到仁政判定
+0058E5B0 - 8d 4c 24 20                - lea ecx,[esp+20]                   ecx = 输入及返回参数列表指针
+0058E5B4 - c7 44 24 48 ff ff ff ff    - mov [esp+48],ffffffff   
+0058E5BC - e8 3f db ee ff             - call 0047c100                      作用未明，应该是清除列表数组
+0058E5C1 - e9 45 02 00 00             - jmp 0058e80b                       设施中的武将数为0则跳转到循环下一个设施
+
+【仁政预判定】
+0058E5C6 - 8b 13                      - mov edx,[ebx]
+0058E5C8 - 6a 60                      - push 60                            0x60 = 仁政
+0058E5CA - 8b cb                      - mov ecx,ebx
+0058E5CC - ff 52 5c                   - call dword ptr [edx+5c]            返回设施中拥有指定特技武将的ID，若无则返回-1
+0058E5CF - 3b c7                      - cmp eax,edi
+0058E5D1 - 7c 0f                      - jnge 0058e5e2
+0058E5D3 - 3d 4b 04 00 00             - cmp eax,0000044b
+0058E5D8 - c7 44 24 10 01 00 00 00    - mov [esp+10],00000001              有仁政则[esp+10] = 1
+0058E5E0 - 7e 04                      - jle 0058e5e6
+0058E5E2 - 89 7c 24 10                - mov [esp+10],edi                   无仁政则[esp+10] = 0
+
+【武将循环】
+0058E5E6 - 8b 44 24 24                - mov eax,[esp+24]
+0058E5EA - 3b c7                      - cmp eax,edi
+0058E5EC - 89 44 24 14                - mov [esp+14],eax                   eax = 武将列表指针
+0058E5F0 - 0f 84 e3 01 00 00          - je 0058e7d9                        如果武将列表指针为0则跳转到循环下一个设施
+
+【获得武将指针并进行状态判定】
+0058E5F6 - 50                         - push eax
+0058E5F7 - 8d 4c 24 24                - lea ecx,[esp+24]                   ecx = 输入及返回参数列表指针
+0058E5FB - e8 d0 0a f1 ff             - call 0049f0d0                      获取武将列表指针
+0058E600 - 8b 30                      - mov esi,[eax]                      esi = 武将指针
+[君主判定]
+0058E602 - 8b ce                      - mov ecx,esi
+0058E604 - e8 f7 a5 ef ff             - call 00488c00                      判断武将是否是君主
+0058E609 - 85 c0                      - test eax,eax
+0058E60B - 0f 85 aa 01 00 00          - jne 0058e7bb                       是君主则跳转到循环下一个武将(忠诚不下降)
+[仁政判定]
+0058E611 - 8b ce                      - mov ecx,esi
+0058E613 - e8 58 a6 ef ff             - call 00488c70                      判断是否是俘虏
+0058E618 - 85 c0                      - test eax,eax
+0058E61A - 75 0a                      - jne 0058e626                       是俘虏则跳过仁政判定(仁政对俘虏无效)
+0058E61C - 39 7c 24 10                - cmp [esp+10],edi                   判断是否有仁政
+0058E620 - 0f 85 95 01 00 00          - jne 0058e7bb                       有仁政则跳转到循环下一个武将(忠诚不下降)
+
+【获得武将所属君主ID】
+0058E626 - 8b ce                      - mov ecx,esi
+0058E628 - e8 13 b7 ef ff             - call 00489d40                      取武将所属君主ID
+0058E62D - 8b f8                      - mov edi,eax                        edi = 武将ID(君主)
+0058E62F - 57                         - push edi
+0058E630 - b9 58 19 20 07             - mov ecx,07201958
+0058E635 - e8 c6 24 f0 ff             - call 00490b00                      根据武将ID获取武将指针
+0058E63A - 8b e8                      - mov ebp,eax                        
+0058E63C - 55                         - push ebp
+0058E63D - e8 ee bf ee ff             - call 0047a630                      校验指针
+0058E642 - 83 c4 04                   - add esp,04
+0058E645 - 85 c0                      - test eax,eax
+0058E647 - 0f 84 6c 01 00 00          - je 0058e7b9                        校验失败则跳转到循环下一个武将(忠诚不下降)
+
+【季度初判定】
+0058E64D - 8b ce                      - mov ecx,esi
+0058E64F - e8 1c a6 ef ff             - call 00488c70                      判断武将是否是俘虏
+0058E654 - 85 c0                      - test eax,eax
+0058E656 - 75 12                      - jne 0058e66a                       是俘虏则跳过季度初判定(即每旬都有可能降忠)
+0058E658 - b9 58 19 20 07             - mov ecx,07201958
+0058E65D - e8 6e 43 ef ff             - call 004829d0                      判断是否是季度初
+0058E662 - 85 c0                      - test eax,eax
+0058E664 - 0f 84 4f 01 00 00          - je 0058e7b9                        不是季度初则跳转到循环下一个武将(忠诚不下降)
+
+【忠诚下降豁免判定】
+[亲善判定]
+0058E66A - 57                         - push edi                           edi = 武将ID(君主)
+0058E66B - 8b ce                      - mov ecx,esi                        esi = 武将指针
+0058E66D - e8 9e a2 ef ff             - call 00488910                      判断A是否亲善B
+0058E672 - 85 c0                      - test eax,eax
+0058E674 - 0f 85 3f 01 00 00          - jne 0058e7b9                       亲善君主则跳转到循环下一个武将(忠诚不下降)
+[配偶判定]
+0058E67A - 57                         - push edi
+0058E67B - 8b ce                      - mov ecx,esi
+0058E67D - e8 0e a1 ef ff             - call 00488790                      判断A是否是B的配偶
+0058E682 - 85 c0                      - test eax,eax
+0058E684 - 0f 85 2f 01 00 00          - jne 0058e7b9                       是配偶关系则跳转到循环下一个武将(忠诚不下降)
+[结义判定]
+0058E68A - 57                         - push edi
+0058E68B - 8b ce                      - mov ecx,esi
+0058E68D - e8 3e a1 ef ff             - call 004887d0                      判断A是否是B的结义
+0058E692 - 85 c0                      - test eax,eax
+0058E694 - 0f 85 1f 01 00 00          - jne 0058e7b9                       是结义关系则跳转到循环下一个武将(忠诚不下降)
+[父母子女判定]
+0058E69A - 57                         - push edi
+0058E69B - 8b ce                      - mov ecx,esi
+0058E69D - e8 4e d7 ef ff             - call 0048bdf0                      判断A是否是B的子女或父母
+0058E6A2 - 85 c0                      - test eax,eax
+0058E6A4 - 0f 85 0f 01 00 00          - jne 0058e7b9                       是父母子女关系则跳转到循环下一个武将(忠诚不下降)
+[俘虏判定]
+0058E6AA - 8b ce                      - mov ecx,esi
+0058E6AC - e8 bf a5 ef ff             - call 00488c70                      判断武将是否是俘虏
+0058E6B1 - 85 c0                      - test eax,eax                       
+0058E6B3 - 75 2e                      - jne 0058e6e3                       是俘虏则跳转到掌握人心判定
+[相性差判定]
+0058E6B5 - 57                         - push edi
+0058E6B6 - 8b ce                      - mov ecx,esi
+0058E6B8 - e8 c3 b8 ef ff             - call 00489f80                      计算A与B的相性差
+0058E6BD - 3c 19                      - cmp al,19                          0x19 = 25(相性差是否大于25)
+0058E6BF - 77 22                      - ja 0058e6e3                        相性差大于25则跳转到掌握人心判定
+[义理野心判定]
+0058E6C1 - 83 be f0 00 00 00 01       - cmp dword ptr [esi+000000f0],01    0x01 = 无情义(武将义理比较)
+0058E6C8 - 7f 09                      - jg 0058e6d3                        
+0058E6CA - 83 be f4 00 00 00 03       - cmp dword ptr [esi+000000f4],03    0x03 = 较高(武将野心比较)
+0058E6D1 - 7d 10                      - jnl 0058e6e3                       相性差小于25但义理低且野心高者跳转到掌握人心判定
+[厌恶君主判定]
+0058E6D3 - 57                         - push edi
+0058E6D4 - 8b ce                      - mov ecx,esi
+0058E6D6 - e8 05 a3 ef ff             - call 004889e0                      判断A是否厌恶B
+0058E6DB - 85 c0                      - test eax,eax
+0058E6DD - 0f 84 d6 00 00 00          - je 0058e7b9                        不厌恶君主者跳转到循环下一个武将(忠诚不下降)
+[掌握人心判定]
+0058E6E3 - 8b 06                      - mov eax,[esi]
+0058E6E5 - 8b ce                      - mov ecx,esi                    
+0058E6E7 - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+0058E6EA - 50                         - push eax
+0058E6EB - b9 58 19 20 07             - mov ecx,07201958
+0058E6F0 - e8 ab 23 f0 ff             - call 00490aa0                      根据势力ID获取势力指针
+0058E6F5 - 8b f8                      - mov edi,eax                        edi = 势力指针
+0058E6F7 - 57                         - push edi
+0058E6F8 - e8 33 bf ee ff             - call 0047a630                      校验指针
+0058E6FD - 83 c4 04                   - add esp,04
+0058E700 - 85 c0                      - test eax,eax
+0058E702 - 74 21                      - je 0058e725                        校验失败跳转到忠诚度下降数值计算
+0058E704 - 6a 23                      - push 23                            0x23 = 掌握人心
+0058E706 - 8b cf                      - mov ecx,edi
+0058E708 - e8 d3 2a ef ff             - call 004811e0                      判断势力是否拥有掌握人心科技
+0058E70D - 85 c0                      - test eax,eax
+0058E70F - 74 14                      - je 0058e725                        无掌握人心则跳转到忠诚度下降数值计算
+0058E711 - 6a 03                      - push 03
+0058E713 - e8 38 3a ee ff             - call 00472150                      取0～2之间的随机数(2/3几率忠诚不下降)
+0058E718 - 83 c4 04                   - add esp,04
+0058E71B - 66 3d 01 00                - cmp ax,0001
+0058E71F - 0f 83 94 00 00 00          - jae 0058e7b9                       随机函数结果大于等于1则跳转到循环下一个武将(忠诚不下降)
+
+【计算忠诚下降数值】
+[第一次随机]
+0058E725 - 6a 03                      - push 03
+0058E727 - e8 24 3a ee ff             - call 00472150                      0～2随机函数
+0058E72C - 83 c4 04                   - add esp,04
+0058E72F - 8b cb                      - mov ecx,ebx
+0058E731 - 0f b7 f8                   - movzx edi,ax                       edi = 第一次随机结果
+[符节台附加忠诚下降效果]
+0058E734 - e8 b7 7f ef ff             - call 004866f0                      根据设施指针获取城市指针
+0058E739 - 8b d8                      - mov ebx,eax                        ebx = 城市指针
+0058E73B - 53                         - push ebx
+0058E73C - e8 ef be ee ff             - call 0047a630                      校验指针
+0058E741 - 83 c4 04                   - add esp,04
+0058E744 - 85 c0                      - test eax,eax
+0058E746 - 74 14                      - je 0058e75c                        校验失败则跳过符节台计算
+0058E748 - 6a 28                      - push 28                            0x28 = 符节台
+0058E74A - 53                         - push ebx
+0058E74B - b9 cc b3 80 07             - mov ecx,0780b3cc
+0058E750 - e8 5b f3 f0 ff             - call 0049dab0                      判断城市是否有指定设施
+0058E755 - 85 c0                      - test eax,eax
+0058E757 - 74 03                      - je 0058e75c
+0058E759 - 83 c7 02                   - add edi,02                         有符节台忠诚下降数值+2                                【修改】符节台附加忠诚下降值
+[义理附加忠诚下降效果]
+0058E75C - 8b 85 f0 00 00 00          - mov eax,[ebp+000000f0]             eax = 武将义理(君主)
+0058E762 - 85 c0                      - test eax,eax                       0x00 = 容易背叛(君主义理比较)
+0058E764 - 75 32                      - jne 0058e798                       君主义理不是容易背叛则跳过义理附加忠诚下降效果
+0058E766 - 83 bd f4 00 00 00 04       - cmp dword ptr [ebp+000000f4],04    0x04 = 很高(君主野望比较)
+0058E76D - 7c 29                      - jnge 0058e798                      君主野望不是很高则跳过义理附加忠诚下降效果
+0058E76F - 8b 9e f0 00 00 00          - mov ebx,[esi+000000f0]             ebx = 武将义理
+0058E775 - 6a 03                      - push 03                            0～2随机函数
+0058E777 - e8 d4 39 ee ff             - call 00472150
+0058E77C - 0f b7 c8                   - movzx ecx,ax                       ecx = 第二次随机结果
+0058E77F - b8 04 00 00 00             - mov eax,00000004
+0058E784 - 2b c3                      - sub eax,ebx
+0058E786 - 99                         - cdq
+0058E787 - 2b c2                      - sub eax,edx
+0058E789 - d1 f8                      - sar eax,1                          eax = 义理效果
+0058E78B - f7 df                      - neg edi
+0058E78D - 2b f8                      - sub edi,eax                        edi = -(第一次随机结果+符节台效果+义理效果)
+0058E78F - 83 c4 04                   - add esp,04
+0058E792 - 2b f9                      - sub edi,ecx                        edi = -(第一次随机结果+符节台效果+义理效果)-第二次随机结果
+0058E794 - 8b c7                      - mov eax,edi
+0058E796 - eb 11                      - jmp 0058e7a9                       跳转到忠诚下降
+[第二次随机(无义理附加忠诚下降效果时)]
+0058E798 - 6a 03                      - push 03                            0～2随机函数                         
+0058E79A - e8 b1 39 ee ff             - call 00472150
+0058E79F - 0f b7 c0                   - movzx eax,ax                       eax = 第二次随机结果
+0058E7A2 - 03 C7                      - add eax,edi                        eax = 第一次随机结果+符节台效果+第二次随机结果
+0058E7A4 - 83 c4 04                   - add esp,04
+0058E7A7 - f7 d8                      - neg eax
+
+【忠诚下降】
+0058E7A9 - 50                         - push eax                           eax = 最终计算结果
+0058E7AA - 56                         - push esi                           esi = 武将指针
+0058E7AB - b9 5c 89 99 07             - mov ecx,0799895c
+0058E7B0 - e8 3b 85 f1 ff             - call 004a6cf0                      武将忠诚度增减
+0058E7B5 - 8b 5c 24 1c                - mov ebx,[esp+1c]                   ebx = 城市指针
+
+【循环下一个武将】
+0058E7B9 - 33 ff                      - xor edi,edi
+0058E7BB - 8d 54 24 14                - lea edx,[esp+14]                   edx = 武将列表指针
+0058E7BF - 52                         - push edx
+0058E7C0 - 8d 4c 24 24                - lea ecx,[esp+24]                   [ecx] = 0x0079bf44
+0058E7C4 - e8 07 d7 ee ff             - call 0047bed0                      作用未明，应该是列表数组指针后移一个单元
+0058E7C9 - 8b 44 24 14                - mov eax,[esp+14]                   eax = 武将列表指针
+0058E7CD - 3b c7                      - cmp eax,edi
+0058E7CF - 0f 85 21 fe ff ff          - jne 0058e5f6                       eax若不等于0则继续循环
+
+【循环下一个设施】
+0058E7D5 - 8b 74 24 18                - mov esi,[esp+18]                   esi = 设施计数器
+0058E7D9 - c7 44 24 20 34 bf 79 00    - mov [esp+20],0079bf34
+0058E7E1 - 8d 4c 24 20                - lea ecx,[esp+20]                   [ecx] = 0x0079bf34
+0058E7E5 - c7 44 24 48 01 00 00 00    - mov [esp+48],00000001
+0058E7ED - e8 5e d6 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+0058E7F2 - 8d 4c 24 20                - lea ecx,[esp+20]                   [ecx] = 0x0079bf14
+0058E7F6 - c7 44 24 48 ff ff ff ff    - mov [esp+48],ffffffff
+0058E7FE - c7 44 24 20 14 bf 79 00    - mov [esp+20],0079bf14
+0058E806 - e8 45 d6 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+0058E80B - 46                         - inc esi
+0058E80C - 83 fe 56                   - cmp esi,56                         设施最多86个(城市、港、关)
+0058E80F - 89 74 24 18                - mov [esp+18],esi
+0058E813 - 0f 8e 1b fd ff ff          - jng 0058e534                       循环下一个设施
+
+0058E819 - 8b 4c 24 40                - mov ecx,[esp+40]
+0058E81D - 5f                         - pop edi
+0058E81E - 5e                         - pop esi
+0058E81F - 5d                         - pop ebp
+0058E820 - 5b                         - pop ebx
+0058E821 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+0058E828 - 83 c4 3c                   - add esp,3c
+0058E82B - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改1 - 掌握人心忠诚不下降概率可调整
+0058E711 - 6a 43                      - push 43                            忠诚不下降概率(0x43表示67%，每增加或减少1表示倍率上调或下降1%)
+0058E713 - e8 b8 3a ee ff             - call 004721d0                      0～100随机函数
+
+
+=====================================================================================================================================================
+
+修改2 - 忠诚下降基数可调整，君主魅力对忠诚下降概率有影响
+0058E725 - 6a 00                      - push 00                            此处随机取消，合并到下面
+0058E727 - e8 24 3a ee ff             - call 00472150
+
+[君主魅力决定忠诚下降概率]
+0058E75C - 8b 8d 79 01 00 00          - mov ecx,[ebp+00000179]             ecx = 武将魅力(君主)
+0058E762 - b8 96 00 00 00             - mov eax,00000096
+0058E767 - 29 c8                      - sub eax,ecx
+0058E769 - 99                         - cdq
+0058E76A - d1 f8                      - sar eax,1
+0058E76C - 85 c0                      - test eax,eax
+0058E76E - 7c 23                      - jnge 0058e793
+0058E770 - 50                         - push eax                           忠诚下降概率 = (150-君主魅力)/2
+0058E771 - e8 5a 3a ee ff             - call 004721d0                      0～100随机函数
+0058E776 - 83 c4 04                   - add esp,04
+0058E779 - 85 c0                      - test eax,eax
+0058E77B - 74 16                      - je 0058e793
+[义理附加忠诚下降效果]
+0058E77D - 8b 9e f0 00 00 00          - mov ebx,[esi+000000f0]             ebx = 武将义理
+0058E783 - b8 04 00 00 00             - mov eax,00000004
+0058E788 - 29 d8                      - sub eax,ebx
+0058E78A - 99                         - cdq
+0058E78B - 29 d0                      - sub eax,edx
+0058E78D - d1 f8                      - sar eax,1                          eax = 义理效果
+0058E78F - 01 c7                      - add edi,eax                        edi = 符节台效果+义理效果
+0058E791 - eb 04                      - jmp 0058e797
+[忠诚不下降]
+0058E793 - 31 c0                      - xor eax,eax                        忠诚下降值
+0058E795 - eb 0e                      - jmp 0058e7a5
+[忠诚下降]
+0058E797 - 6a 04                      - push 04                            忠诚下降基数上限
+0058E799 - e8 b2 39 ee ff             - call 00472150                      0～3随机函数
+0058E79E - 83 c4 04                   - add esp,04
+0058E7A1 - 0f b7 c0                   - movzx eax,ax
+0058E7A4 - 40                         - inc eax                            随机结果+1(即在1～4之间浮动)
+0058E7A5 - 01 f8                      - add eax,edi                        eax = 符节台效果+随机结果+义理效果
+0058E7A7 - f7 d8                      - neg eax                            eax = -(符节台效果+随机结果+义理效果)

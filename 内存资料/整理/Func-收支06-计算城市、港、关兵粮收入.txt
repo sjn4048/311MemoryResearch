@@ -1,0 +1,74 @@
+功能: 计算城市港关兵粮收入
+参数表: [esp+04]=设施指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+0049EA30 - 53                         - push ebx
+0049EA31 - 56                         - push esi
+0049EA32 - 8b 74 24 0c                - mov esi,[esp+0c]               esi = 设施指针
+0049EA36 - 56                         - push esi
+0049EA37 - 8b d9                      - mov ebx,ecx
+0049EA39 - e8 f2 bb fd ff             - call 0047a630                  校验指针
+0049EA3E - 83 c4 04                   - add esp,04
+0049EA41 - 85 c0                      - test eax,eax
+0049EA43 - 74 79                      - je 0049eabe                    校验失败则跳转到返回0
+0049EA45 - 8b 06                      - mov eax,[esi]
+0049EA47 - 8b ce                      - mov ecx,esi
+0049EA49 - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID
+0049EA4C - 85 c0                      - test eax,eax
+0049EA4E - 7c 6e                      - jnge 0049eabe
+0049EA50 - 83 f8 2e                   - cmp eax,2e
+0049EA53 - 7f 69                      - jg 0049eabe                    势力ID若不在0～46之间则跳转到返回0
+0049EA55 - 57                         - push edi
+0049EA56 - 8b ce                      - mov ecx,esi                    esi = 设施指针
+0049EA58 - e8 c3 8e fe ff             - call 00487920                  获取设施所属城市ID
+0049EA5D - 50                         - push eax
+0049EA5E - b9 58 19 20 07             - mov ecx,07201958
+0049EA63 - e8 a8 1f ff ff             - call 00490a10                  根据城市ID获取城市指针
+0049EA68 - 8b f8                      - mov edi,eax                    edi = 城市指针
+0049EA6A - 57                         - push edi
+0049EA6B - e8 c0 bb fd ff             - call 0047a630                  校验指针
+0049EA70 - 83 c4 04                   - add esp,04
+0049EA73 - 85 c0                      - test eax,eax
+0049EA75 - 74 3f                      - je 0049eab6                    校验失败则跳转到返回0
+
+0049EA77 - 8b 17                      - mov edx,[edi]                  edi = 城市指针
+0049EA79 - 55                         - push ebp
+0049EA7A - 8b cf                      - mov ecx,edi
+0049EA7C - ff 52 40                   - call dword ptr [edx+40]        获取所属势力ID(城市)
+0049EA7F - 8b e8                      - mov ebp,eax
+0049EA81 - 8b 06                      - mov eax,[esi]                  esi = 设施指针
+0049EA83 - 8b ce                      - mov ecx,esi
+0049EA85 - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID(设施)
+0049EA88 - 3b c5                      - cmp eax,ebp
+0049EA8A - 5d                         - pop ebp
+0049EA8B - 75 29                      - jne 0049eab6                   如果不是同一势力则跳转到返回0                       【修改】jne 0049ea8d  //非所占城市港关也能收粮
+
+0049EA8D - 57                         - push edi                       edi = 城市指针
+0049EA8E - 8b cb                      - mov ecx,ebx                    ecx = 0x0780b3cc
+0049EA90 - e8 7b fd ff ff             - call 0049e810                  计算城市收粮
+0049EA95 - 8b c8                      - mov ecx,eax                    ecx = 城市收粮
+0049EA97 - 8b 46 08                   - mov eax,[esi+08]               eax = 设施类型
+0049EA9A - 85 c0                      - test eax,eax
+0049EA9C - 74 10                      - je 0049eaae                    如果设施类型为城市则直接返回城市收粮
+0049EA9E - b8 67 66 66 66             - mov eax,66666667
+0049EAA3 - f7 e9                      - imul ecx
+0049EAA5 - d1 fa                      - sar edx,1
+0049EAA7 - 8b ca                      - mov ecx,edx
+0049EAA9 - c1 e9 1f                   - shr ecx,1f
+0049EAAC - 03 ca                      - add ecx,edx                    如果设施类型为港关，收粮为城市的20%
+0049EAAE - 5f                         - pop edi
+0049EAAF - 5e                         - pop esi
+0049EAB0 - 8b c1                      - mov eax,ecx
+0049EAB2 - 5b                         - pop ebx
+0049EAB3 - c2 04 00                   - ret 0004
+
+0049EAB6 - 5f                         - pop edi
+0049EAB7 - 5e                         - pop esi
+0049EAB8 - 33 c0                      - xor eax,eax
+0049EABA - 5b                         - pop ebx
+0049EABB - c2 04 00                   - ret 0004
+0049EABE - 5e                         - pop esi
+0049EABF - 33 c0                      - xor eax,eax
+0049EAC1 - 5b                         - pop ebx
+0049EAC2 - c2 04 00                   - ret 0004

@@ -1,0 +1,248 @@
+005AF520 - 57                         - push edi
+005AF521 - 8b 7c 24 08                - mov edi,[esp+08]                       edi=用计部队指针
+005AF525 - 57                         - push edi
+005AF526 - e8 05 b1 ec ff             - call 0047a630
+005AF52B - 83 c4 04                   - add esp,04
+005AF52E - 85 c0                      - test eax,eax
+005AF530 - 0f 84 ac 02 00 00          - je 005af7e2
+005AF536 - 0f bf 44 24 0c             - movsx eax,word ptr [esp+0c]
+005AF53B - 85 c0                      - test eax,eax
+005AF53D - 0f bf 4c 24 0e             - movsx ecx,word ptr [esp+0e]
+005AF542 - 0f 8c 9a 02 00 00          - jl 005af7e2
+005AF548 - 3d c8 00 00 00             - cmp eax,000000c8
+005AF54D - 0f 8d 8f 02 00 00          - jnl 005af7e2
+005AF553 - 85 c9                      - test ecx,ecx
+005AF555 - 0f 8c 87 02 00 00          - jl 005af7e2
+005AF55B - 81 f9 c8 00 00 00          - cmp ecx,000000c8
+005AF561 - 0f 8d 7b 02 00 00          - jnl 005af7e2
+005AF567 - 0f bf 44 24 10             - movsx eax,word ptr [esp+10]
+005AF56C - 85 c0                      - test eax,eax
+005AF56E - 0f bf 4c 24 12             - movsx ecx,word ptr [esp+12]
+005AF573 - 0f 8c 69 02 00 00          - jl 005af7e2
+005AF579 - 3d c8 00 00 00             - cmp eax,000000c8
+005AF57E - 0f 8d 5e 02 00 00          - jnl 005af7e2
+005AF584 - 85 c9                      - test ecx,ecx
+005AF586 - 0f 8c 56 02 00 00          - jl 005af7e2
+005AF58C - 81 f9 c8 00 00 00          - cmp ecx,000000c8
+005AF592 - 0f 8d 4a 02 00 00          - jnl 005af7e2
+005AF598 - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005AF59E - 03 c1                      - add eax,ecx
+005AF5A0 - 8d 04 80                   - lea eax,[eax+eax*4]
+005AF5A3 - 8b 0c 85 68 0e fb 06       - mov ecx,[eax*4+06fb0e68]               ecx=地图格指针首4个字节
+005AF5AA - 8d 04 85 68 0e fb 06       - lea eax,[eax*4+06fb0e68]
+005AF5B1 - 53                         - push ebx
+005AF5B2 - 80 e1 03                   - and cl,03
+005AF5B5 - 33 db                      - xor ebx,ebx                            ebx=0
+005AF5B7 - 80 f9 01                   - cmp cl,01                              某标志位，该标志位应该是标识上面是否是部队
+005AF5BA - 56                         - push esi
+005AF5BB - 0f b6 b7 c6 00 00 00       - movzx esi,byte ptr [edi+000000c6]      esi=用计部队智力
+005AF5C2 - 75 16                      - jne 005af5da                           如果不是部队，则默认对方智力为0
+005AF5C4 - 0f b7 40 08                - movzx eax,word ptr [eax+08]            【地图格指针＋08  是上面部队的ID】
+005AF5C8 - 50                         - push eax
+005AF5C9 - b9 58 19 20 07             - mov ecx,07201958
+005AF5CE - e8 9d 18 ee ff             - call 00490e70
+005AF5D3 - 0f b6 98 c6 00 00 00       - movzx ebx,byte ptr [eax+000000c6]      ebx=被用计部队智力
+005AF5DA - 55                         - push ebp
+005AF5DB - 8b 6c 24 20                - mov ebp,[esp+20]                       ebp=计谋类型
+005AF5DF - 85 ed                      - test ebp,ebp
+005AF5E1 - 74 0a                      - je 005af5ed
+005AF5E3 - 83 fd 01                   - cmp ebp,01
+005AF5E6 - 7e 4b                      - jle 005af633                           神算/深谋/妙计/秘计的作用对01(灭火)无效
+005AF5E8 - 83 fd 06                   - cmp ebp,06
+005AF5EB - 7f 46                      - jg 005af633                            神算/深谋/妙计/秘计的作用对07(妖术)、08(落雷)无效                           
+005AF5ED - 8b 17                      - mov edx,[edi]
+005AF5EF - 6a 3f                      - push 3f                                63＝神算
+005AF5F1 - 8b cf                      - mov ecx,edi
+005AF5F3 - ff 52 58                   - call dword ptr [edx+58]
+005AF5F6 - 85 c0                      - test eax,eax
+005AF5F8 - 75 1c                      - jne 005af616
+005AF5FA - 8b 07                      - mov eax,[edi]
+005AF5FC - 6a 43                      - push 43                                67＝深谋
+005AF5FE - 8b cf                      - mov ecx,edi
+005AF600 - ff 50 58                   - call dword ptr [eax+58]
+005AF603 - 85 c0                      - test eax,eax
+005AF605 - 75 0f                      - jne 005af616
+005AF607 - 6a 02                      - push 02
+005AF609 - 6a 3a                      - push 3a                                58＝妙计
+005AF60B - 8b cf                      - mov ecx,edi
+005AF60D - e8 6e 60 ee ff             - call 00495680
+005AF612 - 3b c3                      - cmp eax,ebx
+005AF614 - 7e 0a                      - jle 005af620
+005AF616 - b8 64 00 00 00             - mov eax,00000064                       必爆处理
+005AF61B - 5d                         - pop ebp
+005AF61C - 5e                         - pop esi
+005AF61D - 5b                         - pop ebx
+005AF61E - 5f                         - pop edi
+005AF61F - c3                         - ret
+005AF620 - 6a 02                      - push 02
+005AF622 - 6a 3b                      - push 3b                                59＝秘计
+005AF624 - 8b cf                      - mov ecx,edi
+005AF626 - e8 55 60 ee ff             - call 00495680
+005AF62B - 85 c0                      - test eax,eax
+005AF62D - 7c 04                      - jnge 005af633
+005AF62F - 3b c3                      - cmp eax,ebx
+005AF631 - 7c e3                      - jnge 005af616
+
+005AF633 - 83 fd 08                   - cmp ebp,08
+005AF636 - 0f 87 9f 01 00 00          - ja 005af7db
+005AF63C - ff 24 ad e8 f7 5a 00       - jmp dword ptr [ebp*4+005af7e8]         ebp是计谋类型
+【火计】
+005AF643 - 8b c3                      - mov eax,ebx
+005AF645 - 99                         - cdq
+005AF646 - 2b c2                      - sub eax,edx
+005AF648 - d1 f8                      - sar eax,1
+005AF64A - 2b f0                      - sub esi,eax                            esi=用计部队智力-被用计部队智力/2
+【镇静】
+005AF64C - b8 67 66 66 66             - mov eax,66666667
+005AF651 - f7 ee                      - imul esi
+005AF653 - c1 fa 02                   - sar dl,02
+005AF656 - 8b c2                      - mov eax,edx
+005AF658 - c1 e8 1f                   - shr eax,1f
+005AF65B - 03 c2                      - add eax,edx                            eax=esi*0.1
+005AF65D - 83 f8 03                   - cmp eax,03
+005AF660 - 7f b9                      - jg 005af61b
+005AF662 - 5d                         - pop ebp
+005AF663 - 5e                         - pop esi
+005AF664 - 5b                         - pop ebx
+005AF665 - b8 03 00 00 00             - mov eax,00000003                       上限3
+005AF66A - 5f                         - pop edi
+005AF66B - c3                         - ret
+【伪报】
+005AF66C - 8b cf                      - mov ecx,edi
+005AF66E - e8 cd 63 ee ff             - call 00495a40                          获取用计方主将指针
+005AF673 - 8b c8                      - mov ecx,eax
+005AF675 - 8b 89 fc 00 00 00          - mov ecx,[ecx+000000fc]                 获取用计方主将性格
+005AF67B - 8b 0c 8d b8 b6 84 00       - mov ecx,[ecx*4+0084b6b8]               获取性格相应的爆击率修正值 [胆小10 冷静5 刚胆0 莽撞-5]
+005AF682 - 8b c3                      - mov eax,ebx
+005AF684 - 99                         - cdq
+005AF685 - 2b c2                      - sub eax,edx
+005AF687 - 8b d8                      - mov ebx,eax
+005AF689 - d1 fb                      - sar ebx,1
+005AF68B - 2b cb                      - sub ecx,ebx
+005AF68D - 03 ce                      - add ecx,esi                            ecx=用计部队智力+性格修正值-被用计部队智力/2
+005AF68F - b8 67 66 66 66             - mov eax,66666667
+005AF694 - f7 e9                      - imul ecx
+005AF696 - c1 fa 02                   - sar dl,02
+005AF699 - 8b c2                      - mov eax,edx
+005AF69B - c1 e8 1f                   - shr eax,1f
+005AF69E - 03 c2                      - add eax,edx                            eax=ecx*0.1
+005AF6A0 - 83 f8 03                   - cmp eax,03
+005AF6A3 - 7e bd                      - jle 005af662
+005AF6A5 - 8b cf                      - mov ecx,edi
+005AF6A7 - e8 94 63 ee ff             - call 00495a40
+005AF6AC - 8b 88 fc 00 00 00          - mov ecx,[eax+000000fc]
+005AF6B2 - 8b 0c 8d b8 b6 84 00       - mov ecx,[ecx*4+0084b6b8]
+005AF6B9 - e9 f5 00 00 00             - jmp 005af7b3
+【扰乱】
+005AF6BE - 8b cf                      - mov ecx,edi
+005AF6C0 - e8 7b 63 ee ff             - call 00495a40
+005AF6C5 - 8b c8                      - mov ecx,eax
+005AF6C7 - 8b c3                      - mov eax,ebx
+005AF6C9 - 99                         - cdq
+005AF6CA - 2b c2                      - sub eax,edx
+005AF6CC - 8b 91 fc 00 00 00          - mov edx,[ecx+000000fc]
+005AF6D2 - 8b 0c 95 a8 b6 84 00       - mov ecx,[edx*4+0084b6a8]               获取性格相应的爆击率修正值 [胆小-5 冷静0 刚胆5 莽撞10]
+005AF6D9 - 8b d8                      - mov ebx,eax
+005AF6DB - d1 fb                      - sar ebx,1
+005AF6DD - 2b cb                      - sub ecx,ebx
+005AF6DF - 03 ce                      - add ecx,esi                            ecx=用计部队智力+性格修正值-被用计部队智力/2
+005AF6E1 - b8 67 66 66 66             - mov eax,66666667
+005AF6E6 - f7 e9                      - imul ecx
+005AF6E8 - c1 fa 02                   - sar dl,02
+005AF6EB - 8b c2                      - mov eax,edx
+005AF6ED - c1 e8 1f                   - shr eax,1f
+005AF6F0 - 03 c2                      - add eax,edx                            eax=ecx*0.1
+005AF6F2 - 83 f8 03                   - cmp eax,03
+005AF6F5 - 0f 8e 67 ff ff ff          - jng 005af662
+005AF6FB - 8b cf                      - mov ecx,edi
+005AF6FD - e8 3e 63 ee ff             - call 00495a40
+005AF702 - 8b 88 fc 00 00 00          - mov ecx,[eax+000000fc]
+005AF708 - 8b 0c 8d a8 b6 84 00       - mov ecx,[ecx*4+0084b6a8]
+005AF70F - e9 9f 00 00 00             - jmp 005af7b3
+【伏兵】
+005AF714 - 8b 17                      - mov edx,[edi]
+005AF716 - 6a 10                      - push 10                                16＝待伏
+005AF718 - 8b cf                      - mov ecx,edi
+005AF71A - ff 52 58                   - call dword ptr [edx+58]
+005AF71D - 85 c0                      - test eax,eax
+005AF71F - 0f 85 f1 fe ff ff          - jne 005af616                           待伏必中
+005AF725 - 8b 44 24 18                - mov eax,[esp+18]                       eax=被用计地图格坐标
+005AF729 - 50                         - push eax
+005AF72A - 8b cf                      - mov ecx,edi
+005AF72C - 33 ed                      - xor ebp,ebp
+005AF72E - e8 2d 6a ee ff             - call 00496160                          根据地图格范围用计部队所应该使用的兵装，0＝剑 1＝枪 2＝戟 3＝弩 4无修正
+005AF733 - 83 f8 03                   - cmp eax,03
+005AF736 - 77 13                      - ja 005af74b
+005AF738 - ff 24 85 0c f8 5a 00       - jmp dword ptr [eax*4+005af80c]         跳转到兵种修正值
+005AF73F - bd 0a 00 00 00             - mov ebp,0000000a                       枪、戟=10
+005AF744 - eb 05                      - jmp 005af74b
+005AF746 - bd 05 00 00 00             - mov ebp,00000005                       剑、弩=5
+005AF74B - 8b c3                      - mov eax,ebx
+005AF74D - 99                         - cdq
+005AF74E - 2b c2                      - sub eax,edx
+005AF750 - d1 f8                      - sar eax,1
+005AF752 - 2b e8                      - sub ebp,eax
+005AF754 - 03 ee                      - add ebp,esi                            ebp=用计部队智力+兵种修正值-被用计部队智力/2
+005AF756 - b8 67 66 66 66             - mov eax,66666667
+005AF75B - f7 ed                      - imul ebp
+005AF75D - e9 f1 fe ff ff             - jmp 005af653                           跳上去*0.1
+【内讧】
+005AF762 - 8b cf                      - mov ecx,edi
+005AF764 - e8 d7 62 ee ff             - call 00495a40
+005AF769 - 8b c8                      - mov ecx,eax
+005AF76B - 8b 89 f0 00 00 00          - mov ecx,[ecx+000000f0]                 获取用计方主将义理
+005AF771 - 8b 0c 8d 94 b6 84 00       - mov ecx,[ecx*4+0084b694]               获取义理相应的爆击率修正值 [容易背叛10 无情义5 普通0 情理坚定-5 不会背叛-10]
+005AF778 - 8b c3                      - mov eax,ebx
+005AF77A - 99                         - cdq
+005AF77B - 2b c2                      - sub eax,edx
+005AF77D - 8b d8                      - mov ebx,eax
+005AF77F - d1 fb                      - sar ebx,1
+005AF781 - 2b cb                      - sub ecx,ebx
+005AF783 - 03 ce                      - add ecx,esi                            ecx=用计部队智力+义理修正值-被用计部队智力/2
+005AF785 - b8 67 66 66 66             - mov eax,66666667
+005AF78A - f7 e9                      - imul ecx
+005AF78C - c1 fa 02                   - sar dl,02
+005AF78F - 8b c2                      - mov eax,edx
+005AF791 - c1 e8 1f                   - shr eax,1f
+005AF794 - 03 c2                      - add eax,edx                            eax=ecx*0.1
+005AF796 - 83 f8 03                   - cmp eax,03
+005AF799 - 0f 8e c3 fe ff ff          - jng 005af662
+005AF79F - 8b cf                      - mov ecx,edi
+005AF7A1 - e8 9a 62 ee ff             - call 00495a40
+005AF7A6 - 8b 88 f0 00 00 00          - mov ecx,[eax+000000f0]
+005AF7AC - 8b 0c 8d 94 b6 84 00       - mov ecx,[ecx*4+0084b694]
+【扰乱、伪报跳转到此处】
+005AF7B3 - 2b cb                      - sub ecx,ebx
+005AF7B5 - 03 ce                      - add ecx,esi
+005AF7B7 - b8 67 66 66 66             - mov eax,66666667
+005AF7BC - f7 e9                      - imul ecx
+005AF7BE - 5d                         - pop ebp
+005AF7BF - c1 fa 02                   - sar dl,02
+005AF7C2 - 5e                         - pop esi
+005AF7C3 - 8b c2                      - mov eax,edx
+005AF7C5 - c1 e8 1f                   - shr eax,1f
+005AF7C8 - 5b                         - pop ebx
+005AF7C9 - 03 c2                      - add eax,edx
+005AF7CB - 5f                         - pop edi
+005AF7CC - c3                         - ret
+【妖术、落雷】
+005AF7CD - b8 ab aa aa 2a             - mov eax,2aaaaaab
+005AF7D2 - f7 ee                      - imul esi
+005AF7D4 - d1 fa                      - sar edx,1                              eax=用计部队智力*1/3
+005AF7D6 - e9 7b fe ff ff             - jmp 005af656                           跳上去*0.1
+【灭火】
+005AF7DB - 5d                         - pop ebp
+005AF7DC - 5e                         - pop esi
+005AF7DD - 5b                         - pop ebx
+005AF7DE - 33 c0                      - xor eax,eax
+005AF7E0 - 5f                         - pop edi
+005AF7E1 - c3                         - ret
+005AF7E2 - 33 c0                      - xor eax,eax
+005AF7E4 - 5f                         - pop edi
+005AF7E5 - c3                         - ret
+
+数据区
+005AF7E8 - 43 f6 5a 00 db f7 5a 00 6c f6 5a 00 be f6 5a 00 
+           4c f6 5a 00 14 f7 5a 00 62 f7 5a 00 cd f7 5a 00
+           cd f7 5a 00 
+005AF80C - 46 f7 5a 00 3f f7 5a 00 3f f7 5a 00 46 f7 5a 00

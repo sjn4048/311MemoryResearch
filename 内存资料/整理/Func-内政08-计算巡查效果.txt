@@ -1,0 +1,114 @@
+功能: 计算巡查效果
+--参数表: [esp+04]=设施指针，[esp+08]=巡查武将数组指针
+--备注：有四个入口调用这个函数：
+  1、执行巡查
+  005CBE8C - e8 7f fb ff ff             - call 005cba10
+  2、展现巡查界面
+  0060A895 - e8 76 11 fc ff             - call 005cba10
+  3、属于同一个函数，作用未知
+  005ED9AC - e8 5f e0 fd ff             - call 005cba10
+  005EDA2F - e8 dc df fd ff             - call 005cba10
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+005CBA10 - 51                         - push ecx
+005CBA11 - 55                         - push ebp
+005CBA12 - 56                         - push esi
+005CBA13 - 8b 74 24 10                - mov esi,[esp+10]                   esi = 设施指针
+005CBA17 - 56                         - push esi
+005CBA18 - e8 13 ec ea ff             - call 0047a630                      校验指针
+005CBA1D - 83 c4 04                   - add esp,04
+005CBA20 - 85 c0                      - test eax,eax
+005CBA22 - 0f 84 ae 00 00 00          - je 005cbad6                        校验失败则跳转到返回0
+005CBA28 - 8b 6c 24 14                - mov ebp,[esp+14]                   ebp = 巡查武将数组指针
+005CBA2C - 8b 45 00                   - mov eax,[ebp+00]                   eax = 首个巡查武将指针
+005CBA2F - 50                         - push eax
+005CBA30 - e8 fb eb ea ff             - call 0047a630                      校验指针
+005CBA35 - 83 c4 04                   - add esp,04
+005CBA38 - 85 c0                      - test eax,eax
+005CBA3A - 0f 84 96 00 00 00          - je 005cbad6                        校验失败则跳转到返回0
+005CBA40 - 8b ce                      - mov ecx,esi
+005CBA42 - e8 a9 ac eb ff             - call 004866f0                      根据设施指针获取城市指针
+005CBA47 - 50                         - push eax
+005CBA48 - 89 44 24 0c                - mov [esp+0c],eax
+005CBA4C - e8 df eb ea ff             - call 0047a630                      校验指针 
+005CBA51 - 83 c4 04                   - add esp,04
+005CBA54 - 85 c0                      - test eax,eax
+005CBA56 - 74 7e                      - je 005cbad6                        校验失败则跳转到返回0
+
+【获取武将统率】
+005CBA58 - 53                         - push ebx
+005CBA59 - 57                         - push edi
+005CBA5A - 33 db                      - xor ebx,ebx
+005CBA5C - 33 ff                      - xor edi,edi                        edi = 0
+005CBA5E - 8b ff                      - mov edi,edi
+005CBA60 - 8b 74 bd 00                - mov esi,[ebp+edi*4+00]             esi = 巡查武将指针
+005CBA64 - 56                         - push esi
+005CBA65 - e8 c6 eb ea ff             - call 0047a630                      校验指针 
+005CBA6A - 83 c4 04                   - add esp,04
+005CBA6D - 85 c0                      - test eax,eax
+005CBA6F - 74 0c                      - je 005cba7d                        校验失败则循环下一个
+005CBA71 - 8b ce                      - mov ecx,esi
+005CBA73 - e8 f8 d5 eb ff             - call 00489070                      获取武将统率
+005CBA78 - 0f b6 c8                   - movzx ecx,al
+005CBA7B - 03 d9                      - add ebx,ecx                        ebx = 统率和
+005CBA7D - 47                         - inc edi
+005CBA7E - 83 ff 03                   - cmp edi,03                         循环3次
+005CBA81 - 7c dd                      - jnge 005cba60
+
+【计算巡查效果】
+005CBA83 - 8b 4c 24 18                - mov ecx,[esp+18]                   ecx = 设施指针
+005CBA87 - b8 93 24 49 92             - mov eax,92492493                   以下6句，ecx = ebx*1/28
+005CBA8C - f7 eb                      - imul ebx
+005CBA8E - 03 d3                      - add edx,ebx
+005CBA90 - c1 fa 04                   - sar dl,04
+005CBA93 - 8b c2                      - mov eax,edx
+005CBA95 - c1 e8 1f                   - shr eax,1f
+005CBA98 - 51                         - push ecx
+005CBA99 - b9 5c 89 99 07             - mov ecx,0799895c
+005CBA9E - 8d 74 02 02                - lea esi,[edx+eax+02]               esi = 2(基数)+eax+edx(计算余数)
+
+【兵临城下时巡查效果减半】
+005CBAA2 - e8 09 df ee ff             - call 004b99b0                      判断城市、港、关附近(城市3格，港关2格)是否有敌方部队
+005CBAA7 - 85 c0                      - test eax,eax
+005CBAA9 - 5f                         - pop edi
+005CBAAA - 5b                         - pop ebx
+005CBAAB - 74 09                      - je 005cbab6                        若不是兵临城下则跳过巡查效果减半的计算
+005CBAAD - 8b c6                      - mov eax,esi
+005CBAAF - 99                         - cdq
+005CBAB0 - 2b c2                      - sub eax,edx
+005CBAB2 - d1 f8                      - sar eax,1
+005CBAB4 - 8b f0                      - mov esi,eax                        esi = 巡查效果
+
+【城市治安上限判定】
+005CBAB6 - 8b 54 24 08                - mov edx,[esp+08]                   edx = 城市指针
+005CBABA - 0f b6 82 85 00 00 00       - movzx eax,byte ptr [edx+00000085]  eax = 城市治安
+005CBAC1 - 8d 0c 30                   - lea ecx,[eax+esi]                  ecx = eax+esi(原始治安+巡查效果)
+005CBAC4 - 83 f9 64                   - cmp ecx,64
+005CBAC7 - 7e 07                      - jle 005cbad0                       如巡查后的治安不大于100则跳转
+005CBAC9 - be 64 00 00 00             - mov esi,00000064
+005CBACE - 2b f0                      - sub esi,eax                        esi = 100与原始治安之差
+
+005CBAD0 - 8b c6                      - mov eax,esi                        eax = esi(最终返回的巡查效果)
+005CBAD2 - 5e                         - pop esi
+005CBAD3 - 5d                         - pop ebp
+005CBAD4 - 59                         - pop ecx
+005CBAD5 - c3                         - ret
+005CBAD6 - 5e                         - pop esi
+005CBAD7 - 33 c0                      - xor eax,eax
+005CBAD9 - 5d                         - pop ebp
+005CBADA - 59                         - pop ecx
+005CBADB - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 巡查倍率可调整
+005CBA83 - 69 c3 64 00 00 00          - imul eax,ebx,00000064              巡查倍率(0x64表示100%，每增加或减少1表示倍率上调或下降1%)
+005CBA89 - b9 f0 0a 00 00             - mov ecx,00000af0                   0x0AF0 = 2800(这样当倍率设置为100％时，巡查效果仍为统率的1/28倍)
+005CBA8E - 99                         - cdq
+005CBA8F - f7 f9                      - idiv ecx
+005CBA91 - 31 d2                      - xor edx,edx
+005CBA93 - 8b 4c 24 18                - mov ecx,[esp+18]
+005CBA97 - 90                         - nop

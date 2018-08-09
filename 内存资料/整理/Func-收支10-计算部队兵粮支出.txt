@@ -1,0 +1,112 @@
+功能: 计算部队兵粮支出
+参数表: [esp+04]=部队指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+0049D2E0 - 83 ec 08                   - sub esp,08
+0049D2E3 - 53                         - push ebx
+0049D2E4 - 56                         - push esi
+0049D2E5 - 8b 74 24 14                - mov esi,[esp+14]                   esi = 部队指针
+0049D2E9 - 57                         - push edi
+0049D2EA - 56                         - push esi
+0049D2EB - 8b f9                      - mov edi,ecx
+0049D2ED - 33 db                      - xor ebx,ebx                        ebx = 0
+0049D2EF - e8 3c d3 fd ff             - call 0047a630                      校验指针
+0049D2F4 - 83 c4 04                   - add esp,04
+0049D2F7 - 85 c0                      - test eax,eax
+0049D2F9 - 0f 84 cc 00 00 00          - je 0049d3cb                        若检验失败则跳转到返回0
+
+【获取野外耗粮倍率】
+0049D2FF - 8b 46 08                   - mov eax,[esi+08]                   eax = 类型(0=战斗,1=运输)
+0049D302 - 85 c0                      - test eax,eax
+0049D304 - c7 44 24 18 00 00 80 3f    - mov [esp+18],3f800000              0x3f800000 = 1.0f(运输队耗粮倍率)            【修改】运输队野外耗粮倍率
+0049D30C - 75 39                      - jne 0049d347                       如果是运输队跳转到着火耗粮计算
+0049D30E - 56                         - push esi                           esi = 部队指针
+0049D30F - 8b cf                      - mov ecx,edi
+0049D311 - e8 6a fe ff ff             - call 0049d180                      获取与部队相同势力的防御系列设施类型ID
+0049D316 - 83 e8 03                   - sub eax,03
+0049D319 - 74 24                      - je 0049d33f
+0049D31B - 48                         - dec eax
+0049D31C - 74 17                      - je 0049d335
+0049D31E - 48                         - dec eax
+0049D31F - 74 0a                      - je 0049d32b
+[无]
+0049D321 - c7 44 24 18 00 00 00 40    - mov [esp+18],40000000              0x40000000 = 2.0f                           【修改】部队野外耗粮倍率
+0049D329 - eb 1c                      - jmp 0049d347 
+[城塞]
+0049D32B - c7 44 24 18 00 00 80 3f    - mov [esp+18],3f800000              0x3f800000 = 1.0f                           【修改】城塞耗粮倍率
+0049D333 - eb 12                      - jmp 0049d347
+[砦]
+0049D335 - c7 44 24 18 ab aa aa 3f    - mov [esp+18],3faaaaab              0x3f800000 = 1.33f                          【修改】砦耗粮倍率
+0049D33D - eb 08                      - jmp 0049d347
+[阵]
+0049D33F - c7 44 24 18 55 55 d5 3f    - mov [esp+18],3fd55555              0x3f800000 = 1.67f                          【修改】阵耗粮倍率
+
+【着火耗粮计算】
+0049D347 - 8b 06                      - mov eax,[esi]                      esi = 部队指针
+0049D349 - 8b ce                      - mov ecx,esi
+0049D34B - c7 44 24 0c 00 00 00 00    - mov [esp+0c],00000000
+0049D353 - ff 50 4c                   - call dword ptr [eax+4c]            判断部队是否着火
+0049D356 - 85 c0                      - test eax,eax
+0049D358 - 74 37                      - je 0049d391
+0049D35A - 0f b6 8e c7 00 00 00       - movzx ecx,byte ptr [esi+000000c7]  ecx = 部队最高政
+0049D361 - 8b 56 20                   - mov edx,[esi+20]                   edx = 现有兵粮
+0049D364 - 85 d2                      - test edx,edx
+0049D366 - 89 4c 24 0c                - mov [esp+0c],ecx
+0049D36A - db 44 24 0c                - fild dword ptr [esp+0c]
+0049D36E - d8 0d 48 36 76 00          - fmul dword ptr [00763648]          [00763648] = 0.05f
+0049D374 - d8 2d f8 68 77 00          - fsubr dword ptr [007768f8]         [007768f8] = 6.00f
+0049D37A - db 46 20                   - fild dword ptr [esi+20]
+0049D37D - 7d 06                      - jnl 0049d385
+0049D37F - d8 05 68 a6 75 00          - fadd dword ptr [0075a668]
+0049D385 - de c9                      - fmulp st(9),st(0)
+0049D387 - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88]          [0077aa88] = 0.01f
+0049D38D - d9 5c 24 0c                - fstp dword ptr [esp+0c]            [esp+0c] = 当前兵粮*(6-部队最高政*0.05)*0.01
+
+【兵力耗粮计算】
+0049D391 - 8b 06                      - mov eax,[esi]
+0049D393 - 8b ce                      - mov ecx,esi
+0049D395 - ff 50 50                   - call dword ptr [eax+50]            获取兵力
+0049D398 - 8b f0                      - mov esi,eax
+0049D39A - 89 74 24 10                - mov [esp+10],esi
+0049D39E - db 44 24 10                - fild dword ptr [esp+10]
+0049D3A2 - d8 4c 24 18                - fmul dword ptr [esp+18]
+0049D3A6 - d8 0d 48 36 76 00          - fmul dword ptr [00763648]          [00763648] = 0.05f(10000兵基本耗粮500)         【修改】部队野外耗粮倍率
+0049D3AC - d8 44 24 0c                - fadd dword ptr [esp+0c]            [esp+0c] = 着火耗粮
+0049D3B0 - e8 bf a6 26 00             - call 00707a74                      浮点计算结果转整数置入eax
+0049D3B5 - 85 c0                      - test eax,eax
+0049D3B7 - 7f 14                      - jg 0049d3cd                        兵粮支出大于0则跳转到返回兵粮支出
+0049D3B9 - 85 f6                      - test esi,esi
+0049D3BB - 7e 10                      - jle 0049d3cd                       兵力等于0则跳转到返回0
+0049D3BD - 5f                         - pop edi
+0049D3BE - 5e                         - pop esi
+0049D3BF - b8 01 00 00 00             - mov eax,00000001                   最小耗粮为1
+0049D3C4 - 5b                         - pop ebx
+0049D3C5 - 83 c4 08                   - add esp,08
+0049D3C8 - c2 04 00                   - ret 0004
+
+0049D3CB - 8b c3                      - mov eax,ebx
+0049D3CD - 5f                         - pop edi
+0049D3CE - 5e                         - pop esi
+0049D3CF - 5b                         - pop ebx
+0049D3D0 - 83 c4 08                   - add esp,08
+0049D3D3 - c2 04 00                   - ret 0004
+
+
+=====================================================================================================================================================
+
+修改 - 马匹也耗费等量军粮
+0049D391 - 0f b7 46 18                - movzx eax,word ptr [esi+18]        eax = 部队兵力
+0049D395 - e9 96 c7 40 00             - jmp 008a9b30    
+
+008A9B30 - 31 c9                      - xor ecx,ecx                        ecx = 计数器
+008A9B32 - 8b 54 ce 48                - mov edx,[esi+ecx*8+48]             edx = 兵装类型
+008A9B36 - 83 fa 04                   - cmp edx,04                         0x04 = 骑兵
+008A9B39 - 75 04                      - jne 008a9b3f
+008A9B3B - 03 44 ce 4c                - add eax,[esi+ecx*8+4c]             eax = 部队兵力+马匹数量
+008A9B3F - 41                         - inc ecx
+008A9B40 - 83 f9 0c                   - cmp ecx,0c                         循环12次
+008A9B43 - 7c ed                      - jnge 008a9b32                      循环下一个兵装栏
+008A9B45 - 8b f0                      - mov esi,eax
+008A9B47 - e9 4e 38 bf ff             - jmp 0049d39a

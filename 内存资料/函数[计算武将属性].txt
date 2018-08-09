@@ -1,0 +1,226 @@
+0048A110 - 51                         - push ecx
+0048A111 - 53                         - push ebx
+0048A112 - 55                         - push ebp
+0048A113 - 8b 6c 24 10                - mov ebp,[esp+10]               ebp=当前计算的某一个属性(0～4)
+0048A117 - 85 ed                      - test ebp,ebp
+0048A119 - 57                         - push edi
+0048A11A - 8b f9                      - mov edi,ecx                    edi=当前武将指针
+0048A11C - 7c 0e                      - jnge 0048a12c
+0048A11E - 83 fd 04                   - cmp ebp,04
+0048A121 - 7f 09                      - jg 0048a12c
+0048A123 - 8a 84 2f c8 00 00 00       - mov al,[edi+ebp+000000c8]      取基础值
+0048A12A - eb 02                      - jmp 0048a12e
+0048A12C - b0 01                      - mov al,01                      如果ebp值大于4或者小于0，则默认基础值为1，这句是异常情况处理
+0048A12E - 0f b6 d8                   - movzx ebx,al                   ebx=基础值
+
+【健康程度检查】
+0048A131 - 8b 44 24 18                - mov eax,[esp+18]               eax=健康程度
+0048A135 - 85 c0                      - test eax,eax
+0048A137 - 7c 0d                      - jnge 0048a146
+0048A139 - 83 f8 03                   - cmp eax,03
+0048A13C - c7 44 24 0c 01 00 00 00    - mov [esp+0c],00000001          [esp+0c]中存放了是否健康
+0048A144 - 7e 08                      - jle 0048a14e
+0048A146 - c7 44 24 0c 00 00 00 00    - mov [esp+0c],00000000
+
+【事件武将不计算】
+0048A14E - 57                         - push edi
+0048A14F - b9 58 19 20 07             - mov ecx,07201958
+0048A154 - e8 b7 71 00 00             - call 00491310                  根据武将指针获得武将ID
+0048A159 - 3d bc 02 00 00             - cmp eax,000002bc               事件武将起始
+0048A15E - 7c 0b                      - jnge 0048a16b
+0048A160 - 3d 03 03 00 00             - cmp eax,00000303               事件武将结束（这里的值已被修改过）
+0048A165 - 0f 8e 2d 01 00 00          - jng 0048a298
+
+【计算属性根据年龄的浮动】
+0048A16B - 56                         - push esi
+0048A16C - 55                         - push ebp
+0048A16D - 8d 44 24 1c                - lea eax,[esp+1c]
+0048A171 - be 78 00 00 00             - mov esi,00000078               武将本身能力上限（应该是100，这里已改成了120）
+0048A176 - 50                         - push eax
+0048A177 - 8b cf                      - mov ecx,edi                    ecx=武将指针
+0048A179 - 89 74 24 20                - mov [esp+20],esi
+0048A17D - e8 ae fe ff ff             - call 0048a030                  这个函数和年龄、属性变动类型以及健康程度有关有关
+0048A182 - 85 c0                      - test eax,eax
+0048A184 - 74 1a                      - je 0048a1a0
+0048A186 - 8b 4c 24 18                - mov ecx,[esp+18]
+0048A18A - 0f af cb                   - imul ecx,ebx
+0048A18D - b8 1f 85 eb 51             - mov eax,51eb851f
+0048A192 - f7 e9                      - imul ecx
+0048A194 - c1 fa 05                   - sar dl,05
+0048A197 - 8b ca                      - mov ecx,edx
+0048A199 - c1 e9 1f                   - shr ecx,1f
+0048A19C - 03 ca                      - add ecx,edx
+0048A19E - 8b d9                      - mov ebx,ecx
+
+【计算经验】
+0048A1A0 - 85 ed                      - test ebp,ebp
+0048A1A2 - 7c 0f                      - jnge 0048a1b3
+0048A1A4 - 83 fd 04                   - cmp ebp,04
+0048A1A7 - 7f 0a                      - jg 0048a1b3
+0048A1A9 - 66 8b 84 6f 2a 01 00 00    - mov ax,[edi+ebp*2+0000012a]    获取相关属性经验
+0048A1B1 - eb 02                      - jmp 0048a1b5
+0048A1B3 - 33 c0                      - xor eax,eax                    如果ebp值大于4或者小于0，则默认经验值为0
+0048A1B5 - 0f b7 c8                   - movzx ecx,ax
+0048A1B8 - b8 1f 85 eb 51             - mov eax,51eb851f
+0048A1BD - f7 e9                      - imul ecx
+0048A1BF - c1 fa 05                   - sar dl,05
+0048A1C2 - 8b c2                      - mov eax,edx
+0048A1C4 - c1 e8 1f                   - shr eax,1f
+0048A1C7 - 03 c2                      - add eax,edx                    以上7句将经验除以100
+0048A1C9 - 03 d8                      - add ebx,eax
+0048A1CB - 83 fb 01                   - cmp ebx,01                     加上经验以后的上下限判定
+0048A1CE - 7f 07                      - jg 0048a1d7
+0048A1D0 - bb 01 00 00 00             - mov ebx,00000001
+0048A1D5 - eb 06                      - jmp 0048a1dd
+0048A1D7 - 3b de                      - cmp ebx,esi
+0048A1D9 - 7c 02                      - jnge 0048a1dd
+0048A1DB - 8b de                      - mov ebx,esi
+
+【??以下这段计算什么不知道】
+0048A1DD - 8b 44 24 10                - mov eax,[esp+10]               该标志位是？？
+0048A1E1 - 85 c0                      - test eax,eax                   该标志位为0时不计算
+0048A1E3 - 74 46                      - je 0048a22b
+0048A1E5 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+0048A1E9 - 51                         - push ecx
+0048A1EA - 55                         - push ebp
+0048A1EB - 8d 54 24 20                - lea edx,[esp+20]
+0048A1EF - 52                         - push edx
+0048A1F0 - 8b cf                      - mov ecx,edi
+0048A1F2 - 89 74 24 24                - mov [esp+24],esi
+0048A1F6 - e8 b5 ed ff ff             - call 00488fb0                  该函数里根据某值的不同用到了100、80、50、30等数据，可能还和年龄有关
+0048A1FB - 85 c0                      - test eax,eax
+0048A1FD - 74 2c                      - je 0048a22b
+0048A1FF - 8b 4c 24 18                - mov ecx,[esp+18]
+0048A203 - 0f af cb                   - imul ecx,ebx
+0048A206 - b8 1f 85 eb 51             - mov eax,51eb851f
+0048A20B - f7 e9                      - imul ecx
+0048A20D - c1 fa 05                   - sar dl,05
+0048A210 - 8b c2                      - mov eax,edx
+0048A212 - c1 e8 1f                   - shr eax,1f
+0048A215 - 03 c2                      - add eax,edx
+0048A217 - 8b d8                      - mov ebx,eax
+0048A219 - 83 fb 01                   - cmp ebx,01                     后面几句仍然是上下限判定
+0048A21C - 7f 07                      - jg 0048a225
+0048A21E - bb 01 00 00 00             - mov ebx,00000001
+0048A223 - eb 06                      - jmp 0048a22b
+0048A225 - 3b de                      - cmp ebx,esi
+0048A227 - 7c 02                      - jnge 0048a22b
+0048A229 - 8b de                      - mov ebx,esi
+
+【官职计算】
+0048A22B - 8b 87 a4 00 00 00          - mov eax,[edi+000000a4]         获得武将官职ID
+0048A231 - 50                         - push eax
+0048A232 - b9 58 19 20 07             - mov ecx,07201958
+0048A237 - e8 d4 69 00 00             - call 00490c10                  根据官职ID获得官职指针
+0048A23C - 8b f0                      - mov esi,eax
+0048A23E - 56                         - push esi
+0048A23F - e8 ec 03 ff ff             - call 0047a630                  校验指针
+0048A244 - 83 c4 04                   - add esp,04
+0048A247 - 85 c0                      - test eax,eax
+0048A249 - 74 0b                      - je 0048a256
+0048A24B - 3b 6e 30                   - cmp ebp,[esi+30]               判定ebp(正在计算的属性)是否与官职所加的属性
+0048A24E - 75 06                      - jne 0048a256
+0048A250 - 0f b6 4e 34                - movzx ecx,byte ptr [esi+34]    取得官职所增加的属性
+0048A254 - 03 d9                      - add ebx,ecx
+
+【内助计算】
+0048A256 - 8b 47 60                   - mov eax,[edi+60]               获取配偶ID
+0048A259 - 50                         - push eax
+0048A25A - b9 58 19 20 07             - mov ecx,07201958
+0048A25F - e8 9c 68 00 00             - call 00490b00                  根据武将ID获得武将指针
+0048A264 - 8b f0                      - mov esi,eax                    esi＝配偶指针
+0048A266 - 56                         - push esi
+0048A267 - e8 c4 03 ff ff             - call 0047a630                  校验指针
+0048A26C - 83 c4 04                   - add esp,04
+0048A26F - 85 c0                      - test eax,eax
+0048A271 - 74 24                      - je 0048a297
+0048A273 - 8b af e8 00 00 00          - mov ebp,[edi+000000e8]         本人是否持有内助特技
+0048A279 - 33 c0                      - xor eax,eax
+0048A27B - b9 63 00 00 00             - mov ecx,00000063
+0048A280 - 3b e9                      - cmp ebp,ecx
+0048A282 - 0f 94 c0                   - sete al
+0048A285 - 85 c0                      - test eax,eax
+0048A287 - 75 0d                      - jne 0048a296
+0048A289 - 39 8e e8 00 00 00          - cmp [esi+000000e8],ecx         配偶是否持有内助特技
+0048A28F - 0f 94 c0                   - sete al
+0048A292 - 85 c0                      - test eax,eax
+0048A294 - 74 01                      - je 0048a297
+0048A296 - 43                         - inc ebx                        配偶特技五围＋1
+
+【上下限计算】
+0048A297 - 5e                         - pop esi
+0048A298 - 83 fb 01                   - cmp ebx,01                     五围下限
+0048A29B - 7f 0c                      - jg 0048a2a9
+0048A29D - 5f                         - pop edi
+0048A29E - 5d                         - pop ebp
+0048A29F - b8 01 00 00 00             - mov eax,00000001
+0048A2A4 - 5b                         - pop ebx
+0048A2A5 - 59                         - pop ecx
+0048A2A6 - c2 08 00                   - ret 0008
+0048A2A9 - 83 fb 78                   - cmp ebx,78                     五围上限，应该是100，这里已经修改为120
+0048A2AC - 72 0c                      - jb 0048a2ba
+0048A2AE - 5f                         - pop edi
+0048A2AF - 5d                         - pop ebp
+0048A2B0 - b8 78 00 00 00             - mov eax,00000078
+0048A2B5 - 5b                         - pop ebx
+0048A2B6 - 59                         - pop ecx
+0048A2B7 - c2 08 00                   - ret 0008
+0048A2BA - 5f                         - pop edi
+0048A2BB - 5d                         - pop ebp
+0048A2BC - 8a c3                      - mov al,bl
+0048A2BE - 5b                         - pop ebx
+0048A2BF - 59                         - pop ecx
+0048A2C0 - c2 08 00                   - ret 0008
+
+
+**修改
+0048A271 - 74 1d                      - je 0048a290                    //这段解决内助无法被组合的问题
+0048A273 - 8b cf                      - mov ecx,edi
+0048A275 - 6a 63                      - push 63
+0048A277 - e8 74 ee ff ff             - call 004890f0
+0048A27C - 85 c0                      - test eax,eax
+0048A27E - 75 0d                      - jne 0048a28d
+0048A280 - 8b ce                      - mov ecx,esi
+0048A282 - 6a 63                      - push 63
+0048A284 - e8 67 ee ff ff             - call 004890f0
+0048A289 - 85 c0                      - test eax,eax
+0048A28B - 74 03                      - je 0048a290
+0048A28D - 83 c3 01                   - add ebx,01
+0048A290 - e9 07 01 42 00             - jmp 008aa39c                   //这里可以调用宝物增加五围的新函数
+ 008AA39C - 57                         - push edi
+ 008AA39D - b9 58 19 20 07             - mov ecx,07201958
+ 008AA3A2 - e8 69 6f be ff             - call 00491310
+ 008AA3A7 - 8b f8                      - mov edi,eax
+ 008AA3A9 - 31 f6                      - xor esi,esi
+ 008AA3AB - 53                         - push ebx
+ 008AA3AC - 31 db                      - xor ebx,ebx
+ 008AA3AE - 56                         - push esi
+ 008AA3AF - b9 58 19 20 07             - mov ecx,07201958
+ 008AA3B4 - e8 77 67 be ff             - call 00490b30
+ 008AA3B9 - 56                         - push esi
+ 008AA3BA - 8b f0                      - mov esi,eax
+ 008AA3BC - 56                         - push esi
+ 008AA3BD - e8 6e 02 bd ff             - call 0047a630
+ 008AA3C2 - 83 c4 04                   - add esp,04
+ 008AA3C5 - 85 c0                      - test eax,eax
+ 008AA3C7 - 74 1b                      - je 008aa3e4
+ 008AA3C9 - 3b 7e 40                   - cmp edi,[esi+40]
+ 008AA3CC - 75 16                      - jne 008aa3e4
+ 008AA3CE - 5e                         - pop esi
+ 008AA3CF - 8b ce                      - mov ecx,esi
+ 008AA3D1 - 6b c9 05                   - imul ecx,ecx,05
+ 008AA3D4 - 0f b6 84 0d e0 82 8a 00    - movzx eax,byte ptr [ebp+ecx+008a82e0]
+ 008AA3DC - 39 d8                      - cmp eax,ebx
+ 008AA3DE - 7c 05                      - jnge 008aa3e5
+ 008AA3E0 - 8b d8                      - mov ebx,eax
+ 008AA3E2 - eb 01                      - jmp 008aa3e5
+ 008AA3E4 - 5e                         - pop esi
+ 008AA3E5 - 46                         - inc esi
+ 008AA3E6 - 83 fe 64                   - cmp esi,64
+ 008AA3E9 - 7c c3                      - jnge 008aa3ae
+ 008AA3EB - 8b cb                      - mov ecx,ebx
+ 008AA3ED - 5b                         - pop ebx
+ 008AA3EE - e9 a2 fe bd ff             - jmp 0048a295
+0048A295 - 01 cb                      - add ebx,ecx
+
+

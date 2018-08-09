@@ -1,0 +1,322 @@
+功能: 每旬城市港关和部队耗粮
+参数表: 无
+
+*****************************************************************************************************************************************************
+
+0059BF40 - 6a ff                      - push ff
+0059BF42 - 68 31 3b 73 00             - push 00733b31 : [891454B8]
+0059BF47 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+0059BF4D - 50                         - push eax
+0059BF4E - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+0059BF55 - 81 ec ec 07 00 00          - sub esp,000007ec
+
+【城市、港、关减兵粮】
+0059BF5B - 53                         - push ebx
+0059BF5C - 33 db                      - xor ebx,ebx                        ebx = 0
+0059BF5E - 56                         - push esi
+0059BF5F - 57                         - push edi
+0059BF60 - 89 4c 24 10                - mov [esp+10],ecx
+0059BF64 - c7 44 24 34 d0 12 7f 00    - mov [esp+34],007f12d0
+0059BF6C - 89 5c 24 40                - mov [esp+40],ebx
+0059BF70 - 89 5c 24 44                - mov [esp+44],ebx
+0059BF74 - 89 5c 24 3c                - mov [esp+3c],ebx
+0059BF78 - 89 5c 24 38                - mov [esp+38],ebx
+0059BF7C - 89 5c 24 48                - mov [esp+48],ebx
+0059BF80 - c7 44 24 4c 0a 00 00 00    - mov [esp+4c],0000000a
+0059BF88 - 89 5c 24 50                - mov [esp+50],ebx
+0059BF8C - 89 9c 24 00 08 00 00       - mov [esp+00000800],ebx
+[获取设施指针并校验]
+0059BF93 - 33 ff                      - xor edi,edi                        edi = 设施指针
+0059BF95 - 57                         - push edi
+0059BF96 - b9 58 19 20 07             - mov ecx,07201958
+0059BF9B - e8 60 4d ef ff             - call 00490d00                      根据设施ID获取设施指针
+0059BFA0 - 8b f0                      - mov esi,eax                        esi = 设施指针
+0059BFA2 - 56                         - push esi
+0059BFA3 - e8 88 e6 ed ff             - call 0047a630                      校验指针
+0059BFA8 - 83 c4 04                   - add esp,04
+0059BFAB - 85 c0                      - test eax,eax
+0059BFAD - 74 65                      - je 0059c014                        校验失败则跳转到循环下一个设施
+[获取现有兵粮]
+0059BFAF - 8b ce                      - mov ecx,esi
+0059BFB1 - e8 3a ae ee ff             - call 00486df0                      获取城市、港、关兵粮
+0059BFB6 - 85 c0                      - test eax,eax
+0059BFB8 - 7e 5a                      - jle 0059c014                       现有兵粮为0则跳转到循环下一个设施
+[屯田判定]
+0059BFBA - 8b 46 08                   - mov eax,[esi+08]                   eax = 设施类型
+0059BFBD - 83 f8 02                   - cmp eax,02
+0059BFC0 - 74 05                      - je 0059bfc7
+0059BFC2 - 83 f8 01                   - cmp eax,01
+0059BFC5 - 75 14                      - jne 0059bfdb                       设施类型不为港、关则跳过屯田判定
+0059BFC7 - 8b 06                      - mov eax,[esi]
+0059BFC9 - 6a 4e                      - push 4e                            0x4e = 屯田                             【修改】push fe  //取消屯田效果
+0059BFCB - 8b ce                      - mov ecx,esi
+0059BFCD - ff 50 5c                   - call dword ptr [eax+5c]            获取设施持有指定特技的武将ID
+0059BFD0 - 3b c3                      - cmp eax,ebx
+0059BFD2 - 7c 07                      - jnge 0059bfdb
+0059BFD4 - 3d 4b 04 00 00             - cmp eax,0000044b
+0059BFD9 - 7e 39                      - jle 0059c014                       武将ID在0～1099之间则跳转到循环下一个设施(即有屯田的港、关不耗粮)
+[耗粮处理]
+0059BFDB - 56                         - push esi                           esi = 设施指针
+0059BFDC - b9 cc b3 80 07             - mov ecx,0780b3cc
+0059BFE1 - e8 1a 12 f0 ff             - call 0049d200                      计算城市、港、关兵粮支出
+0059BFE6 - f7 d8                      - neg eax
+0059BFE8 - 50                         - push eax
+0059BFE9 - 56                         - push esi
+0059BFEA - b9 5c 89 99 07             - mov ecx,0799895c
+0059BFEF - e8 0c 23 f1 ff             - call 004ae300                      城市、港、关兵粮增减
+0059BFF4 - 8b ce                      - mov ecx,esi
+0059BFF6 - e8 f5 ad ee ff             - call 00486df0                      获取城市、港、关兵粮
+0059BFFB - 85 c0                      - test eax,eax
+0059BFFD - 75 15                      - jne 0059c014                       若兵粮没有耗尽则跳转到循环下一个设施
+[兵粮耗尽的情况]
+0059BFFF - 8b ce                      - mov ecx,esi                        esi = 设施指针
+0059C001 - e8 ca e6 ed ff             - call 0047a6d0                      判断指针对象是否属于玩家势力第一军团
+0059C006 - 85 c0                      - test eax,eax
+0059C008 - 74 0a                      - je 0059c014
+0059C00A - 56                         - push esi
+0059C00B - 8d 4c 24 38                - lea ecx,[esp+38]                   ecx = 输入及返回参数列表指针(设施)
+0059C00F - e8 4c 1c f3 ff             - call 004cdc60                      作用未明，应该是置入设施列表数组
+[设施循环]
+0059C014 - 47                         - inc edi
+0059C015 - 83 ff 57                   - cmp edi,57                         设施最多87个(城市、港、关)
+0059C018 - 0f 8c 77 ff ff ff          - jl 0059bf95                        循环下一个设施
+
+【部队减兵粮】
+0059C01E - 89 5c 24 20                - mov [esp+20],ebx
+0059C022 - 89 5c 24 24                - mov [esp+24],ebx
+0059C026 - 89 5c 24 1c                - mov [esp+1c],ebx
+0059C02A - 89 5c 24 18                - mov [esp+18],ebx
+0059C02E - 89 5c 24 28                - mov [esp+28],ebx
+0059C032 - c7 44 24 2c 0a 00 00 00    - mov [esp+2c],0000000a
+0059C03A - 89 5c 24 30                - mov [esp+30],ebx
+0059C03E - c7 44 24 14 ec c8 79 00    - mov [esp+14],0079c8ec
+0059C046 - c6 84 24 00 08 00 00 01    - mov byte ptr [esp+00000800],01
+[获取部队指针并校验]
+0059C04E - 33 ff                      - xor edi,edi                        edi = 部队ID
+0059C050 - 57                         - push edi
+0059C051 - b9 58 19 20 07             - mov ecx,07201958
+0059C056 - e8 15 4e ef ff             - call 00490e70                      根据部队ID获取部队指针
+0059C05B - 8b f0                      - mov esi,eax                        esi = 部队指针
+0059C05D - 56                         - push esi
+0059C05E - e8 cd e5 ed ff             - call 0047a630                      校验指针
+0059C063 - 83 c4 04                   - add esp,04
+0059C066 - 85 c0                      - test eax,eax
+0059C068 - 74 38                      - je 0059c0a2                        校验失败则跳转到循环下一支部队
+[获取现有兵粮]
+0059C06A - 39 5e 20                   - cmp [esi+20],ebx                   判断部队现有兵粮是否为0
+0059C06D - 76 33                      - jna 0059c0a2                       现有兵粮为0则跳转到循环下一支部队
+[耗粮处理]
+0059C06F - 56                         - push esi
+0059C070 - b9 cc b3 80 07             - mov ecx,0780b3cc
+0059C075 - e8 66 12 f0 ff             - call 0049d2e0                      计算部队耗粮
+0059C07A - f7 d8                      - neg eax
+0059C07C - 50                         - push eax
+0059C07D - 56                         - push esi
+0059C07E - b9 5c 89 99 07             - mov ecx,0799895c
+0059C083 - e8 e8 24 f1 ff             - call 004ae570                      部队兵粮增减
+0059C088 - 39 5e 20                   - cmp [esi+20],ebx                   判断部队当前兵粮是否为0
+0059C08B - 75 15                      - jne 0059c0a2                       若兵粮没有耗尽则跳转到循环下一支部队
+[兵粮耗尽的情况]
+0059C08D - 8b ce                      - mov ecx,esi
+0059C08F - e8 3c e6 ed ff             - call 0047a6d0                      判断指针对象是否属于玩家势力第一军团
+0059C094 - 85 c0                      - test eax,eax
+0059C096 - 74 0a                      - je 0059c0a2
+0059C098 - 56                         - push esi
+0059C099 - 8d 4c 24 18                - lea ecx,[esp+18]                   ecx = 输入及返回参数列表指针(部队)
+0059C09D - e8 ae 5e ef ff             - call 00491f50                      作用未明，应该是置入部队列表数组
+[部队循环]
+0059C0A2 - 47                         - inc edi
+0059C0A3 - 81 ff e8 03 00 00          - cmp edi,000003e8
+0059C0A9 - 7c a5                      - jnge 0059c050
+
+【以下一系列处理未明，猜测是显示执行消息和武将语言】
+[部队]
+0059C0AB - 39 5c 24 20                - cmp [esp+20],ebx                   [esp+20]应该是耗尽兵粮的部队数量
+0059C0AF - 7e 3f                      - jle 0059c0f0
+0059C0B1 - 53                         - push ebx
+0059C0B2 - 53                         - push ebx
+0059C0B3 - 6a 01                      - push 01
+0059C0B5 - 53                         - push ebx
+0059C0B6 - 8d 4c 24 24                - lea ecx,[esp+24]                   ecx = 输入及返回参数列表指针(部队)
+0059C0BA - e8 21 71 ef ff             - call 004931e0
+0059C0BF - 8b 44 24 18                - mov eax,[esp+18]
+0059C0C3 - 3b c3                      - cmp eax,ebx
+0059C0C5 - 89 44 24 0c                - mov [esp+0c],eax
+0059C0C9 - 74 25                      - je 0059c0f0
+0059C0CB - eb 03                      - jmp 0059c0d0
+0059C0CD - 8d 49 00                   - lea ecx,[ecx+00]
+0059C0D0 - 8d 4c 24 0c                - lea ecx,[esp+0c]
+0059C0D4 - 51                         - push ecx
+0059C0D5 - 8d 4c 24 18                - lea ecx,[esp+18]                   ecx = 输入及返回参数列表指针(部队)
+0059C0D9 - e8 e2 61 ef ff             - call 004922c0
+0059C0DE - 8b 10                      - mov edx,[eax]
+0059C0E0 - 52                         - push edx
+0059C0E1 - 8d 4c 24 38                - lea ecx,[esp+38]                   ecx = 输入及返回参数列表指针(设施)
+0059C0E5 - e8 76 1b f3 ff             - call 004cdc60
+0059C0EA - 39 5c 24 0c                - cmp [esp+0c],ebx
+0059C0EE - 75 e0                      - jne 0059c0d0
+[设施]
+0059C0F0 - 39 5c 24 40                - cmp [esp+40],ebx                   [esp+40]应该是耗尽兵粮的设施数量
+0059C0F4 - 0f 8e 39 01 00 00          - jng 0059c233
+0059C0FA - 8d 44 24 54                - lea eax,[esp+54]
+0059C0FE - 50                         - push eax
+0059C0FF - b9 d8 59 6a 09             - mov ecx,096a59d8
+0059C104 - e8 a7 c6 fe ff             - call 005887b0
+0059C109 - 53                         - push ebx
+0059C10A - 8d 4c 24 38                - lea ecx,[esp+38]                   ecx = 输入及返回参数列表指针(设施)
+0059C10E - 51                         - push ecx
+0059C10F - b9 08 98 99 07             - mov ecx,07999808
+0059C114 - e8 27 2c f3 ff             - call 004ced40
+0059C119 - 8b 44 24 38                - mov eax,[esp+38]                   eax = 输入及返回参数列表指针(设施)
+0059C11D - 3b c3                      - cmp eax,ebx
+0059C11F - 89 44 24 0c                - mov [esp+0c],eax
+0059C123 - 0f 84 0a 01 00 00          - je 0059c233
+0059C129 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+0059C130 - 8d 54 24 0c                - lea edx,[esp+0c]
+0059C134 - 52                         - push edx
+0059C135 - 8d 4c 24 38                - lea ecx,[esp+38]                   ecx = 输入及返回参数列表指针(设施)
+0059C139 - e8 c2 1b f3 ff             - call 004cdd00
+0059C13E - 8b 30                      - mov esi,[eax]
+0059C140 - 8b ce                      - mov ecx,esi
+0059C142 - e8 c9 e8 ed ff             - call 0047aa10
+0059C147 - 50                         - push eax
+0059C148 - b9 58 19 20 07             - mov ecx,07201958
+0059C14D - e8 ae 49 ef ff             - call 00490b00                      根据武将ID获取武将指针
+0059C152 - 8b f8                      - mov edi,eax
+0059C154 - 57                         - push edi
+0059C155 - e8 d6 e4 ed ff             - call 0047a630                      校验指针
+0059C15A - 83 c4 04                   - add esp,04
+0059C15D - 85 c0                      - test eax,eax
+0059C15F - 75 11                      - jne 0059c172
+0059C161 - 68 cc 02 00 00             - push 000002cc                      0x02cc = 士兵
+0059C166 - b9 58 19 20 07             - mov ecx,07201958
+0059C16B - e8 90 49 ef ff             - call 00490b00                      根据武将ID获取武将指针
+0059C170 - 8b f8                      - mov edi,eax                        edi = 武将指针(士兵)
+0059C172 - 8b 4c 24 10                - mov ecx,[esp+10]
+0059C176 - 6a ff                      - push ff
+0059C178 - 56                         - push esi
+0059C179 - e8 d2 d6 fe ff             - call 00589850
+0059C17E - 53                         - push ebx
+0059C17F - 53                         - push ebx
+0059C180 - 68 00 00 80 bf             - push bf800000
+0059C185 - 53                         - push ebx
+0059C186 - 6a 03                      - push 03
+0059C188 - b9 10 98 11 09             - mov ecx,09119810
+0059C18D - e8 de 43 f3 ff             - call 004d0570
+0059C192 - 68 a1 18 00 00             - push 000018a1
+0059C197 - 8d 4c 24 5c                - lea ecx,[esp+5c]
+0059C19B - e8 c0 09 f0 ff             - call 0049cb60
+0059C1A0 - 57                         - push edi
+0059C1A1 - 53                         - push ebx
+0059C1A2 - 8d 4c 24 60                - lea ecx,[esp+60]
+0059C1A6 - e8 d5 09 f0 ff             - call 0049cb80
+0059C1AB - 56                         - push esi
+0059C1AC - 8d 44 24 5c                - lea eax,[esp+5c]
+0059C1B0 - 57                         - push edi
+0059C1B1 - 50                         - push eax
+0059C1B2 - e8 d9 f1 ef ff             - call 0049b390
+0059C1B7 - 83 c4 04                   - add esp,04
+0059C1BA - 50                         - push eax
+0059C1BB - e8 d0 a4 f5 ff             - call 004f6690
+0059C1C0 - 6a 01                      - push 01
+0059C1C2 - 68 b8 0b 00 00             - push 00000bb8
+0059C1C7 - e8 44 d2 0a 00             - call 00649410
+0059C1CC - 83 c4 14                   - add esp,14
+0059C1CF - 3b f3                      - cmp esi,ebx
+0059C1D1 - 74 48                      - je 0059c21b
+0059C1D3 - 8b 16                      - mov edx,[esi]
+0059C1D5 - 6a 1b                      - push 1b
+0059C1D7 - 8b ce                      - mov ecx,esi
+0059C1D9 - ff 52 2c                   - call dword ptr [edx+2c]
+0059C1DC - 85 c0                      - test eax,eax
+0059C1DE - 74 3b                      - je 0059c21b
+0059C1E0 - 68 a4 18 00 00             - push 000018a4
+0059C1E5 - 8d 8c 24 2c 04 00 00       - lea ecx,[esp+0000042c]
+0059C1EC - e8 6f 09 f0 ff             - call 0049cb60
+0059C1F1 - 56                         - push esi
+0059C1F2 - 53                         - push ebx
+0059C1F3 - 8d 8c 24 30 04 00 00       - lea ecx,[esp+00000430]
+0059C1FA - e8 21 07 f0 ff             - call 0049c920
+0059C1FF - 6a 01                      - push 01
+0059C201 - 8d 84 24 2c 04 00 00       - lea eax,[esp+0000042c]
+0059C208 - 56                         - push esi
+0059C209 - 50                         - push eax
+0059C20A - e8 81 f1 ef ff             - call 0049b390
+0059C20F - 83 c4 04                   - add esp,04
+0059C212 - 50                         - push eax
+0059C213 - e8 28 94 f5 ff             - call 004f5640
+0059C218 - 83 c4 0c                   - add esp,0c
+0059C21B - 39 5c 24 0c                - cmp [esp+0c],ebx
+0059C21F - 0f 85 0b ff ff ff          - jne 0059c130
+0059C225 - 8d 4c 24 54                - lea ecx,[esp+54]
+0059C229 - 51                         - push ecx
+0059C22A - 8b 4c 24 14                - mov ecx,[esp+14]
+0059C22E - e8 9d d4 fe ff             - call 005896d0
+
+0059C233 - c7 44 24 14 cc c8 79 00    - mov [esp+14],0079c8cc : [005E1460]
+0059C23B - 8d 4c 24 14                - lea ecx,[esp+14]
+0059C23F - c6 84 24 00 08 00 00 02    - mov byte ptr [esp+00000800],02
+0059C247 - e8 a4 5d ef ff             - call 00491ff0
+0059C24C - 8d 4c 24 14                - lea ecx,[esp+14]
+0059C250 - 88 9c 24 00 08 00 00       - mov [esp+00000800],bl
+0059C257 - c7 44 24 14 ac c8 79 00    - mov [esp+14],0079c8ac : [00492070]
+0059C25F - e8 8c 5d ef ff             - call 00491ff0
+0059C264 - 8d 4c 24 34                - lea ecx,[esp+34]
+0059C268 - c7 84 24 00 08 00 00 ff ff ff ff - mov [esp+00000800],ffffffff
+0059C273 - c7 44 24 34 d0 12 7f 00    - mov [esp+34],007f12d0 : [004CDD90]
+0059C27B - e8 60 19 f3 ff             - call 004cdbe0
+0059C280 - 8b 8c 24 f8 07 00 00       - mov ecx,[esp+000007f8]
+0059C287 - 5f                         - pop edi
+0059C288 - 5e                         - pop esi
+0059C289 - 5b                         - pop ebx
+0059C28A - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+0059C291 - 81 c4 f8 07 00 00          - add esp,000007f8
+0059C297 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 有“后勤”特技则部队耗粮减半，另一半由部队所属城支出
+0059C075 - e9 12 48 37 00             - jmp 0091088c
+
+0091088C - e8 4f ca b8 ff             - call 0049d2e0                      计算部队耗粮
+[获得部队所属设施指针]
+00910891 - 57                         - push edi
+00910892 - 53                         - push ebx
+00910893 - 8b d8                      - mov ebx,eax                        ebx = 部队耗粮
+00910895 - 8b ce                      - mov ecx,esi                        esi = 部队指针
+00910897 - e8 a4 51 b8 ff             - call 00495a40                      获得部队主将指针
+0091089C - 8b 80 98 00 00 00          - mov eax,[eax+00000098]             获得主将所属
+009108A2 - 50                         - push eax
+009108A3 - b9 58 19 20 07             - mov ecx,07201958
+009108A8 - e8 53 04 b8 ff             - call 00490d00                      根据设施ID获取设施指针
+009108AD - 85 c0                      - test eax,eax
+009108AF - 74 35                      - je 009108e6
+[后勤判定]
+009108B1 - 8b f8                      - mov edi,eax                        edi = 设施指针
+009108B3 - 8b cf                      - mov ecx,edi
+009108B5 - 8b 07                      - mov eax,[edi]
+009108B7 - 68 8d 00 00 00             - push 0000008d                      0x8d = 后勤
+009108BC - ff 50 58                   - call dword ptr [eax+58]
+009108BF - 85 c0                      - test eax,eax
+009108C1 - 74 23                      - je 009108e6                        判断城市中是否有持有后勤特技的武将
+[有后勤的情况下考虑设施现有兵粮计算设施和部队的耗粮分配]
+009108C3 - 8b cf                      - mov ecx,edi
+009108C5 - e8 26 65 b7 ff             - call 00486df0                      获取城市、港、关兵粮
+009108CA - d1 fb                      - sar ebx,1                          耗粮减半
+009108CC - 8b cb                      - mov ecx,ebx                        ecx = 设施应耗粮
+009108CE - 39 c8                      - cmp eax,ecx                        判断设施中粮草是否足够
+009108D0 - 7f 06                      - jg 009108d8
+009108D2 - 29 c1                      - sub ecx,eax
+009108D4 - 01 cb                      - add ebx,ecx                        ebx = 部队应耗粮
+009108D6 - 8b c8                      - mov ecx,eax                        ecx = 设施应耗粮
+009108D8 - f7 d9                      - neg ecx
+[设施耗粮处理]
+009108DA - 51                         - push ecx
+009108DB - 57                         - push edi
+009108DC - b9 5c 89 99 07             - mov ecx,0799895c
+009108E1 - e8 1a da b9 ff             - call 004ae300                      城市、港、关兵粮增减
+009108E6 - 8b c3                      - mov eax,ebx                        eax = 考虑后勤特技后部队应耗粮
+009108E8 - 5b                         - pop ebx
+009108E9 - 5f                         - pop edi
+009108EA - e9 8b b7 c8 ff             - jmp 0059c07a

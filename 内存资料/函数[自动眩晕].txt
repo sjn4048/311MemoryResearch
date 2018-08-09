@@ -1,0 +1,113 @@
+0059A0E0 - 8b 44 24 04                - mov eax,[esp+04]                       [esp+04]中是势力指针
+0059A0E4 - 83 ec 10                   - sub esp,10
+0059A0E7 - 53                         - push ebx
+0059A0E8 - 55                         - push ebp
+0059A0E9 - 56                         - push esi
+0059A0EA - 57                         - push edi
+0059A0EB - 50                         - push eax
+0059A0EC - b9 58 19 20 07             - mov ecx,07201958
+0059A0F1 - e8 7a 71 ef ff             - call 00491270                          根据势力指针获得势力ID
+0059A0F6 - 33 ff                      - xor edi,edi                            EDI=0
+0059A0F8 - 8b e8                      - mov ebp,eax                            势力ID置入EBP
+0059A0FA - 33 db                      - xor ebx,ebx                            EBX置0，开始循环
+0059A0FC - 8d 64 24 00                - lea esp,[esp+00]
+0059A100 - 53                         - push ebx
+0059A101 - b9 58 19 20 07             - mov ecx,07201958
+0059A106 - e8 65 6d ef ff             - call 00490e70                          获得部队指针
+0059A10B - 8b f0                      - mov esi,eax                            部队指针置入ESI
+0059A10D - 56                         - push esi
+0059A10E - e8 1d 05 ee ff             - call 0047a630                          校验指针
+0059A113 - 83 c4 04                   - add esp,04
+0059A116 - 85 c0                      - test eax,eax
+0059A118 - 0f 84 f2 00 00 00          - je 0059a210                            若校验失败则循环下一支部队
+**以下A段和B段要交换位置
+[A段]
+0059A11E - 8b 16                      - mov edx,[esi]
+0059A120 - 8b ce                      - mov ecx,esi
+0059A122 - ff 52 50                   - call dword ptr [edx+50]                获得部队兵力
+0059A125 - 3d e8 03 00 00             - cmp eax,000003e8                       若部队兵力>1000则循环下一支
+0059A12A - 0f 8d e0 00 00 00          - jnl 0059a210
+0059A130 - 39 7e 24                   - cmp [esi+24],edi                       如果部队状态已经异常，则循环下一支
+0059A133 - 0f 85 d7 00 00 00          - jne 0059a210
+[B段]
+0059A139 - 8b 06                      - mov eax,[esi]
+0059A13B - 8b ce                      - mov ecx,esi
+0059A13D - ff 50 40                   - call dword ptr [eax+40]                获得部队所属势力ID
+0059A140 - 3b c5                      - cmp eax,ebp                            如果部队不是当前势力，则循环下一支（这里可以改成，如果有治军则循环下一支）
+0059A142 - 0f 85 c8 00 00 00          - jne 0059a210
+**
+0059A148 - 8b 16                      - mov edx,[esi]
+0059A14A - 8b ce                      - mov ecx,esi
+0059A14C - ff 52 50                   - call dword ptr [edx+50]                获得部队兵力
+0059A14F - 8d 0c 80                   - lea ecx,[eax+eax*4]                    
+0059A152 - c1 e1 04                   - shl ecx,04
+0059A155 - b8 d3 4d 62 10             - mov eax,10624dd3
+0059A15A - f7 e9                      - imul ecx
+0059A15C - c1 fa 06                   - sar dl,06
+0059A15F - 8b c2                      - mov eax,edx
+0059A161 - c1 e8 1f                   - shr eax,1f
+0059A164 - 8d 44 02 0a                - lea eax,[edx+eax+0a]                   根据兵力的来计算眩晕概率
+0059A168 - 83 f8 0a                   - cmp eax,0a
+0059A16B - 7f 07                      - jg 0059a174
+0059A16D - b8 0a 00 00 00             - mov eax,0000000a
+0059A172 - eb 0a                      - jmp 0059a17e
+0059A174 - 83 f8 5a                   - cmp eax,5a
+0059A177 - 7c 05                      - jnge 0059a17e
+0059A179 - b8 5a 00 00 00             - mov eax,0000005a                       随机概率在10～80之间
+0059A17E - 50                         - push eax
+0059A17F - e8 4c 80 ed ff             - call 004721d0                          随机判定是否不发生眩晕
+0059A184 - 83 c4 04                   - add esp,04
+0059A187 - 85 c0                      - test eax,eax
+0059A189 - 0f 85 81 00 00 00          - jne 0059a210                           如果不发生眩晕则循环下一支
+0059A18F - 0f b6 8e c4 00 00 00       - movzx ecx,byte ptr [esi+000000c4]      获得预定眩晕部队统
+0059A196 - b8 67 66 66 66             - mov eax,66666667
+0059A19B - f7 e9                      - imul ecx
+0059A19D - d1 fa                      - sar edx,1
+0059A19F - 8b ca                      - mov ecx,edx
+0059A1A1 - c1 e9 1f                   - shr ecx,1f
+0059A1A4 - 8d 54 0a 14                - lea edx,[edx+ecx+14]                   不眩晕概率 ＝ 统×0.4+20
+0059A1A8 - 52                         - push edx
+0059A1A9 - e8 22 80 ed ff             - call 004721d0                          随机判定是否不眩晕
+0059A1AE - 83 c4 04                   - add esp,04
+0059A1B1 - 85 c0                      - test eax,eax
+0059A1B3 - 75 5b                      - jne 0059a210                           如果不眩晕则循环下一支
+0059A1B5 - 89 74 24 10                - mov [esp+10],esi                       ESI＝预定眩晕部队指针
+0059A1B9 - 89 7c 24 14                - mov [esp+14],edi                       置0
+0059A1BD - 89 7c 24 18                - mov [esp+18],edi                       置0
+0059A1C1 - 89 7c 24 1c                - mov [esp+1c],edi                       置0
+0059A1C5 - 8b 06                      - mov eax,[esi]
+0059A1C7 - 8b ce                      - mov ecx,esi
+0059A1C9 - ff 50 3c                   - call dword ptr [eax+3c]
+0059A1CC - 8b 10                      - mov edx,[eax]                          获得部队坐标，置入EDX
+0059A1CE - 57                         - push edi                               EDI=0
+0059A1CF - 8d 4c 24 14                - lea ecx,[esp+14]
+0059A1D3 - 51                         - push ecx                               [esp+14]指针，此时里面的内容是esi，这个值将作为[ESP+10]参数为“过滤函数”所用
+0059A1D4 - 68 90 a0 59 00             - push 0059a090                          过滤函数地址
+0059A1D9 - 6a 03                      - push 03                                取3格以内部队
+0059A1DB - 52                         - push edx                               中心坐标
+0059A1DC - b9 68 0e fb 06             - mov ecx,06fb0e68
+0059A1E1 - e8 ba a1 ee ff             - call 004843a0                          取半径以内符合“过滤函数”要求的部队
+0059A1E6 - 8d 4c 24 10                - lea ecx,[esp+10]                       [esp+10]指针就是前面传入的[esp+14]指针，因为PUSH内容都POP了
+0059A1EA - e8 21 ef ff ff             - call 00599110
+0059A1EF - 85 c0                      - test eax,eax
+0059A1F1 - 74 1d                      - je 0059a210
+0059A1F3 - 6a 01                      - push 01
+0059A1F5 - 6a 02                      - push 02
+0059A1F7 - e8 54 7f ed ff             - call 00472150                          随机眩晕回合1或2
+0059A1FC - 83 c4 04                   - add esp,04
+0059A1FF - fe c0                      - inc al
+0059A201 - b9 5c 89 99 07             - mov ecx,0799895c
+0059A206 - 50                         - push eax                               PUSH 眩晕回合
+0059A207 - 6a 01                      - push 01                                PUSH 状态＝1（眩晕）
+0059A209 - 57                         - push edi
+0059A20A - 56                         - push esi                               PUSH 眩晕部队指针
+0059A20B - e8 60 48 f1 ff             - call 004aea70                          设置部队状态
+0059A210 - 43                         - inc ebx                                部队ID＋1
+0059A211 - 81 fb e8 03 00 00          - cmp ebx,000003e8                       部队上限1000
+0059A217 - 0f 8c e3 fe ff ff          - jl 0059a100
+0059A21D - 5f                         - pop edi
+0059A21E - 5e                         - pop esi
+0059A21F - 5d                         - pop ebp
+0059A220 - 5b                         - pop ebx
+0059A221 - 83 c4 10                   - add esp,10
+0059A224 - c2 04 00                   - ret 0004

@@ -1,0 +1,85 @@
+功能: 计算城市港关金钱支出
+参数表: [esp+04]=设施指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+0049F940 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+0049F946 - 6a ff                      - push ff
+0049F948 - 68 e8 f2 72 00             - push 0072f2e8
+0049F94D - 50                         - push eax
+0049F94E - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+0049F955 - 83 ec 20                   - sub esp,20
+
+【获取指针并校验】
+0049F958 - 53                         - push ebx
+0049F959 - 56                         - push esi
+0049F95A - 8b 74 24 38                - mov esi,[esp+38]               esi = 设施指针
+0049F95E - 57                         - push edi
+0049F95F - 56                         - push esi
+0049F960 - 8b d9                      - mov ebx,ecx
+0049F962 - 33 ff                      - xor edi,edi                    edi = 0
+0049F964 - e8 c7 ac fd ff             - call 0047a630                  校验指针
+0049F969 - 83 c4 04                   - add esp,04
+0049F96C - 85 c0                      - test eax,eax
+0049F96E - 0f 84 a4 00 00 00          - je 0049fa18                    校验失败则跳过支出计算
+0049F974 - 8b 06                      - mov eax,[esi]
+0049F976 - 8b ce                      - mov ecx,esi
+0049F978 - ff 50 40                   - call dword ptr [eax+40]        获得所属势力ID
+0049F97B - 3b c7                      - cmp eax,edi
+0049F97D - 0f 8c 95 00 00 00          - jl 0049fa18
+0049F983 - 83 f8 2e                   - cmp eax,2e
+0049F986 - 0f 8f 8c 00 00 00          - jg 0049fa18                    势力ID若不在0～46之间则跳过支出计算
+
+【金钱支出计算】
+[数据初始化]
+0049F98C - 89 7c 24 18                - mov [esp+18],edi
+0049F990 - 89 7c 24 1c                - mov [esp+1c],edi
+0049F994 - 89 7c 24 14                - mov [esp+14],edi
+0049F998 - 89 7c 24 10                - mov [esp+10],edi
+0049F99C - 89 7c 24 20                - mov [esp+20],edi
+0049F9A0 - c7 44 24 24 0a 00 00 00    - mov [esp+24],0000000a
+0049F9A8 - 89 7c 24 28                - mov [esp+28],edi
+0049F9AC - c7 44 24 0c 44 bf 79 00    - mov [esp+0c],0079bf44          用于返回武将列表的指针
+[俘虏金钱支出]
+0049F9B4 - 6a 20                      - push 20                        0x20 = 00100000b(俘虏)
+0049F9B6 - 56                         - push esi                       esi = 设施指针
+0049F9B7 - b9 58 19 20 07             - mov ecx,07201958
+0049F9BC - 89 7c 24 3c                - mov [esp+3c],edi
+0049F9C0 - e8 ab 1d ff ff             - call 00491770                  根据设施指针获得设施ID
+0049F9C5 - 50                         - push eax
+0049F9C6 - e8 85 89 fe ff             - call 00488350                  校验城市、港、关的设施ID是否在0～86之间
+0049F9CB - 83 c4 04                   - add esp,04
+0049F9CE - 50                         - push eax                       eax = 设施ID
+0049F9CF - 8d 4c 24 14                - lea ecx,[esp+14]               ecx = 输入及返回参数列表指针
+0049F9D3 - 51                         - push ecx                       
+0049F9D4 - b9 08 98 99 07             - mov ecx,07999808
+0049F9D9 - e8 12 f9 02 00             - call 004cf2f0                  获取指定所在指定状态武将的个数
+0049F9DE - 6b c0 32                   - imul eax,eax,32                0x32 = 50(俘虏金钱支出)                     【修改】俘虏金钱支出
+[现役武将俸禄支出]
+0049F9E1 - 6a 0f                      - push 0f                        0x0f = 00001111b(君主、都督、太守、一般)
+0049F9E3 - 56                         - push esi                       esi = 设施指针
+0049F9E4 - 8d 54 24 14                - lea edx,[esp+14]               edx = 输入及返回参数列表指针
+0049F9E8 - 52                         - push edx                       
+0049F9E9 - b9 08 98 99 07             - mov ecx,07999808
+0049F9EE - 8b f8                      - mov edi,eax                    edi = 俘虏金钱支出
+0049F9F0 - e8 6b f9 02 00             - call 004cf360                  获取指定设施指定状态的武将列表
+0049F9F5 - 85 c0                      - test eax,eax
+0049F9F7 - 7e 0e                      - jle 0049fa07
+0049F9F9 - 8d 44 24 0c                - lea eax,[esp+0c]               eax = 输入及返回参数列表指针
+0049F9FD - 50                         - push eax
+0049F9FE - 8b cb                      - mov ecx,ebx                    ecx = 0x0780b3cc
+0049FA00 - e8 9b f8 ff ff             - call 0049f2a0                  获取武将列表的俸禄和
+0049FA05 - 03 f8                      - add edi,eax                    edi = 俘虏金钱支出+现役武将俸禄支出
+0049FA07 - 8d 4c 24 0c                - lea ecx,[esp+0c]               ecx = 输入及返回参数列表指针
+0049FA0B - c7 44 24 34 ff ff ff ff    - mov [esp+34],ffffffff
+0049FA13 - e8 e8 c6 fd ff             - call 0047c100                  作用未明，应该是清除列表数组
+
+0049FA18 - 8b 4c 24 2c                - mov ecx,[esp+2c]
+0049FA1C - 8b c7                      - mov eax,edi
+0049FA1E - 5f                         - pop edi
+0049FA1F - 5e                         - pop esi
+0049FA20 - 5b                         - pop ebx
+0049FA21 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+0049FA28 - 83 c4 2c                   - add esp,2c
+0049FA2B - c2 04 00                   - ret 0004
+

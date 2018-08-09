@@ -1,0 +1,265 @@
+功能: 计算城市收粮
+参数表: [esp+04]=城市指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+【获取城市指针并校验】
+0049E810 - 83 ec 0c                   - sub esp,0c
+0049E813 - 56                         - push esi
+0049E814 - 8b 74 24 14                - mov esi,[esp+14]                   esi = 城市指针
+0049E818 - 56                         - push esi
+0049E819 - 89 4c 24 10                - mov [esp+10],ecx
+0049E81D - e8 0e be fd ff             - call 0047a630                      校验指针
+0049E822 - 83 c4 04                   - add esp,04
+0049E825 - 85 c0                      - test eax,eax
+0049E827 - 0f 84 c8 01 00 00          - je 0049e9f5                        校验失败跳转到返回0
+0049E82D - 8b 06                      - mov eax,[esi]
+0049E82F - 8b ce                      - mov ecx,esi
+0049E831 - ff 50 40                   - call dword ptr [eax+40]            获取城市所属势力ID
+0049E834 - 85 c0                      - test eax,eax
+0049E836 - 0f 8c b9 01 00 00          - jl 0049e9f5
+0049E83C - 83 f8 2e                   - cmp eax,2e
+0049E83F - 0f 8f b0 01 00 00          - jg 0049e9f5                        如果势力ID不在0～46范围内则跳转到返回0
+
+【基础收粮】
+0049E845 - 55                         - push ebp
+0049E846 - 0f b7 ae 80 00 00 00       - movzx ebp,word ptr [esi+00000080]  ebp = 城市基础收粮
+
+【循环内政设施】
+0049E84D - 81 c6 f4 00 00 00          - add esi,000000f4                   esi = 城市内政设施数组指针
+0049E853 - 53                         - push ebx
+0049E854 - 89 6c 24 10                - mov [esp+10],ebp
+0049E858 - 89 74 24 0c                - mov [esp+0c],esi
+0049E85C - c7 44 24 10 1e 00 00 00    - mov [esp+10],0000001e              0x1e = 30(城市内政设施上限)
+0049E864 - 57                         - push edi
+0049E865 - 8b 4c 24 10                - mov ecx,[esp+10]                   ecx = 城市内政设施数组指针
+0049E869 - 8b 39                      - mov edi,[ecx]                      edi = 设施指针
+0049E86B - 57                         - push edi
+0049E86C - e8 bf bd fd ff             - call 0047a630                      校验指针
+0049E871 - 83 c4 04                   - add esp,04
+0049E874 - 85 c0                      - test eax,eax
+0049E876 - 0f 84 d2 00 00 00          - je 0049e94e                        校验失败则跳转到循环下一个内政设施
+
+【内政设施产量计算】
+0049E87C - 8b 77 08                   - mov esi,[edi+08]                   esi = 设施类型
+0049E87F - 8d 46 e0                   - lea eax,[esi-20]                   eax = 设施类型-32(内政设施从32号开始)
+0049E882 - 83 f8 15                   - cmp eax,15                         0x15 = 农场Lv3
+0049E885 - 0f 87 c3 00 00 00          - ja 0049e94e                        设施类型编号大于农场Lv3则跳转到循环下一个内政设施
+0049E88B - 0f b6 90 10 ea 49 00       - movzx edx,byte ptr [eax+0049ea10]  取得32号-53号内政设施类型的对应处理编码
+0049E892 - ff 24 95 00 ea 49 00       - jmp dword ptr [edx*4+0049ea00]     根据处理编码取得跳转地址
+[农场Lv1、军屯农]
+0049E899 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E89C - 85 c0                      - test eax,eax
+0049E89E - 0f 84 aa 00 00 00          - je 0049e94e                        设施未建设完成则跳转到循环下一个内政设施
+0049E8A4 - 83 fe ff                   - cmp esi,ff
+0049E8A7 - 0f 84 a1 00 00 00          - je 0049e94e
+[获取设施类型指针]
+0049E8AD - 56                         - push esi
+0049E8AE - b9 58 19 20 07             - mov ecx,07201958
+0049E8B3 - e8 d8 22 ff ff             - call 00490b90                      根据设施类型ID获取设施类型指针
+0049E8B8 - 8b d8                      - mov ebx,eax
+0049E8BA - 53                         - push ebx
+0049E8BB - e8 70 bd fd ff             - call 0047a630                      校验指针
+0049E8C0 - 83 c4 04                   - add esp,04
+0049E8C3 - 85 c0                      - test eax,eax
+0049E8C5 - 0f 84 83 00 00 00          - je 0049e94e                        校验失败则跳转到循环下一个内政设施
+[谷仓判定]
+0049E8CB - 83 fe 20                   - cmp esi,20                         0x20 = 农场Lv1
+0049E8CE - 0f b7 9b c0 00 00 00       - movzx ebx,word ptr [ebx+000000c0]  ebx = 设施产量
+0049E8D5 - 74 0a                      - je 0049e8e1                                                                    【修改】jmp 0049e8e1  //谷仓对军屯农有效
+0049E8D7 - 83 fe 34                   - cmp esi,34                         0x34 = 农场Lv1
+0049E8DA - 74 05                      - je 0049e8e1
+0049E8DC - 83 fe 35                   - cmp esi,35                         0x35 = 农场Lv1
+0049E8DF - 75 41                      - jne 0049e922                       如果是军屯农，不进行谷仓处理，跳转到军屯农处理
+0049E8E1 - 8b 07                      - mov eax,[edi]
+0049E8E3 - 8b cf                      - mov ecx,edi
+0049E8E5 - ff 50 3c                   - call dword ptr [eax+3c]            获取设施坐标数组指针
+0049E8E8 - 8b 08                      - mov ecx,[eax]                      ecx = 设施坐标
+0049E8EA - 6a 27                      - push 27                            0x27 = 谷仓
+0049E8EC - 51                         - push ecx
+0049E8ED - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 0x0780b3cc
+0049E8F1 - e8 0a fc ff ff             - call 0049e500                      判断坐标周边一格有无指定设施
+0049E8F6 - 85 c0                      - test eax,eax
+0049E8F8 - 74 28                      - je 0049e922                        若无谷仓则跳转到军屯农处理
+0049E8FA - 8d 04 5b                   - lea eax,[ebx+ebx*2]
+0049E8FD - 99                         - cdq
+0049E8FE - 2b c2                      - sub eax,edx
+0049E900 - d1 f8                      - sar eax,1                          以上4句，有谷仓设施产量*1.5
+0049E902 - 03 e8                      - add ebp,eax                        ebp = 城市收粮累加+考虑谷仓的设施产量
+0049E904 - eb 48                      - jmp 0049e94e                       跳转到循环下一个内政设施
+[农场Lv2]
+0049E906 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E909 - 85 c0                      - test eax,eax
+0049E90B - 75 97                      - jne 0049e8a4
+0049E90D - be 20 00 00 00             - mov esi,00000020                   如果农场Lv2未建设完成，则按农场Lv1处理
+0049E912 - eb 99                      - jmp 0049e8ad                       跳转到获取设施类型指针
+[农场Lv3]
+0049E914 - 8b 47 14                   - mov eax,[edi+14]                   eax = 设施是否建设完成
+0049E917 - 85 c0                      - test eax,eax
+0049E919 - 75 89                      - jne 0049e8a4
+0049E91B - be 34 00 00 00             - mov esi,00000034                   如果农场Lv3未建设完成，则按农场Lv2处理
+0049E920 - eb 8b                      - jmp 0049e8ad                       跳转到获取设施类型指针
+[军屯农]
+0049E922 - 83 fe 31                   - cmp esi,31                         0x31 = 军屯农
+0049E925 - 75 25                      - jne 0049e94c
+0049E927 - 8b 54 24 20                - mov edx,[esp+20]                   edx = 城市指针
+0049E92B - 8b 4a 40                   - mov ecx,[edx+40]                   ecx = 城市兵力
+0049E92E - 81 f9 98 3a 00 00          - cmp ecx,00003a98                   0x3a98 = 15000(如果城市兵力不足15000则按15000计算)
+0049E934 - 73 05                      - jae 0049e93b
+0049E936 - b9 98 3a 00 00             - mov ecx,00003a98
+0049E93B - 0f af cb                   - imul ecx,ebx
+0049E93E - b8 73 b2 e7 45             - mov eax,45e7b273
+0049E943 - f7 e1                      - mul ecx
+0049E945 - c1 ea 0c                   - shr edx,0c
+0049E948 - 03 ea                      - add ebp,edx                        ebp = 城市收粮累加+设施产量
+0049E94A - eb 02                      - jmp 0049e94e
+[累计设施产量]
+0049E94C - 03 eb                      - add ebp,ebx                        ebp = 城市收粮累加+设施产量
+
+【循环内政设施】
+0049E94E - 8b 4c 24 10                - mov ecx,[esp+10]
+0049E952 - 8b 44 24 14                - mov eax,[esp+14]                   计数器(从30开始自减)
+0049E956 - 83 c1 08                   - add ecx,08                         ecx = 下一个内政设施指针
+0049E959 - 48                         - dec eax
+0049E95A - 89 4c 24 10                - mov [esp+10],ecx
+0049E95E - 89 44 24 14                - mov [esp+14],eax
+0049E962 - 0f 85 fd fe ff ff          - jne 0049e865                       不为0则循环下一个内政设施
+
+【简单难度收入增加与超级难度玩家收入减少】
+0049E968 - a1 78 19 20 07             - mov eax,[07201978]                 eax = 游戏难度
+0049E96D - 83 e8 00                   - sub eax,00                         0x00 = 简单难度
+0049E970 - 5f                         - pop edi
+0049E971 - 89 6c 24 10                - mov [esp+10],ebp                   [esp+10](实际是[esp+0c]) = 城市累计收粮
+0049E975 - 5b                         - pop ebx
+0049E976 - 74 3d                      - je 0049e9b5
+0049E978 - 83 e8 02                   - sub eax,02                         0x02 = 超级难度
+0049E97B - 75 49                      - jne 0049e9c6
+0049E97D - 8b 4c 24 18                - mov ecx,[esp+18]                   ecx = 城市指针
+0049E981 - 8b 01                      - mov eax,[ecx]
+0049E983 - ff 50 48                   - call dword ptr [eax+48]            是否是玩家势力
+0049E986 - 85 c0                      - test eax,eax
+0049E988 - 8b cd                      - mov ecx,ebp
+0049E98A - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E98F - 75 13                      - jne 0049e9a4                       如果是玩家势力则跳转到超级难度收入减少
+[超级难度AI收入增加]
+0049E991 - 6b c9 7d                   - imul ecx,ecx,7d                    超级难度AI收入增加到125%
+0049E994 - f7 e9                      - imul ecx
+0049E996 - c1 fa 05                   - sar dl,05
+0049E999 - 8b ca                      - mov ecx,edx
+0049E99B - c1 e9 1f                   - shr ecx,1f
+0049E99E - 03 ca                      - add ecx,edx
+0049E9A0 - 8b e9                      - mov ebp,ecx
+0049E9A2 - eb 22                      - jmp 0049e9c6
+[超级难度玩家收入减少]
+0049E9A4 - 6b c9 4b                   - imul ecx,ecx,4b                    超级难度玩家收入减少到75%
+0049E9A7 - f7 e9                      - imul ecx
+0049E9A9 - c1 fa 05                   - sar dl,05
+0049E9AC - 8b c2                      - mov eax,edx
+0049E9AE - c1 e8 1f                   - shr eax,1f
+0049E9B1 - 03 c2                      - add eax,edx
+0049E9B3 - eb 0f                      - jmp 0049e9c4
+[简单难度收入增加]
+0049E9B5 - db 44 24 0c                - fild dword ptr [esp+0c]            [esp+0c] = 城市累计收粮
+0049E9B9 - d8 0d 68 7b 7e 00          - fmul dword ptr [007e7b68]          简单难度收入增加倍率([007e7b68] = 1.25f)
+0049E9BF - e8 b0 90 26 00             - call 00707a74                      浮点计算结果转整数置入eax
+
+【治安影响收入】
+0049E9C4 - 8b e8                      - mov ebp,eax                        ebp = 根据难度增加减少后的收入
+0049E9C6 - 8b 4c 24 18                - mov ecx,[esp+18]                   ecx = 城市指针
+0049E9CA - 8a 81 85 00 00 00          - mov al,[ecx+00000085]              al = 城市治安
+0049E9D0 - 3c 32                      - cmp al,32
+0049E9D2 - 73 02                      - jae 0049e9d6
+0049E9D4 - b0 32                      - mov al,32                          如果治安小于50则按50计算
+0049E9D6 - 0f b6 c8                   - movzx ecx,al                       ecx = 城市治安
+0049E9D9 - 0f af cd                   - imul ecx,ebp                       治安50-100之间，收入线性衰减
+0049E9DC - b8 1f 85 eb 51             - mov eax,51eb851f
+0049E9E1 - f7 e9                      - imul ecx
+0049E9E3 - c1 fa 05                   - sar dl,05
+0049E9E6 - 8b c2                      - mov eax,edx
+0049E9E8 - c1 e8 1f                   - shr eax,1f                         以上6句，eax = eax*0.01
+0049E9EB - 5d                         - pop ebp
+0049E9EC - 03 c2                      - add eax,edx                        eax = 城市收粮计算结果
+0049E9EE - 5e                         - pop esi
+0049E9EF - 83 c4 0c                   - add esp,0c
+0049E9F2 - c2 04 00                   - ret 0004
+
+0049E9F5 - 33 c0                      - xor eax,eax                        eax = 0
+0049E9F7 - 5e                         - pop esi
+0049E9F8 - 83 c4 0c                   - add esp,0c
+0049E9FB - c2 04 00                   - ret 0004
+
+数据区：
+0049EA00 - 99 E8 49 00 06 E9 49 00 14 E9 49 00 4E E9 49 00 
+0049EA10 - 00 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 00 03 03 01 02
+
+
+=====================================================================================================================================================
+
+修改1 - 谷仓对军屯农有效
+0049E900 - e9 3f ac 40 00             - jmp 008a9544
+0049E905 - 90                         - nop
+
+008A9544 - d1 f8                      - sar eax,1
+008A9546 - 8b d8                      - mov ebx,eax
+008A9548 - 83 fe 31                   - cmp esi,31
+008A954B - 0f 85 fb 53 bf ff          - jne 0049e94c                       计算完谷仓效果的农场跳转到累计设施产量
+008A9551 - e9 cc 53 bf ff             - jmp 0049e922                       计算完谷仓效果的军屯农继续计算 
+
+
+=====================================================================================================================================================
+
+修改2 - 谷仓对不邻接设施也有效果
+0049E8EC - 8b 4c 24 24                - mov ecx,[esp+24]                   ecx = 城市指针
+0049E8F0 - 51                         - push ecx
+0049E8F1 - e8 ba f1 ff ff             - call 0049dab0                      判断城市是否有指定设施
+
+
+=====================================================================================================================================================
+
+修改3 - 有“变法”特技则谷仓效果升为2倍
+0049E8F8 - e9 fe 1d 47 00             - jmp 009106fb
+
+009106FB - 0f 84 21 e2 b8 ff          - je 0049e922
+00910701 - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 城市指针
+00910705 - e8 c2 ff ff ff             - call 009106cc                      调用变法判定公共函数
+0091070A - e9 ee e1 b8 ff             - jmp 0049e8fd
+
+009106CC - e8 ef bd b6 ff             - call 0047c4c0                      根据城市指针获取设施指针
+009106D1 - 8b c8                      - mov ecx,eax
+009106D3 - 8b 01                      - mov eax,[ecx]
+009106D5 - 68 8b 00 00 00             - push 0000008b                      0x8b = 变法
+009106DA - ff 50 58                   - call dword ptr [eax+58]            判断城市中是否有持有变法特技的武将
+009106DD - 85 c0                      - test eax,eax
+009106DF - 8d 04 5b                   - lea eax,[ebx+ebx*2]                没有变法则eax = 3*设施产量(返回去再除以2，所以是1.5倍效果)
+009106E2 - 74 02                      - je 009106e6
+009106E4 - 01 d8                      - add eax,ebx                        有变法则eax = 4*设施产量(返回去再除以2，所以是2倍效果)
+009106E6 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改4 - 有“屯田”特技则增加一个军屯农效果(由于该军屯农无坐标，因此不能享受谷仓效果)
+0049E962 - e9 31 bc 40 00             - jmp 008aa598
+0049E967 - 90                         - nop
+
+008AA598 - 83 f8 20                   - cmp eax,20
+008AA59B - 7d 44                      - jnl 008aa5e1                       如果计数器为32则跳出循环
+008AA59D - 85 c0                      - test eax,eax
+008AA59F - 0f 85 c0 42 bf ff          - jne 0049e865                       如果计数器不为0，则表示不是最后一块内政用地，先循环处理内政用地
+008AA5A5 - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 城市指针
+008AA5A9 - e8 12 1f bd ff             - call 0047c4c0                      获取对应的设施指针
+008AA5AE - 8b c8                      - mov ecx,eax
+008AA5B0 - 8b 01                      - mov eax,[ecx]
+008AA5B2 - 6a 4e                      - push 4e                            0x4e = 屯田
+008AA5B4 - ff 50 58                   - call dword ptr [eax+58]            判断城市中有无屯田特技
+008AA5B7 - 85 c0                      - test eax,eax
+008AA5B9 - 74 26                      - je 008aa5e1
+008AA5BB - c7 44 24 14 21 00 00 00    - mov [esp+14],00000021              计数器置33，下次循环变为32，以便跳出循环
+008AA5C3 - be 31 00 00 00             - mov esi,00000031                   0x31 = 军屯农
+008AA5C8 - 56                         - push esi
+008AA5C9 - b9 58 19 20 07             - mov ecx,07201958
+008AA5CE - e8 bd 65 be ff             - call 00490b90                      根据设施类型ID获取设施类型指针
+008AA5D3 - 8b d8                      - mov ebx,eax
+008AA5D5 - 0f b7 9b c0 00 00 00       - movzx ebx,word ptr [ebx+000000c0]  获取军屯农产量参数
+008AA5DC - e9 46 43 bf ff             - jmp 0049e927                       跳转到军屯农计算代码
+008AA5E1 - e9 82 43 bf ff             - jmp 0049e968                       跳出循环到简单难度收入增加与超级难度玩家收入减少

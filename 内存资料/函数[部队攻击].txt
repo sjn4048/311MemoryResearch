@@ -1,0 +1,992 @@
+005AFC70 - 83 ec 24                   - sub esp,24
+005AFC73 - 53                         - push ebx
+005AFC74 - 55                         - push ebp
+005AFC75 - 56                         - push esi
+005AFC76 - 8b 74 24 38                - mov esi,[esp+38]                                       esi = 攻击部队指针（第二个参数）
+005AFC7A - 8b 06                      - mov eax,[esi]                                          
+005AFC7C - 57                         - push edi
+005AFC7D - 8b ce                      - mov ecx,esi
+005AFC7F - ff 50 40                   - call dword ptr [eax+40]                                获得攻击部队所属势力ID
+005AFC82 - 50                         - push eax                                               eax = 势力ID
+005AFC83 - b9 58 19 20 07             - mov ecx,07201958
+005AFC88 - e8 13 0e ee ff             - call 00490aa0                                          根据势力ID获得势力指针
+005AFC8D - 0f bf 4c 24 46             - movsx ecx,word ptr [esp+46]                            ecx = 被攻击坐标Y（第四个参数）
+005AFC92 - 89 44 24 20                - mov [esp+20],eax                                       [esp+20] = 攻击部队势力指针
+005AFC96 - 0f bf 44 24 44             - movsx eax,word ptr [esp+44]                            eax = 被攻击坐标X（第四个参数）
+005AFC9B - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005AFCA1 - 03 c1                      - add eax,ecx
+005AFCA3 - 8d 0c 80                   - lea ecx,[eax+eax*4]
+005AFCA6 - 8d 0c 8d 68 0e fb 06       - lea ecx,[ecx*4+06fb0e68]                               ecx = 坐标格数据地址
+005AFCAD - e8 8e 3e ed ff             - call 00483b40                                        >>猜测是获取被攻击坐标所对应的对象指针
+005AFCB2 - 8b 6c 24 38                - mov ebp,[esp+38]                                       ebp = 一个临时结构体指针（第一个参数）
+005AFCB6 - 89 44 24 18                - mov [esp+18],eax                                       [esp+18] = 被攻击坐标所对应的对象指针
+005AFCBA - 33 c0                      - xor eax,eax
+005AFCBC - b9 20 00 00 00             - mov ecx,00000020                                       ecx = 32
+005AFCC1 - 8b fd                      - mov edi,ebp                                            edi = 临时结构体指针
+005AFCC3 - f3 ab                      - repe stosd
+005AFCC5 - 83 c8 ff                   - or eax,ff                                              eax = -1
+005AFCC8 - 89 45 08                   - mov [ebp+08],eax                                       以下一段为临时结构体的初始化
+005AFCCB - 89 45 50                   - mov [ebp+50],eax
+005AFCCE - 89 45 60                   - mov [ebp+60],eax
+005AFCD1 - 89 45 68                   - mov [ebp+68],eax
+005AFCD4 - 89 45 64                   - mov [ebp+64],eax
+005AFCD7 - 89 45 6c                   - mov [ebp+6c],eax
+005AFCDA - 8b 15 d0 c1 79 00          - mov edx,[0079c1d0] : [FFFFFFFF]                        全局参数？
+005AFCE0 - 89 55 74                   - mov [ebp+74],edx
+005AFCE3 - a1 d0 c1 79 00             - mov eax,[0079c1d0] : [FFFFFFFF]                        全局参数？
+
+【确定计算部队攻击的参数】
+005AFCEB - 8b 44 24 50                - mov eax,[esp+50]                                       eax = 攻击方式 [0=物理攻击, 1=伏兵计略]（第七个参数）
+005AFCEF - 85 c0                      - test eax,eax
+005AFCF1 - b9 01 00 00 00             - mov ecx,00000001                                       ecx = 1
+005AFCF6 - 89 4d 7c                   - mov [ebp+7c],ecx
+005AFCF9 - 74 14                      - je 005afd0f                                            物理攻击使用部队攻击力作为基础进行计算
+005AFCFB - 0f b6 86 c6 00 00 00       - movzx eax,byte ptr [esi+000000c6]                      eax = 攻方部队最高智力
+005AFD02 - 83 e8 05                   - sub eax,05
+005AFD05 - 3b c1                      - cmp eax,ecx                                            eax = (最高智力–5), 下限为1
+005AFD07 - 7c 0d                      - jnge 005afd16
+005AFD09 - 89 44 24 14                - mov [esp+14],eax
+005AFD0D - eb 0b                      - jmp 005afd1a
+005AFD0F - 0f b6 8e c9 00 00 00       - movzx ecx,byte ptr [esi+000000c9]                      ecx = 攻方部队攻击力
+005AFD16 - 89 4c 24 14                - mov [esp+14],ecx                                       [esp+14] = 部队攻击力 或 (最高智力–5)
+
+
+005AFD1A - 8b 7c 24 18                - mov edi,[esp+18]                                       edi = 被攻击坐标所对应的对象指针
+005AFD1E - 8b 17                      - mov edx,[edi]
+005AFD20 - 33 db                      - xor ebx,ebx                                            ebx = 0
+005AFD22 - 6a 0b                      - push 0b
+005AFD24 - 8b cf                      - mov ecx,edi
+005AFD26 - 89 5c 24 54                - mov [esp+54],ebx                                       [esp+54](实际是[esp+50])代表被攻击部队指针，置0
+005AFD2A - 89 5c 24 14                - mov [esp+14],ebx                                       [esp+14](实际是[esp+10])代表被攻击设施指针，置0
+005AFD2E - ff 52 2c                   - call dword ptr [edx+2c]
+005AFD31 - 85 c0                      - test eax,eax
+005AFD33 - 74 1b                      - je 005afd50
+005AFD35 - 8b 1f                      - mov ebx,[edi]
+005AFD37 - e8 24 91 eb ff             - call 00468e60
+005AFD3C - 50                         - push eax
+005AFD3D - 8b cf                      - mov ecx,edi
+005AFD3F - ff 53 2c                   - call dword ptr [ebx+2c]
+005AFD42 - 8b d8                      - mov ebx,eax
+005AFD44 - f7 db                      - neg ebx
+005AFD46 - 1b db                      - sbb ebx,ebx
+005AFD48 - 23 df                      - and ebx,edi
+005AFD4A - 89 5c 24 50                - mov [esp+50],ebx                                       [esp+50] = 被攻击部队指针
+005AFD4E - eb 32                      - jmp 005afd82
+005AFD50 - 8b 07                      - mov eax,[edi]
+005AFD52 - 89 44 24 38                - mov [esp+38],eax
+005AFD56 - e8 15 37 fc ff             - call 00573470
+005AFD5B - 8b 7c 24 18                - mov edi,[esp+18]
+005AFD5F - 50                         - push eax
+005AFD60 - 8b 44 24 3c                - mov eax,[esp+3c]
+005AFD64 - 8b cf                      - mov ecx,edi
+005AFD66 - ff 50 2c                   - call dword ptr [eax+2c]
+005AFD69 - f7 d8                      - neg eax
+005AFD6B - 1b c0                      - sbb eax,eax
+005AFD6D - 23 c7                      - and eax,edi
+005AFD6F - 8b c8                      - mov ecx,eax
+005AFD71 - 89 44 24 10                - mov [esp+10],eax
+005AFD75 - e8 96 80 ed ff             - call 00487e10
+005AFD7A - 85 c0                      - test eax,eax
+005AFD7C - 75 04                      - jne 005afd82
+005AFD7E - 89 44 24 10                - mov [esp+10],eax                                       [esp+10] = 被攻击设施指针
+
+【计算战法成功率和战法攻击力】
+005AFD82 - 8b 7c 24 40                - mov edi,[esp+40]                                       edi = 使用战法ID（第三个参数）
+005AFD86 - 85 ff                      - test edi,edi                                           edi<0或>31则认为是普攻
+005AFD88 - c7 44 24 1c 00 00 00 00    - mov [esp+1c],00000000                                  [esp+1c]代表战法的攻击力，置0
+005AFD90 - 7c 3c                      - jnge 005afdce                                          跳过战法成功判断
+005AFD92 - 83 ff 1f                   - cmp edi,1f                                             
+005AFD95 - 7f 37                      - jg 005afdce                                            跳过战法成功判断
+005AFD97 - 57                         - push edi
+005AFD98 - b9 58 19 20 07             - mov ecx,07201958
+005AFD9D - e8 ee 0e ee ff             - call 00490c90                                          根据战法ID获得战法指针
+005AFDA2 - 0f b6 40 2e                - movzx eax,byte ptr [eax+2e]                            获得战法的攻击力
+005AFDA6 - 8b 16                      - mov edx,[esi]                                          esi = 攻击部队指针
+005AFDA8 - 8b ce                      - mov ecx,esi
+005AFDAA - 89 44 24 1c                - mov [esp+1c],eax                                       [esp+1c] = 战法的攻击力
+005AFDAE - ff 52 3c                   - call dword ptr [edx+3c]                                获得部队坐标地址
+005AFDB1 - 8b 4c 24 18                - mov ecx,[esp+18]                                       ecx = 被攻击部队指针
+005AFDB5 - 8b 10                      - mov edx,[eax]                                          edx = 坐标地址置入
+005AFDB7 - 57                         - push edi                                               edi是使用战法ID
+005AFDB8 - 51                         - push ecx                                               ecx是被攻击部队指针
+005AFDB9 - 52                         - push edx                                               edx是攻击方坐标地址
+005AFDBA - 56                         - push esi                                               esi是攻击部队指针
+005AFDBB - e8 90 fa ff ff             - call 005af850                                          计算战法成功率
+005AFDC0 - 50                         - push eax
+005AFDC1 - e8 0a 24 ec ff             - call 004721d0                                          计算战法是否成功
+005AFDC6 - 83 c4 14                   - add esp,14
+005AFDC9 - 89 45 54                   - mov [ebp+54],eax                                       战法是否成功置入[ebp+54]
+005AFDCC - eb 25                      - jmp 005afdf3                                           跳转（即无论战法成功与否，都使用战法攻击力计算伤害）
+[普攻情况下的普攻攻击力计算]
+005AFDCE - 8b 06                      - mov eax,[esi]                                          esi是攻击部队指针
+005AFDD0 - 8b ce                      - mov ecx,esi
+005AFDD2 - ff 50 3c                   - call dword ptr [eax+3c]                                获得部队坐标地址
+005AFDD5 - 8b 4c 24 44                - mov ecx,[esp+44]                                       ecx = 被攻击方坐标X,Y值
+005AFDD9 - 8b 10                      - mov edx,[eax]                                          edx = 攻击方坐标X,Y值
+005AFDDB - 51                         - push ecx
+005AFDDC - 52                         - push edx
+005AFDDD - b9 68 0e fb 06             - mov ecx,06fb0e68
+005AFDE2 - e8 c9 3f ed ff             - call 00483db0                                          判断两坐标是否邻接
+005AFDE7 - 85 c0                      - test eax,eax
+005AFDE9 - 74 08                      - je 005afdf3
+005AFDEB - c7 44 24 1c 0a 00 00 00    - mov [esp+1c],0000000a                                  [esp+1c]代表战法（或普攻）的攻击力，置10（即以10为基础计算邻接普攻攻击力，以0为基础计算远程普攻攻击力）
+
+【判断攻击部队周围是否有太鼓台】
+005AFDF3 - 8b 06                      - mov eax,[esi]                                          esi是攻击部队指针
+005AFDF5 - 8b ce                      - mov ecx,esi
+005AFDF7 - ff 50 3c                   - call dword ptr [eax+3c]                                获得部队坐标地址
+005AFDFA - 8b 4c 24 20                - mov ecx,[esp+20]                                       [esp+20]代表攻击部队势力指针
+005AFDFE - 6a 00                      - push 00                                                应该是调004843a0的第一个参数
+005AFE00 - 51                         - push ecx
+005AFE01 - b9 58 19 20 07             - mov ecx,07201958
+005AFE06 - 8b f8                      - mov edi,eax                                            edi = 攻击部队坐标地址
+005AFE08 - e8 63 14 ee ff             - call 00491270                                          根据势力指针获得势力ID
+005AFE0D - 8b 17                      - mov edx,[edi]                                          eax = 攻击部队坐标X,Y值
+005AFE0F - 50                         - push eax                                               势力指针
+005AFE10 - 68 50 9a 58 00             - push 00589a50                                          判断有无太鼓台的函数指针
+005AFE15 - 6a 03                      - push 03                                                太鼓台的范围
+005AFE17 - 52                         - push edx                                               中心坐标
+005AFE18 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005AFE1D - e8 7e 45 ed ff             - call 004843a0                                          判断某坐标指定范围内是否有传入的函数指针返回为True的对象
+005AFE24 - 89 44 24 28                - mov [esp+28],eax                                       [esp+28] = 是否是太鼓台
+005AFE28 - 89 45 04                   - mov [ebp+04],eax                                       [ebp+04] = 是否有太鼓台
+
+【判断被攻击部队周围是否有防御设施】
+005AFE22 - 85 db                      - test ebx,ebx                                           判断被攻击部队指针是否为空
+005AFE2B - 0f 84 96 00 00 00          - je 005afec7                                            为空则跳转
+005AFE31 - 8b 03                      - mov eax,[ebx]                                          ebx为被攻击部队指针
+005AFE33 - 8b cb                      - mov ecx,ebx
+005AFE35 - ff 50 40                   - call dword ptr [eax+40]                                获得势力ID
+005AFE38 - 50                         - push eax
+005AFE39 - b9 58 19 20 07             - mov ecx,07201958
+005AFE3E - e8 5d 0c ee ff             - call 00490aa0                                          根据势力ID获得势力指针
+005AFE43 - 6a 19                      - push 19                                                25 = 强化设施
+005AFE45 - 8b c8                      - mov ecx,eax
+005AFE47 - 89 44 24 28                - mov [esp+28],eax                                       [esp+28](实际是[esp+24]) = 被攻击势力指针
+005AFE4B - bf 03 00 00 00             - mov edi,00000003                                       edi = 3（阵）
+005AFE50 - e8 8b 13 ed ff             - call 004811e0                                          判断被攻击势力是否拥有强化设施科技
+005AFE55 - 85 c0                      - test eax,eax
+005AFE57 - 74 05                      - je 005afe5e
+005AFE59 - bf 04 00 00 00             - mov edi,00000004                                       edi = 4（砦）
+005AFE5E - 8b 4c 24 24                - mov ecx,[esp+24]                                       ecx = 被攻击势力指针
+005AFE62 - 6a 1a                      - push 1a                                                26 = 强化城墙
+005AFE64 - e8 77 13 ed ff             - call 004811e0                                          判断被攻击势力是否拥有强化城墙科技
+005AFE69 - 85 c0                      - test eax,eax
+005AFE6B - 74 05                      - je 005afe72
+005AFE6D - bf 05 00 00 00             - mov edi,00000005                                       edi = 5（城塞）
+005AFE72 - 57                         - push edi
+005AFE73 - b9 58 19 20 07             - mov ecx,07201958
+005AFE78 - e8 13 0d ee ff             - call 00490b90                                          根据设施类型ID获得设施类型指针
+005AFE7D - 8a 88 c8 00 00 00          - mov cl,[eax+000000c8]                                  cl = 设施效果范围
+005AFE83 - 8b 13                      - mov edx,[ebx]
+005AFE85 - 88 4c 24 38                - mov [esp+38],cl                                        [esp+38] = 设施效果范围
+005AFE89 - 8b cb                      - mov ecx,ebx
+005AFE8B - ff 52 3c                   - call dword ptr [edx+3c]
+005AFE8E - 89 44 24 2c                - mov [esp+2c],eax                                       [esp+2c] = 被攻击对象坐标
+005AFE92 - 8b 44 24 24                - mov eax,[esp+24]                                       eax = 被攻击势力指针
+005AFE96 - 6a 00                      - push 00                                                应该是调004843a0的第一个参数
+005AFE98 - 50                         - push eax                                               
+005AFE99 - b9 58 19 20 07             - mov ecx,07201958
+005AFE9E - e8 cd 13 ee ff             - call 00491270                                          根据势力指针获得势力ID
+005AFEA3 - 0f b6 4c 24 3c             - movzx ecx,byte ptr [esp+3c]                            ecx = [esp+3c](实际是[esp+38])为设施效果范围
+005AFEA8 - 8b 54 24 30                - mov edx,[esp+30]                                       edx = [esp+30](实际是[esp+2c])为被攻击对象坐标地址
+005AFEAC - 50                         - push eax                                               势力指针
+005AFEAD - 8b 02                      - mov eax,[edx]                                          eax = 被攻击对象坐标X,Y值
+005AFEAF - 68 d0 8b 59 00             - push 00598bd0                                          判断有无相关防御设施的函数指针
+005AFEB4 - 51                         - push ecx                                               防御设施的范围
+005AFEB5 - 50                         - push eax                                               中心坐标
+005AFEB6 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005AFEBB - e8 e0 44 ed ff             - call 004843a0                                          判断某坐标指定范围内是否有传入的函数指针返回为True的对象
+005AFEC0 - 85 c0                      - test eax,eax
+005AFEC2 - 74 03                      - je 005afec7
+005AFEC4 - 89 7d 08                   - mov [ebp+08],edi                                       [ebp+08] = 被攻击部队周边有的防御设施类型（3、4、5）
+
+【攻击部队兵力不能大于主将能带领的最大兵力】
+005AFEC7 - 8b 16                      - mov edx,[esi]                                          esi为攻击部队指针
+005AFEC9 - 8b ce                      - mov ecx,esi
+005AFECB - ff 52 50                   - call dword ptr [edx+50]                                取得攻击部队兵力
+005AFECE - 8b ce                      - mov ecx,esi
+005AFED0 - 89 44 24 24                - mov [esp+24],eax                                       [esp+24] = 攻击部队兵力
+005AFED4 - e8 67 5b ee ff             - call 00495a40                                          获取部队主将地址
+005AFED9 - 8b f8                      - mov edi,eax                                            edi = 部队主将地址
+005AFEDB - 57                         - push edi
+005AFEDC - e8 4f a7 ec ff             - call 0047a630                                          校验指针
+005AFEE1 - 83 c4 04                   - add esp,04
+005AFEE4 - 85 c0                      - test eax,eax
+005AFEE6 - 74 20                      - je 005aff08                                            校验指针失败则跳转
+005AFEE8 - 8b cf                      - mov ecx,edi
+005AFEEA - e8 01 a6 ed ff             - call 0048a4f0                                          获得主将最大带兵数量
+005AFEEF - 8b 4c 24 24                - mov ecx,[esp+24]                                       ecx = 攻击部队兵力
+005AFEF3 - 0f b7 c0                   - movzx eax,ax                                           eax = 主将最大带兵数量
+005AFEF6 - 3b c1                      - cmp eax,ecx                                            比较兵力上限
+005AFEF8 - 7d 0e                      - jnl 005aff08
+005AFEFA - 8b cf                      - mov ecx,edi
+005AFEFC - e8 ef a5 ed ff             - call 0048a4f0                                          获得主将最大带兵数量
+005AFF01 - 0f b7 c8                   - movzx ecx,ax
+005AFF04 - 89 4c 24 24                - mov [esp+24],ecx                                       [esp+24]为攻击部队兵力，置为主将最大带兵数量
+
+【判定战法是否爆击】
+005AFF08 - 8b 7c 24 40                - mov edi,[esp+40]                                       edi = 使用战法ID（第三个参数）
+005AFF0C - 85 ff                      - test edi,edi
+005AFF0E - 7c 15                      - jnge 005aff25
+005AFF10 - 83 ff 1f                   - cmp edi,1f
+005AFF13 - 7f 10                      - jg 005aff25                                            如果战法ID不在0～31的范围之间，即普攻，则无需判定战法是否成功
+005AFF15 - 8b 45 54                   - mov eax,[ebp+54]                                       [ebp+54] = 战法是否成功
+005AFF18 - 85 c0                      - test eax,eax
+005AFF1A - 75 09                      - jne 005aff25                                           成功则跳转到战法爆击判定
+005AFF1C - c7 45 00 00 00 00 00       - mov [ebp+00],00000000                                  战法不成功的情况，[ebp+00]为战法是否爆击，直接置0
+005AFF23 - eb 53                      - jmp 005aff78                                           跳过战法爆击判定
+005AFF25 - 8b 44 24 4c                - mov eax,[esp+4c]                                       eax = ??（第六个参数）
+005AFF29 - 85 c0                      - test eax,eax
+005AFF2B - 74 09                      - je 005aff36
+005AFF2D - c7 45 00 01 00 00 00       - mov [ebp+00],00000001                                  战法成功且[esp+4c]不为0的情况，[ebp+00]为战法是否爆击，直接置1
+005AFF34 - eb 42                      - jmp 005aff78                                           结束判定
+005AFF36 - 8b 44 24 48                - mov eax,[esp+48]                                       eax = 是否是反伤计算（第五个参数）
+005AFF3A - 85 c0                      - test eax,eax                                          
+005AFF3C - 74 09                      - je 005aff47
+005AFF3E - c7 45 00 00 00 00 00       - mov [ebp+00],00000000                                  战法成功且[esp+48]不为0的情况，[ebp+00]为战法是否爆击，直接置0
+005AFF45 - eb 31                      - jmp 005aff78                                           结束判定
+005AFF47 - 8b 16                      - mov edx,[esi]                                          esi为攻击部队指针
+005AFF49 - 8b ce                      - mov ecx,esi
+005AFF4B - ff 52 3c                   - call dword ptr [edx+3c]                                获得部队坐标地址
+005AFF4E - 8b 4c 24 44                - mov ecx,[esp+44]                                       ecx = 被攻击坐标X,Y值（第四个参数）
+005AFF52 - 8b 10                      - mov edx,[eax]                                          edx = 攻击部队坐标X,Y值
+005AFF54 - 51                         - push ecx
+005AFF55 - 52                         - push edx
+005AFF56 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005AFF5B - e8 50 3e ed ff             - call 00483db0                                          判断两坐标是否邻接（邻接=1，不邻接=0）
+005AFF60 - f7 d8                      - neg eax
+005AFF62 - 1b c0                      - sbb eax,eax
+005AFF64 - 40                         - inc eax                                                eax = 是否邻接取反（邻接=0，不邻接=1）
+005AFF65 - 50                         - push eax                                             >>猜测用于白马的爆击判定
+005AFF66 - 8b 44 24 1c                - mov eax,[esp+1c]                                       [esp+1c](实际是[esp+18])是被攻击方指针
+005AFF6A - 50                         - push eax
+005AFF6B - 8b c7                      - mov eax,edi                                            edi = 使用战法ID
+005AFF6D - e8 9e e6 ff ff             - call 005ae610                                          判断战法（或普攻）是否爆击
+005AFF72 - 83 c4 08                   - add esp,08
+005AFF75 - 89 45 00                   - mov [ebp+00],eax                                       [ebp+00] = 战法是否爆击
+
+【计算攻击伤害】
+005AFF78 - 85 db                      - test ebx,ebx                                           ebx是被攻击部队指针
+005AFF7A - 0f 85 d7 00 00 00          - jne 005b0057                                           被攻击部队指针不为空则跳转
+005AFF80 - 8b 44 24 10                - mov eax,[esp+10]                                       eax = 被攻击设施指针
+005AFF84 - 85 c0                      - test eax,eax
+005AFF86 - 0f 84 c5 04 00 00          - je 005b0451                                            被攻击对象既不是部队也不是设施，则跳转
+[被攻击对象为设施的情况下获取设施兵力]
+005AFF8C - 8b 7c 24 10                - mov edi,[esp+10]                                       edi = 被攻击设施指针
+005AFF90 - 8d 44 24 2c                - lea eax,[esp+2c]                                       eax = 被攻击对象坐标地址
+005AFF94 - 50                         - push eax
+005AFF95 - 8d 4c 24 20                - lea ecx,[esp+20]                                       ？？ecx = 攻击战法（或普攻）的攻击力[esp+40](实际是[esp+1c])
+005AFF99 - 51                         - push ecx
+005AFF9A - 8d 54 24 40                - lea edx,[esp+40]                                       [esp+40](实际是[esp+38])
+005AFF9E - 52                         - push edx
+005AFF9F - 8d 44 24 3c                - lea eax,[esp+3c]
+005AFFA3 - e8 08 df ff ff             - call 005adeb0                                          获得被攻击设施太守的统武较大值和实际指挥兵力（城市兵力大于太守指挥兵力则取太守指挥兵力）
+005AFFA8 - 8b 07                      - mov eax,[edi]                                          edi为被攻击设施指针
+005AFFAA - 83 c4 0c                   - add esp,0c
+005AFFAD - 8b cf                      - mov ecx,edi
+005AFFAF - ff 50 50                   - call dword ptr [eax+50]                                eax = 被攻击设施的兵力
+005AFFB2 - 8b 74 24 38                - mov esi,[esp+38]                                       esi = ？？
+005AFFB6 - 8b 7c 24 2c                - mov edi,[esp+2c]                                       edi = 被攻击设施坐标地址
+[开始计算伤害]
+005AFFBA - 8b 4c 24 28                - mov ecx,[esp+28]                                       ecx = 是否有太鼓台
+005AFFBE - 8b 54 24 1c                - mov edx,[esp+1c]                                       edx = 战法（或普攻）攻击力
+005AFFC2 - 8b 5c 24 24                - mov ebx,[esp+24]                                       ebx = 攻击部队兵力
+005AFFC6 - 57                         - push edi                                               edi = 攻击对象为部队的情况是被攻击部队兵力/攻击对象为设施的情况是？？
+005AFFC7 - 51                         - push ecx
+005AFFC8 - 52                         - push edx
+005AFFC9 - 89 45 1c                   - mov [ebp+1c],eax                                       [ebp+1c] = 被攻击部队兵力
+005AFFCC - 8b 44 24 20                - mov eax,[esp+20]                                       eax = [esp+20](实际是[esp+14])，即部队攻击力 或 最高智力–5
+005AFFD0 - 56                         - push esi                                               esi = 攻击对象为部队的情况是部队防御力/攻击对象为设施的情况是？？
+005AFFD1 - 50                         - push eax
+005AFFD2 - e8 59 dc ff ff             - call 005adc30
+  005ADC30 - 51                         - push ecx
+  005ADC31 - b8 1f 85 eb 51             - mov eax,51eb851f
+  005ADC36 - f7 eb                      - imul ebx                                             ebx = 攻击部队兵力
+  005ADC38 - c1 fa 05                   - sar dl,05
+  005ADC3B - 8b c2                      - mov eax,edx
+  005ADC3D - c1 e8 1f                   - shr eax,1f                                           ebx×0.01
+  005ADC40 - 8d 8c 02 2c 01 00 00       - lea ecx,[edx+eax+0000012c]                           {参数A} = ebx×0.01 + 300
+  005ADC47 - 55                         - push ebp
+  005ADC48 - 8b 6c 24 0c                - mov ebp,[esp+0c]                                     ebp = 部队攻击力（第一个参数）
+  005ADC4C - 56                         - push esi
+  005ADC4D - 8d 75 32                   - lea esi,[ebp+32]                                     {参数B}esi = 部队攻击力（第一个参数） + 50
+  005ADC50 - 0f af ce                   - imul ecx,esi
+  005ADC53 - 0f af ce                   - imul ecx,esi                                         ecx = {参数A}×{参数B}×{参数B}
+  005ADC56 - b8 1f 85 eb 51             - mov eax,51eb851f
+  005ADC5B - f7 e9                      - imul ecx
+  005ADC5D - c1 fa 05                   - sar dl,05
+  005ADC60 - 8b f2                      - mov esi,edx
+  005ADC62 - c1 ee 1f                   - shr esi,1f
+  005ADC65 - 03 f2                      - add esi,edx                                          {攻击基数}esi = {参数A}×{参数B}×{参数B}×0.01
+  005ADC67 - b8 1f 85 eb 51             - mov eax,51eb851f
+  005ADC6C - f7 6c 24 20                - imul [esp+20]                                        [esp+20]为被攻击部队兵力（第五个参数）
+  005ADC70 - c1 fa 05                   - sar dl,05
+  005ADC73 - 8b ca                      - mov ecx,edx
+  005ADC75 - c1 e9 1f                   - shr ecx,1f
+  005ADC78 - 57                         - push edi
+  005ADC79 - 8b 7c 24 18                - mov edi,[esp+18]                                     edi = [esp+18]为被攻击部队防御力（第二个参数）
+  005ADC7D - 8d 8c 0a 2c 01 00 00       - lea ecx,[edx+ecx+0000012c]                           {参数C}ecx = 被攻击部队兵力×0.01 + 300
+  005ADC84 - 83 c7 32                   - add edi,32                                           {参数D}edi = 部队防御力 + 50
+  005ADC87 - 0f af cf                   - imul ecx,edi
+  005ADC8A - 0f af cf                   - imul ecx,edi
+  005ADC8D - b8 1f 85 eb 51             - mov eax,51eb851f
+  005ADC92 - f7 e9                      - imul ecx
+  005ADC94 - c1 fa 05                   - sar dl,05
+  005ADC97 - 8b c2                      - mov eax,edx
+  005ADC99 - c1 e8 1f                   - shr eax,1f
+  005ADC9C - 03 c2                      - add eax,edx                                          {防御基数}eax = {参数C}×{参数D}×{参数D}×0.01
+  005ADC9E - 3b f0                      - cmp esi,eax                                          两者比较
+  005ADCA0 - bf 01 00 00 00             - mov edi,00000001                                     edi = 1
+  005ADCA5 - 8d 0c 30                   - lea ecx,[eax+esi]                                    {攻防基数和}ecx = esi + eax
+  005ADCA8 - 7c 0e                      - jnge 005adcb8
+  [{攻击基数}较大的情况]
+  005ADCAA - 8b c6                      - mov eax,esi
+  005ADCAC - 6b c0 64                   - imul eax,eax,64                                      
+  005ADCAF - 99                         - cdq
+  005ADCB0 - f7 f9                      - idiv ecx                                             eax = {攻击基数}×100 / {攻防基数和}
+  005ADCB2 - 89 44 24 14                - mov [esp+14],eax                                     计算结果置入[esp+14]（覆盖第一个参数）
+  005ADCB6 - eb 19                      - jmp 005adcd1
+  [{防御基数}较大的情况]
+  005ADCB8 - 6b c0 64                   - imul eax,eax,64
+  005ADCBB - 99                         - cdq
+  005ADCBC - f7 f9                      - idiv ecx                                             eax = {防御基数}×100 / {攻防基数和}
+  005ADCBE - b9 64 00 00 00             - mov ecx,00000064
+  005ADCC3 - 89 7c 24 14                - mov [esp+14],edi                                     下限是1
+  005ADCC7 - 2b c8                      - sub ecx,eax                                          ecx = 100 - {防御基数}×100 / {攻防基数和} （其实还是{攻击基数}×100 / {攻防基数和}）
+  005ADCC9 - 3b cf                      - cmp ecx,edi                                          与下限比较
+  005ADCCB - 7c 04                      - jnge 005adcd1
+  005ADCCD - 89 4c 24 14                - mov [esp+14],ecx                                     计算结果置入[esp+14]
+  []
+  005ADCD1 - 83 fd 28                   - cmp ebp,28                                           ebp = 部队攻击力
+  005ADCD4 - 7d 05                      - jnl 005adcdb
+  005ADCD6 - bd 28 00 00 00             - mov ebp,00000028                                     部队攻击力低于40则按40计算
+  005ADCDB - 8b 74 24 18                - mov esi,[esp+18]                                     esi = 被攻击部队防御力（第二个参数）
+  005ADCDF - 8b cd                      - mov ecx,ebp
+  005ADCE1 - 0f af cd                   - imul ecx,ebp                                         ecx = ebp×ebp
+  005ADCE4 - 83 fe 28                   - cmp esi,28                                           
+  005ADCE7 - 7d 05                      - jnl 005adcee
+  005ADCE9 - be 28 00 00 00             - mov esi,00000028                                     被攻击部队防御力小于40则按40计算
+  005ADCEE - 8b c3                      - mov eax,ebx                                          eax = 攻击部队兵力
+  005ADCF0 - 0f af f6                   - imul esi,esi                                         esi = esi×esi
+  [计算一个浮动值]
+  005ADCF3 - 99                         - cdq                                                  CDQ 是一个让很多初学者感到困惑的指令. 它大多出现在除法运算之前. 它实际的作用只是把EDX的所有位都设成EAX最高位的值. 也就是说,当EAX <80000000, EDX 00000000; 当EAX >= 80000000, EDX 则为FFFFFFFF
+  005ADCF4 - 83 e2 03                   - and edx,03                                           由于攻击部队兵力<60000，所以edx必然是0
+  005ADCF7 - 03 c2                      - add eax,edx
+  005ADCF9 - c1 f8 02                   - sar al,02                                            以上三句就在后面8位运算，得到相对于攻击兵力（+/-128）的浮动值，不影响大局
+  005ADCFC - 3b c7                      - cmp eax,edi                                          以下四句设置{参与攻击兵力}下限为1
+  005ADCFE - 89 7c 24 18                - mov [esp+18],edi
+  005ADD02 - 7c 04                      - jnge 005add08
+  005ADD04 - 89 44 24 18                - mov [esp+18],eax
+  005ADD08 - db 44 24 18                - fild dword ptr [esp+18]                              {参与攻击兵力}准备进行浮点运算
+  005ADD0C - 2b ce                      - sub ecx,esi                                          ecx = 部队攻击力平方 - 被攻击部队防御力平方
+  005ADD0E - b8 b5 81 4e 1b             - mov eax,1b4e81b5
+  005ADD13 - f7 e9                      - imul ecx
+  005ADD15 - d9 fa                      - fsqrt                                                {参与攻击兵力}开根号
+  005ADD17 - c1 fa 05                   - sar dl,05
+  005ADD1A - 8b c2                      - mov eax,edx
+  005ADD1C - c1 e8 1f                   - shr eax,1f
+  005ADD1F - 03 c2                      - add eax,edx                                          {攻击防御差}eax = ecx×1/300
+  005ADD21 - ba 00 00 00 00             - mov edx,00000000
+  005ADD26 - 0f 98 c2                   - sets dl                                              edx = 如果eax是正值为0，负值为1
+  005ADD29 - 8b cb                      - mov ecx,ebx                                          ecx = 攻击部队兵力
+  005ADD2B - 5f                         - pop edi
+  005ADD2C - 5e                         - pop esi
+  005ADD2D - 5d                         - pop ebp
+  005ADD2E - 4a                         - dec edx
+  005ADD2F - 23 d0                      - and edx,eax                                          如果{攻击防御差} < 0， {攻击防御差} = 0
+  005ADD31 - 89 14 24                   - mov [esp],edx
+  005ADD34 - 2b 4c 24 18                - sub ecx,[esp+18]                                     ecx = 攻击部队兵力 - {参与攻击兵力}
+  005ADD38 - b8 d3 4d 62 10             - mov eax,10624dd3
+  005ADD3D - f7 e9                      - imul ecx
+  005ADD3F - d9 05 b0 b5 84 00          - fld dword ptr [0084b5b0] : [(float)40.0000]
+  005ADD45 - c1 fa 07                   - sar dl,07
+  005ADD48 - 8b c2                      - mov eax,edx
+  005ADD4A - c1 e8 1f                   - shr eax,1f
+  005ADD4D - 03 c2                      - add eax,edx                                          eax = （攻击部队兵力 - {参与攻击兵力}） * 0.0005
+  005ADD4F - b9 00 00 00 00             - mov ecx,00000000
+  005ADD54 - 0f 98 c1                   - sets cl                                              ecx = 如果eax是正值为0，负值为1
+  005ADD57 - d8 d9                      - fcomp st(0),st(1)                                    浮点数比较，{参与攻击兵力}开根号 与 40
+  005ADD59 - 49                         - dec ecx
+  005ADD5A - 23 c8                      - and ecx,eax                                          如果eax < 0，ecx = 0，否则ecx = eax
+  005ADD5C - df e0                      - fnstsw ax                                            eax = 计算结果
+  005ADD5E - 89 4c 24 0c                - mov [esp+0c],ecx
+  005ADD62 - f6 c4 05                   - test ah,05
+  005ADD65 - 7a 08                      - jp 005add6f
+  
+  005ADD67 - dd d8                      - fstp st(0)
+  005ADD69 - d9 05 b0 b5 84 00          - fld dword ptr [0084b5b0] : [(float)40.0000]          如果{参与攻击兵力}开根号<40，按40算
+  005ADD6F - db 44 24 10                - fild dword ptr [esp+10]                              [esp+10] = 战法（或普攻）攻击力（第三个参数）
+  005ADD73 - 8b 54 24 14                - mov edx,[esp+14]                                     edx = 是否有太鼓台加成（第四个参数）
+  005ADD77 - 83 c2 0a                   - add edx,0a                                           攻击基数10
+  005ADD7A - b8 1f 85 eb 51             - mov eax,51eb851f
+  005ADD7F - d8 0d 14 b2 77 00          - fmul dword ptr [0077b214] : [(float)64.0000]         {参与攻击兵力}开根号×64
+  005ADD85 - d9 fa                      - fsqrt                                                {参与攻击兵力}开根号×64 再开根号
+  005ADD87 - da 44 24 0c                - fiadd [esp+0c]                                       很小的一个数，几乎可以忽略不计
+  005ADD8B - 89 54 24 0c                - mov [esp+0c],edx
+  005ADD8F - f7 eb                      - imul ebx
+  005ADD91 - da 04 24                   - fiadd [esp]                                          +{攻击防御差}
+  005ADD94 - c1 fa 06                   - sar dl,06
+  005ADD97 - 8b c2                      - mov eax,edx
+  005ADD99 - c1 e8 1f                   - shr eax,1f
+  005ADD9C - 03 c2                      - add eax,edx                                          eax = 攻击部队兵力×0.005
+  005ADD9E - d8 05 80 cc 79 00          - fadd dword ptr [0079cc80] : [(float)50.0000]         +50
+  005ADDA4 - da 4c 24 0c                - fimul [esp+0c]                                       ×10，或11
+  005ADDA8 - 89 44 24 0c                - mov [esp+0c],eax
+  005ADDAC - da 4c 24 08                - fimul [esp+08]                                       ×{攻击基数}×100 / {攻防基数和}
+  005ADDB0 - de c9                      - fmulp st(9),st(0)                                    ×[esp+10] = 战法（或普攻）攻击力（第三个参数）
+  005ADDB2 - d8 0d ac b5 84 00          - fmul dword ptr [0084b5ac] : [39F9A934]
+  005ADDB8 - da 44 24 0c                - fiadd [esp+0c]                                       +攻击部队兵力×0.005
+  005ADDBC - 59                         - pop ecx
+  005ADDBD - c3                         - ret
+005AFFD7 - d9 5c 24 4c                - fstp dword ptr [esp+4c]                                [esp+4c](实际是[esp+38])为伤害的浮点值
+005AFFDF - 83 c4 14                   - add esp,14
+
+【以下开始各种加成或衰减处理】
+005AFFDB - 8b 44 24 24                - mov eax,[esp+24]                                       eax = [esp+24](实际是[esp+10]，被攻击对象如果是设施则为设施指针，这句话和上句位置颠倒)
+005AFFE2 - 85 c0                      - test eax,eax
+005AFFE4 - 0f 84 21 01 00 00          - je 005b010b                                            跳转到被攻击对象为部队的情况
+
+【攻击对象是设施的倍率修正】
+[井栏处理]
+005AFFEA - 8b 4c 24 3c                - mov ecx,[esp+3c]                                       ecx = 攻击部队指针（第二个参数）
+005AFFEE - 8b 81 a8 00 00 00          - mov eax,[ecx+000000a8]                                 eax = 攻击部队兵种
+005AFFF4 - 83 f8 06                   - cmp eax,06                                             6 = 井栏
+005AFFF7 - 75 7c                      - jne 005b0075                                           不是井栏跳转
+005AFFF9 - d9 44 24 38                - fld dword ptr [esp+38]                                 
+005AFFFD - d8 0d 0c 82 7e 00          - fmul dword ptr [007e820c]                              井栏对对全据点士兵伤害的倍率指标
+005B0003 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B0007 - 8b 7c 24 50                - mov edi,[esp+50]                                       edi = 被攻击部队指针
+005B000B - 8b 5c 24 3c                - mov ebx,[esp+3c]                                       ebx = 攻击部队指针
+
+【超级难度玩家伤害衰减】
+005B000F - 83 3d 78 19 20 07 02       - cmp dword ptr [07201978],02                            是否是超级难度
+005B0016 - 75 19                      - jne 005b0031
+005B0018 - 8b 03                      - mov eax,[ebx]
+005B001A - 8b cb                      - mov ecx,ebx
+005B001C - ff 50 48                   - call dword ptr [eax+48]                                攻击部队是否是玩家部队
+005B001F - 85 c0                      - test eax,eax
+005B0021 - 74 0e                      - je 005b0031
+005B0023 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0027 - d8 0d 88 b3 77 00          - fmul dword ptr [0077b388]                              伤害×0.75
+005B002D - d9 5c 24 38                - fstp dword ptr [esp+38]                                [esp+38] = 衰减后的伤害 
+[反伤计算]
+005B0031 - 8b 44 24 48                - mov eax,[esp+48]                                       eax = 是否是反伤（第五个参数）
+005B0035 - 33 f6                      - xor esi,esi                                            esi = 0
+005B0037 - 3b c6                      - cmp eax,esi                                            
+005B0039 - 0f 84 4b 03 00 00          - je 005b038a                                            如果此参数为0则跳转
+005B003F - 83 f8 02                   - cmp eax,02                                             2代表是战法反击伤害计算
+005B0042 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0046 - 0f 85 c6 02 00 00          - jne 005b0312                                           如果此参数不为2则跳转
+005B004C - d8 0d e8 b6 84 00          - fmul dword ptr [0084b6e8]                              攻击方所受到反击伤害的减轻倍率(0.4)
+005B0052 - e9 c1 02 00 00             - jmp 005b0318
+
+【被攻击对象为部队的情况下获取部队防御力和兵力，此段代码应该承接在005AFF7A处】
+005B0057 - 0f b6 b3 ca 00 00 00       - movzx esi,byte ptr [ebx+000000ca]                      esi = 被攻击部队防御力
+005B005E - 53                         - push ebx                                               ebx是被攻击部队指针
+005B005F - e8 7c db ff ff             - call 005adbe0                                          获得被攻击部队兵力（会比较是否超出主将最高带兵值）
+005B0064 - 8b 13                      - mov edx,[ebx]
+005B0066 - 83 c4 04                   - add esp,04
+005B0069 - 8b cb                      - mov ecx,ebx
+005B006B - 8b f8                      - mov edi,eax                                            edi = 被攻击部队兵力
+005B006D - ff 52 50                   - call dword ptr [edx+50]                                eax = 被攻击部队兵力
+005B0070 - e9 45 ff ff ff             - jmp 005affba                                           跳转回去
+
+【设施 - 投石处理，这段代码应该承接在005B0003之前】
+005B0075 - 83 f8 07                   - cmp eax,07                                             7=投石
+005B0078 - 75 0f                      - jne 005b0089
+005B007A - d9 44 24 38                - fld dword ptr [esp+38]
+005B007E - d8 0d 18 91 84 00          - fmul dword ptr [00849118]                              投石对全据点士兵伤害的倍率指标
+005B0084 - e9 7a ff ff ff             - jmp 005b0003                                           跳回超级难度玩家伤害衰减计算
+
+【设施 - 其它情况处理】
+005B0089 - 8b cb                      - mov ecx,ebx
+005B008B - 6b c9 4b                   - imul ecx,ecx,4b
+005B008E - b8 1f 85 eb 51             - mov eax,51eb851f
+005B0093 - f7 e9                      - imul ecx
+005B0095 - c1 fa 05                   - sar dl,05
+005B0098 - 8b c2                      - mov eax,edx
+005B009A - c1 e8 1f                   - shr eax,1f
+005B009D - 03 c2                      - add eax,edx
+005B009F - 83 f8 01                   - cmp eax,01
+005B00A2 - 7d 05                      - jnl 005b00a9
+005B00A4 - b8 01 00 00 00             - mov eax,00000001
+005B00A9 - 8b 54 24 28                - mov edx,[esp+28]
+005B00AD - 8b 4c 24 1c                - mov ecx,[esp+1c]
+005B00B1 - 57                         - push edi
+005B00B2 - 52                         - push edx
+005B00B3 - 8b 54 24 1c                - mov edx,[esp+1c]
+005B00B7 - 51                         - push ecx
+005B00B8 - 56                         - push esi
+005B00B9 - 52                         - push edx
+005B00BA - 8b d8                      - mov ebx,eax
+005B00BC - e8 6f db ff ff             - call 005adc30                                          又计算攻击伤害
+005B00C1 - d9 5c 24 4c                - fstp dword ptr [esp+4c]
+005B00C5 - 8b 44 24 24                - mov eax,[esp+24]                                       eax = 被攻击设施指针
+005B00C9 - 8b 40 08                   - mov eax,[eax+08]                                       eax = 设施类型
+005B00CC - 83 c4 14                   - add esp,14
+005B00CF - 83 e8 00                   - sub eax,00
+005B00D2 - 74 28                      - je 005b00fc                                            跳转城市
+005B00D4 - 48                         - dec eax
+005B00D5 - 74 16                      - je 005b00ed                                            跳转关所
+005B00D7 - 48                         - dec eax
+005B00D8 - 0f 85 29 ff ff ff          - jne 005b0007                                           不是城市、关所、港口则跳回超级难度衰减计算
+005B00DE - d9 44 24 38                - fld dword ptr [esp+38]
+005B00E2 - d8 0d a0 92 84 00          - fmul dword ptr [008492a0]                              除井栏和投石外对港口士兵伤害的倍率指标
+005B00E8 - e9 16 ff ff ff             - jmp 005b0003                                           跳回超级难度衰减计算
+005B00ED - d9 44 24 38                - fld dword ptr [esp+38]
+005B00F1 - d8 0d e4 b6 84 00          - fmul dword ptr [0084b6e4]                              除井栏和投石外对关所士兵伤害的倍率指标
+005B00F7 - e9 07 ff ff ff             - jmp 005b0003                                           跳回超级难度衰减计算
+005B00FC - d9 44 24 38                - fld dword ptr [esp+38]
+005B0100 - d8 0d e0 b6 84 00          - fmul dword ptr [0084b6e0]                              除井栏和投石外对城市士兵伤害的倍率指标
+005B0106 - e9 f8 fe ff ff             - jmp 005b0003                                           跳回超级难度衰减计算
+
+【攻击对象是部队的倍率修正】
+005B010B - 8b 5c 24 3c                - mov ebx,[esp+3c]                                       ebx = 攻击部队指针
+005B010F - 8b 83 a8 00 00 00          - mov eax,[ebx+000000a8]                                 eax = 攻击部队的兵种（枪=1,戟=2,弩=3,骑=4...）
+005B0115 - 8b 7c 24 50                - mov edi,[esp+50]                                       edi = 被攻击部队指针
+005B0119 - 8b b7 a8 00 00 00          - mov esi,[edi+000000a8]                                 esi = 被攻击部队的兵种
+005B011F - 48                         - dec eax                                                攻击部队的兵种减1（枪=0,戟=1,弩=2,骑=3...）
+005B0120 - 83 f8 0a                   - cmp eax,0a                                             取值范围限定
+005B0123 - 0f 87 e6 fe ff ff          - ja 005b000f
+005B0129 - 0f b6 88 4c 06 5b 00       - movzx ecx,byte ptr [eax+005b064c]
+005B0130 - ff 24 8d 34 06 5b 00       - jmp dword ptr [ecx*4+005b0634]
+[攻击方是枪]
+005B0137 - 8b 54 24 40                - mov edx,[esp+40]                                       edx = 使用战法ID
+005B013B - 52                         - push edx
+005B013C - e8 9f 08 ee ff             - call 004909e0                                          根据战法ID判定战法是否在0～31之间
+005B0141 - 83 c4 04                   - add esp,04
+005B0144 - 85 c0                      - test eax,eax
+005B0146 - 74 28                      - je 005b0170
+005B0148 - 83 fe 02                   - cmp esi,02
+005B014B - 75 0c                      - jne 005b0159
+005B014D - d9 44 24 38                - fld dword ptr [esp+38]
+005B0151 - d8 0d dc b6 84 00          - fmul dword ptr [0084b6dc]
+005B0157 - eb 13                      - jmp 005b016c
+005B0159 - 85 c0                      - test eax,eax
+005B015B - 74 13                      - je 005b0170
+005B015D - 83 fe 04                   - cmp esi,04
+005B0160 - 75 0e                      - jne 005b0170
+005B0162 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0166 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]
+005B016C - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B0170 - 8b 74 24 20                - mov esi,[esp+20]
+005B0174 - 6a 03                      - push 03                                                03 = 3（精锐枪兵）
+005B0176 - 8b ce                      - mov ecx,esi
+005B0178 - e8 63 10 ed ff             - call 004811e0                                          判定势力是否拥有某项科技   
+005B017D - 85 c0                      - test eax,eax
+005B017F - 74 13                      - je 005b0194
+005B0181 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0185 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              精锐枪兵战法与普攻威力倍率指标(0084B6D8=>1.15)
+005B018B - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B018F - e9 7b fe ff ff             - jmp 005b000f
+005B0194 - 6a 00                      - push 00                                                00 = 0（锻炼枪兵）
+005B0196 - 8b ce                      - mov ecx,esi
+005B0198 - e8 43 10 ed ff             - call 004811e0                                          判定势力是否拥有某项科技   
+005B019D - 85 c0                      - test eax,eax
+005B019F - 0f 84 6a fe ff ff          - je 005b000f
+005B01A5 - d9 44 24 38                - fld dword ptr [esp+38]
+005B01A9 - d8 0d d4 b6 84 00          - fmul dword ptr [0084b6d4]			       锻炼XX兵的伤害加成(0084b6d4=>1.10)
+005B01AF - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B01B3 - e9 57 fe ff ff             - jmp 005b000f
+[攻击方是戟]
+005B01B8 - 8b 44 24 40                - mov eax,[esp+40]
+005B01BC - 50                         - push eax
+005B01BD - e8 1e 08 ee ff             - call 004909e0
+005B01C2 - 83 c4 04                   - add esp,04
+005B01C5 - 85 c0                      - test eax,eax
+005B01C7 - 74 28                      - je 005b01f1
+005B01C9 - 83 fe 01                   - cmp esi,01
+005B01CC - 75 0c                      - jne 005b01da
+005B01CE - d9 44 24 38                - fld dword ptr [esp+38]
+005B01D2 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]
+005B01D8 - eb 13                      - jmp 005b01ed
+005B01DA - 85 c0                      - test eax,eax
+005B01DC - 74 13                      - je 005b01f1
+005B01DE - 83 fe 04                   - cmp esi,04
+005B01E1 - 75 0e                      - jne 005b01f1
+005B01E3 - d9 44 24 38                - fld dword ptr [esp+38]
+005B01E7 - d8 0d dc b6 84 00          - fmul dword ptr [0084b6dc]
+005B01ED - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B01F1 - 8b 74 24 20                - mov esi,[esp+20]
+005B01F5 - 6a 07                      - push 07                                                07 = 7（精锐戟兵）
+005B01F7 - 8b ce                      - mov ecx,esi
+005B01F9 - e8 e2 0f ed ff             - call 004811e0                                          判定势力是否拥有某项科技 
+005B01FE - 85 c0                      - test eax,eax
+005B0200 - 74 13                      - je 005b0215
+005B0202 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0206 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              精锐戟兵战法与普攻威力倍率指标(0084B6D8=>1.15)
+005B020C - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B0210 - e9 fa fd ff ff             - jmp 005b000f
+005B0215 - 6a 04                      - push 04                                                04 = 4（锻炼戟兵）                                  
+005B0217 - e9 7a ff ff ff             - jmp 005b0196                                           跳转到锻炼XX兵科技判定
+[攻击方是骑]
+005B021C - 8b 4c 24 40                - mov ecx,[esp+40]                                       ecx = 使用战法ID
+005B0220 - 51                         - push ecx
+005B0221 - e8 ba 07 ee ff             - call 004909e0                                          根据战法ID判定战法是否在0～31之间
+005B0226 - 83 c4 04                   - add esp,04
+005B0229 - 85 c0                      - test eax,eax
+005B022B - 74 28                      - je 005b0255
+005B022D - 83 fe 01                   - cmp esi,01                                             对方是枪兵
+005B0230 - 75 0c                      - jne 005b023e
+005B0232 - d9 44 24 38                - fld dword ptr [esp+38]
+005B0236 - d8 0d dc b6 84 00          - fmul dword ptr [0084b6dc]                              骑兵战法对枪兵伤害倍率指标(0084B6DC=>0.85)
+005B023C - eb 13                      - jmp 005b0251
+005B023E - 85 c0                      - test eax,eax
+005B0240 - 74 13                      - je 005b0255
+005B0242 - 83 fe 02                   - cmp esi,02                                             对方是戟兵
+005B0245 - 75 0e                      - jne 005b0255
+005B0247 - d9 44 24 38                - fld dword ptr [esp+38]
+005B024B - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              骑兵战法对戟兵伤害倍率指标(0084B6D8=>1.15)
+005B0251 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B0255 - 8b 74 24 20                - mov esi,[esp+20]                                       esi = 攻击部队势力指针
+005B0259 - 6a 0f                      - push 0f                                                0f = 15（精锐骑兵）
+005B025B - 8b ce                      - mov ecx,esi
+005B025D - e8 7e 0f ed ff             - call 004811e0                                          判定势力是否拥有某项科技                                          
+005B0262 - 85 c0                      - test eax,eax
+005B0264 - 74 13                      - je 005b0279
+005B0266 - d9 44 24 38                - fld dword ptr [esp+38]
+005B026A - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              精锐骑兵战法与普攻威力倍率指标(0084B6D8=>1.15)
+005B0270 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B0274 - e9 96 fd ff ff             - jmp 005b000f
+005B0279 - 6a 0c                      - push 0c                                                0c = 12（锻炼骑兵）
+005B027B - e9 16 ff ff ff             - jmp 005b0196                                           跳转到锻炼XX兵科技判定                                 
+[攻击方是弩]
+005B0280 - 8b 54 24 40                - mov edx,[esp+40]
+005B0284 - 52                         - push edx
+005B0285 - e8 56 07 ee ff             - call 004909e0
+005B028A - 83 c4 04                   - add esp,04
+005B028D - 85 c0                      - test eax,eax
+005B028F - 74 1c                      - je 005b02ad
+005B0291 - 56                         - push esi
+005B0292 - e8 e9 e9 ec ff             - call 0047ec80
+005B0297 - 83 c4 04                   - add esp,04
+005B029A - 83 f8 04                   - cmp eax,04
+005B029D - 75 0e                      - jne 005b02ad
+005B029F - d9 44 24 38                - fld dword ptr [esp+38]
+005B02A3 - d8 0d dc b6 84 00          - fmul dword ptr [0084b6dc]                              弩兵战法对于攻城武器的伤害倍率指标(0084B6DC=>0.85) 
+005B02A9 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B02AD - 8b 74 24 20                - mov esi,[esp+20]
+005B02B1 - 6a 0b                      - push 0b                                                0b = 11（精锐弩兵）
+005B02B3 - 8b ce                      - mov ecx,esi
+005B02B5 - e8 26 0f ed ff             - call 004811e0                                          判定势力是否拥有某项科技   
+005B02BA - 85 c0                      - test eax,eax
+005B02BC - 74 13                      - je 005b02d1
+005B02BE - d9 44 24 38                - fld dword ptr [esp+38]
+005B02C2 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              精锐弩兵战法与普攻威力倍率指标(0084B6D8=>1.15)
+005B02C8 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B02CC - e9 3e fd ff ff             - jmp 005b000f
+005B02D1 - 6a 08                      - push 08                                                08 = 8（锻炼弩兵）
+005B02D3 - e9 be fe ff ff             - jmp 005b0196                                           跳转到锻炼XX兵科技判定
+[攻击方是井兰与战舰]
+005B02D8 - 8b 44 24 40                - mov eax,[esp+40]
+005B02DC - 85 c0                      - test eax,eax
+005B02DE - 0f 8c 2b fd ff ff          - jl 005b000f
+005B02E4 - 83 f8 1f                   - cmp eax,1f
+005B02E7 - 0f 8f 22 fd ff ff          - jg 005b000f
+005B02ED - 56                         - push esi
+005B02EE - e8 8d e9 ec ff             - call 0047ec80
+005B02F3 - 83 c4 04                   - add esp,04
+005B02F6 - 83 f8 04                   - cmp eax,04
+005B02F9 - 0f 85 10 fd ff ff          - jne 005b000f
+005B02FF - d9 44 24 38                - fld dword ptr [esp+38]
+005B0303 - d8 0d 78 a6 75 00          - fmul dword ptr [0075a678]                              井阑与舰船对于攻城武器的伤害倍率指标(0075A678=>0.8)
+005B0309 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B030D - e9 fd fc ff ff             - jmp 005b000f                                           跳回超级难度衰减计算
+
+【反伤计算】
+005B0312 - d8 0d 74 77 84 00          - fmul dword ptr [00847774]
+005B0318 - e8 57 77 15 00             - call 00707a74                                          计算结果从浮点值转换为整形值，置入eax
+005B031D - 8b cf                      - mov ecx,edi                                            edi = 被攻击部队指针（由于此处是计算反伤，其实是发起攻击的部队）
+005B031F - 89 45 0c                   - mov [ebp+0c],eax                                       [ebp+0c] = 伤害值
+005B0322 - e8 e9 60 ee ff             - call 00496410                                          ？？应该是判断战场是否在水面上或者判断是否是水军
+005B0327 - 85 c0                      - test eax,eax
+005B0329 - 8b cf                      - mov ecx,edi                                            edi为被攻击部队指针（由于此处是计算反伤，其实是发起攻击的部队）
+005B032B - 74 30                      - je 005b035d
+[强袭免反伤]
+005B032D - 8b 17                      - mov edx,[edi]
+005B032F - 6a 0e                      - push 0e                                                14 = 强袭
+005B0331 - ff 52 58                   - call dword ptr [edx+58]
+005B0334 - 85 c0                      - test eax,eax
+005B0336 - 0f 84 c8 00 00 00          - je 005b0404
+005B033C - 6a 32                      - push 32                                                强袭发动概率(50％)
+005B033E - e8 8d 1e ec ff             - call 004721d0
+005B0343 - 83 c4 04                   - add esp,04
+005B0346 - 85 c0                      - test eax,eax
+005B0348 - 0f 84 b6 00 00 00          - je 005b0404
+005B034E - 89 75 0c                   - mov [ebp+0c],esi                                       [ebp+0c] = 0（反伤为0）
+005B0351 - c7 45 64 0e 00 00 00       - mov [ebp+64],0000000e                                  [ebp+64] = 强袭演示效果
+005B0358 - e9 a7 00 00 00             - jmp 005b0404
+[突袭免反伤]
+005B035D - 8b 07                      - mov eax,[edi]                                          edi为被攻击部队指针（由于此处是计算反伤，其实是发起攻击的部队）
+005B035F - 6a 0d                      - push 0d                                                13 = 突袭
+005B0361 - ff 50 58                   - call dword ptr [eax+58]
+005B0364 - 85 c0                      - test eax,eax
+005B0366 - 0f 84 98 00 00 00          - je 005b0404
+005B036C - 6a 32                      - push 32                                                突袭发动概率(50％)
+005B036E - e8 5d 1e ec ff             - call 004721d0
+005B0373 - 83 c4 04                   - add esp,04
+005B0376 - 85 c0                      - test eax,eax
+005B0378 - 0f 84 86 00 00 00          - je 005b0404
+005B037E - 89 75 0c                   - mov [ebp+0c],esi                                       [ebp+0c] = 0（反伤为0）
+005B0381 - c7 45 64 0d 00 00 00       - mov [ebp+64],0000000d                                  [ebp+64] = 突袭演示效果
+005B0388 - eb 7a                      - jmp 005b0404                                           跳转到藤甲处理（反伤不进行金刚、不屈、矢盾、大盾、扫讨、威风和袭击兵粮的判定）
+
+【爆击处理】
+005B038A - 39 75 00                   - cmp [ebp+00],esi                                       [ebp+00]为是否爆击，此处esi值为0
+005B038D - 74 0e                      - je 005b039d
+005B038F - d9 44 24 38                - fld dword ptr [esp+38]
+005B0393 - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              爆击伤害的倍率指标
+005B0399 - d9 5c 24 38                - fstp dword ptr [esp+38]
+005B039D - d9 44 24 38                - fld dword ptr [esp+38]
+005B03A1 - e8 ce 76 15 00             - call 00707a74                                          计算结果从浮点值转换为整形值，置入eax
+005B03A6 - 3b fe                      - cmp edi,esi                                            edi为被攻击部队指针，此处esi值为0
+005B03A8 - 89 45 0c                   - mov [ebp+0c],eax                                       [ebp+0c] = 0（伤害值）
+005B03AB - 0f 84 a0 00 00 00          - je 005b0451                                            如果edi为0代表被攻击对象是设施，则跳转到耐久伤害计算
+
+【被攻击对象是部队的特技和科技判定】
+[大盾、矢盾、金刚、不屈]
+005B03B1 - 8b 44 24 40                - mov eax,[esp+40]                                       [esp+40] = 战法ID
+005B03B5 - 55                         - push ebp
+005B03B6 - 8b f7                      - mov esi,edi                                            esi = 被攻击部队指针
+005B03B8 - 8b cb                      - mov ecx,ebx                                            ecx = 攻击部队指针
+005B03BA - e8 41 dc ff ff             - call 005ae000                                          大盾、矢盾、金刚、不屈的判定
+005B03BF - 83 c4 04                   - add esp,04
+005B03C2 - 85 c0                      - test eax,eax
+005B03C4 - 74 07                      - je 005b03cd
+005B03C6 - c7 45 0c 00 00 00 00       - mov [ebp+0c],00000000                                  大盾、矢盾、金刚、不屈发动则[ebp+0c] = 0（伤害值）
+[扫讨]
+005B03CD - 8b 13                      - mov edx,[ebx]                                          ebx为攻击部队指针
+005B03CF - 6a 09                      - push 09                                                09 = 扫讨
+005B03D1 - 8b cb                      - mov ecx,ebx
+005B03D3 - ff 52 58                   - call dword ptr [edx+58]
+005B03D6 - 85 c0                      - test eax,eax
+005B03D8 - 74 07                      - je 005b03e1
+005B03DA - c7 45 14 05 00 00 00       - mov [ebp+14],00000005                                  [ebp+14] = 减气值
+[威风]
+005B03E1 - 8b 03                      - mov eax,[ebx]                                          ebx为攻击部队指针
+005B03E3 - 6a 0a                      - push 0a                                                0a = 威风
+005B03E5 - 8b cb                      - mov ecx,ebx
+005B03E7 - ff 50 58                   - call dword ptr [eax+58]
+005B03EA - 85 c0                      - test eax,eax
+005B03EC - 74 07                      - je 005b03f5
+005B03EE - c7 45 14 14 00 00 00       - mov [ebp+14],00000014                                  [ebp+14] = 减气值
+[袭击兵粮]
+005B03F5 - 8b c7                      - mov eax,edi                                            eax = 被攻击部队指针
+005B03F7 - 8b f3                      - mov esi,ebx                                            esi = 攻击部队指针
+005B03F9 - e8 22 d7 ff ff             - call 005adb20                                          袭击兵粮判定
+005B03FE - 89 45 18                   - mov [ebp+18],eax
+005B0401 - 89 45 2c                   - mov [ebp+2c],eax
+[藤甲处理]
+005B0404 - 8b 17                      - mov edx,[edi]                                          edi为被攻击部队指针
+005B0406 - 6a 1f                      - push 1f                                                1f=藤甲
+005B0408 - 8b cf                      - mov ecx,edi
+005B040A - ff 52 58                   - call dword ptr [edx+58]
+005B040D - 85 c0                      - test eax,eax
+005B040F - 74 0b                      - je 005b041c
+005B0411 - 8b 45 0c                   - mov eax,[ebp+0c]                                       eax = 伤害值
+005B0414 - 99                         - cdq
+005B0415 - 2b c2                      - sub eax,edx
+005B0417 - d1 f8                      - sar eax,1                                              伤害减半
+005B0419 - 89 45 0c                   - mov [ebp+0c],eax                                       [ebp+0c] = 伤害值
+
+【防御工事处理】
+005B041C - 8b 45 08                   - mov eax,[ebp+08]                                       eax = [ebp+08]，是所受到的防御工事类型（阵＝3, 砦＝4, 城塞＝5）
+005B041F - 83 e8 03                   - sub eax,03
+005B0422 - 74 1c                      - je 005b0440
+005B0424 - 48                         - dec eax
+005B0425 - 74 0e                      - je 005b0435
+005B0427 - 48                         - dec eax
+005B0428 - 75 27                      - jne 005b0451
+005B042A - db 45 0c                   - fild dword ptr [ebp+0c]                                [ebp+0c]为伤害值
+005B042D - d8 0d d0 b6 84 00          - fmul dword ptr [0084b6d0]                              阵～城塞+强化城墙的伤害减轻倍率(0084B6D0=>0.65)
+005B0433 - eb 14                      - jmp 005b0449
+005B0435 - db 45 0c                   - fild dword ptr [ebp+0c]
+005B0438 - d8 0d 88 b3 77 00          - fmul dword ptr [0077b388]                              阵～城塞+强化设施的伤害减轻倍率(0077B388=>0.75)
+005B043E - eb 09                      - jmp 005b0449
+005B0440 - db 45 0c                   - fild dword ptr [ebp+0c]
+005B0443 - d8 0d dc b6 84 00          - fmul dword ptr [0084b6dc]                              阵～城塞(无技术)的伤害减轻倍率(0084B6DC=>0.85)
+005B0449 - e8 26 76 15 00             - call 00707a74                                          计算结果从浮点值转换为整形值，置入eax
+005B044E - 89 45 0c                   - mov [ebp+0c],eax                                       [ebp+0c] = 伤害值
+
+【被攻击对象是设施的XX处理计算】
+005B0451 - 8b 7c 24 18                - mov edi,[esp+18]
+005B0455 - 8b 07                      - mov eax,[edi]
+005B0457 - 6a 05                      - push 05
+005B0459 - 8b cf                      - mov ecx,edi
+005B045B - ff 50 2c                   - call dword ptr [eax+2c]
+005B045E - 85 c0                      - test eax,eax
+005B0460 - 0f 84 a6 01 00 00          - je 005b060c
+005B0466 - 8b 37                      - mov esi,[edi]
+005B0468 - e8 03 30 fc ff             - call 00573470
+005B046D - 50                         - push eax
+005B046E - 8b cf                      - mov ecx,edi
+005B0470 - ff 56 2c                   - call dword ptr [esi+2c]
+005B0473 - 8b f0                      - mov esi,eax
+005B0475 - 8b 44 24 40                - mov eax,[esp+40]
+005B0479 - f7 de                      - neg esi
+005B047B - 1b f6                      - sbb esi,esi
+005B047D - 23 f7                      - and esi,edi
+005B047F - 85 c0                      - test eax,eax
+005B0481 - bf 05 00 00 00             - mov edi,00000005
+005B0486 - 7c 1c                      - jnge 005b04a4
+005B0488 - 83 f8 1f                   - cmp eax,1f
+005B048B - 7f 17                      - jg 005b04a4
+005B048D - 8b c8                      - mov ecx,eax
+005B048F - 51                         - push ecx
+005B0490 - b9 58 19 20 07             - mov ecx,07201958
+005B0495 - e8 f6 07 ee ff             - call 00490c90                                          根据战法ID获得战法指针
+005B049A - 0f b6 78 2f                - movzx edi,byte ptr [eax+2f]
+005B049E - 8b 5c 24 3c                - mov ebx,[esp+3c]
+005B04A2 - eb 26                      - jmp 005b04ca
+005B04A4 - 8b 5c 24 3c                - mov ebx,[esp+3c]
+005B04A8 - 8b 13                      - mov edx,[ebx]
+005B04AA - 8b cb                      - mov ecx,ebx
+005B04AC - ff 52 3c                   - call dword ptr [edx+3c]
+005B04AF - 8b 4c 24 44                - mov ecx,[esp+44]
+005B04B3 - 8b 10                      - mov edx,[eax]
+005B04B5 - 51                         - push ecx
+005B04B6 - 52                         - push edx
+005B04B7 - b9 68 0e fb 06             - mov ecx,06fb0e68 : [00300000]
+005B04BC - e8 ef 38 ed ff             - call 00483db0
+005B04C1 - 85 c0                      - test eax,eax
+005B04C3 - 74 05                      - je 005b04ca
+005B04C5 - bf 0f 00 00 00             - mov edi,0000000f
+005B04CA - 8b 83 a8 00 00 00          - mov eax,[ebx+000000a8]
+005B04D0 - 83 f8 05                   - cmp eax,05
+005B04D3 - 74 1b                      - je 005b04f0
+005B04D5 - 83 f8 08                   - cmp eax,08
+005B04D8 - 74 16                      - je 005b04f0
+005B04DA - 8b 44 24 24                - mov eax,[esp+24]
+005B04DE - 8b 4c 24 28                - mov ecx,[esp+28]
+005B04E2 - 57                         - push edi
+005B04E3 - 50                         - push eax
+005B04E4 - 8b 44 24 1c                - mov eax,[esp+1c]
+005B04E8 - 51                         - push ecx
+005B04E9 - e8 d2 d8 ff ff             - call 005addc0
+005B04EE - eb 14                      - jmp 005b0504
+ 
+【设施耐久伤害计算】
+005B04F0 - 8b 54 24 24                - mov edx,[esp+24]
+005B04F4 - 8b 44 24 28                - mov eax,[esp+28]
+005B04F8 - 57                         - push edi
+005B04F9 - 52                         - push edx
+005B04FA - 8b 54 24 1c                - mov edx,[esp+1c]
+005B04FE - 50                         - push eax
+005B04FF - e8 1c d9 ff ff             - call 005ade20                                          计算耐久伤害
+005B0504 - 8b 45 00                   - mov eax,[ebp+00]
+005B0507 - 83 c4 0c                   - add esp,0c
+005B050A - 85 c0                      - test eax,eax
+005B050C - 74 06                      - je 005b0514
+005B050E - d8 0d d8 b6 84 00          - fmul dword ptr [0084b6d8]                              战法与普攻暴击对建筑物耐久伤害倍率指标(0084B6D8=>1.15)
+005B0514 - 85 f6                      - test esi,esi
+005B0516 - 74 66                      - je 005b057e
+005B0518 - 8b 76 08                   - mov esi,[esi+08]
+005B051B - 83 fe 10                   - cmp esi,10                                             火种(16)
+005B051E - 7c 0d                      - jnge 005b052d
+005B0520 - 83 fe 16                   - cmp esi,16                                             业火种(22)之间的设施
+005B0523 - 7f 08                      - jg 005b052d
+005B0525 - d8 0d 5c 91 84 00          - fmul dword ptr [0084915c]                              受到耐久伤害的倍率指标(0084915C=1.6)
+005B052B - eb 51                      - jmp 005b057e
+005B052D - 83 fe 1f                   - cmp esi,1f                                             市场lv1(31)
+005B0530 - 7c 0d                      - jnge 005b053f
+005B0532 - 83 fe 3f                   - cmp esi,3f                                             (63) 之间的设施
+005B0535 - 7f 08                      - jg 005b053f
+005B0537 - d8 0d d4 b6 84 00          - fmul dword ptr [0084b6d4]                              受到耐久伤害的倍率指标(0084B6D4=1.1)
+005B053D - eb 3f                      - jmp 005b057e
+005B053F - 83 fe 18                   - cmp esi,18                                             堤防(24)
+005B0542 - 75 08                      - jne 005b054c
+005B0544 - d8 0d cc b6 84 00          - fmul dword ptr [0084b6cc]                              (石墙、连弩楼、砦、城池和堤防)受到耐久伤害的倍率指标(0084B6CC=0.7)
+005B054A - eb 32                      - jmp 005b057e
+[其它]
+005B054C - 8b 83 a8 00 00 00          - mov eax,[ebx+000000a8]
+005B0552 - 83 f8 05                   - cmp eax,05                                             冲车(5)
+005B0555 - 74 27                      - je 005b057e
+005B0557 - 83 f8 08                   - cmp eax,08                                             木兽(8)
+005B055A - 74 22                      - je 005b057e
+005B055C - 83 fe 09                   - cmp esi,09                                             石墙(9)
+005B055F - 77 1d                      - ja 005b057e
+005B0561 - ff 24 b5 58 06 5b 00       - jmp dword ptr [esi*4+005b0658]
+005B0568 - d8 0d 78 a6 75 00          - fmul dword ptr [0075a678] : [3F4CCCCD]                 (港与阵)受到耐久伤害的倍率指标(0075A678=0.8)
+005B056E - eb 0e                      - jmp 005b057e
+005B0570 - d8 0d 74 77 84 00          - fmul dword ptr [00847774] : ["fff?0aV"]                (土垒)受到耐久伤害的倍率指标(00847774=0.9)
+005B0576 - eb 06                      - jmp 005b057e
+005B0578 - d8 0d a0 92 84 00          - fmul dword ptr [008492a0] : [(double)0.4000]           (关所与城塞)受到耐久伤害的倍率指标(008492A0=0.6)
+
+005B057E - e8 f1 74 15 00             - call 00707a74
+005B0583 - 8b 4c 24 18                - mov ecx,[esp+18]
+005B0587 - 51                         - push ecx
+005B0588 - 89 45 10                   - mov [ebp+10],eax
+005B058B - e8 50 f6 ff ff             - call 005afbe0
+005B0590 - 83 c4 04                   - add esp,04
+005B0593 - 85 c0                      - test eax,eax
+005B0595 - 74 07                      - je 005b059e
+005B0597 - c7 45 10 00 00 00 00       - mov [ebp+10],00000000
+005B059E - 8b 13                      - mov edx,[ebx]
+005B05A0 - 6a 13                      - push 13                                                19=云梯
+005B05A2 - 8b cb                      - mov ecx,ebx
+005B05A4 - ff 52 60                   - call dword ptr [edx+60]
+005B05A7 - 85 c0                      - test eax,eax
+005B05A9 - 74 39                      - je 005b05e4
+005B05AB - 8b 83 a8 00 00 00          - mov eax,[ebx+000000a8]
+005B05B1 - 85 c0                      - test eax,eax
+005B05B3 - 7c 0d                      - jnge 005b05c2
+005B05B5 - 83 f8 04                   - cmp eax,04                                             兵种分界(4=骑兵)
+005B05B8 - 7f 08                      - jg 005b05c2
+005B05BA - d9 05 c8 b6 84 00          - fld dword ptr [0084b6c8]                               小于兵种分界的部队对设施伤害的倍率指标(0084B6C8=>1.4)
+005B05C0 - eb 06                      - jmp 005b05c8
+005B05C2 - d9 05 18 91 84 00          - fld dword ptr [00849118]                               超过兵种分界的部队对设施伤害的倍率指标(00849118=>1.2)
+005B05C8 - db 45 0c                   - fild dword ptr [ebp+0c]
+005B05CB - d8 c9                      - fmul st(0),st(1)
+005B05CD - e8 a2 74 15 00             - call 00707a74
+005B05D2 - db 45 10                   - fild dword ptr [ebp+10]
+005B05D5 - 89 45 0c                   - mov [ebp+0c],eax
+005B05D8 - d8 c9                      - fmul st(0),st(1)
+005B05DA - e8 95 74 15 00             - call 00707a74
+005B05DF - dd d8                      - fstp st(0)
+005B05E1 - 89 45 10                   - mov [ebp+10],eax
+
+
+005B05E4 - 83 3d 78 19 20 07 02       - cmp dword ptr [07201978],02                            超级难度
+005B05EB - 75 23                      - jne 005b0610
+005B05ED - 8b 03                      - mov eax,[ebx]
+005B05EF - 8b cb                      - mov ecx,ebx
+005B05F1 - ff 50 48                   - call dword ptr [eax+48]                                被攻击设施是否是
+005B05F4 - 85 c0                      - test eax,eax
+005B05F6 - 74 18                      - je 005b0610
+005B05F8 - 8b 45 10                   - mov eax,[ebp+10]
+005B05FB - 8d 04 40                   - lea eax,[eax+eax*2]
+005B05FE - 99                         - cdq
+005B05FF - 83 e2 03                   - and edx,03
+005B0602 - 03 c2                      - add eax,edx
+005B0604 - c1 f8 02                   - sar al,02                                              超级难度玩家伤害*0.75
+005B0607 - 89 45 10                   - mov [ebp+10],eax
+005B060A - eb 04                      - jmp 005b0610
+005B060C - 8b 5c 24 3c                - mov ebx,[esp+3c]
+005B0610 - 8b 4c 24 40                - mov ecx,[esp+40]
+005B0614 - 89 4d 50                   - mov [ebp+50],ecx
+005B0617 - 8b 13                      - mov edx,[ebx]
+005B0619 - 8b cb                      - mov ecx,ebx
+005B061B - ff 52 3c                   - call dword ptr [edx+3c]
+005B061E - 8b 00                      - mov eax,[eax]
+005B0620 - 8b 4c 24 44                - mov ecx,[esp+44]
+005B0624 - 5f                         - pop edi
+005B0625 - 5e                         - pop esi
+005B0626 - 89 45 58                   - mov [ebp+58],eax
+005B0629 - 89 4d 5c                   - mov [ebp+5c],ecx
+005B062C - 5d                         - pop ebp
+005B062D - 5b                         - pop ebx
+005B062E - 83 c4 24                   - add esp,24
+005B0631 - c3                         - ret
+
+
+数据区1－005B0634
+37 01 5B 00   B8 01 5B 00   80 02 5B 00
+1C 02 5B 00   D8 02 5B 00   0F 00 5B 00 
+
+数据区2－005B064C
+00 01 02 03 05 04 05 05 04 04 04 90 
+
+数据区3－005B0658
+44 05 5B 00   78 05 5B 00   68 05 5B 00   68 05 5B 00   44 05 5B 00   
+78 05 5B 00   7E 05 5B 00   44 05 5B 00   70 05 5B 00   44 05 5B 00

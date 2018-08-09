@@ -1,0 +1,284 @@
+功能: 每月俘虏逃走处理
+参数表: 无
+
+*****************************************************************************************************************************************************
+
+00582BE0 - 6a ff                      - push ff
+00582BE2 - 68 26 35 73 00             - push 00733526
+00582BE7 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+00582BED - 50                         - push eax
+00582BEE - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+00582BF5 - 81 ec f0 07 00 00          - sub esp,000007f0
+00582BFB - 53                         - push ebx
+00582BFC - 55                         - push ebp
+00582BFD - 33 ed                      - xor ebp,ebp
+00582BFF - b9 0a 00 00 00             - mov ecx,0000000a
+00582C04 - b8 44 bf 79 00             - mov eax,0079bf44
+00582C09 - 56                         - push esi
+00582C0A - 89 6c 24 28                - mov [esp+28],ebp
+00582C0E - 89 6c 24 2c                - mov [esp+2c],ebp
+00582C12 - 89 6c 24 24                - mov [esp+24],ebp
+00582C16 - 89 6c 24 20                - mov [esp+20],ebp
+00582C1A - 89 6c 24 30                - mov [esp+30],ebp
+00582C1E - 89 4c 24 34                - mov [esp+34],ecx
+00582C22 - 89 6c 24 38                - mov [esp+38],ebp
+00582C26 - 89 44 24 1c                - mov [esp+1c],eax
+00582C2A - 89 ac 24 04 08 00 00       - mov [esp+00000804],ebp
+00582C31 - 89 6c 24 48                - mov [esp+48],ebp
+00582C35 - 89 6c 24 4c                - mov [esp+4c],ebp
+00582C39 - 89 6c 24 44                - mov [esp+44],ebp
+00582C3D - 89 6c 24 40                - mov [esp+40],ebp
+00582C41 - 89 6c 24 50                - mov [esp+50],ebp
+00582C45 - 89 4c 24 54                - mov [esp+54],ecx
+00582C49 - 89 6c 24 58                - mov [esp+58],ebp
+00582C4D - 89 44 24 3c                - mov [esp+3c],eax
+
+【获取俘虏列表】
+00582C51 - 6a 20                      - push 20
+00582C53 - 8d 44 24 40                - lea eax,[esp+40]                       eax = 接受下面函数返回的俘虏列表指针
+00582C57 - 50                         - push eax
+00582C58 - b9 08 98 99 07             - mov ecx,07999808
+00582C5D - c6 84 24 0c 08 00 00 01    - mov byte ptr [esp+0000080c],01
+00582C65 - e8 06 c6 f4 ff             - call 004cf270                          获取指定状态武将的个数
+00582C6A - 8b 44 24 40                - mov eax,[esp+40]                       eax = 俘虏列表指针
+00582C6E - 3b c5                      - cmp eax,ebp
+00582C70 - 89 44 24 0c                - mov [esp+0c],eax
+00582C74 - 0f 84 d7 00 00 00          - je 00582d51                            如果俘虏个数为0，则跳过俘虏是否逃走判定
+00582C7A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+
+【判定俘虏是否逃走】
+[获取并校验指针]
+00582C80 - 8d 4c 24 0c                - lea ecx,[esp+0c]
+00582C84 - 51                         - push ecx
+00582C85 - 8d 4c 24 40                - lea ecx,[esp+40]                       ecx = 俘虏列表指针
+00582C89 - e8 42 92 ef ff             - call 0047bed0                          作用未明，应该是列表数组指针后移一个单元
+00582C8E - 8b 30                      - mov esi,[eax]                          esi = 武将指针
+00582C90 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]                 eax = 武将所在
+00582C96 - 3b c5                      - cmp eax,ebp
+00582C98 - 7c 05                      - jnge 00582c9f
+00582C9A - 83 f8 56                   - cmp eax,56
+00582C9D - 7e 03                      - jle 00582ca2
+00582C9F - 83 c8 ff                   - or eax,ff                              武将所在不在0～86之间则设置为-1
+00582CA2 - 50                         - push eax                               eax = 设施ID(0～86)
+00582CA3 - b9 58 19 20 07             - mov ecx,07201958
+00582CA8 - e8 53 e0 f0 ff             - call 00490d00                          根据设施ID获取设施指针
+00582CAD - 50                         - push eax
+00582CAE - e8 7d 79 ef ff             - call 0047a630                          校验指针
+00582CB3 - 83 c4 04                   - add esp,04
+00582CB6 - 85 c0                      - test eax,eax
+00582CB8 - 0f 84 89 00 00 00          - je 00582d47                            校验失败则跳转到循环下一个武将
+00582CBE - 56                         - push esi                               esi = 武将指针
+00582CBF - e8 6c 79 ef ff             - call 0047a630                          校验指针
+00582CC4 - 83 c4 04                   - add esp,04
+00582CC7 - 85 c0                      - test eax,eax
+00582CC9 - 74 7c                      - je 00582d47                            校验失败则跳转到循环下一个武将
+[判定俘虏月数]
+00582CCB - 80 be 69 01 00 00 02       - cmp byte ptr [esi+00000169],02         判断武将俘虏月数是否小于2个月
+00582CD2 - 72 73                      - jb 00582d47                            武将俘虏月数小于2个月则跳转到循环下一个武将(俘虏月数小于2个月的武将不会逃走)
+[获取武将武力和智力中的较高值]
+00582CD4 - 8b ce                      - mov ecx,esi
+00582CD6 - e8 b5 63 f0 ff             - call 00489090
+00582CDB - 8b ce                      - mov ecx,esi
+00582CDD - 8a d8                      - mov bl,al
+00582CDF - e8 9c 63 f0 ff             - call 00489080
+00582CE4 - 3a c3                      - cmp al,bl
+00582CE6 - 76 02                      - jna 00582cea
+00582CE8 - 8a d8                      - mov bl,al
+00582CEA - 0f b6 c3                   - movzx eax,bl                           eax = 武将武力和智力中的较高值
+00582CED - 83 f8 1e                   - cmp eax,1e
+00582CF0 - ba 1e 00 00 00             - mov edx,0000001e                       如果武将武力和智力中的较高值小于30，则按30计算
+00582CF5 - 7c 02                      - jnge 00582cf9
+00582CF7 - 8b d0                      - mov edx,eax
+[计算逃走概率]
+00582CF9 - 0f b6 86 69 01 00 00       - movzx eax,byte ptr [esi+00000169]      eax = 武将俘虏月数
+00582D00 - 83 e8 02                   - sub eax,02
+00582D03 - 83 f8 01                   - cmp eax,01
+00582D06 - 7d 05                      - jnl 00582d0d
+00582D08 - b8 01 00 00 00             - mov eax,00000001                       俘虏月数小于3个月则按3个月计算
+00582D0D - 8b c8                      - mov ecx,eax
+00582D0F - 0f af c8                   - imul ecx,eax
+00582D12 - 0f af ca                   - imul ecx,edx
+00582D15 - b8 b5 81 4e 1b             - mov eax,1b4e81b5
+00582D1A - f7 e9                      - imul ecx
+00582D1C - c1 fa 04                   - sar dl,04
+00582D1F - 8b c2                      - mov eax,edx
+00582D21 - c1 e8 1f                   - shr eax,1f
+00582D24 - 03 c2                      - add eax,edx                            ecx = 俘虏月数*俘虏月数*武将武力和智力中的较高值*0.01*2/3
+00582D26 - 83 f8 01                   - cmp eax,01
+00582D29 - 7d 05                      - jnl 00582d30
+00582D2B - b8 01 00 00 00             - mov eax,00000001                       最小逃走概率为1
+[逃走判定]
+00582D30 - 50                         - push eax
+00582D31 - e8 9a f4 ee ff             - call 004721d0                          0～100随机函数
+00582D36 - 83 c4 04                   - add esp,04
+00582D39 - 85 c0                      - test eax,eax
+00582D3B - 74 0a                      - je 00582d47                            跳过将俘虏置入逃走列表的处理                          【修改】jmp 00582d47  //俘虏不会逃走
+[将俘虏置入逃走列表]
+00582D3D - 56                         - push esi                               esi = 武将指针
+00582D3E - 8d 4c 24 20                - lea ecx,[esp+20]
+00582D42 - e8 69 94 ef ff             - call 0047c1b0                          作用未明，应该是列表数组指针前移一个单元并将值置入列表
+[循环下一个武将]
+00582D47 - 39 6c 24 0c                - cmp [esp+0c],ebp
+00582D4B - 0f 85 2f ff ff ff          - jne 00582c80
+
+【俘虏逃走处理】
+00582D51 - 8d 4c 24 3c                - lea ecx,[esp+3c]
+00582D55 - c6 84 24 04 08 00 00 00    - mov byte ptr [esp+00000804],00
+00582D5D - e8 9e 93 ef ff             - call 0047c100
+00582D62 - 55                         - push ebp
+00582D63 - 8d 54 24 20                - lea edx,[esp+20]
+00582D67 - 52                         - push edx
+00582D68 - b9 08 98 99 07             - mov ecx,07999808
+00582D6D - e8 9e bf f4 ff             - call 004ced10
+00582D72 - 8d 44 24 14                - lea eax,[esp+14]
+00582D76 - 50                         - push eax
+00582D77 - b9 d8 59 6a 09             - mov ecx,096a59d8
+00582D7C - e8 2f 5a 00 00             - call 005887b0
+00582D81 - 8b 44 24 20                - mov eax,[esp+20]
+00582D85 - 3b c5                      - cmp eax,ebp
+00582D87 - 89 6c 24 10                - mov [esp+10],ebp
+00582D8B - 89 44 24 0c                - mov [esp+0c],eax
+00582D8F - 0f 84 a5 01 00 00          - je 00582f3a
+00582D95 - 57                         - push edi
+00582D96 - eb 08                      - jmp 00582da0
+00582D98 - 33 ed                      - xor ebp,ebp
+00582D9A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+00582DA0 - 8d 4c 24 10                - lea ecx,[esp+10]
+00582DA4 - 51                         - push ecx
+00582DA5 - 8d 4c 24 24                - lea ecx,[esp+24]
+00582DA9 - e8 22 91 ef ff             - call 0047bed0
+00582DAE - 8b 30                      - mov esi,[eax]                          esi = 武将指针
+00582DB0 - 8b 86 98 00 00 00          - mov eax,[esi+00000098]                 eax = 所属
+00582DB6 - 50                         - push eax
+00582DB7 - b9 58 19 20 07             - mov ecx,07201958
+00582DBC - e8 3f df f0 ff             - call 00490d00                          根据设施ID获取设施指针
+00582DC1 - 8b d8                      - mov ebx,eax
+00582DC3 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]                 eax = 所在
+00582DC9 - 3b c5                      - cmp eax,ebp
+00582DCB - 89 6c 24 1c                - mov [esp+1c],ebp
+00582DCF - 7c 05                      - jnge 00582dd6
+00582DD1 - 83 f8 56                   - cmp eax,56
+00582DD4 - 7e 03                      - jle 00582dd9
+00582DD6 - 83 c8 ff                   - or eax,ff
+00582DD9 - 50                         - push eax
+00582DDA - b9 58 19 20 07             - mov ecx,07201958
+00582DDF - e8 1c df f0 ff             - call 00490d00                          根据设施ID获取设施指针
+00582DE4 - 8b f8                      - mov edi,eax
+00582DE6 - 57                         - push edi
+00582DE7 - e8 44 78 ef ff             - call 0047a630                          校验指针
+00582DEC - 83 c4 04                   - add esp,04
+00582DEF - 85 c0                      - test eax,eax
+00582DF1 - 74 31                      - je 00582e24
+00582DF3 - 8b 17                      - mov edx,[edi]
+00582DF5 - 8b cf                      - mov ecx,edi
+00582DF7 - ff 52 40                   - call dword ptr [edx+40]                获取所属势力ID
+00582DFA - 50                         - push eax
+00582DFB - b9 58 19 20 07             - mov ecx,07201958
+00582E00 - e8 9b dc f0 ff             - call 00490aa0                          根据势力ID获取势力指针
+00582E05 - 8b f8                      - mov edi,eax
+00582E07 - 57                         - push edi
+00582E08 - e8 23 78 ef ff             - call 0047a630                          校验指针
+00582E0D - 83 c4 04                   - add esp,04
+00582E10 - 85 c0                      - test eax,eax
+00582E12 - 74 10                      - je 00582e24
+00582E14 - 8b 07                      - mov eax,[edi]
+00582E16 - 8b cf                      - mov ecx,edi
+00582E18 - ff 50 48                   - call dword ptr [eax+48]                判断是否属于玩家
+00582E1B - 85 c0                      - test eax,eax
+00582E1D - 74 05                      - je 00582e24
+00582E1F - bd 01 00 00 00             - mov ebp,00000001
+00582E24 - 8b 16                      - mov edx,[esi]
+00582E26 - 8b ce                      - mov ecx,esi
+00582E28 - ff 52 40                   - call dword ptr [edx+40]                获取所属势力ID
+00582E2B - 50                         - push eax
+00582E2C - b9 58 19 20 07             - mov ecx,07201958
+00582E31 - e8 6a dc f0 ff             - call 00490aa0                          根据势力ID获取势力指针
+00582E36 - 8b f8                      - mov edi,eax
+00582E38 - 57                         - push edi
+00582E39 - e8 f2 77 ef ff             - call 0047a630                          校验指针
+00582E3E - 83 c4 04                   - add esp,04
+00582E41 - 85 c0                      - test eax,eax
+00582E43 - 74 10                      - je 00582e55
+00582E45 - 8b 07                      - mov eax,[edi]
+00582E47 - 8b cf                      - mov ecx,edi
+00582E49 - ff 50 48                   - call dword ptr [eax+48]                判断是否属于玩家
+00582E4C - 85 c0                      - test eax,eax
+00582E4E - bf 01 00 00 00             - mov edi,00000001
+00582E53 - 75 04                      - jne 00582e59
+00582E55 - 8b 7c 24 1c                - mov edi,[esp+1c]
+00582E59 - 56                         - push esi
+00582E5A - b9 5c 89 99 07             - mov ecx,0799895c
+00582E5F - e8 0c 5b f2 ff             - call 004a8970
+00582E64 - 85 ed                      - test ebp,ebp
+00582E66 - 75 08                      - jne 00582e70
+00582E68 - 85 ff                      - test edi,edi
+00582E6A - 0f 84 a6 00 00 00          - je 00582f16
+00582E70 - 6a ff                      - push ff
+00582E72 - 56                         - push esi
+00582E73 - b9 d8 59 6a 09             - mov ecx,096a59d8
+00582E78 - e8 d3 69 00 00             - call 00589850
+00582E7D - 8b cb                      - mov ecx,ebx
+00582E7F - c7 44 24 14 01 00 00 00    - mov [esp+14],00000001
+00582E87 - e8 a4 78 ef ff             - call 0047a730
+00582E8C - 50                         - push eax
+00582E8D - b9 58 19 20 07             - mov ecx,07201958
+00582E92 - e8 69 dc f0 ff             - call 00490b00                          根据武将ID获取武将指针
+00582E97 - 68 5e 18 00 00             - push 0000185e
+00582E9C - 8d 4c 24 64                - lea ecx,[esp+64]
+00582EA0 - 8b f8                      - mov edi,eax
+00582EA2 - e8 b9 9c f1 ff             - call 0049cb60
+00582EA7 - 56                         - push esi
+00582EA8 - 6a 00                      - push 00
+00582EAA - 8d 4c 24 68                - lea ecx,[esp+68]
+00582EAE - e8 cd 9c f1 ff             - call 0049cb80
+00582EB3 - 57                         - push edi
+00582EB4 - 6a 01                      - push 01
+00582EB6 - 8d 4c 24 68                - lea ecx,[esp+68]
+00582EBA - e8 c1 9c f1 ff             - call 0049cb80
+00582EBF - 6a 01                      - push 01
+00582EC1 - 6a 00                      - push 00
+00582EC3 - 8d 4c 24 68                - lea ecx,[esp+68]
+00582EC7 - 56                         - push esi
+00582EC8 - 51                         - push ecx
+00582EC9 - e8 c2 84 f1 ff             - call 0049b390
+00582ECE - 83 c4 04                   - add esp,04
+00582ED1 - 50                         - push eax
+00582ED2 - e8 79 25 f7 ff             - call 004f5450
+00582ED7 - 83 c4 10                   - add esp,10
+00582EDA - 68 67 18 00 00             - push 00001867
+00582EDF - 8d 8c 24 34 04 00 00       - lea ecx,[esp+00000434]
+00582EE6 - e8 75 9c f1 ff             - call 0049cb60
+00582EEB - 56                         - push esi
+00582EEC - 6a 00                      - push 00
+00582EEE - 8d 8c 24 38 04 00 00       - lea ecx,[esp+00000438]
+00582EF5 - e8 86 9c f1 ff             - call 0049cb80
+00582EFA - 6a 01                      - push 01
+00582EFC - 8d 94 24 34 04 00 00       - lea edx,[esp+00000434]
+00582F03 - 56                         - push esi
+00582F04 - 52                         - push edx
+00582F05 - e8 86 84 f1 ff             - call 0049b390
+00582F0A - 83 c4 04                   - add esp,04
+00582F0D - 50                         - push eax
+00582F0E - e8 2d 27 f7 ff             - call 004f5640
+00582F13 - 83 c4 0c                   - add esp,0c
+00582F16 - 8b 44 24 10                - mov eax,[esp+10]
+00582F1A - 85 c0                      - test eax,eax
+00582F1C - 0f 85 76 fe ff ff          - jne 00582d98
+00582F22 - 8b 44 24 14                - mov eax,[esp+14]
+00582F26 - 85 c0                      - test eax,eax
+00582F28 - 5f                         - pop edi
+00582F29 - 74 0f                      - je 00582f3a
+00582F2B - 8d 44 24 14                - lea eax,[esp+14]
+00582F2F - 50                         - push eax
+00582F30 - b9 d8 59 6a 09             - mov ecx,096a59d8
+00582F35 - e8 96 67 00 00             - call 005896d0
+00582F3A - 8d 4c 24 1c                - lea ecx,[esp+1c]
+00582F3E - c7 84 24 04 08 00 00 ff ff ff ff - mov [esp+00000804],ffffffff
+00582F49 - e8 b2 91 ef ff             - call 0047c100
+00582F4E - 8b 8c 24 fc 07 00 00       - mov ecx,[esp+000007fc]
+00582F55 - 5e                         - pop esi
+00582F56 - 5d                         - pop ebp
+00582F57 - 5b                         - pop ebx
+00582F58 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+00582F5F - 81 c4 fc 07 00 00          - add esp,000007fc
+00582F65 - c3                         - ret

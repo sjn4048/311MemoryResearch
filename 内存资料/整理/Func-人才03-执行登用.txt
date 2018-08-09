@@ -1,0 +1,254 @@
+功能: 执行登用
+参数表: [esp+04]=存放执行登用系列参数的数组指针
+
+*****************************************************************************************************************************************************
+
+【初始化并校验参数】
+005C5940 - 55                         - push ebp
+005C5941 - 8b ec                      - mov ebp,esp
+005C5943 - 83 e4 f8                   - and esp,f8
+005C5946 - 81 ec bc 07 00 00          - sub esp,000007bc
+005C594C - 53                         - push ebx
+005C594D - 8b 5d 08                   - mov ebx,[ebp+08]
+005C5950 - 8b 03                      - mov eax,[ebx]                      eax = 设施指针(登用方)
+005C5952 - 56                         - push esi
+005C5953 - 57                         - push edi
+005C5954 - 50                         - push eax
+005C5955 - e8 76 fd ff ff             - call 005c56d0                      作用未明，包括可登用武将判断、玩家势力第一军团判断和显示执行消息的一系列处理
+005C595A - 83 c4 04                   - add esp,04
+005C595D - 85 c0                      - test eax,eax
+005C595F - 74 0b                      - je 005c596c
+005C5961 - 8b cb                      - mov ecx,ebx
+005C5963 - e8 e8 ec ff ff             - call 005c4650                      校验参数(登用方设施指针、被登用和登用方武将指针)
+005C5968 - 85 c0                      - test eax,eax
+005C596A - 75 09                      - jne 005c5975                       校验成功则跳转到后续处理
+005C596C - 33 c0                      - xor eax,eax
+005C596E - 5f                         - pop edi
+005C596F - 5e                         - pop esi
+005C5970 - 5b                         - pop ebx
+005C5971 - 8b e5                      - mov esp,ebp
+005C5973 - 5d                         - pop ebp
+005C5974 - c3                         - ret
+
+【判断是否是本回合登用】
+005C5975 - 8b 3b                      - mov edi,[ebx]                      edi = 设施指针(登用方)
+005C5977 - 8b 73 04                   - mov esi,[ebx+04]                   esi = 武将指针(被登用方)
+005C597A - 8b 5b 08                   - mov ebx,[ebx+08]                   ebx = 武将指针(登用方)
+005C597D - 89 7c 24 10                - mov [esp+10],edi
+005C5981 - 89 74 24 14                - mov [esp+14],esi
+005C5985 - e8 76 42 ff ff             - call 005b9c00                      返回当前日*7+当前月*5+当前年*3
+005C598A - 56                         - push esi
+005C598B - 89 44 24 20                - mov [esp+20],eax
+005C598F - e8 0c ee ff ff             - call 005c47a0                      获取被登用武将所在地的设施ID
+005C5994 - 83 c4 04                   - add esp,04
+005C5997 - 50                         - push eax                           eax = 设施ID(被登用方)
+005C5998 - b9 58 19 20 07             - mov ecx,07201958
+005C599D - 89 44 24 28                - mov [esp+28],eax
+005C59A1 - e8 5a b3 ec ff             - call 00490d00                      根据设施ID获取设施指针
+005C59A6 - 8b c8                      - mov ecx,eax                        ecx = 设施指针(被登用方)
+005C59A8 - 89 44 24 18                - mov [esp+18],eax
+005C59AC - e8 6f 1f ec ff             - call 00487920                      获取设施所属城市ID
+005C59B1 - 8b cf                      - mov ecx,edi                        edi = 设施指针(登用方)
+005C59B3 - 89 44 24 20                - mov [esp+20],eax
+005C59B7 - e8 64 1f ec ff             - call 00487920                      获取设施所属城市ID
+005C59BC - 8b 4c 24 20                - mov ecx,[esp+20]
+005C59C0 - 3b c1                      - cmp eax,ecx                        当被登用方与登用方设施ID不相同，则跳转到非本回合登用处理
+005C59C2 - 75 64                      - jne 005c5a28
+
+【本回合登用】
+[计算登用是否成功]
+005C59C4 - 8b 4c 24 1c                - mov ecx,[esp+1c]                   ecx = 当前日*7+当前月*5+当前年*3
+005C59C8 - 51                         - push ecx
+005C59C9 - 6a 00                      - push 00
+005C59CB - 53                         - push ebx                           ebx = 武将指针(登用方)
+005C59CC - 56                         - push esi                           esi = 武将指针(被登用方)
+005C59CD - b9 5c 89 99 07             - mov ecx,0799895c
+005C59D2 - e8 89 a3 ee ff             - call 004afd60                      计算登用武将是否成功
+005C59D7 - 8b 54 24 24                - mov edx,[esp+24]
+005C59DB - 6a 00                      - push 00
+005C59DD - 8b f8                      - mov edi,eax                        edi = 登用是否成功
+005C59DF - 57                         - push edi
+005C59E0 - 52                         - push edx
+005C59E1 - 56                         - push esi
+005C59E2 - 53                         - push ebx
+005C59E3 - e8 58 ee ff ff             - call 005c4840                      登用成功时被登用武将处理，及无论登用成功与否的消息显示和武将语言
+005C59E8 - 83 c4 14                   - add esp,14
+[武将增加功勋]
+005C59EB - 8b c7                      - mov eax,edi                        edi = 登用是否成功
+005C59ED - f7 d8                      - neg eax
+005C59EF - 1b c0                      - sbb eax,eax
+005C59F1 - 25 be 00 00 00             - and eax,000000be                   0xbe = 190(加上下面10点共计200，是登用成功勋功)
+005C59F6 - 83 c0 0a                   - add eax,0a                         0x0a = 10(登用失败勋功)
+005C59F9 - 50                         - push eax
+005C59FA - 53                         - push ebx
+005C59FB - b9 5c 89 99 07             - mov ecx,0799895c
+005C5A00 - e8 4b 13 ee ff             - call 004a6d50                      武将增加勋功
+[武将增加属性经验]
+005C5A05 - 33 c9                      - xor ecx,ecx
+005C5A07 - 85 ff                      - test edi,edi                       edi = 登用是否成功
+005C5A09 - 0f 95 c1                   - setnc cl
+005C5A0C - 6a 01                      - push 01
+005C5A0E - 8d 0c 8d 01 00 00 00       - lea ecx,[ecx*4+00000001]           增加经验：登用成功为5，登用失败为1
+005C5A15 - 51                         - push ecx
+005C5A16 - 6a 04                      - push 04                            0x04 = 魅力
+005C5A18 - 53                         - push ebx
+005C5A19 - b9 5c 89 99 07             - mov ecx,0799895c
+005C5A1E - e8 ad 16 ee ff             - call 004a70d0                      武将增加属性经验
+005C5A23 - e9 e3 00 00 00             - jmp 005c5b0b
+
+【非本回合登用】
+[显示执行消息和武将语言]
+005C5A28 - 8b cb                      - mov ecx,ebx
+005C5A2A - e8 11 43 ec ff             - call 00489d40                      获取武将所属君主ID
+005C5A2F - 50                         - push eax
+005C5A30 - b9 58 19 20 07             - mov ecx,07201958
+005C5A35 - e8 c6 b0 ec ff             - call 00490b00                      根据武将ID获取武将指针
+005C5A3A - 53                         - push ebx
+005C5A3B - 8b f8                      - mov edi,eax
+005C5A3D - e8 8e 27 ff ff             - call 005b81d0
+005C5A42 - 83 c4 04                   - add esp,04
+005C5A45 - 85 c0                      - test eax,eax
+005C5A47 - 74 5a                      - je 005c5aa3
+005C5A49 - 56                         - push esi
+005C5A4A - 57                         - push edi
+005C5A4B - 53                         - push ebx
+005C5A4C - 68 d7 13 00 00             - push 000013d7
+005C5A51 - 8d 8c 24 08 04 00 00       - lea ecx,[esp+00000408]
+005C5A58 - e8 83 74 ee ff             - call 004acee0
+005C5A5D - 8d 54 24 28                - lea edx,[esp+28]
+005C5A61 - 8b f0                      - mov esi,eax
+005C5A63 - b9 f4 00 00 00             - mov ecx,000000f4
+005C5A68 - 8d 7c 24 28                - lea edi,[esp+28]
+005C5A6C - 52                         - push edx
+005C5A6D - f3 a5                      - repe movsd
+005C5A6F - e8 1c 59 ed ff             - call 0049b390
+005C5A74 - 83 c4 04                   - add esp,04
+005C5A77 - 6a 00                      - push 00
+005C5A79 - 6a 00                      - push 00
+005C5A7B - 68 00 00 80 bf             - push bf800000
+005C5A80 - 6a 00                      - push 00
+005C5A82 - 6a 06                      - push 06
+005C5A84 - b9 10 98 11 09             - mov ecx,09119810
+005C5A89 - 8b f0                      - mov esi,eax
+005C5A8B - e8 e0 aa f0 ff             - call 004d0570
+005C5A90 - 8b 44 24 10                - mov eax,[esp+10]
+005C5A94 - 50                         - push eax
+005C5A95 - 53                         - push ebx
+005C5A96 - 56                         - push esi
+005C5A97 - e8 f4 0b f3 ff             - call 004f6690
+[计算移动天数]
+005C5A9C - 8b 74 24 20                - mov esi,[esp+20]
+005C5AA0 - 83 c4 0c                   - add esp,0c
+005C5AA3 - 8b 7c 24 18                - mov edi,[esp+18]                   edi = 设施指针(被登用方)
+005C5AA7 - 8b 4c 24 10                - mov ecx,[esp+10]                   ecx = 设施指针(登用方)
+005C5AAB - 57                         - push edi
+005C5AAC - 51                         - push ecx
+005C5AAD - b9 cc b3 80 07             - mov ecx,0780b3cc
+005C5AB2 - e8 19 8a ed ff             - call 0049e4d0                      获取2个城市、港、关之间的移动天数
+[设定武将任务]
+005C5AB7 - 56                         - push esi                           esi = 武将指针(被登用方)
+005C5AB8 - b9 58 19 20 07             - mov ecx,07201958
+005C5ABD - 89 44 24 18                - mov [esp+18],eax
+005C5AC1 - e8 4a b8 ec ff             - call 00491310                      根据武将指针获取武将ID
+005C5AC6 - 8b 54 24 1c                - mov edx,[esp+1c]
+005C5ACA - 6a 00                      - push 00
+005C5ACC - 6a 00                      - push 00
+005C5ACE - 52                         - push edx                           edx = 任务序列号(就是当前日*7+当前月*5+当前年*3)
+005C5ACF - 57                         - push edi                           edi = 设施指针(被登用方)
+005C5AD0 - b9 58 19 20 07             - mov ecx,07201958
+005C5AD5 - 8b f0                      - mov esi,eax
+005C5AD7 - e8 94 bc ec ff             - call 00491770                      根据设施指针获取设施ID
+005C5ADC - 50                         - push eax                           eax = 设施ID
+005C5ADD - 56                         - push esi                           esi = 武将ID
+005C5ADE - 6a 0c                      - push 0c                            0x0c = 登用(任务ID)
+005C5AE0 - 53                         - push ebx                           ebx = 武将指针(登用方)
+005C5AE1 - b9 5c 89 99 07             - mov ecx,0799895c
+005C5AE6 - e8 25 19 ee ff             - call 004a7410                      设定武将任务
+[设定武将留守计数]
+005C5AEB - 8b 44 24 14                - mov eax,[esp+14]
+005C5AEF - 50                         - push eax                           eax = 留守计时
+005C5AF0 - 53                         - push ebx                           ebx = 武将指针(登用方)
+005C5AF1 - b9 5c 89 99 07             - mov ecx,0799895c
+005C5AF6 - e8 65 fb ed ff             - call 004a5660                      设置武将留守计数
+[武将向目标位置移动]
+005C5AFB - 6a 00                      - push 00
+005C5AFD - 6a ff                      - push ff
+005C5AFF - 57                         - push edi                           edi = 设施指针(被登用方)
+005C5B00 - 53                         - push ebx                           ebx = 武将指针(登用方)
+005C5B01 - b9 5c 89 99 07             - mov ecx,0799895c
+005C5B06 - e8 85 1e ee ff             - call 004a7990                      作用未明，猜测是武将向目标位置移动的一系列处理
+
+【公共处理】
+[设置武将已行动]
+005C5B0B - 6a 01                      - push 01                            0x01 = 已行动
+005C5B0D - 53                         - push ebx
+005C5B0E - b9 5c 89 99 07             - mov ecx,0799895c
+005C5B13 - e8 e8 fa ed ff             - call 004a5600                      设置武将状态是否为已行动
+[扣除军团行动力]
+005C5B18 - 8b 74 24 10                - mov esi,[esp+10]                   esi = 设施指针
+005C5B1C - 56                         - push esi
+005C5B1D - e8 0e c4 00 00             - call 005d1f30                      计算登用武将所需要的行动力
+005C5B22 - 83 c4 04                   - add esp,04
+005C5B25 - 50                         - push eax                           eax = 扣除的行动力
+005C5B26 - 6a 0c                      - push 0c
+005C5B28 - 56                         - push esi
+005C5B29 - b9 90 15 77 09             - mov ecx,09771590
+005C5B2E - e8 0d 38 ff ff             - call 005b9340                      扣除军团行动力
+[下面这个函数没用]
+005C5B33 - 8b 4d 08                   - mov ecx,[ebp+08]
+005C5B36 - 51                         - push ecx
+005C5B37 - 6a 0c                      - push 0c
+005C5B39 - b9 2c 61 3f 07             - mov ecx,073f612c
+005C5B3E - e8 bd d9 fa ff             - call 00573500                      eax = 1
+
+005C5B43 - 5f                         - pop edi
+005C5B44 - 5e                         - pop esi
+005C5B45 - b8 01 00 00 00             - mov eax,00000001
+005C5B4A - 5b                         - pop ebx
+005C5B4B - 8b e5                      - mov esp,ebp
+005C5B4D - 5d                         - pop ebp
+005C5B4E - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 有“清谈”特技则登用无归属的武将失败会进入舌战
+005C59D2 - e9 d9 b1 34 00             - jmp 00910bb0
+
+00910BB0 - e8 ab f1 b9 ff             - call 004afd60                      计算登用武将是否成功
+00910BB5 - 85 c0                      - test eax,eax
+00910BB7 - 75 08                      - jne 00910bc1
+00910BB9 - 57                         - push edi
+00910BBA - 53                         - push ebx
+00910BBB - 56                         - push esi
+00910BBC - e8 3f 00 00 00             - call 00910c00                      调用清谈判定公共函数
+00910BC1 - e9 11 4e cb ff             - jmp 005c59d7
+
+00910C00 - 56                         - push esi
+00910C01 - 57                         - push edi
+00910C02 - 53                         - push ebx
+00910C03 - 8b 74 24 10                - mov esi,[esp+10]                   esi = 武将指针(被登用方)
+00910C07 - 8b 7c 24 14                - mov edi,[esp+14]                   edi = 武将指针(登用方)
+00910C0B - 8b 5c 24 18                - mov ebx,[esp+18]                   ebx = 设施指针(登用方)
+00910C0F - 8b ce                      - mov ecx,esi
+00910C11 - 8b 06                      - mov eax,[esi]
+00910C13 - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+00910C16 - 85 c0                      - test eax,eax
+00910C18 - 7c 05                      - jnge 00910c1f
+00910C1A - 83 f8 2e                   - cmp eax,2e
+00910C1D - 7e 1a                      - jle 00910c39                       如果势力ID在0～46之间则跳过清谈判定
+00910C1F - 8b cf                      - mov ecx,edi
+00910C21 - 68 93 00 00 00             - push 00000093                      0x93 = 清谈
+00910C26 - e8 c5 84 b7 ff             - call 004890f0                      判断武将是否持有清谈特技
+00910C2B - 85 c0                      - test eax,eax
+00910C2D - 74 0a                      - je 00910c39                        如果未持有清谈特技则跳过舌战
+00910C2F - 53                         - push ebx
+00910C30 - 57                         - push edi
+00910C31 - 56                         - push esi
+00910C32 - e8 0d 00 00 00             - call 00910c44                      调用舌战函数，该函数与探索发现人才并登用中的舌战段落极为相似 
+00910C37 - eb 02                      - jmp 00910c3b
+00910C39 - 31 c0                      - xor eax,eax
+00910C3B - 5b                         - pop ebx
+00910C3C - 5f                         - pop edi
+00910C3D - 5e                         - pop esi
+00910C3E - c2 0c 00                   - ret 000c

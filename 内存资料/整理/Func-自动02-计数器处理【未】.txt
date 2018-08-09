@@ -1,0 +1,382 @@
+功能: 每旬一系列计数器的自动处理
+参数表: 无
+
+*****************************************************************************************************************************************************
+
+【城市数据清零】
+00599CF0 - 83 ec 0c                   - sub esp,0c
+00599CF3 - 56                         - push esi
+00599CF4 - 57                         - push edi
+00599CF5 - 33 f6                      - xor esi,esi                        esi = 0
+00599CF7 - eb 07                      - jmp 00599d00
+00599CF9 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+00599D00 - 56                         - push esi
+00599D01 - b9 58 19 20 07             - mov ecx,07201958
+00599D06 - e8 05 6d ef ff             - call 00490a10                      根据城市ID获取城市指针
+00599D0B - 8b f8                      - mov edi,eax                        edi = 城市指针
+00599D0D - 57                         - push edi
+00599D0E - e8 1d 09 ee ff             - call 0047a630                      校验指针
+00599D13 - 83 c4 04                   - add esp,04
+00599D16 - 85 c0                      - test eax,eax
+00599D18 - 74 07                      - je 00599d21
+00599D1A - 8b cf                      - mov ecx,edi                        ecx=城市指针
+00599D1C - e8 1f 1a ee ff             - call 0047b740                      设置城市指针+1E8～+244的24个整形数据为0
+00599D21 - 46                         - inc esi
+00599D22 - 83 fe 2a                   - cmp esi,2a                         循环遍历所有42个城市
+00599D25 - 7c d9                      - jnge 00599d00
+
+【设施数据清零】
+00599D27 - 33 f6                      - xor esi,esi                        esi = 0
+00599D29 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+00599D30 - 56                         - push esi
+00599D31 - b9 58 19 20 07             - mov ecx,07201958
+00599D36 - e8 c5 6f ef ff             - call 00490d00                      根据设施ID获取设施指针
+00599D3B - 8b f8                      - mov edi,eax                        edi = 设施指针
+00599D3D - 57                         - push edi
+00599D3E - e8 ed 08 ee ff             - call 0047a630                      校验指针
+00599D43 - 83 c4 04                   - add esp,04
+00599D46 - 85 c0                      - test eax,eax
+00599D48 - 74 07                      - je 00599d51
+00599D4A - 8b cf                      - mov ecx,edi                        ecx = 设施指针
+00599D4C - e8 cf df ee ff             - call 00487d20                      设置设施指针+30、+34的2个整形数据数据为0
+00599D51 - 46                         - inc esi
+00599D52 - 81 fe 00 40 00 00          - cmp esi,00004000                   循环遍历所有存在的设施
+00599D58 - 7c d6                      - jnge 00599d30
+
+【技术研究计数器】
+00599D5A - 33 ff                      - xor edi,edi                        edi = 0
+00599D5C - 8d 64 24 00                - lea esp,[esp+00]
+00599D60 - 57                         - push edi
+00599D61 - b9 58 19 20 07             - mov ecx,07201958
+00599D66 - e8 35 6d ef ff             - call 00490aa0                      根据势力ID获取势力指针
+00599D6B - 8b f0                      - mov esi,eax                        esi = 势力指针
+00599D6D - 56                         - push esi
+00599D6E - e8 bd 08 ee ff             - call 0047a630                      校验指针
+00599D73 - 83 c4 04                   - add esp,04
+00599D76 - 85 c0                      - test eax,eax
+00599D78 - 74 16                      - je 00599d90
+00599D7A - 8a 86 a0 00 00 00          - mov al,[esi+000000a0]              势力剩余研究时间
+00599D80 - 84 c0                      - test al,al
+00599D82 - 76 0c                      - jna 00599d90                       剩余研究时间为0则跳转
+00599D84 - 0f b6 c0                   - movzx eax,al
+00599D87 - 48                         - dec eax                            剩余研究时间减少一旬
+00599D88 - 50                         - push eax
+00599D89 - 8b ce                      - mov ecx,esi
+00599D8B - e8 50 78 ee ff             - call 004815e0                      设置技术研究剩余回合数
+00599D90 - 47                         - inc edi                            
+00599D91 - 83 ff 2f                   - cmp edi,2f                         循环遍历所有存在的势力
+00599D94 - 7c ca                      - jnge 00599d60
+
+【能力研究计数器】
+00599D96 - 33 ff                      - xor edi,edi                        edi = 0
+00599D98 - 53                         - push ebx
+00599D99 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+00599DA0 - 57                         - push edi
+00599DA1 - b9 58 19 20 07             - mov ecx,07201958
+00599DA6 - e8 f5 6c ef ff             - call 00490aa0                      根据势力ID获取势力指针
+00599DAB - 8b f0                      - mov esi,eax                        esi = 势力指针
+00599DAD - 56                         - push esi
+00599DAE - e8 7d 08 ee ff             - call 0047a630                      校验指针
+00599DB3 - 83 c4 04                   - add esp,04
+00599DB6 - 85 c0                      - test eax,eax
+00599DB8 - 74 38                      - je 00599df2
+00599DBA - 8b 86 a8 00 00 00          - mov eax,[esi+000000a8]             势力正在研究能力
+00599DC0 - 85 c0                      - test eax,eax
+00599DC2 - 7c 2e                      - jnge 00599df2
+00599DC4 - 83 f8 61                   - cmp eax,61
+00599DC7 - 7f 29                      - jg 00599df2                        校验正在研究能力的范围
+00599DC9 - 8a 9e ac 00 00 00          - mov bl,[esi+000000ac]              正在研究能力剩余时间
+00599DCF - 84 db                      - test bl,bl
+00599DD1 - 76 1f                      - jna 00599df2                       剩余研究时间为0则跳转
+00599DD3 - fe cb                      - dec bl                             剩余研究时间减少一旬
+00599DD5 - 88 5c 24 10                - mov [esp+10],bl
+00599DD9 - 8b 4c 24 10                - mov ecx,[esp+10]
+00599DDD - 51                         - push ecx
+00599DDE - 8b ce                      - mov ecx,esi
+00599DE0 - e8 db 78 ee ff             - call 004816c0                      设置能力研究剩余回合数
+00599DE5 - 84 db                      - test bl,bl                         判断是否剩余研究时间为0
+00599DE7 - 75 09                      - jne 00599df2
+00599DE9 - 56                         - push esi
+00599DEA - e8 11 48 03 00             - call 005ce600                      能力研究完成处理，包括判断是否出现势力隐藏能力，能力研究完成信息提示
+00599DEF - 83 c4 04                   - add esp,04
+00599DF2 - 47                         - inc edi
+00599DF3 - 83 ff 2f                   - cmp edi,2f                         循环遍历所有存在的势力
+00599DF6 - 7c a8                      - jnge 00599da0
+
+【以下武将移动】
+00599DF8 - b9 58 19 20 07             - mov ecx,07201958
+00599DFD - e8 de 8c ee ff             - call 00482ae0
+00599E02 - 85 c0                      - test eax,eax
+00599E04 - 89 44 24 14                - mov [esp+14],eax                   [esp+14]=刚刚获取的值
+00599E08 - 0f 84 0b 02 00 00          - je 0059a019                        该值为0则跳转
+00599E0E - 55                         - push ebp
+00599E0F - 83 cd ff                   - or ebp,ff                          ebp=-1
+00599E12 - a1 f8 59 6a 09             - mov eax,[096a59f8]                 某全局调试参数？？
+00599E17 - 85 c0                      - test eax,eax
+00599E19 - 0f 85 f9 01 00 00          - jne 0059a018                       如果？？参数不为0则跳转
+
+00599E1F - 8d 54 24 18                - lea edx,[esp+18]                   edx=[esp+18]列表指针（即刚刚获取的值的指针，因为当中push过一个数）
+00599E23 - 52                         - push edx
+00599E24 - b9 58 19 20 07             - mov ecx,07201958
+00599E29 - e8 f2 90 ee ff             - call 00482f20                      应该是获取武将指针，应该是取出列表中的第一个数
+00599E2E - 8b f0                      - mov esi,eax                        esi = 武将指针
+00599E30 - 56                         - push esi
+00599E31 - e8 fa 07 ee ff             - call 0047a630                      校验指针
+00599E36 - 83 c4 04                   - add esp,04
+00599E39 - 85 c0                      - test eax,eax
+00599E3B - 0f 84 cb 01 00 00          - je 0059a00c
+00599E41 - 8d 44 24 10                - lea eax,[esp+10]
+00599E45 - 50                         - push eax
+00599E46 - 8d 4c 24 18                - lea ecx,[esp+18]
+00599E4A - 51                         - push ecx
+00599E4B - 56                         - push esi
+00599E4C - 89 6c 24 20                - mov [esp+20],ebp                   [esp+20]=ebp
+00599E50 - 89 6c 24 1c                - mov [esp+1c],ebp                   [esp+20]=ebp
+00599E54 - e8 c7 04 02 00             - call 005ba320
+00599E59 - 83 c4 0c                   - add esp,0c
+00599E5C - 85 c0                      - test eax,eax
+00599E5E - 0f 84 40 01 00 00          - je 00599fa4
+00599E64 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]             eax=武将所在
+00599E6A - 85 c0                      - test eax,eax
+00599E6C - 7c 05                      - jnge 00599e73
+00599E6E - 83 f8 56                   - cmp eax,56
+00599E71 - 7e 02                      - jle 00599e75
+00599E73 - 8b c5                      - mov eax,ebp                        如果所在ID不在0～86之间，则eax=-1
+00599E75 - 50                         - push eax
+00599E76 - b9 58 19 20 07             - mov ecx,07201958
+00599E7B - e8 80 6e ef ff             - call 00490d00                      根据设施ID获取设施指针
+00599E80 - 50                         - push eax
+00599E81 - b9 cc b3 80 07             - mov ecx,0780b3cc
+00599E86 - e8 c5 45 f0 ff             - call 0049e450                      ??
+00599E8B - 8b 54 24 10                - mov edx,[esp+10]                   edx=[esp+10]，猜测是武将目的地
+00599E8F - 52                         - push edx
+00599E90 - 50                         - push eax
+00599E91 - e8 ca ee ff ff             - call 00598d60                      移动武将，返回武将移动到何地
+00599E96 - 8b f8                      - mov edi,eax                        edi=武将移动到何地
+00599E98 - 83 c4 08                   - add esp,08
+00599E9B - 85 ff                      - test edi,edi
+00599E9D - 0f 8c f4 00 00 00          - jl 00599f97
+00599EA3 - 83 ff 29                   - cmp edi,29                         确保edi在0～41之间（42个城市）
+00599EA6 - 0f 8f eb 00 00 00          - jg 00599f97
+00599EAC - 3b 7c 24 10                - cmp edi,[esp+10]                   判断武将是否已到达目的地，到达则跳转
+00599EB0 - 74 34                      - je 00599ee6                        
+00599EB2 - 57                         - push edi
+00599EB3 - 56                         - push esi
+00599EB4 - b9 5c 89 99 07             - mov ecx,0799895c
+00599EB9 - e8 32 6e f0 ff             - call 004a0cf0
+00599EBE - 6a 01                      - push 01
+00599EC0 - 8b ce                      - mov ecx,esi
+00599EC2 - e8 79 fc ee ff             - call 00489b40
+00599EC7 - 8b 44 24 10                - mov eax,[esp+10]
+00599ECB - 50                         - push eax
+00599ECC - 57                         - push edi
+00599ECD - e8 ae 15 ee ff             - call 0047b480
+00599ED2 - 83 c4 08                   - add esp,08
+00599ED5 - 50                         - push eax
+00599ED6 - 56                         - push esi
+00599ED7 - b9 5c 89 99 07             - mov ecx,0799895c
+00599EDC - e8 7f b7 f0 ff             - call 004a5660
+00599EE1 - e9 26 01 00 00             - jmp 0059a00c
+
+00599EE6 - 8b 4c 24 14                - mov ecx,[esp+14]                   以下武将到达目的地的处理
+00599EEA - 51                         - push ecx
+00599EEB - 56                         - push esi
+00599EEC - b9 5c 89 99 07             - mov ecx,0799895c
+00599EF1 - e8 fa 6d f0 ff             - call 004a0cf0
+00599EF6 - 6a 00                      - push 00
+00599EF8 - 56                         - push esi
+00599EF9 - b9 5c 89 99 07             - mov ecx,0799895c
+00599EFE - e8 5d b7 f0 ff             - call 004a5660
+00599F03 - 8b 9e 3c 01 00 00          - mov ebx,[esi+0000013c]
+00599F09 - 56                         - push esi
+00599F0A - b9 90 15 77 09             - mov ecx,09771590
+00599F0F - e8 fc fe 01 00             - call 005b9e10
+00599F14 - 8b 86 3c 01 00 00          - mov eax,[esi+0000013c]
+00599F1A - 85 c0                      - test eax,eax
+00599F1C - 7c 09                      - jnge 00599f27
+00599F1E - 83 f8 2b                   - cmp eax,2b
+00599F21 - 0f 8e e5 00 00 00          - jng 0059a00c                       0－43
+
+00599F27 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]             eax=武将所在
+00599F2D - 85 c0                      - test eax,eax
+00599F2F - 7c 05                      - jnge 00599f36
+00599F31 - 83 f8 56                   - cmp eax,56
+00599F34 - 7e 02                      - jle 00599f38                       0－86
+00599F36 - 8b c5                      - mov eax,ebp
+00599F38 - 50                         - push eax
+00599F39 - b9 58 19 20 07             - mov ecx,07201958
+00599F3E - e8 bd 6d ef ff             - call 00490d00                      根据设施ID获取设施指针
+00599F43 - 8b f8                      - mov edi,eax
+00599F45 - 57                         - push edi
+00599F46 - e8 e5 06 ee ff             - call 0047a630                      校验指针
+00599F4B - 83 c4 04                   - add esp,04
+00599F4E - 85 c0                      - test eax,eax
+00599F50 - 0f 84 b6 00 00 00          - je 0059a00c
+00599F56 - 8b ce                      - mov ecx,esi
+00599F58 - e8 13 ed ee ff             - call 00488c70
+00599F5D - 85 c0                      - test eax,eax
+00599F5F - 75 22                      - jne 00599f83
+00599F61 - 83 fb 09                   - cmp ebx,09
+00599F64 - 74 0c                      - je 00599f72
+00599F66 - 83 fb 0a                   - cmp ebx,0a
+00599F69 - 74 07                      - je 00599f72
+00599F6B - b8 01 00 00 00             - mov eax,00000001
+00599F70 - eb 02                      - jmp 00599f74
+00599F72 - 33 c0                      - xor eax,eax
+00599F74 - 6a 01                      - push 01
+00599F76 - 50                         - push eax
+00599F77 - 57                         - push edi
+00599F78 - 56                         - push esi
+00599F79 - b9 5c 89 99 07             - mov ecx,0799895c
+00599F7E - e8 6d 57 f2 ff             - call 004bf6f0
+00599F83 - 6a 00                      - push 00
+00599F85 - 8b ce                      - mov ecx,esi
+00599F87 - e8 b4 fb ee ff             - call 00489b40
+00599F8C - 6a 00                      - push 00
+00599F8E - 8b ce                      - mov ecx,esi
+00599F90 - e8 1b 09 ef ff             - call 0048a8b0
+00599F95 - eb 75                      - jmp 0059a00c
+
+00599F97 - 56                         - push esi
+00599F98 - b9 5c 89 99 07             - mov ecx,0799895c
+00599F9D - e8 de b7 f0 ff             - call 004a5780
+00599FA2 - eb 68                      - jmp 0059a00c
+00599FA4 - 8b 86 3c 01 00 00          - mov eax,[esi+0000013c]
+00599FAA - 85 c0                      - test eax,eax
+00599FAC - 75 0b                      - jne 00599fb9
+00599FAE - 56                         - push esi
+00599FAF - e8 3c 17 02 00             - call 005bb6f0
+00599FB4 - 83 c4 04                   - add esp,04
+00599FB7 - eb 53                      - jmp 0059a00c
+00599FB9 - 83 f8 26                   - cmp eax,26
+00599FBC - 75 0b                      - jne 00599fc9
+00599FBE - 56                         - push esi
+00599FBF - e8 6c cb 03 00             - call 005d6b30
+00599FC4 - 83 c4 04                   - add esp,04
+00599FC7 - eb 43                      - jmp 0059a00c
+00599FC9 - 83 f8 05                   - cmp eax,05
+00599FCC - 75 29                      - jne 00599ff7
+00599FCE - 8b 16                      - mov edx,[esi]
+00599FD0 - 8b ce                      - mov ecx,esi
+00599FD2 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+00599FD5 - 50                         - push eax
+00599FD6 - b9 58 19 20 07             - mov ecx,07201958
+00599FDB - e8 c0 6a ef ff             - call 00490aa0                      根据势力ID获取势力指针
+00599FE0 - 8b f8                      - mov edi,eax                        edi = 势力指针
+00599FE2 - 57                         - push edi
+00599FE3 - e8 48 06 ee ff             - call 0047a630                      校验指针
+00599FE8 - 83 c4 04                   - add esp,04
+00599FEB - 85 c0                      - test eax,eax
+00599FED - 74 1d                      - je 0059a00c
+00599FEF - 8a 87 a0 00 00 00          - mov al,[edi+000000a0]              剩余研究时间
+00599FF5 - eb 06                      - jmp 00599ffd
+00599FF7 - 8a 86 58 01 00 00          - mov al,[esi+00000158]              留守计数
+00599FFD - 84 c0                      - test al,al
+00599FFF - 75 0b                      - jne 0059a00c
+0059A001 - b9 90 15 77 09             - mov ecx,09771590 : [0084C068]
+0059A006 - 56                         - push esi
+0059A007 - e8 04 fe 01 00             - call 005b9e10
+
+0059A00C - 8b 44 24 18                - mov eax,[esp+18]
+0059A010 - 85 c0                      - test eax,eax
+0059A012 - 0f 85 fa fd ff ff          - jne 00599e12                       循环下一个
+0059A018 - 5d                         - pop ebp
+
+
+0059A019 - 33 f6                      - xor esi,esi                        esi = 0
+0059A01B - 5b                         - pop ebx
+0059A01C - 8d 64 24 00                - lea esp,[esp+00]
+0059A020 - 56                         - push esi
+0059A021 - b9 58 19 20 07             - mov ecx,07201958
+0059A026 - e8 e5 69 ef ff             - call 00490a10                      根据城市ID获取城市指针
+0059A02B - 8b f8                      - mov edi,eax                        edi = 城市指针
+0059A02D - 57                         - push edi
+0059A02E - e8 fd 05 ee ff             - call 0047a630                      校验指针
+0059A033 - 83 c4 04                   - add esp,04
+0059A036 - 85 c0                      - test eax,eax
+0059A038 - 74 09                      - je 0059a043
+0059A03A - 57                         - push edi
+0059A03B - e8 c0 c0 02 00             - call 005c6100                      ？？
+0059A040 - 83 c4 04                   - add esp,04
+0059A043 - 46                         - inc esi
+0059A044 - 83 fe 2a                   - cmp esi,2a                         循环遍历所有42个城市
+0059A047 - 7c d7                      - jnge 0059a020
+
+0059A049 - 33 f6                      - xor esi,esi                        esi=0
+0059A04B - eb 03                      - jmp 0059a050
+0059A04D - 8d 49 00                   - lea ecx,[ecx+00]
+0059A050 - 56                         - push esi
+0059A051 - b9 58 19 20 07             - mov ecx,07201958
+0059A056 - e8 a5 6c ef ff             - call 00490d00                      根据设施ID获取设施指针
+0059A05B - 8b f8                      - mov edi,eax                        edi=设施指针
+0059A05D - 57                         - push edi
+0059A05E - e8 cd 05 ee ff             - call 0047a630                      校验指针
+0059A063 - 83 c4 04                   - add esp,04
+0059A066 - 85 c0                      - test eax,eax
+0059A068 - 74 09                      - je 0059a073
+0059A06A - 57                         - push edi
+0059A06B - e8 60 0f 03 00             - call 005cafd0
+0059A070 - 83 c4 04                   - add esp,04
+0059A073 - 46                         - inc esi
+0059A074 - 81 fe 00 40 00 00          - cmp esi,00004000                   循环遍历所有设施
+0059A07A - 7c d4                      - jnge 0059a050
+
+0059A07C - b9 58 19 20 07             - mov ecx,07201958
+0059A081 - e8 ba 93 ee ff             - call 00483440                      ？？
+0059A086 - 5f                         - pop edi
+0059A087 - 5e                         - pop esi
+0059A088 - 83 c4 0c                   - add esp,0c
+0059A08B - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - AI势力每旬自动增加资源
+00599D1C - e9 eb 05 31 00             - jmp 008aa30c
+
+008AA30C - e8 2f 14 bd ff             - call 0047b740
+008AA311 - 8b cf                      - mov ecx,edi
+008AA313 - 8b 07                      - mov eax,[edi]
+008AA315 - ff 50 40                   - call dword ptr [eax+40]        判断城市有无所属势力
+008AA318 - 85 c0                      - test eax,eax
+008AA31A - 7c 79                      - jnge 008aa395
+008AA31C - 8b cf                      - mov ecx,edi
+008AA31E - 8b 07                      - mov eax,[edi]
+008AA320 - ff 50 48                   - call dword ptr [eax+48]        判断城市是否玩家势力
+008AA323 - 85 c0                      - test eax,eax
+008AA325 - 75 6e                      - jne 008aa395
+008AA327 - 8b cf                      - mov ecx,edi
+008AA329 - 8b 47 44                   - mov eax,[edi+44]
+008AA32C - 05 e8 03 00 00             - add eax,000003e8               增加钱
+008AA331 - 50                         - push eax
+008AA332 - e8 b9 19 bd ff             - call 0047bcf0                  设置城市钱
+008AA337 - 8b 47 48                   - mov eax,[edi+48]
+008AA33A - 05 88 13 00 00             - add eax,00001388               增加粮
+008AA33F - 50                         - push eax
+008AA340 - e8 db 19 bd ff             - call 0047bd20                  设置城市粮
+008AA345 - 8b 47 40                   - mov eax,[edi+40]
+008AA348 - 05 d0 07 00 00             - add eax,000007d0               增加兵
+008AA34D - 50                         - push eax
+008AA34E - e8 5d 19 bd ff             - call 0047bcb0                  设置城市兵力
+008AA353 - 8b cf                      - mov ecx,edi
+008AA355 - 8b 47 50                   - mov eax,[edi+50]
+008AA358 - 05 e8 03 00 00             - add eax,000003e8               增加枪
+008AA35D - 50                         - push eax
+008AA35E - 6a 01                      - push 01
+008AA360 - e8 3b 1a bd ff             - call 0047bda0                  设置城市兵装
+008AA365 - 8b 47 54                   - mov eax,[edi+54]
+008AA368 - 05 e8 03 00 00             - add eax,000003e8               增加戟
+008AA36D - 50                         - push eax
+008AA36E - 6a 02                      - push 02
+008AA370 - e8 2b 1a bd ff             - call 0047bda0                  设置城市兵装
+008AA375 - 8b 47 58                   - mov eax,[edi+58]
+008AA378 - 05 e8 03 00 00             - add eax,000003e8               增加弩
+008AA37D - 50                         - push eax
+008AA37E - 6a 03                      - push 03
+008AA380 - e8 1b 1a bd ff             - call 0047bda0                  设置城市兵装
+008AA385 - 8b 47 5c                   - mov eax,[edi+5c]
+008AA388 - 05 e8 03 00 00             - add eax,000003e8               增加马
+008AA38D - 50                         - push eax
+008AA38E - 6a 04                      - push 04
+008AA390 - e8 0b 1a bd ff             - call 0047bda0                  设置城市兵装
+008AA395 - e9 87 f9 ce ff             - jmp 00599d21

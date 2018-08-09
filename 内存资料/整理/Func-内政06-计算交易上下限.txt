@@ -1,0 +1,259 @@
+功能: 计算商人上下限
+参数表: [esp+04]=设施指针，[esp+08]=执行武将指针，[esp+0c]=参数值为0或者1
+备注：有七个入口调用这个函数：
+  1、展现商人界面
+  00608F6F - e8 fc 17 fc ff             - call 005ca770
+  00608F86 - e8 e5 17 fc ff             - call 005ca770
+  0060960D - e8 5e 11 fc ff             - call 005ca770
+  00609624 - e8 47 11 fc ff             - call 005ca770
+  2、以下入口作用未知
+  005EDBE3 - e8 88 cb fd ff             - call 005ca770
+  005EDE30 - e8 3b c9 fd ff             - call 005ca770
+  005EE074 - e8 f7 c6 fd ff             - call 005ca770
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+[校验设施指针]
+005CA770 - 83 ec 08                   - sub esp,08
+005CA773 - 56                         - push esi
+005CA774 - 8b 74 24 10                - mov esi,[esp+10]                   esi = 设施指针
+005CA778 - 56                         - push esi
+005CA779 - e8 b2 fe ea ff             - call 0047a630                      校验指针
+005CA77E - 83 c4 04                   - add esp,04
+005CA781 - 85 c0                      - test eax,eax
+005CA783 - 0f 84 8c 01 00 00          - je 005ca915                        校验失败则跳转到返回0
+005CA789 - 6a 00                      - push 00                            0x00 = 0(城市)
+005CA78B - 8b ce                      - mov ecx,esi
+005CA78D - e8 ce be eb ff             - call 00486660                      判断设施是否是指定设施类型
+005CA792 - 85 c0                      - test eax,eax
+005CA794 - 0f 84 7b 01 00 00          - je 005ca915                        设施不是城市则跳转到返回0
+[获得武将指针]
+005CA79A - 53                         - push ebx
+005CA79B - 8b 5c 24 18                - mov ebx,[esp+18]                   ebx = 武将指针
+005CA79F - 85 db                      - test ebx,ebx
+005CA7A1 - 75 08                      - jne 005ca7ab                       武将指针不为空则跳转到后续处理
+005CA7A3 - 5b                         - pop ebx
+005CA7A4 - 33 c0                      - xor eax,eax
+005CA7A6 - 5e                         - pop esi
+005CA7A7 - 83 c4 08                   - add esp,08
+005CA7AA - c3                         - ret
+[校验城市指针]
+005CA7AB - 56                         - push esi                           esi = 设施指针
+005CA7AC - b9 58 19 20 07             - mov ecx,07201958
+005CA7B1 - e8 ba 6f ec ff             - call 00491770                      根据设施指针获取设施ID
+005CA7B6 - 85 c0                      - test eax,eax 
+005CA7B8 - 7c 05                      - jnge 005ca7bf
+005CA7BA - 83 f8 29                   - cmp eax,29
+005CA7BD - 7e 03                      - jle 005ca7c2
+005CA7BF - 83 c8 ff                   - or eax,ff                          设施ID不在0～41之间则设置为-1
+005CA7C2 - 57                         - push edi
+005CA7C3 - 50                         - push eax                           eax = 设施ID(0～41)
+005CA7C4 - b9 58 19 20 07             - mov ecx,07201958
+005CA7C9 - e8 42 62 ec ff             - call 00490a10                      根据城市ID获取城市指针
+005CA7CE - 8b f8                      - mov edi,eax                        edi = 城市指针
+005CA7D0 - 57                         - push edi
+005CA7D1 - e8 5a fe ea ff             - call 0047a630                      校验指针
+005CA7D6 - 83 c4 04                   - add esp,04
+005CA7D9 - 85 c0                      - test eax,eax
+005CA7DB - 75 07                      - jne 005ca7e4                       校验成功则跳转到后续处理
+005CA7DD - 5f                         - pop edi
+005CA7DE - 5b                         - pop ebx
+005CA7DF - 5e                         - pop esi
+005CA7E0 - 83 c4 08                   - add esp,08
+005CA7E3 - c3                         - ret
+[校验武将指针]
+005CA7E4 - 55                         - push ebp 
+005CA7E5 - 53                         - push ebx                           ebx = 武将指针
+005CA7E6 - 33 ed                      - xor ebp,ebp                        ebp = 0
+005CA7E8 - e8 43 fe ea ff             - call 0047a630                      校验指针
+005CA7ED - 83 c4 04                   - add esp,04
+005CA7F0 - 85 c0                      - test eax,eax
+005CA7F2 - 74 0a                      - je 005ca7fe                        校验失败则跳过获取武将政治
+
+【计算处理】
+[获取武将政治和钱粮交易价格]
+005CA7F4 - 8b cb                      - mov ecx,ebx                        ebx = 武将指针
+005CA7F6 - e8 a5 e8 eb ff             - call 004890a0
+005CA7FB - 0f b6 e8                   - movzx ebp,al                       ebp = 执行武将政治
+005CA7FE - 0f b6 47 7c                - movzx eax,byte ptr [edi+7c]        eax = 钱粮交易价格
+005CA802 - 99                         - cdq
+005CA803 - 8b f8                      - mov edi,eax                        edi = 钱粮交易价格
+005CA805 - b8 c2 01 00 00             - mov eax,000001c2                   0x01c2 = 450
+005CA80A - 2b c5                      - sub eax,ebp
+005CA80C - 8b da                      - mov ebx,edx
+005CA80E - 99                         - cdq
+005CA80F - 8b e8                      - mov ebp,eax                        ebp = 450-执行武将政治
+[获取参数]
+005CA811 - 8b 44 24 24                - mov eax,[esp+24]                   eax = 参数值为0或者1
+005CA815 - 85 c0                      - test eax,eax
+005CA817 - 89 6c 24 10                - mov [esp+10],ebp
+005CA81B - 89 54 24 14                - mov [esp+14],edx
+005CA81F - 8b ce                      - mov ecx,esi
+005CA821 - 74 78                      - je 005ca89b
+[参数为1-计算最大买粮]
+005CA823 - e8 58 c4 eb ff             - call 00486c80                      获取城市、港、关金钱
+005CA828 - 53                         - push ebx
+005CA829 - 99                         - cdq
+005CA82A - 57                         - push edi
+005CA82B - 52                         - push edx
+005CA82C - 50                         - push eax
+005CA82D - e8 fe fa 13 00             - call 0070a330                      计算
+005CA832 - 6a 00                      - push 00
+005CA834 - 68 90 01 00 00             - push 00000190
+005CA839 - 52                         - push edx
+005CA83A - 50                         - push eax
+005CA83B - e8 f0 fa 13 00             - call 0070a330                      计算
+005CA840 - 6a 00                      - push 00
+005CA842 - 8b f8                      - mov edi,eax
+005CA844 - 8b 44 24 18                - mov eax,[esp+18]
+005CA848 - 6a 0a                      - push 0a
+005CA84A - 50                         - push eax
+005CA84B - 55                         - push ebp
+005CA84C - 8b da                      - mov ebx,edx
+005CA84E - e8 dd fa 13 00             - call 0070a330                      计算
+005CA853 - 52                         - push edx
+005CA854 - 50                         - push eax
+005CA855 - 53                         - push ebx
+005CA856 - 57                         - push edi
+005CA857 - e8 24 fa 13 00             - call 0070a280                      计算
+005CA85C - 8b ce                      - mov ecx,esi                        esi = 设施指针
+005CA85E - 8b e8                      - mov ebp,eax                        ebp = 计算结果(所有金钱买粮所得)
+005CA860 - 8b fa                      - mov edi,edx
+005CA862 - e8 89 c5 eb ff             - call 00486df0                      获取城市、港、关兵粮
+005CA867 - 99                         - cdq
+005CA868 - 03 c5                      - add eax,ebp                        eax = 城市兵粮+所有金钱买粮所得(低32位)
+005CA86A - 8b da                      - mov ebx,edx
+005CA86C - 8b ce                      - mov ecx,esi
+005CA86E - 89 44 24 10                - mov [esp+10],eax
+005CA872 - 13 df                      - adc ebx,edi                        ebx = 城市兵粮+所有金钱买粮所得(高32位)
+005CA874 - e8 27 c6 eb ff             - call 00486ea0                      获取城市、港、关兵粮上限
+005CA879 - 99                         - cdq
+005CA87A - 3b da                      - cmp ebx,edx
+005CA87C - 7c 7e                      - jnge 005ca8fc
+005CA87E - 7f 06                      - jg 005ca886
+005CA880 - 39 44 24 10                - cmp [esp+10],eax
+005CA884 - 76 76                      - jna 005ca8fc
+005CA886 - 8b ce                      - mov ecx,esi
+005CA888 - e8 63 c5 eb ff             - call 00486df0                      获取城市、港、关兵粮
+005CA88D - 8b ce                      - mov ecx,esi
+005CA88F - 8b f8                      - mov edi,eax
+005CA891 - e8 0a c6 eb ff             - call 00486ea0                      获取城市、港、关兵粮上限
+005CA896 - 2b c7                      - sub eax,edi                        eax = 最大买粮数量
+005CA898 - 99                         - cdq
+005CA899 - eb 5d                      - jmp 005ca8f8
+[参数为0-计算最大卖粮]
+005CA89B - e8 90 c4 eb ff             - call 00486d30                      获取城市、港、关金钱上限
+005CA8A0 - 8b ce                      - mov ecx,esi                        esi = 设施指针
+005CA8A2 - 8b e8                      - mov ebp,eax
+005CA8A4 - e8 d7 c3 eb ff             - call 00486c80                      获取城市、港、关金钱
+005CA8A9 - 8b 4c 24 14                - mov ecx,[esp+14]
+005CA8AD - 2b e8                      - sub ebp,eax
+005CA8AF - 51                         - push ecx
+005CA8B0 - 8b 4c 24 14                - mov ecx,[esp+14]
+005CA8B4 - 8b c5                      - mov eax,ebp
+005CA8B6 - 99                         - cdq
+005CA8B7 - 51                         - push ecx
+005CA8B8 - 52                         - push edx
+005CA8B9 - 50                         - push eax
+005CA8BA - e8 71 fa 13 00             - call 0070a330                      计算
+005CA8BF - 53                         - push ebx
+005CA8C0 - 57                         - push edi
+005CA8C1 - 52                         - push edx
+005CA8C2 - 50                         - push eax
+005CA8C3 - e8 68 fa 13 00             - call 0070a330                      计算
+005CA8C8 - 6a 00                      - push 00
+005CA8CA - 68 80 0c 00 00             - push 00000c80
+005CA8CF - 52                         - push edx
+005CA8D0 - 50                         - push eax
+005CA8D1 - e8 aa f9 13 00             - call 0070a280                      计算
+005CA8D6 - 8b ce                      - mov ecx,esi                        esi = 设施指针
+005CA8D8 - 8b e8                      - mov ebp,eax                        ebp = 计算结果(低32位)
+005CA8DA - 8b fa                      - mov edi,edx                        ebp = 计算结果(高32位)
+005CA8DC - e8 0f c5 eb ff             - call 00486df0                      获取城市、港、关兵粮
+005CA8E1 - 48                         - dec eax
+005CA8E2 - ba 00 00 00 00             - mov edx,00000000
+005CA8E7 - 0f 98 c2                   - sets dl
+005CA8EA - 4a                         - dec edx
+005CA8EB - 23 c2                      - and eax,edx
+005CA8ED - 99                         - cdq
+005CA8EE - 3b d7                      - cmp edx,edi
+005CA8F0 - 7f 0a                      - jg 005ca8fc
+005CA8F2 - 7c 04                      - jnge 005ca8f8
+005CA8F4 - 3b c5                      - cmp eax,ebp
+005CA8F6 - 73 04                      - jae 005ca8fc
+005CA8F8 - 8b e8                      - mov ebp,eax
+005CA8FA - 8b fa                      - mov edi,edx
+[上下限公共处理]
+005CA8FC - 6a 00                      - push 00
+005CA8FE - 68 ff ff ff 7f             - push 7fffffff
+005CA903 - 57                         - push edi
+005CA904 - 55                         - push ebp
+005CA905 - e8 e6 fc ff ff             - call 005ca5f0                      买卖兵粮的上下限判定(这里的上下限是指整型的上下限，不是指城市兵粮的上下限)
+005CA90A - 83 c4 10                   - add esp,10
+
+005CA90D - 5d                         - pop ebp
+005CA90E - 5f                         - pop edi
+005CA90F - 5b                         - pop ebx
+005CA910 - 5e                         - pop esi
+005CA911 - 83 c4 08                   - add esp,08
+005CA914 - c3                         - ret
+
+005CA915 - 33 c0                      - xor eax,eax
+005CA917 - 5e                         - pop esi
+005CA918 - 83 c4 08                   - add esp,08
+005CA91B - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改1 - 有“商才”特技则交易效果上升
+005CA7F6 - e8 95 63 34 00             - call 00910b90
+005CA7FB - 8b e8                      - mov ebp,eax
+005CA7FD - 90     
+
+00910B90 - 53                         - push ebx
+00910B91 - e8 0a 85 b7 ff             - call 004890a0                      获取武将政治
+00910B96 - 0f b6 d8                   - movzx ebx,al
+00910B99 - 68 77 00 00 00             - push 00000077                      0x77 = 商才
+00910B9E - e8 4d 85 b7 ff             - call 004890f0                      判断武将是否持有商才特技
+00910BA3 - 74 03                      - je 00910ba8
+00910BA5 - 83 c3 1e                   - add ebx,1e                         持有商才特技的武将交易政治增加30
+00910BA8 - 8b c3                      - mov eax,ebx
+00910BAA - 5b                         - pop ebx
+00910BAB - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改2 - 单次交易兵粮有上限
+005CA905 - e9 c2 f1 2d 00             - jmp 008a9acc
+
+008A9ACC - e8 1f 0b d2 ff             - call 005ca5f0
+008A9AD1 - 8b d8                      - mov ebx,eax                        ebx = 考虑城市钱粮上限后的单次交易上限
+008A9AD3 - 8b 4c 24 30                - mov ecx,[esp+30]
+008A9AD7 - e8 0c 00 00 00             - call 008a9ae8                      调用获得单次交易兵粮上限函数
+008A9ADC - 39 c3                      - cmp ebx,eax
+008A9ADE - 7f 02                      - jg 008a9ae2
+008A9AE0 - 8b c3                      - mov eax,ebx
+008A9AE2 - e9 23 0e d2 ff             - jmp 005ca90a
+
+008A9AE8 - 56                         - push esi
+008A9AE9 - 57                         - push edi
+008A9AEA - bf 50 c3 00 00             - mov edi,0000c350                   0xc350 = 50000(单次交易兵粮上限)
+008A9AEF - 8b f1                      - mov esi,ecx                        esi = 武将指针
+008A9AF1 - 56                         - push esi
+008A9AF2 - e8 39 0b bd ff             - call 0047a630                      校验指针
+008A9AF7 - 83 c4 04                   - add esp,04
+008A9AFA - 85 c0                      - test eax,eax
+008A9AFC - 74 12                      - je 008a9b10                        校验失败则跳过商才处理
+008A9AFE - 8b ce                      - mov ecx,esi
+008A9B00 - 68 77 00 00 00             - push 00000077                      0x77 = 商才
+008A9B05 - e8 e6 f5 bd ff             - call 004890f0                      判断武将是否持有商才特技
+008A9B0A - 85 c0                      - test eax,eax
+008A9B0C - 74 02                      - je 008a9b10
+008A9B0E - 01 ff                      - add edi,edi                        持有商才特技的武将单次交易上限翻倍
+008A9B10 - 8b c7                      - mov eax,edi
+008A9B12 - 5f                         - pop edi
+008A9B13 - 5e                         - pop esi
+008A9B14 - c3                         - ret

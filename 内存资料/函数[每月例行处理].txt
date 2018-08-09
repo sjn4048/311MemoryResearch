@@ -1,0 +1,208 @@
+00590C30 - 83 ec 18                   - sub esp,18
+00590C33 - 57                         - push edi
+00590C34 - 8b f9                      - mov edi,ecx                    
+00590C36 - b9 80 3e c4 09             - mov ecx,09c43e80 : [0085FA9C]
+00590C3B - e8 10 eb 0e 00             - call 0067f750
+00590C40 - 85 c0                      - test eax,eax
+00590C42 - 74 1b                      - je 00590c5f
+00590C44 - a1 80 3e c4 09             - mov eax,[09c43e80] : [0085FA9C]
+00590C49 - 6a 15                      - push 15
+00590C4B - b9 80 3e c4 09             - mov ecx,09c43e80 : [0085FA9C]
+00590C50 - ff 50 04                   - call dword ptr [eax+04]
+00590C53 - 85 c0                      - test eax,eax
+00590C55 - c7 44 24 04 01 00 00 00    - mov [esp+04],00000001
+00590C5D - 75 08                      - jne 00590c67
+00590C5F - c7 44 24 04 00 00 00 00    - mov [esp+04],00000000
+
+00590C67 - b9 58 19 20 07             - mov ecx,07201958
+00590C6C - e8 0f 1a ef ff             - call 00482680                  判断是否是月初
+00590C71 - 85 c0                      - test eax,eax
+00590C73 - 0f 84 03 02 00 00          - je 00590e7c                    非月初则直接返回
+00590C79 - 8b cf                      - mov ecx,edi
+00590C7B - e8 b0 ae ff ff             - call 0058bb30                  俘虏月份和禁仕月份计数器处理
+00590C80 - 8b cf                      - mov ecx,edi
+00590C82 - e8 49 27 ff ff             - call 005833d0                  ？？应该是与武将死亡和年龄相关的计算
+00590C87 - 8b 47 20                   - mov eax,[edi+20]
+00590C8A - 85 c0                      - test eax,eax
+00590C8C - 0f 85 ea 01 00 00          - jne 00590e7c
+00590C92 - 8b cf                      - mov ecx,edi
+00590C94 - e8 d7 01 ff ff             - call 00580e70
+00590C99 - 8b cf                      - mov ecx,edi
+00590C9B - e8 40 1f ff ff             - call 00582be0                  俘虏逃跑处理
+00590CA0 - 8b 44 24 04                - mov eax,[esp+04]
+00590CA4 - 85 c0                      - test eax,eax
+00590CA6 - 75 07                      - jne 00590caf
+00590CA8 - 8b cf                      - mov ecx,edi
+00590CAA - e8 31 e8 ff ff             - call 0058f4e0                  丰作效果处理
+00590CAF - 56                         - push esi
+00590CB0 - 8b cf                      - mov ecx,edi
+00590CB2 - e8 d9 f7 ff ff             - call 00590490                  钱粮收入
+
+【加技巧点】
+[以下皇帝加技巧点]
+00590CB7 - b9 cc b3 80 07             - mov ecx,0780b3cc
+00590CBC - e8 2f c1 f0 ff             - call 0049cdf0
+00590CC1 - 50                         - push eax
+00590CC2 - b9 58 19 20 07             - mov ecx,07201958
+00590CC7 - e8 44 fd ef ff             - call 00490a10
+00590CCC - 8b f0                      - mov esi,eax
+00590CCE - 56                         - push esi
+00590CCF - e8 5c 99 ee ff             - call 0047a630
+00590CD4 - 83 c4 04                   - add esp,04
+00590CD7 - 85 c0                      - test eax,eax
+00590CD9 - 74 2f                      - je 00590d0a
+00590CDB - 8b 16                      - mov edx,[esi]
+00590CDD - 8b ce                      - mov ecx,esi
+00590CDF - ff 52 40                   - call dword ptr [edx+40]
+00590CE2 - 50                         - push eax
+00590CE3 - b9 58 19 20 07             - mov ecx,07201958
+00590CE8 - e8 b3 fd ef ff             - call 00490aa0
+00590CED - 8b f0                      - mov esi,eax
+00590CEF - 56                         - push esi
+00590CF0 - e8 3b 99 ee ff             - call 0047a630
+00590CF5 - 83 c4 04                   - add esp,04
+00590CF8 - 85 c0                      - test eax,eax
+00590CFA - 74 0e                      - je 00590d0a
+00590CFC - 56                         - push esi
+00590CFD - 6a 05                      - push 05
+00590CFF - 56                         - push esi
+00590D00 - b9 5c 89 99 07             - mov ecx,0799895c
+00590D05 - e8 76 58 f2 ff             - call 004b6580
+[以下铜雀台加技巧点]
+00590D0A - 53                         - push ebx
+00590D0B - 33 db                      - xor ebx,ebx
+00590D0D - 8d 49 00                   - lea ecx,[ecx+00]
+00590D10 - 53                         - push ebx
+00590D11 - b9 58 19 20 07             - mov ecx,07201958
+00590D16 - e8 e5 ff ef ff             - call 00490d00
+00590D1B - 8b f0                      - mov esi,eax
+00590D1D - 56                         - push esi
+00590D1E - e8 0d 99 ee ff             - call 0047a630
+00590D23 - 83 c4 04                   - add esp,04
+00590D26 - 85 c0                      - test eax,eax
+00590D28 - 74 3c                      - je 00590d66
+00590D2A - 83 7e 08 1e                - cmp dword ptr [esi+08],1e
+00590D2E - 75 36                      - jne 00590d66
+00590D30 - 8b 46 14                   - mov eax,[esi+14]
+00590D33 - 85 c0                      - test eax,eax
+00590D35 - 74 2f                      - je 00590d66
+00590D37 - 8b 06                      - mov eax,[esi]
+00590D39 - 8b ce                      - mov ecx,esi
+00590D3B - ff 50 40                   - call dword ptr [eax+40]
+00590D3E - 50                         - push eax
+00590D3F - b9 58 19 20 07             - mov ecx,07201958
+00590D44 - e8 57 fd ef ff             - call 00490aa0
+00590D49 - 8b f0                      - mov esi,eax
+00590D4B - 56                         - push esi
+00590D4C - e8 df 98 ee ff             - call 0047a630
+00590D51 - 83 c4 04                   - add esp,04
+00590D54 - 85 c0                      - test eax,eax
+00590D56 - 74 0e                      - je 00590d66
+00590D58 - 56                         - push esi
+00590D59 - 6a 0a                      - push 0a
+00590D5B - 56                         - push esi
+00590D5C - b9 5c 89 99 07             - mov ecx,0799895c
+00590D61 - e8 1a 58 f2 ff             - call 004b6580
+00590D66 - 43                         - inc ebx
+00590D67 - 81 fb 00 40 00 00          - cmp ebx,00004000
+00590D6D - 7c a1                      - jnge 00590d10
+[以下玉玺加技巧点]
+00590D6F - 6a 29                      - push 29
+00590D71 - b9 58 19 20 07             - mov ecx,07201958
+00590D76 - e8 b5 fd ef ff             - call 00490b30
+00590D7B - 8b f0                      - mov esi,eax
+00590D7D - 56                         - push esi
+00590D7E - e8 ad 98 ee ff             - call 0047a630
+00590D83 - 83 c4 04                   - add esp,04
+00590D86 - 85 c0                      - test eax,eax
+00590D88 - 5b                         - pop ebx
+00590D89 - 74 52                      - je 00590ddd
+00590D8B - 83 7e 48 01                - cmp dword ptr [esi+48],01
+00590D8F - 75 4c                      - jne 00590ddd
+00590D91 - 8b 76 40                   - mov esi,[esi+40]
+00590D94 - 56                         - push esi
+00590D95 - b9 58 19 20 07             - mov ecx,07201958
+00590D9A - e8 61 fd ef ff             - call 00490b00
+00590D9F - 8b f0                      - mov esi,eax
+00590DA1 - 56                         - push esi
+00590DA2 - e8 89 98 ee ff             - call 0047a630
+00590DA7 - 83 c4 04                   - add esp,04
+00590DAA - 85 c0                      - test eax,eax
+00590DAC - 74 2f                      - je 00590ddd
+00590DAE - 8b 16                      - mov edx,[esi]
+00590DB0 - 8b ce                      - mov ecx,esi
+00590DB2 - ff 52 40                   - call dword ptr [edx+40]
+00590DB5 - 50                         - push eax
+00590DB6 - b9 58 19 20 07             - mov ecx,07201958
+00590DBB - e8 e0 fc ef ff             - call 00490aa0
+00590DC0 - 8b f0                      - mov esi,eax
+00590DC2 - 56                         - push esi
+00590DC3 - e8 68 98 ee ff             - call 0047a630
+00590DC8 - 83 c4 04                   - add esp,04
+00590DCB - 85 c0                      - test eax,eax
+00590DCD - 74 0e                      - je 00590ddd
+00590DCF - 56                         - push esi
+00590DD0 - 6a 05                      - push 05
+00590DD2 - 56                         - push esi
+00590DD3 - b9 5c 89 99 07             - mov ecx,0799895c
+00590DD8 - e8 a3 57 f2 ff             - call 004b6580
+
+【加？？】
+00590DDD - 8b 74 24 08                - mov esi,[esp+08]
+00590DE1 - 85 f6                      - test esi,esi
+00590DE3 - 75 07                      - jne 00590dec
+00590DE5 - 8b cf                      - mov ecx,edi
+00590DE7 - e8 e4 d5 ff ff             - call 0058e3d0
+00590DEC - 8b cf                      - mov ecx,edi
+00590DEE - e8 8d 24 ff ff             - call 00583280
+00590DF3 - 8b cf                      - mov ecx,edi
+00590DF5 - e8 66 dd ff ff             - call 0058eb60
+00590DFA - 85 f6                      - test esi,esi
+00590DFC - 75 15                      - jne 00590e13
+00590DFE - 8b cf                      - mov ecx,edi
+00590E00 - e8 8b ee ff ff             - call 0058fc90
+00590E05 - 8b cf                      - mov ecx,edi
+00590E07 - e8 94 bc ff ff             - call 0058caa0
+00590E0C - 8b cf                      - mov ecx,edi
+00590E0E - e8 fd d6 ff ff             - call 0058e510
+00590E13 - 8b cf                      - mov ecx,edi
+00590E15 - e8 16 da ff ff             - call 0058e830
+00590E1A - 85 f6                      - test esi,esi
+00590E1C - 5e                         - pop esi
+00590E1D - 75 0e                      - jne 00590e2d
+00590E1F - 8b cf                      - mov ecx,edi
+00590E21 - e8 4a 21 ff ff             - call 00582f70
+00590E26 - 8b cf                      - mov ecx,edi
+00590E28 - e8 c3 28 ff ff             - call 005836f0
+
+00590E2D - b9 58 19 20 07             - mov ecx,07201958
+00590E32 - e8 b9 16 ef ff             - call 004824f0                      获取当前月
+00590E37 - 83 f8 01                   - cmp eax,01
+00590E3A - 74 0f                      - je 00590e4b
+00590E3C - 83 f8 04                   - cmp eax,04
+00590E3F - 74 0a                      - je 00590e4b
+00590E41 - 83 f8 07                   - cmp eax,07
+00590E44 - 74 05                      - je 00590e4b
+00590E46 - 83 f8 0a                   - cmp eax,0a
+00590E49 - 75 1c                      - jne 00590e67
+00590E4B - 6a 00                      - push 00
+00590E4D - 6a 02                      - push 02
+00590E4F - 8d 4c 24 10                - lea ecx,[esp+10]
+00590E53 - e8 c8 e2 ee ff             - call 0047f120
+00590E58 - 50                         - push eax
+00590E59 - 8b cf                      - mov ecx,edi
+00590E5B - e8 c0 e1 fe ff             - call 0057f020
+00590E60 - 8b 47 20                   - mov eax,[edi+20]
+00590E63 - 85 c0                      - test eax,eax
+00590E65 - 75 15                      - jne 00590e7c
+
+00590E67 - 6a 00                      - push 00
+00590E69 - 6a 03                      - push 03
+00590E6B - 8d 4c 24 10                - lea ecx,[esp+10]
+00590E6F - e8 ac e2 ee ff             - call 0047f120
+00590E74 - 50                         - push eax
+00590E75 - 8b cf                      - mov ecx,edi
+00590E77 - e8 a4 e1 fe ff             - call 0057f020
+00590E7C - 5f                         - pop edi
+00590E7D - 83 c4 18                   - add esp,18
+00590E80 - c3                         - ret

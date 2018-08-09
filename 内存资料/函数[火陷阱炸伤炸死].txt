@@ -1,0 +1,270 @@
+00597850 - 51                         - push ecx
+00597851 - 8b 54 24 18                - mov edx,[esp+18]
+00597855 - 8b 44 24 08                - mov eax,[esp+08]
+00597859 - 53                         - push ebx
+0059785A - 8b 18                      - mov ebx,[eax]
+0059785C - 55                         - push ebp
+0059785D - 8b 6c 24 24                - mov ebp,[esp+24]
+00597861 - 56                         - push esi
+00597862 - 8b 74 24 20                - mov esi,[esp+20]
+00597866 - 89 4c 24 0c                - mov [esp+0c],ecx
+0059786A - 8b 4d 0c                   - mov ecx,[ebp+0c]
+0059786D - 57                         - push edi
+0059786E - 03 4a 0c                   - add ecx,[edx+0c]
+00597871 - f7 d9                      - neg ecx
+00597873 - 51                         - push ecx
+00597874 - 56                         - push esi
+00597875 - b9 5c 89 99 07             - mov ecx,0799895c
+0059787A - e8 21 6c f1 ff             - call 004ae4a0
+0059787F - 8b ce                      - mov ecx,esi
+00597881 - 8b f8                      - mov edi,eax
+00597883 - e8 38 dc ef ff             - call 004954c0
+00597888 - 85 ff                      - test edi,edi
+0059788A - 74 31                      - je 005978bd
+0059788C - 8b 44 24 20                - mov eax,[esp+20]
+00597890 - 50                         - push eax
+00597891 - e8 9a 2d ee ff             - call 0047a630
+00597896 - 83 c4 04                   - add esp,04
+00597899 - 85 c0                      - test eax,eax
+0059789B - 74 20                      - je 005978bd
+0059789D - 8b 16                      - mov edx,[esi]
+0059789F - 8b ce                      - mov ecx,esi
+005978A1 - ff 52 40                   - call dword ptr [edx+40]
+005978A4 - 8b 4c 24 20                - mov ecx,[esp+20]
+005978A8 - 50                         - push eax
+005978A9 - e8 52 9c ee ff             - call 00481500
+005978AE - 85 c0                      - test eax,eax
+005978B0 - 74 0b                      - je 005978bd
+005978B2 - 8b 44 24 18                - mov eax,[esp+18]
+005978B6 - c7 40 0c 01 00 00 00       - mov [eax+0c],00000001
+005978BD - 53                         - push ebx
+005978BE - e8 fd 8d 00 00             - call 005a06c0
+005978C3 - 83 c4 04                   - add esp,04
+005978C6 - 85 c0                      - test eax,eax
+005978C8 - 89 44 24 20                - mov [esp+20],eax
+005978CC - 75 4c                      - jne 0059791a
+005978CE - 85 ff                      - test edi,edi
+005978D0 - 74 1b                      - je 005978ed
+005978D2 - 56                         - push esi
+005978D3 - 55                         - push ebp
+005978D4 - b9 b0 99 54 09             - mov ecx,095499b0
+005978D9 - e8 c2 92 fd ff             - call 00570ba0
+005978DE - 8b 4c 24 10                - mov ecx,[esp+10]
+005978E2 - 53                         - push ebx
+005978E3 - 6a 01                      - push 01
+005978E5 - 57                         - push edi
+005978E6 - e8 a5 12 ff ff             - call 00588b90
+005978EB - eb 2d                      - jmp 0059791a
+005978ED - 83 7d 64 3e                - cmp dword ptr [ebp+64],3e
+005978F1 - 75 27                      - jne 0059791a
+005978F3 - 6a 00                      - push 00
+005978F5 - 56                         - push esi
+005978F6 - 6a 56                      - push 56
+005978F8 - b9 d8 59 6a 09             - mov ecx,096a59d8
+005978FD - e8 be 20 ff ff             - call 005899c0
+00597902 - 56                         - push esi
+00597903 - 6a 61                      - push 61
+00597905 - b9 d8 59 6a 09             - mov ecx,096a59d8
+0059790A - e8 71 20 ff ff             - call 00589980
+0059790F - 6a 00                      - push 00
+00597911 - 53                         - push ebx
+00597912 - e8 59 8e 00 00             - call 005a0770
+00597917 - 83 c4 08                   - add esp,08
+0059791A - 8b 16                      - mov edx,[esi]
+0059791C - 8b ce                      - mov ecx,esi
+0059791E - ff 52 50                   - call dword ptr [edx+50]
+00597921 - 85 c0                      - test eax,eax
+00597923 - 75 33                      - jne 00597958
+00597925 - 8b 44 24 20                - mov eax,[esp+20]
+00597929 - 85 c0                      - test eax,eax
+0059792B - 75 12                      - jne 0059793f
+0059792D - 8b 4c 24 1c                - mov ecx,[esp+1c]
+00597931 - 8d 46 3c                   - lea eax,[esi+3c]
+00597934 - 50                         - push eax
+00597935 - 51                         - push ecx
+00597936 - 56                         - push esi
+00597937 - e8 f4 81 01 00             - call 005afb30
+0059793C - 83 c4 0c                   - add esp,0c
+0059793F - 6a 00                      - push 00
+00597941 - 6a 00                      - push 00
+00597943 - 6a 00                      - push 00
+00597945 - 56                         - push esi
+00597946 - b9 5c 89 99 07             - mov ecx,0799895c : [00000000]
+0059794B - e8 e0 80 f2 ff             - call 004bfa30
+00597950 - 5f                         - pop edi
+00597951 - 5e                         - pop esi
+00597952 - 5d                         - pop ebp
+00597953 - 5b                         - pop ebx
+00597954 - 59                         - pop ecx
+00597955 - c2 18 00                   - ret 0018
+[眩晕处理]
+00597958 - 8b 7c 24 18                - mov edi,[esp+18]
+0059795C - 8b 47 08                   - mov eax,[edi+08]
+0059795F - 83 f8 16                   - cmp eax,16                     16＝业火种
+00597962 - 75 14                      - jne 00597978
+00597964 - 6a 32                      - push 32                        50％概率
+00597966 - e8 65 a8 ed ff             - call 004721d0
+0059796B - 83 c4 04                   - add esp,04
+0059796E - 85 c0                      - test eax,eax
+00597970 - 74 37                      - je 005979a9
+00597972 - 6a 01                      - push 01
+00597974 - 6a 03                      - push 03                        晕1～3回合
+00597976 - eb 17                      - jmp 0059798f
+00597978 - 83 f8 14                   - cmp eax,14                     14＝火船
+0059797B - 75 2c                      - jne 005979a9
+0059797D - 6a 19                      - push 19                        25％概率
+0059797F - e8 4c a8 ed ff             - call 004721d0
+00597984 - 83 c4 04                   - add esp,04
+00597987 - 85 c0                      - test eax,eax
+00597989 - 74 1e                      - je 005979a9
+0059798B - 6a 01                      - push 01
+0059798D - 6a 02                      - push 02                        晕1～2回合
+0059798F - e8 bc a7 ed ff             - call 00472150
+00597994 - 83 c4 04                   - add esp,04
+00597997 - fe c0                      - inc al
+00597999 - b9 5c 89 99 07             - mov ecx,0799895c
+0059799E - 50                         - push eax
+0059799F - 6a 01                      - push 01
+005979A1 - 6a 00                      - push 00
+005979A3 - 56                         - push esi
+005979A4 - e8 c7 70 f1 ff             - call 004aea70                  眩晕演示
+[炸伤炸死处理]
+005979A9 - 8b 47 08                   - mov eax,[edi+08]
+005979AC - 83 f8 16                   - cmp eax,16                     16＝业火种
+005979AF - 74 05                      - je 005979b6
+005979B1 - 83 f8 15                   - cmp eax,15                     15＝业火球
+005979B4 - 75 12                      - jne 005979c8                   不是业火种和业火球则跳转返回
+005979B6 - 8b 54 24 28                - mov edx,[esp+28]
+005979BA - 8b 42 0c                   - mov eax,[edx+0c]
+005979BD - 8b 4c 24 10                - mov ecx,[esp+10]
+005979C1 - 50                         - push eax
+005979C2 - 56                         - push esi
+005979C3 - e8 88 f9 ff ff             - call 00597350                  炸死炸伤判定
+005979C8 - 5f                         - pop edi
+005979C9 - 5e                         - pop esi
+005979CA - 5d                         - pop ebp
+005979CB - 5b                         - pop ebx
+005979CC - 59                         - pop ecx
+005979CD - c2 18 00                   - ret 0018
+
+
+【00597350炸死处理】
+00597350 - a1 7c 19 20 07             - mov eax,[0720197c]             EAX＝战死设定
+00597355 - 81 ec d0 03 00 00          - sub esp,000003d0
+0059735B - 85 c0                      - test eax,eax                   判断是否是无战死
+0059735D - 53                         - push ebx
+0059735E - 8b 9c 24 d8 03 00 00       - mov ebx,[esp+000003d8]         EBX＝部队指针
+00597365 - 56                         - push esi
+00597366 - 57                         - push edi
+00597367 - 0f 84 ae 00 00 00          - je 0059741b                    无战死则跳转到受伤判定
+0059736D - e8 7e fe ff ff             - call 005971f0                  预定死亡人员（判断部队中是否有护卫或强运），返回预定死亡人员首地址
+00597372 - 8b f8                      - mov edi,eax                    EDI＝预定死亡人员
+00597374 - 85 ff                      - test edi,edi
+00597376 - 0f 84 9f 00 00 00          - je 0059741b                    如无预定死亡人员则跳转到受伤判定
+0059737C - a1 7c 19 20 07             - mov eax,[0720197c]             EAX＝战死设定
+00597381 - 55                         - push ebp
+00597382 - 33 ed                      - xor ebp,ebp                    EBP=0
+00597384 - 48                         - dec eax
+00597385 - 74 0a                      - je 00597391
+00597387 - 48                         - dec eax
+00597388 - 75 0c                      - jne 00597396
+0059738A - bd 04 00 00 00             - mov ebp,00000004               高战死的几率
+0059738F - eb 05                      - jmp 00597396
+00597391 - bd 02 00 00 00             - mov ebp,00000002               普通战死的几率
+00597396 - 8b b7 fc 00 00 00          - mov esi,[edi+000000fc]         ESI＝武将性格
+0059739C - e8 df ef ff ff             - call 00596380                  （EDI＝武将指针），根据该武将的统/武/智最高值计算武将能力炸死参数，如果<=70则EAX=0；<=80则EAX=1；<=90则EAX=2；>90则EAX=3
+005973A1 - 2b f0                      - sub esi,eax                    ESI＝武将性格－武将能力炸死参数
+005973A3 - 03 ee                      - add ebp,esi                    EBP＝基本炸死几率＋武将性格－武将能力炸死参数
+005973A5 - 55                         - push ebp
+005973A6 - e8 25 ae ed ff             - call 004721d0                  调用随机函数
+005973AB - 83 c4 04                   - add esp,04
+005973AE - 85 c0                      - test eax,eax
+005973B0 - 5d                         - pop ebp
+005973B1 - 74 68                      - je 0059741b                    随机结果为FALSE的情况下跳转
+005973B3 - 8b cf                      - mov ecx,edi
+005973B5 - e8 86 29 ef ff             - call 00489d40                  取武将所属君主ID
+005973BA - 50                         - push eax                       eax＝武将所属君主ID
+005973BB - b9 58 19 20 07             - mov ecx,07201958
+005973C0 - e8 3b 97 ef ff             - call 00490b00                  根据武将ID获得武将指针
+005973C5 - 68 a5 18 00 00             - push 000018a5
+005973CA - 8d 4c 24 10                - lea ecx,[esp+10]
+005973CE - 8b f0                      - mov esi,eax
+005973D0 - e8 8b 57 f0 ff             - call 0049cb60
+005973D5 - 57                         - push edi
+005973D6 - 6a 00                      - push 00
+005973D8 - 8d 4c 24 14                - lea ecx,[esp+14]
+005973DC - e8 9f 57 f0 ff             - call 0049cb80
+005973E1 - 56                         - push esi
+005973E2 - 6a 01                      - push 01
+005973E4 - 8d 4c 24 14                - lea ecx,[esp+14]
+005973E8 - e8 93 57 f0 ff             - call 0049cb80
+005973ED - 6a 00                      - push 00
+005973EF - 8d 44 24 10                - lea eax,[esp+10]
+005973F3 - 57                         - push edi
+005973F4 - 50                         - push eax
+005973F5 - e8 96 3f f0 ff             - call 0049b390
+005973FA - 83 c4 04                   - add esp,04
+005973FD - 50                         - push eax
+005973FE - e8 8d f2 f5 ff             - call 004f6690
+00597403 - 83 c4 0c                   - add esp,0c
+00597406 - 6a 00                      - push 00
+00597408 - 6a 00                      - push 00
+0059740A - 6a 00                      - push 00
+0059740C - 6a 00                      - push 00
+0059740E - 6a 00                      - push 00
+00597410 - 57                         - push edi
+00597411 - b9 5c 89 99 07             - mov ecx,0799895c
+00597416 - e8 c5 57 f1 ff             - call 004acbe0                  具体的战死处理
+[炸伤处理]
+0059741B - 53                         - push ebx
+0059741C - e8 0f 32 ee ff             - call 0047a630                  校验指针
+00597421 - 83 c4 04                   - add esp,04
+00597424 - 85 c0                      - test eax,eax
+00597426 - 0f 84 88 00 00 00          - je 005974b4
+0059742C - e8 bf fd ff ff             - call 005971f0                  预定炸伤人员（判断部队中是否有护卫或强运），返回预定炸伤人员首地址
+00597431 - 8b f8                      - mov edi,eax                    EDI＝预定炸伤人员
+00597433 - 85 ff                      - test edi,edi
+00597435 - 74 7d                      - je 005974b4                    如无预定炸伤人员则跳转到xxxx
+00597437 - 8b b7 fc 00 00 00          - mov esi,[edi+000000fc]         ESI＝武将性格
+0059743D - e8 3e ef ff ff             - call 00596380                 （EDI＝武将指针），根据该武将的统/武/智最高值计算武将能力炸伤参数，如果<=70则EAX=0；<=80则EAX=1；<=90则EAX=2；>90则EAX=3
+00597442 - 2b f0                      - sub esi,eax                    ESI＝武将性格－武将能力炸死参数
+00597444 - 83 c6 02                   - add esi,02                     基本受伤概率=2
+00597447 - 56                         - push esi
+00597448 - e8 83 ad ed ff             - call 004721d0                  调用随机函数
+0059744D - 83 c4 04                   - add esp,04
+00597450 - 85 c0                      - test eax,eax
+00597452 - 74 60                      - je 005974b4                    随机结果为FALSE的情况下跳转
+00597454 - 8b cf                      - mov ecx,edi
+00597456 - e8 e5 28 ef ff             - call 00489d40                  取武将所属君主ID
+0059745B - 50                         - push eax                       eax＝武将所属君主ID
+0059745C - b9 58 19 20 07             - mov ecx,07201958
+00597461 - e8 9a 96 ef ff             - call 00490b00                  根据武将ID获得武将指针
+00597466 - 68 b0 18 00 00             - push 000018b0
+0059746B - 8d 4c 24 10                - lea ecx,[esp+10]
+0059746F - 8b f0                      - mov esi,eax
+00597471 - e8 ea 56 f0 ff             - call 0049cb60
+00597476 - 57                         - push edi
+00597477 - 6a 00                      - push 00
+00597479 - 8d 4c 24 14                - lea ecx,[esp+14]
+0059747D - e8 fe 56 f0 ff             - call 0049cb80
+00597482 - 56                         - push esi
+00597483 - 6a 01                      - push 01
+00597485 - 8d 4c 24 14                - lea ecx,[esp+14]
+00597489 - e8 f2 56 f0 ff             - call 0049cb80
+0059748E - 6a 00                      - push 00
+00597490 - 8d 4c 24 10                - lea ecx,[esp+10]
+00597494 - 57                         - push edi
+00597495 - 51                         - push ecx
+00597496 - e8 f5 3e f0 ff             - call 0049b390
+0059749B - 83 c4 04                   - add esp,04
+0059749E - 50                         - push eax
+0059749F - e8 ec f1 f5 ff             - call 004f6690
+005974A4 - 8b 84 24 f0 03 00 00       - mov eax,[esp+000003f0]
+005974AB - 53                         - push ebx
+005974AC - e8 2f ef ff ff             - call 005963e0                  具体的受伤处理
+005974B1 - 83 c4 10                   - add esp,10
+005974B4 - 5f                         - pop edi
+005974B5 - 5e                         - pop esi
+005974B6 - 5b                         - pop ebx
+005974B7 - 81 c4 d0 03 00 00          - add esp,000003d0
+005974BD - c2 08 00                   - ret 0008

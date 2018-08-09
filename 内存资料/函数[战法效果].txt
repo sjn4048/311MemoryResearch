@@ -1,0 +1,141 @@
+0058623F - 8b 84 24 28 05 00 00       - mov eax,[esp+00000528]
+00586246 - 83 f8 12                   - cmp eax,12
+00586249 - c7 44 24 14 01 00 00 00    - mov [esp+14],00000001              
+00586251 - 0f 87 a8 01 00 00          - ja 005863ff                        战法0～18
+00586257 - ff 24 85 18 71 58 00       - jmp dword ptr [eax*4+00587118]     跳转到相应处理
+0058625E - 8b 7c 24 10                - mov edi,[esp+10]                   0－突刺、17－猛撞
+00586262 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+00586269 - 51                         - push ecx
+0058626A - 8b cf                      - mov ecx,edi
+0058626C - e8 8f fd 00 00             - call 00596000                       对方部队移位一格的处理
+00586271 - e9 76 01 00 00             - jmp 005863ec
+00586276 - 8b 7c 24 10                - mov edi,[esp+10]                   1－螺旋突刺
+0058627A - 8d 94 24 d8 04 00 00       - lea edx,[esp+000004d8]
+00586281 - 52                         - push edx
+00586282 - 8b cf                      - mov ecx,edi
+00586284 - e8 b7 d9 00 00             - call 00593c40                      眩晕处理
+00586289 - e9 5e 01 00 00             - jmp 005863ec
+0058628E - 8b 7c 24 10                - mov edi,[esp+10]                   2－二段突
+00586292 - 8d 84 24 d8 04 00 00       - lea eax,[esp+000004d8]
+00586299 - 50                         - push eax
+0058629A - 8b cf                      - mov ecx,edi
+0058629C - e8 6f fd 00 00             - call 00596010                      对方部队移位两格的处理
+005862A1 - e9 46 01 00 00             - jmp 005863ec
+005862A6 - 8b 7c 24 10                - mov edi,[esp+10]                   3－熊手
+005862AA - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+005862B1 - 51                         - push ecx
+005862B2 - 8b cf                      - mov ecx,edi
+005862B4 - e8 37 e4 00 00             - call 005946f0                      对方部队回拉一格的处理
+005862B9 - e9 2e 01 00 00             - jmp 005863ec
+005862BE - 8b 7c 24 10                - mov edi,[esp+10]                   4－横扫
+005862C2 - 8d 94 24 d8 04 00 00       - lea edx,[esp+000004d8]
+005862C9 - 52                         - push edx
+005862CA - 8b cf                      - mov ecx,edi
+005862CC - e8 bf e5 00 00             - call 00594890
+005862D1 - 8d 84 24 d8 04 00 00       - lea eax,[esp+000004d8]
+005862D8 - 50                         - push eax
+005862D9 - e8 72 e4 ff ff             - call 00584750                      处理多支部队的“怒发”加气
+005862DE - e9 0f 01 00 00             - jmp 005863f2
+005862E3 - 8b 7c 24 10                - mov edi,[esp+10]                   5－旋风
+005862E7 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+005862EE - 51                         - push ecx
+005862EF - 8b cf                      - mov ecx,edi
+005862F1 - e8 fa e7 00 00             - call 00594af0
+005862F6 - 8d 94 24 d8 04 00 00       - lea edx,[esp+000004d8]
+005862FD - 52                         - push edx
+005862FE - e8 4d e4 ff ff             - call 00584750                      处理多支部队的“怒发”加气
+00586303 - e9 ea 00 00 00             - jmp 005863f2
+00586308 - 8b 7c 24 10                - mov edi,[esp+10]                   6－火矢、12－火矢、16－火矢
+0058630C - 8d 84 24 d8 04 00 00       - lea eax,[esp+000004d8]
+00586313 - 50                         - push eax
+00586314 - 8b cf                      - mov ecx,edi
+00586316 - e8 c5 e9 00 00             - call 00594ce0
+0058631B - 53                         - push ebx
+0058631C - e8 df e3 ff ff             - call 00584700                      被攻击部队“怒发”处理
+00586321 - 83 c4 04                   - add esp,04
+00586324 - 53                         - push ebx
+00586325 - 8b cf                      - mov ecx,edi
+00586327 - e8 d4 65 01 00             - call 0059c900                      弩兵战法的处理？？
+0058632C - e9 c4 00 00 00             - jmp 005863f5
+00586331 - 8b 7c 24 10                - mov edi,[esp+10]                   7－贯射
+00586335 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+0058633C - 51                         - push ecx
+0058633D - 8b cf                      - mov ecx,edi
+0058633F - e8 8c eb 00 00             - call 00594ed0
+00586344 - 8d 94 24 d8 04 00 00       - lea edx,[esp+000004d8]
+0058634B - 52                         - push edx
+0058634C - eb 1b                      - jmp 00586369                       跳转到乱射处理处理多支部队的“怒发”加气
+0058634E - 8b 7c 24 10                - mov edi,[esp+10]                   8－乱射
+00586352 - 8d 84 24 d8 04 00 00       - lea eax,[esp+000004d8]
+00586359 - 50                         - push eax
+0058635A - 8b cf                      - mov ecx,edi
+0058635C - e8 ef ee 00 00             - call 00595250
+00586361 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+00586368 - 51                         - push ecx
+00586369 - e8 e2 e3 ff ff             - call 00584750                      处理多支部队的“怒发”加气
+0058636E - 83 c4 04                   - add esp,04
+00586371 - 53                         - push ebx
+00586372 - 8b cf                      - mov ecx,edi
+00586374 - e8 87 65 01 00             - call 0059c900                      弩兵战法的处理？？
+00586379 - eb 7a                      - jmp 005863f5
+0058637B - 8b 7c 24 10                - mov edi,[esp+10]                   9－突击
+0058637F - 8d 54 24 14                - lea edx,[esp+14]
+00586383 - 52                         - push edx
+00586384 - 8d 84 24 dc 04 00 00       - lea eax,[esp+000004dc]
+0058638B - 50                         - push eax
+0058638C - 8b cf                      - mov ecx,edi
+0058638E - e8 dd f7 00 00             - call 00595b70                      突击移位处理
+00586393 - eb 57                      - jmp 005863ec
+00586395 - 8b 7c 24 10                - mov edi,[esp+10]                   10－突破
+00586399 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+005863A0 - 51                         - push ecx
+005863A1 - 8b cf                      - mov ecx,edi
+005863A3 - e8 08 f8 00 00             - call 00595bb0                      突破移位处理
+005863A8 - eb 42                      - jmp 005863ec
+005863AA - 8b 7c 24 10                - mov edi,[esp+10]                   11－突进
+005863AE - 8d 54 24 14                - lea edx,[esp+14]
+005863B2 - 52                         - push edx
+005863B3 - 8d 84 24 dc 04 00 00       - lea eax,[esp+000004dc]
+005863BA - 50                         - push eax
+005863BB - 8b cf                      - mov ecx,edi
+005863BD - e8 ce f7 00 00             - call 00595b90                      突进移位处理
+005863C2 - eb 28                      - jmp 005863ec
+005863C4 - 8b 7c 24 10                - mov edi,[esp+10]                   14－放射
+005863C8 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+005863CF - 51                         - push ecx
+005863D0 - 8b cf                      - mov ecx,edi
+005863D2 - e8 79 da 00 00             - call 00593e50
+005863D7 - eb 13                      - jmp 005863ec
+005863D9 - 8b 7c 24 10                - mov edi,[esp+10]                   15－投石、18－投石
+005863DD - 8d 94 24 d8 04 00 00       - lea edx,[esp+000004d8]
+005863E4 - 52                         - push edx
+005863E5 - 8b cf                      - mov ecx,edi
+005863E7 - e8 34 f9 00 00             - call 00595d20
+005863EC - 53                         - push ebx
+005863ED - e8 0e e3 ff ff             - call 00584700                      被攻击部队“怒发”处理
+005863F2 - 83 c4 04                   - add esp,04
+005863F5 - 8b 44 24 14                - mov eax,[esp+14]
+005863F9 - 85 c0                      - test eax,eax
+005863FB - 74 33                      - je 00586430
+005863FD - eb 04                      - jmp 00586403
+005863FF - 8b 7c 24 10                - mov edi,[esp+10]                   13－破碎（不能攻击部队，所以直接跳转到这里）
+00586403 - 8b 84 24 4c 05 00 00       - mov eax,[esp+0000054c]
+0058640A - 8b 8c 24 30 05 00 00       - mov ecx,[esp+00000530]
+00586411 - 50                         - push eax
+00586412 - 51                         - push ecx
+00586413 - e8 08 fb ff ff             - call 00585f20
+00586418 - 8b 94 24 58 05 00 00       - mov edx,[esp+00000558]
+0058641F - 8b 84 24 3c 05 00 00       - mov eax,[esp+0000053c]
+00586426 - 52                         - push edx
+00586427 - 50                         - push eax
+00586428 - e8 f3 fa ff ff             - call 00585f20
+0058642D - 83 c4 10                   - add esp,10
+00586430 - 8d 8c 24 d8 04 00 00       - lea ecx,[esp+000004d8]
+00586437 - 51                         - push ecx
+00586438 - 56                         - push esi
+00586439 - e8 42 e2 ff ff             - call 00584680
+0058643E - 8b 54 24 20                - mov edx,[esp+20]
+00586442 - 8b 44 24 28                - mov eax,[esp+28]
+00586446 - 83 c4 08                   - add esp,08
+
+之前之后都可以扩展阅读

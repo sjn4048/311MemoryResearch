@@ -1,0 +1,179 @@
+005FAF00 - 83 ec 14                   - sub esp,14
+005FAF03 - 8b 44 24 1c                - mov eax,[esp+1c]
+005FAF07 - 50                         - push eax
+005FAF08 - 89 4c 24 14                - mov [esp+14],ecx
+005FAF0C - e8 3f f7 ff ff             - call 005fa650
+005FAF11 - 8b 54 24 1c                - mov edx,[esp+1c]
+005FAF15 - 89 44 24 04                - mov [esp+04],eax
+005FAF19 - 8b 42 04                   - mov eax,[edx+04]
+005FAF1C - 33 c9                      - xor ecx,ecx
+005FAF1E - 83 c4 04                   - add esp,04
+005FAF21 - 85 c0                      - test eax,eax
+005FAF23 - c7 44 24 04 00 00 00 80    - mov [esp+04],80000000
+005FAF2B - 89 4c 24 0c                - mov [esp+0c],ecx
+005FAF2F - 89 44 24 08                - mov [esp+08],eax
+005FAF33 - 0f 84 a9 01 00 00          - je 005fb0e2
+005FAF39 - 53                         - push ebx
+005FAF3A - 55                         - push ebp
+005FAF3B - 56                         - push esi
+005FAF3C - 57                         - push edi
+005FAF3D - 8d 49 00                   - lea ecx,[ecx+00]
+005FAF40 - 8b 4c 24 28                - mov ecx,[esp+28]
+005FAF44 - 8d 44 24 18                - lea eax,[esp+18]
+005FAF48 - 50                         - push eax
+005FAF49 - e8 82 0f e8 ff             - call 0047bed0
+005FAF4E - 8b 30                      - mov esi,[eax]
+005FAF50 - 56                         - push esi
+005FAF51 - e8 da f6 e7 ff             - call 0047a630
+005FAF56 - 83 c4 04                   - add esp,04
+005FAF59 - 85 c0                      - test eax,eax
+005FAF5B - 0f 84 67 01 00 00          - je 005fb0c8
+005FAF61 - 8b 4c 24 2c                - mov ecx,[esp+2c]
+005FAF65 - 51                         - push ecx                               ecx = 选定官职指针
+005FAF66 - 8b 4c 24 24                - mov ecx,[esp+24]
+005FAF6A - 56                         - push esi                               esi = 选定武将指针
+005FAF6B - e8 60 f5 ff ff             - call 005fa4d0                          判断选定武将是否可以被封选定的官职，主要判断勋功、所在、状态等属性
+005FAF70 - 85 c0                      - test eax,eax
+005FAF72 - 0f 84 50 01 00 00          - je 005fb0c8
+
+005FAF78 - 80 be ac 00 00 00 5a       - cmp byte ptr [esi+000000ac],5a         判断选定武将忠诚度是否小于90
+005FAF7F - bf 00 00 00 80             - mov edi,80000000
+005FAF84 - 0f 82 30 01 00 00          - jb 005fb0ba
+
+005FAF8A - 8b 44 24 30                - mov eax,[esp+30]
+005FAF8E - 85 c0                      - test eax,eax
+005FAF90 - 8b ce                      - mov ecx,esi                            ecx = esi
+005FAF92 - 0f 84 d8 00 00 00          - je 005fb070
+005FAF98 - 8b 44 24 10                - mov eax,[esp+10]                       eax = 官职类型
+005FAF9C - 83 e8 00                   - sub eax,00
+005FAF9F - 0f 84 94 00 00 00          - je 005fb039                            官职是10级（丞相三公）
+005FAFA5 - 48                         - dec eax
+005FAFA6 - 74 3f                      - je 005fafe7                            官职是武官
+005FAFA8 - 48                         - dec eax
+
+[文官职位]
+005FAFA9 - e8 f2 e0 e8 ff             - call 004890a0                          取得政治
+005FAFAE - 8b ce                      - mov ecx,esi
+005FAFB0 - 8a d8                      - mov bl,al
+005FAFB2 - e8 d9 e0 e8 ff             - call 00489090                          取得智力
+005FAFB7 - 3a c3                      - cmp al,bl
+005FAFB9 - 77 02                      - ja 005fafbd
+005FAFBB - 8a c3                      - mov al,bl
+005FAFBD - 0f b6 c8                   - movzx ecx,al                           ecx = 政治智力取较大值
+005FAFC0 - 83 f9 46                   - cmp ecx,46                             ecx至少为70
+005FAFC3 - 0f 8c f1 00 00 00          - jl 005fb0ba
+005FAFC9 - 0f b6 86 ac 00 00 00       - movzx eax,byte ptr [esi+000000ac]
+005FAFD0 - 83 e8 5a                   - sub eax,5a
+005FAFD3 - 83 f8 0a                   - cmp eax,0a
+005FAFD6 - 7e 05                      - jle 005fafdd
+005FAFD8 - b8 0a 00 00 00             - mov eax,0000000a
+005FAFDD - 8d 3c c1                   - lea edi,[ecx+eax*8]
+005FAFE0 - 03 f8                      - add edi,eax
+005FAFE2 - e9 d3 00 00 00             - jmp 005fb0ba
+
+[武官职位]
+005FAFE7 - e8 94 e0 e8 ff             - call 00489080                          取得武力
+005FAFEC - 8b ce                      - mov ecx,esi
+005FAFEE - 8a d8                      - mov bl,al
+005FAFF0 - e8 7b e0 e8 ff             - call 00489070                          取得统帅
+005FAFF5 - 3a c3                      - cmp al,bl
+005FAFF7 - 77 02                      - ja 005faffb
+005FAFF9 - 8a c3                      - mov al,bl                              eax = 武力统帅较大值
+005FAFFB - 3c 3c                      - cmp al,3c                              eax至少为60
+005FAFFD - 0f 82 b7 00 00 00          - jb 005fb0ba
+005FB003 - 0f b6 86 ac 00 00 00       - movzx eax,byte ptr [esi+000000ac]
+005FB00A - 83 e8 5a                   - sub eax,5a
+005FB00D - 83 f8 0a                   - cmp eax,0a
+005FB010 - bb 0a 00 00 00             - mov ebx,0000000a
+005FB015 - 7f 02                      - jg 005fb019
+005FB017 - 8b d8                      - mov ebx,eax
+005FB019 - 8b ce                      - mov ecx,esi
+005FB01B - e8 50 e0 e8 ff             - call 00489070
+005FB020 - 8b ce                      - mov ecx,esi
+005FB022 - 0f b6 f8                   - movzx edi,al
+005FB025 - e8 56 e0 e8 ff             - call 00489080
+005FB02A - 0f b6 d0                   - movzx edx,al
+005FB02D - 03 fa                      - add edi,edx
+005FB02F - 8d 04 db                   - lea eax,[ebx+ebx*8]
+005FB032 - 03 f8                      - add edi,eax
+005FB034 - e9 81 00 00 00             - jmp 005fb0ba
+
+[10级官职]
+005FB039 - e8 52 e0 e8 ff             - call 00489090                          取武将智力
+005FB03E - 8b ce                      - mov ecx,esi
+005FB040 - 0f b6 d8                   - movzx ebx,al
+005FB043 - e8 28 e0 e8 ff             - call 00489070                          取武将统帅
+005FB048 - 0f b6 c8                   - movzx ecx,al
+005FB04B - 03 d9                      - add ebx,ecx                            
+005FB04D - 81 fb 96 00 00 00          - cmp ebx,00000096                       统智和要求大于150
+005FB053 - 7c 65                      - jnge 005fb0ba
+005FB055 - 0f b6 86 ac 00 00 00       - movzx eax,byte ptr [esi+000000ac]      取得忠诚
+005FB05C - 83 e8 5a                   - sub eax,5a
+005FB05F - 83 f8 0a                   - cmp eax,0a
+005FB062 - 7e 05                      - jle 005fb069
+005FB064 - b8 0a 00 00 00             - mov eax,0000000a                       eax = 忠诚-90，大于10按10计算
+005FB069 - 8d 3c c3                   - lea edi,[ebx+eax*8]
+005FB06C - 03 f8                      - add edi,eax                            最终判定值 = 统智和 + eax * 9
+005FB06E - eb 4a                      - jmp 005fb0ba
+
+[最后]
+005FB070 - e8 0b e0 e8 ff             - call 00489080                          前面都是过滤，这里才是文官和武官取值比大小的地方
+005FB075 - 8b ce                      - mov ecx,esi
+005FB077 - 8a d8                      - mov bl,al
+005FB079 - e8 f2 df e8 ff             - call 00489070
+005FB07E - 3a c3                      - cmp al,bl
+005FB080 - 77 02                      - ja 005fb084
+005FB082 - 8a c3                      - mov al,bl
+005FB084 - 8b ce                      - mov ecx,esi
+005FB086 - 0f b6 e8                   - movzx ebp,al
+005FB089 - e8 12 e0 e8 ff             - call 004890a0
+005FB08E - 8b ce                      - mov ecx,esi
+005FB090 - 8a d8                      - mov bl,al
+005FB092 - e8 f9 df e8 ff             - call 00489090
+005FB097 - 3a c3                      - cmp al,bl
+005FB099 - 77 02                      - ja 005fb09d
+005FB09B - 8a c3                      - mov al,bl
+005FB09D - 0f b6 c8                   - movzx ecx,al
+005FB0A0 - 8b 44 24 10                - mov eax,[esp+10]
+005FB0A4 - 83 e8 00                   - sub eax,00
+005FB0A7 - 74 0b                      - je 005fb0b4
+005FB0A9 - 48                         - dec eax
+005FB0AA - 75 08                      - jne 005fb0b4
+005FB0AC - 3b e9                      - cmp ebp,ecx
+005FB0AE - 7c 0a                      - jnge 005fb0ba
+005FB0B0 - 8b fd                      - mov edi,ebp
+005FB0B2 - eb 06                      - jmp 005fb0ba
+005FB0B4 - 3b cd                      - cmp ecx,ebp
+005FB0B6 - 7e 02                      - jle 005fb0ba
+005FB0B8 - 8b f9                      - mov edi,ecx
+
+005FB0BA - 39 7c 24 14                - cmp [esp+14],edi
+005FB0BE - 7d 08                      - jnl 005fb0c8
+005FB0C0 - 89 7c 24 14                - mov [esp+14],edi
+005FB0C4 - 89 74 24 1c                - mov [esp+1c],esi
+005FB0C8 - 8b 44 24 18                - mov eax,[esp+18]
+005FB0CC - 85 c0                      - test eax,eax
+005FB0CE - 0f 85 6c fe ff ff          - jne 005faf40
+005FB0D4 - 8b 44 24 1c                - mov eax,[esp+1c]
+005FB0D8 - 5f                         - pop edi
+005FB0D9 - 5e                         - pop esi
+005FB0DA - 5d                         - pop ebp
+005FB0DB - 5b                         - pop ebx
+005FB0DC - 83 c4 14                   - add esp,14
+005FB0DF - c2 0c 00                   - ret 000c
+005FB0E2 - 8b c1                      - mov eax,ecx
+005FB0E4 - 83 c4 14                   - add esp,14
+005FB0E7 - c2 0c 00                   - ret 000c
+
+
+修改地点：
+005FB07E - 0f b6 db                   - movzx ebx,bl
+005FB081 - 0f b6 e8                   - movzx ebp,al
+005FB084 - 8b ce                      - mov ecx,esi
+005FB086 - 01 dd                      - add ebp,ebx
+005FB088 - 90                         - nop
+
+005FB097 - 0f b6 db                   - movzx ebx,bl
+005FB09A - 0f b6 c8                   - movzx ecx,al
+005FB09D - 01 d9                      - add ecx,ebx
+005FB09F - 90                         - nop

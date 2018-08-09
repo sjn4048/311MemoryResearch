@@ -1,0 +1,154 @@
+功能: 计算探索是否成功
+参数表: [esp+04]=武将指针，[esp+08]=城市指针，[esp+0c]=输入及返回参数列表？？指针
+备注：有三个入口调用这个函数：
+  1、军师推荐
+  005D4366 - e8 35 db ff ff             - call 005d1ea0
+  2、执行探索
+  005D5A54 - e8 47 c4 ff ff             - call 005d1ea0
+  3、以下入口作用未知
+  005F28C2 - e8 d9 f5 fd ff             - call 005d1ea0
+ 
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+005D1EA0 - 56                         - push esi
+005D1EA1 - 8b 74 24 0c                - mov esi,[esp+0c]                   esi = 城市指针
+005D1EA5 - 56                         - push esi
+005D1EA6 - e8 85 87 ea ff             - call 0047a630                      校验指针
+005D1EAB - 83 c4 04                   - add esp,04
+005D1EAE - 85 c0                      - test eax,eax
+005D1EB0 - 75 02                      - jne 005d1eb4                       校验成功跳转到后续处理
+005D1EB2 - 5e                         - pop esi
+005D1EB3 - c3                         - ret
+
+【计算发现人才概率】
+005D1EB4 - 53                         - push ebx
+005D1EB5 - 8b 5c 24 0c                - mov ebx,[esp+0c]                   ebx = 武将指针(发现方)
+005D1EB9 - 55                         - push ebp
+005D1EBA - 57                         - push edi
+005D1EBB - 8b 7c 24 1c                - mov edi,[esp+1c]                   edi = 返回参数列表指针
+005D1EBF - 57                         - push edi
+005D1EC0 - 56                         - push esi
+005D1EC1 - 53                         - push ebx
+005D1EC2 - e8 29 ff ff ff             - call 005d1df0                      计算发现人才概率
+005D1EC7 - 8b e8                      - mov ebp,eax                        ebp = 发现人才概率
+005D1EC9 - 83 c4 0c                   - add esp,0c
+005D1ECC - 85 ed                      - test ebp,ebp
+005D1ECE - 7f 07                      - jg 005d1ed7                        发现人才概率大于0则跳转到后续处理
+005D1ED0 - 5f                         - pop edi
+005D1ED1 - 5d                         - pop ebp
+005D1ED2 - 5b                         - pop ebx
+005D1ED3 - 33 c0                      - xor eax,eax
+005D1ED5 - 5e                         - pop esi
+005D1ED6 - c3                         - ret
+
+【定位一个被发现的人才】
+005D1ED7 - 8b cf                      - mov ecx,edi                        edi = 返回参数列表指针(包含一个为发现人才列表)
+005D1ED9 - be 19 00 00 00             - mov esi,00000019
+005D1EDE - e8 2d ad fc ff             - call 0059cc10                      定位一个被发现的人才
+005D1EE3 - 8b 38                      - mov edi,[eax]
+005D1EE5 - 57                         - push edi                           edi = 武将指针(被发现方)
+005D1EE6 - e8 45 87 ea ff             - call 0047a630                      校验指针
+005D1EEB - 83 c4 04                   - add esp,04
+005D1EEE - 85 c0                      - test eax,eax
+005D1EF0 - 74 16                      - je 005d1f08
+
+【计算是否成功发现该人才】
+005D1EF2 - 57                         - push edi                           edi = 武将指针(被发现方)
+005D1EF3 - b9 58 19 20 07             - mov ecx,07201958
+005D1EF8 - e8 13 f4 eb ff             - call 00491310                      根据武将指针获取武将ID
+005D1EFD - 50                         - push eax
+005D1EFE - 8b cb                      - mov ecx,ebx                        ebx = 武将指针(发现方)
+005D1F00 - e8 7b 80 eb ff             - call 00489f80                      计算A与B的相性差
+005D1F05 - 0f b6 f0                   - movzx esi,al                       esi = 相性差
+005D1F08 - 6a 00                      - push 00
+005D1F0A - 6a 00                      - push 00
+005D1F0C - 6a 00                      - push 00
+005D1F0E - 56                         - push esi
+005D1F0F - 53                         - push ebx
+005D1F10 - b9 58 19 20 07             - mov ecx,07201958
+005D1F15 - e8 f6 f3 eb ff             - call 00491310                      根据武将指针获取武将ID
+005D1F1A - 50                         - push eax                           eax = 武将ID(发现方)
+005D1F1B - 55                         - push ebp                           ebp = 发现人才概率
+005D1F1C - e8 1f 62 fe ff             - call 005b8140                      计算是否成功发现
+005D1F21 - 83 c4 18                   - add esp,18
+005D1F24 - 5f                         - pop edi
+005D1F25 - 5d                         - pop ebp
+005D1F26 - 5b                         - pop ebx
+005D1F27 - 5e                         - pop esi
+005D1F28 - c3                         - ret
+
+*****************************************************************************************************************************************************
+
+子函数A - 计算发现人才概率
+
+[校验指针]
+005D1DF0 - 55                         - push ebp
+005D1DF1 - 8b 6c 24 0c                - mov ebp,[esp+0c]                   ebp = 城市指针
+005D1DF5 - 55                         - push ebp
+005D1DF6 - e8 35 88 ea ff             - call 0047a630                      校验指针
+005D1DFB - 83 c4 04                   - add esp,04
+005D1DFE - 85 c0                      - test eax,eax
+005D1E00 - 75 02                      - jne 005d1e04                       校验成功跳转到后续处理
+005D1E02 - 5d                         - pop ebp
+005D1E03 - c3                         - ret
+[获取城市在野武将数量]
+005D1E04 - 56                         - push esi
+005D1E05 - 6a 00                      - push 00
+005D1E07 - 8b cd                      - mov ecx,ebp
+005D1E09 - e8 b2 a6 ea ff             - call 0047c4c0                      根据城市指针获取设施指针
+005D1E0E - 8b 74 24 18                - mov esi,[esp+18]                   esi = 返回参数列表指针
+005D1E12 - 50                         - push eax
+005D1E13 - 68 20 17 5d 00             - push 005d1720                      005d1720 = 过滤函数
+005D1E18 - 56                         - push esi
+005D1E19 - b9 08 98 99 07             - mov ecx,07999808
+005D1E1E - e8 6d d7 ef ff             - call 004cf590                      获取指定设施符合指定过滤函数要求的武将列表
+005D1E23 - 8b 76 0c                   - mov esi,[esi+0c]                   esi = 城市在野武将数量
+005D1E26 - 85 f6                      - test esi,esi
+005D1E28 - 75 05                      - jne 005d1e2f                       如果城市在野武将数量不为0则跳转到后续处理
+005D1E2A - 5e                         - pop esi
+005D1E2B - 33 c0                      - xor eax,eax
+005D1E2D - 5d                         - pop ebp
+005D1E2E - c3                         - ret
+[眼力判定]
+005D1E2F - 57                         - push edi
+005D1E30 - 8b 7c 24 10                - mov edi,[esp+10]                   edi = 武将指针
+005D1E34 - 6a 55                      - push 55                            0x55 = 眼力
+005D1E36 - 8b cf                      - mov ecx,edi
+005D1E38 - e8 b3 72 eb ff             - call 004890f0                      判断武将是否持有眼力特技
+005D1E3D - 85 c0                      - test eax,eax
+005D1E3F - 74 09                      - je 005d1e4a
+005D1E41 - 5f                         - pop edi
+005D1E42 - 5e                         - pop esi
+005D1E43 - b8 64 00 00 00             - mov eax,00000064                   持有眼力特技则发现人才概率为100%
+005D1E48 - 5d                         - pop ebp
+005D1E49 - c3                         - ret
+[计算发现人才概率]
+005D1E4A - 8b 45 18                   - mov eax,[ebp+18]                   eax = 城市所属州
+005D1E4D - 3b 87 e4 00 00 00          - cmp eax,[edi+000000e4]             比较城市所属州与探索武将出身州
+005D1E53 - 53                         - push ebx
+005D1E54 - b3 0a                      - mov bl,0a                          城市所属州与探索武将出身州不同，ebx = 10
+005D1E56 - 75 02                      - jne 005d1e5a
+005D1E58 - b3 0b                      - mov bl,0b                          城市所属州与探索武将出身州相同，ebx = 11
+005D1E5A - 8b cf                      - mov ecx,edi
+005D1E5C - e8 3f 72 eb ff             - call 004890a0                      获取武将政治
+005D1E61 - 83 fe 05                   - cmp esi,05
+005D1E64 - b9 05 00 00 00             - mov ecx,00000005
+005D1E69 - 7f 02                      - jg 005d1e6d
+005D1E6B - 8b ce                      - mov ecx,esi                        以上四句，ecx = 城市在野武将数量(最小为5)
+005D1E6D - 0f b6 d0                   - movzx edx,al                       edx  = 探索武将政治
+005D1E70 - 8d 4c 49 07                - lea ecx,[ecx+ecx*2+07]
+005D1E74 - 0f af ca                   - imul ecx,edx
+005D1E77 - 0f b6 c3                   - movzx eax,bl
+005D1E7A - 0f af c8                   - imul ecx,eax
+005D1E7D - b8 b5 81 4e 1b             - mov eax,1b4e81b5
+005D1E82 - f7 e9                      - imul ecx
+005D1E84 - 5b                         - pop ebx
+005D1E85 - c1 fa 05                   - sar dl,05
+005D1E88 - 5f                         - pop edi
+005D1E89 - 8b c2                      - mov eax,edx
+005D1E8B - c1 e8 1f                   - shr eax,1f
+005D1E8E - 5e                         - pop esi
+005D1E8F - 03 c2                      - add eax,edx                        探索发现人才概率 = (城市在野武将数量*3+7)*探索武将政治*城市所属州与探索武将出身州关系/300
+005D1E91 - 5d                         - pop ebp
+005D1E92 - c3                         - ret

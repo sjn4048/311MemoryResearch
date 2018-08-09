@@ -1,0 +1,42 @@
+功能: 设置港关兵粮
+参数表: [esp+04]=兵粮值，ecx=港关指针
+
+*****************************************************************************************************************************************************
+
+0048DA20 - 56                         - push esi
+0048DA21 - 8b f1                      - mov esi,ecx                    esi = 港关指针
+0048DA23 - 8b 06                      - mov eax,[esi]
+0048DA25 - 57                         - push edi
+0048DA26 - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID
+0048DA29 - 50                         - push eax
+0048DA2A - b9 58 19 20 07             - mov ecx,07201958
+0048DA2F - e8 6c 30 00 00             - call 00490aa0                  根据势力ID获取势力指针
+0048DA34 - 8b f8                      - mov edi,eax
+0048DA36 - 57                         - push edi
+0048DA37 - e8 f4 cb fe ff             - call 0047a630                  校验指针
+0048DA3C - 83 c4 04                   - add esp,04
+0048DA3F - 85 c0                      - test eax,eax
+0048DA41 - 74 12                      - je 0048da55
+
+0048DA43 - 6a 21                      - push 21                        0x21 = 扩展港关
+0048DA45 - 8b cf                      - mov ecx,edi
+0048DA47 - e8 94 37 ff ff             - call 004811e0                  判断势力是否拥有扩展港关科技
+0048DA4C - 85 c0                      - test eax,eax
+0048DA4E - b9 e0 93 04 00             - mov ecx,000493e0               0x493e0 = 300000(有扩展港关)               【修改】有扩展港关兵粮上限
+0048DA53 - 75 05                      - jne 0048da5a
+0048DA55 - b9 a0 86 01 00             - mov ecx,000186a0               0x186a0 = 100000(无扩展港关)               【修改】无扩展港关兵粮上限
+
+0048DA5A - 8b 44 24 0c                - mov eax,[esp+0c]               eax = 设置的兵粮值
+0048DA5E - 85 c0                      - test eax,eax
+0048DA60 - 77 0a                      - ja 0048da6c
+0048DA62 - 33 c0                      - xor eax,eax
+0048DA64 - 5f                         - pop edi
+0048DA65 - 89 46 2c                   - mov [esi+2c],eax
+0048DA68 - 5e                         - pop esi
+0048DA69 - c2 04 00                   - ret 0004
+0048DA6C - 3b c8                      - cmp ecx,eax
+0048DA6E - 77 f4                      - ja 0048da64
+0048DA70 - 5f                         - pop edi
+0048DA71 - 89 4e 2c                   - mov [esi+2c],ecx
+0048DA74 - 5e                         - pop esi
+0048DA75 - c2 04 00                   - ret 0004

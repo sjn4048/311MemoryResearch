@@ -1,0 +1,712 @@
+0058E3D0 - 83 ec 0c                   - sub esp,0c
+0058E3D3 - 55                         - push ebp
+0058E3D4 - 8b e9                      - mov ebp,ecx
+0058E3D6 - b9 58 19 20 07             - mov ecx,07201958
+0058E3DB - e8 90 41 ef ff             - call 00482570                       获取从开始时间到当前旬为止过去的年数
+0058E3E0 - 83 f8 01                   - cmp eax,01                          第一年，返回
+0058E3E3 - 0f 82 c2 00 00 00          - jb 0058e4ab
+
+0058E3E9 - 53                         - push ebx
+0058E3EA - 56                         - push esi
+0058E3EB - 57                         - push edi
+0058E3EC - 8d 44 24 10                - lea eax,[esp+10]
+0058E3F0 - 50                         - push eax
+0058E3F1 - 8b cd                      - mov ecx,ebp
+0058E3F3 - e8 b8 a3 ff ff             - call 005887b0
+
+0058E3F8 - 33 db                      - xor ebx,ebx
+0058E3FA - 33 ff                      - xor edi,edi
+0058E3FC - 8d 64 24 00                - lea esp,[esp+00]
+0058E400 - 57                         - push edi
+0058E401 - b9 58 19 20 07             - mov ecx,07201958
+0058E406 - e8 f5 26 f0 ff             - call 00490b00                        根据武将ID获取武将指针
+0058E40B - 8b f0                      - mov esi,eax
+0058E40D - 56                         - push esi
+0058E40E - e8 1d c2 ee ff             - call 0047a630                        校验指针
+0058E413 - 83 c4 04                   - add esp,04
+0058E416 - 85 c0                      - test eax,eax
+0058E418 - 74 60                      - je 0058e47a
+0058E41A - 8a 86 58 01 00 00          - mov al,[esi+00000158]               esi＝武将指针，+158=留守计数
+0058E420 - 84 c0                      - test al,al
+0058E422 - 75 56                      - jne 0058e47a
+
+0058E424 - 8b ce                      - mov ecx,esi
+0058E426 - e8 15 a8 ef ff             - call 00488c40                        判断武将是否在野
+0058E42B - 85 c0                      - test eax,eax
+0058E42D - 75 0b                      - jne 0058e43a                         在野跳过
+0058E42F - 8b ce                      - mov ecx,esi                          事件武将不随机移动 8b ce -> eb 49
+0058E431 - e8 8a b9 ef ff             - call 00489dc0                        判断武将ID是否在703～710之间
+0058E436 - 85 c0                      - test eax,eax
+0058E438 - 74 40                      - je 0058e47a                          不在跳转到下一个循环
+
+0058E43A - 56                         - push esi
+0058E43B - 8b cd                      - mov ecx,ebp
+0058E43D - e8 2e e4 ff ff             - call 0058c870                        这个是武将移动函数，无异常都返回1
+0058E442 - 85 c0                      - test eax,eax
+0058E444 - 74 34                      - je 0058e47a
+
+0058E446 - 8b ce                      - mov ecx,esi
+0058E448 - e8 73 b9 ef ff             - call 00489dc0                        判断武将ID是否在703～710之间
+0058E44D - 85 c0                      - test eax,eax
+0058E44F - 75 29                      - jne 0058e47a                         在跳转到下一个循环
+
+0058E451 - 56                         - push esi
+0058E452 - e8 e9 fa ff ff             - call 0058df40                        考虑人物关系，禁仕期，城市经济情况等因素后的出仕概率判定，返回0或1
+0058E457 - 83 c4 04                   - add esp,04
+0058E45A - 85 c0                      - test eax,eax
+0058E45C - 74 1c                      - je 0058e47a
+
+0058E45E - 8d 4c 24 14                - lea ecx,[esp+14]
+0058E462 - 51                         - push ecx
+0058E463 - b9 d8 59 6a 09             - mov ecx,096a59d8
+0058E468 - c7 44 24 18 98 b0 84 00    - mov [esp+18],0084b098
+0058E470 - 89 74 24 1c                - mov [esp+1c],esi
+0058E474 - e8 f7 a8 ff ff             - call 00588d70
+0058E479 - 43                         - inc ebx
+0058E47A - 47                         - inc edi
+0058E47B - 81 ff 4c 04 00 00          - cmp edi,0000044c
+0058E481 - 0f 8c 79 ff ff ff          - jl 0058e400
+
+0058E487 - 6a 00                      - push 00
+0058E489 - 68 ff 00 00 00             - push 000000ff
+0058E48E - b9 58 19 20 07             - mov ecx,07201958
+0058E493 - e8 c8 42 ef ff             - call 00482760
+0058E498 - 5f                         - pop edi
+0058E499 - 5e                         - pop esi
+0058E49A - 85 db                      - test ebx,ebx
+0058E49C - 5b                         - pop ebx
+0058E49D - 7e 0c                      - jle 0058e4ab
+0058E49F - 8d 54 24 04                - lea edx,[esp+04]
+0058E4A3 - 52                         - push edx
+0058E4A4 - 8b cd                      - mov ecx,ebp
+0058E4A6 - e8 25 b2 ff ff             - call 005896d0
+
+0058E4AB - 5d                         - pop ebp
+0058E4AC - 83 c4 0c                   - add esp,0c
+0058E4AF - c3                         - ret
+
+***********************************************************************************************
+
+0058DF40 - 83 ec 0c                   - sub esp,0c
+0058DF43 - b9 80 3e c4 09             - mov ecx,09c43e80
+0058DF48 - e8 03 18 0f 00             - call 0067f750
+0058DF4D - 85 c0                      - test eax,eax
+0058DF4F - 74 19                      - je 0058df6a
+0058DF51 - a1 80 3e c4 09             - mov eax,[09c43e80]
+0058DF56 - 6a 1a                      - push 1a
+0058DF58 - b9 80 3e c4 09             - mov ecx,09c43e80
+0058DF5D - ff 50 04                   - call dword ptr [eax+04]
+0058DF60 - 85 c0                      - test eax,eax
+0058DF62 - 74 06                      - je 0058df6a
+0058DF64 - 33 c0                      - xor eax,eax
+0058DF66 - 83 c4 0c                   - add esp,0c
+0058DF69 - c3                         - ret
+
+0058DF6A - 55                         - push ebp
+0058DF6B - 8b 6c 24 14                - mov ebp,[esp+14]               ebp = 指定武将指针
+0058DF6F - 8b 85 9c 00 00 00          - mov eax,[ebp+0000009c]         eax = 武将所在
+0058DF75 - 85 c0                      - test eax,eax
+0058DF77 - 7c 05                      - jnge 0058df7e
+0058DF79 - 83 f8 29                   - cmp eax,29
+0058DF7C - 7e 03                      - jle 0058df81
+0058DF7E - 83 c8 ff                   - or eax,ff
+0058DF81 - 53                         - push ebx
+0058DF82 - 56                         - push esi
+0058DF83 - 57                         - push edi
+0058DF84 - 50                         - push eax
+0058DF85 - b9 58 19 20 07             - mov ecx,07201958
+0058DF8A - e8 81 2a f0 ff             - call 00490a10                  根据城市ID获取城市指针
+0058DF8F - 8b d8                      - mov ebx,eax                    ebx = 城市指针
+0058DF91 - 8b 13                      - mov edx,[ebx]
+0058DF93 - 8b cb                      - mov ecx,ebx
+0058DF95 - ff 52 40                   - call dword ptr [edx+40]        获取所属势力ID
+0058DF98 - 85 c0                      - test eax,eax
+0058DF9A - 0f 8c 4f 01 00 00          - jl 0058e0ef
+0058DFA0 - 83 f8 29                   - cmp eax,29
+0058DFA3 - 0f 8f 46 01 00 00          - jg 0058e0ef
+
+0058DFA9 - 8b 03                      - mov eax,[ebx]                  ebx = 城市指针
+0058DFAB - 8b cb                      - mov ecx,ebx
+0058DFAD - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID
+0058DFB0 - 50                         - push eax
+0058DFB1 - b9 58 19 20 07             - mov ecx,07201958
+0058DFB6 - e8 e5 2a f0 ff             - call 00490aa0                  根据势力ID获取势力指针
+0058DFBB - 8b f8                      - mov edi,eax                    edi = 势力指针
+0058DFBD - 8b 4f 04                   - mov ecx,[edi+04]               ecx = 君主ID
+0058DFC0 - 8b 45 64                   - mov eax,[ebp+64]               eax = 义兄弟ID
+0058DFC3 - 89 4c 24 18                - mov [esp+18],ecx
+
+0058DFC7 - 50                         - push eax
+0058DFC8 - b9 58 19 20 07             - mov ecx,07201958
+0058DFCD - e8 2e 2b f0 ff             - call 00490b00                  根据武将ID获取武将指针
+0058DFD2 - 8b f0                      - mov esi,eax                    esi = 义兄弟大哥指针
+
+0058DFD4 - 8b 45 60                   - mov eax,[ebp+60]               夫/妻ID
+0058DFD7 - 50                         - push eax
+0058DFD8 - b9 58 19 20 07             - mov ecx,07201958
+0058DFDD - e8 1e 2b f0 ff             - call 00490b00                  根据武将ID获取武将指针
+
+0058DFE2 - 56                         - push esi
+0058DFE3 - 89 44 24 18                - mov [esp+18],eax
+0058DFE7 - e8 44 c6 ee ff             - call 0047a630                  校验义兄弟指针
+0058DFEC - 83 c4 04                   - add esp,04
+0058DFEF - 85 c0                      - test eax,eax
+0058DFF1 - 74 30                      - je 0058e023
+
+0058DFF3 - 8b 16                      - mov edx,[esi]                  esi = 义兄弟大哥指针
+0058DFF5 - 8b ce                      - mov ecx,esi
+0058DFF7 - ff 52 40                   - call dword ptr [edx+40]        获取所属势力ID
+0058DFFA - 85 c0                      - test eax,eax
+0058DFFC - 7c 25                      - jnge 0058e023
+0058DFFE - 83 f8 2e                   - cmp eax,2e
+0058E001 - 7f 20                      - jg 0058e023
+
+0058E003 - 57                         - push edi                       edi = 势力指针
+0058E004 - b9 58 19 20 07             - mov ecx,07201958
+0058E009 - e8 62 32 f0 ff             - call 00491270                  根据势力指针获取势力ID
+0058E00E - 89 44 24 10                - mov [esp+10],eax
+
+0058E012 - 8b 06                      - mov eax,[esi]
+0058E014 - 8b ce                      - mov ecx,esi
+0058E016 - ff 50 40                   - call dword ptr [eax+40]        义兄弟所属势力
+0058E019 - 3b 44 24 10                - cmp eax,[esp+10]               比较，不相同跳转
+0058E01D - 0f 85 cc 00 00 00          - jne 0058e0ef
+
+0058E023 - 8b 74 24 14                - mov esi,[esp+14]               esi = 夫妻指针
+0058E027 - 56                         - push esi
+0058E028 - e8 03 c6 ee ff             - call 0047a630                  校验夫妻指针
+0058E02D - 83 c4 04                   - add esp,04
+0058E030 - 85 c0                      - test eax,eax
+0058E032 - 74 2c                      - je 0058e060
+
+0058E034 - 8b 16                      - mov edx,[esi]
+0058E036 - 8b ce                      - mov ecx,esi
+0058E038 - ff 52 40                   - call dword ptr [edx+40]
+0058E03B - 85 c0                      - test eax,eax
+0058E03D - 7c 21                      - jnge 0058e060
+0058E03F - 83 f8 2e                   - cmp eax,2e
+0058E042 - 7f 1c                      - jg 0058e060                 
+
+0058E044 - 57                         - push edi
+0058E045 - b9 58 19 20 07             - mov ecx,07201958
+0058E04A - e8 21 32 f0 ff             - call 00491270
+0058E04F - 8b f8                      - mov edi,eax
+
+0058E051 - 8b 06                      - mov eax,[esi]
+0058E053 - 8b ce                      - mov ecx,esi
+0058E055 - ff 50 40                   - call dword ptr [eax+40]    夫妻所属势力
+0058E058 - 3b c7                      - cmp eax,edi               比较，不相同跳转
+0058E05A - 0f 85 8f 00 00 00          - jne 0058e0ef
+
+[禁仕期判断]
+0058E060 - 8b 74 24 18                - mov esi,[esp+18]         目标君主ID
+0058E064 - 39 b5 64 01 00 00          - cmp [ebp+00000164],esi   禁止仕官君主
+0058E06A - 75 0a                      - jne 0058e076
+0058E06C - 8a 85 68 01 00 00          - mov al,[ebp+00000168]    eax = 禁止仕官时间
+0058E072 - 84 c0                      - test al,al
+0058E074 - 75 79                      - jne 0058e0ef             
+
+0058E076 - 56                         - push esi                 esi = B武将id
+0058E077 - 8b cd                      - mov ecx,ebp              ebp = A武将指针
+0058E079 - e8 62 a9 ef ff             - call 004889e0            判断A是否厌恶B
+0058E07E - 85 c0                      - test eax,eax
+0058E080 - 75 6d                      - jne 0058e0ef
+
+0058E082 - 53                         - push ebx                 ebx = 城市指针
+0058E083 - e8 78 fe ff ff             - call 0058df00            城市收入-支出>100?
+0058E088 - 83 c4 04                   - add esp,04
+0058E08B - 85 c0                      - test eax,eax
+0058E08D - 74 60                      - je 0058e0ef
+
+0058E08F - 56                         - push esi
+0058E090 - 8b cd                      - mov ecx,ebp
+0058E092 - 33 ff                      - xor edi,edi
+0058E094 - e8 77 a8 ef ff             - call 00488910            判断A是否亲善B
+0058E099 - 85 c0                      - test eax,eax
+0058E09B - 74 16                      - je 0058e0b3
+0058E09D - bf 3c 00 00 00             - mov edi,0000003c         亲善60％随机
+0058E0A2 - 57                         - push edi
+0058E0A3 - e8 28 41 ee ff             - call 004721d0
+0058E0A8 - 83 c4 04                   - add esp,04
+0058E0AB - 5f                         - pop edi
+0058E0AC - 5e                         - pop esi
+0058E0AD - 5b                         - pop ebx
+0058E0AE - 5d                         - pop ebp
+0058E0AF - 83 c4 0c                   - add esp,0c
+0058E0B2 - c3                         - ret
+
+0058E0B3 - 56                         - push esi
+0058E0B4 - 8b cd                      - mov ecx,ebp
+0058E0B6 - e8 c5 be ef ff             - call 00489f80           计算A与B的相性差
+0058E0BB - 3c 05                      - cmp al,05
+0058E0BD - 77 16                      - ja 0058e0d5
+0058E0BF - bf 1e 00 00 00             - mov edi,0000001e        相性差5以内，30％
+0058E0C4 - 57                         - push edi
+0058E0C5 - e8 06 41 ee ff             - call 004721d0
+0058E0CA - 83 c4 04                   - add esp,04
+0058E0CD - 5f                         - pop edi
+0058E0CE - 5e                         - pop esi
+0058E0CF - 5b                         - pop ebx
+0058E0D0 - 5d                         - pop ebp
+0058E0D1 - 83 c4 0c                   - add esp,0c
+0058E0D4 - c3                         - ret
+
+0058E0D5 - 3c 0a                      - cmp al,0a
+0058E0D7 - 77 05                      - ja 0058e0de
+0058E0D9 - bf 14 00 00 00             - mov edi,00000014        相性差10以内，20％
+0058E0DE - 57                         - push edi
+0058E0DF - e8 ec 40 ee ff             - call 004721d0
+0058E0E4 - 83 c4 04                   - add esp,04
+0058E0E7 - 5f                         - pop edi
+0058E0E8 - 5e                         - pop esi
+0058E0E9 - 5b                         - pop ebx
+0058E0EA - 5d                         - pop ebp
+0058E0EB - 83 c4 0c                   - add esp,0c
+0058E0EE - c3                         - ret
+
+0058E0EF - 5f                         - pop edi
+0058E0F0 - 5e                         - pop esi
+0058E0F1 - 5b                         - pop ebx
+0058E0F2 - 33 c0                      - xor eax,eax
+0058E0F4 - 5d                         - pop ebp
+0058E0F5 - 83 c4 0c                   - add esp,0c
+0058E0F8 - c3                         - ret
+
+***********************************************************************************************
+
+0058DF00 - 8b 4c 24 04                - mov ecx,[esp+04]
+0058DF04 - 56                         - push esi
+0058DF05 - 57                         - push edi
+0058DF06 - e8 b5 e5 ee ff             - call 0047c4c0            根据城市指针获取设施指针
+0058DF0B - 8b f0                      - mov esi,eax
+0058DF0D - 56                         - push esi
+0058DF0E - b9 cc b3 80 07             - mov ecx,0780b3cc
+0058DF13 - e8 28 1a f1 ff             - call 0049f940            计算城市、港、关金钱支出
+0058DF18 - 56                         - push esi
+0058DF19 - b9 cc b3 80 07             - mov ecx,0780b3cc
+0058DF1E - 8b f8                      - mov edi,eax
+0058DF20 - e8 4b 08 f1 ff             - call 0049e770            计算城市、港、关金钱收入
+0058DF25 - 2b c7                      - sub eax,edi
+0058DF27 - 33 c9                      - xor ecx,ecx
+0058DF29 - 83 f8 64                   - cmp eax,64               收入减支出>100?
+0058DF2C - 0f 9d c1                   - setge cl                 >100 return 1 else return 0
+0058DF2F - 5f                         - pop edi
+0058DF30 - 5e                         - pop esi
+0058DF31 - 8b c1                      - mov eax,ecx
+0058DF33 - c3                         - ret
+
+***********************************************************************************************
+
+0058C870 - 83 ec 18                   - sub esp,18
+0058C873 - 56                         - push esi
+0058C874 - 8b 74 24 20                - mov esi,[esp+20]               esi = 武将指针
+0058C878 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]         eax = 所在
+0058C87E - 85 c0                      - test eax,eax
+0058C880 - 57                         - push edi
+0058C881 - 7c 05                      - jnge 0058c888
+0058C883 - 83 f8 29                   - cmp eax,29
+0058C886 - 7e 4a                      - jle 0058c8d2
+
+0058C888 - 8b 86 98 00 00 00          - mov eax,[esi+00000098]         eax = 所属
+0058C88E - 85 c0                      - test eax,eax
+0058C890 - 7c 40                      - jnge 0058c8d2
+0058C892 - 3d ff 3f 00 00             - cmp eax,00003fff
+0058C897 - 7f 39                      - jg 0058c8d2
+
+0058C899 - 50                         - push eax
+0058C89A - b9 58 19 20 07             - mov ecx,07201958
+0058C89F - e8 5c 44 f0 ff             - call 00490d00                  根据设施ID获取设施指针
+0058C8A4 - 8b c8                      - mov ecx,eax
+0058C8A6 - e8 75 b0 ef ff             - call 00487920                  获取设施所属城市ID
+0058C8AB - 85 c0                      - test eax,eax
+0058C8AD - 7c 05                      - jnge 0058c8b4
+0058C8AF - 83 f8 29                   - cmp eax,29
+0058C8B2 - 7e 03                      - jle 0058c8b7
+0058C8B4 - 83 c8 ff                   - or eax,ff
+0058C8B7 - 6a 01                      - push 01
+0058C8B9 - 6a 00                      - push 00
+0058C8BB - 50                         - push eax
+0058C8BC - b9 58 19 20 07             - mov ecx,07201958
+0058C8C1 - e8 3a 44 f0 ff             - call 00490d00                   根据设施ID获取设施指针
+0058C8C6 - 50                         - push eax                        设施指针
+0058C8C7 - 56                         - push esi                        武将指针
+0058C8C8 - b9 5c 89 99 07             - mov ecx,0799895c
+0058C8CD - e8 1e 2e f3 ff             - call 004bf6f0
+
+  004BF6F0 - 81 ec e4 03 00 00          - sub esp,000003e4
+  004BF6F6 - 53                         - push ebx
+  004BF6F7 - 56                         - push esi
+  004BF6F8 - 8b b4 24 f0 03 00 00       - mov esi,[esp+000003f0]           esi = 武将指针
+  004BF6FF - 56                         - push esi
+  004BF700 - 8b d9                      - mov ebx,ecx
+  004BF702 - e8 29 af fb ff             - call 0047a630
+  004BF707 - 83 c4 04                   - add esp,04
+  004BF70A - 85 c0                      - test eax,eax
+  004BF70C - 0f 84 01 02 00 00          - je 004bf913
+  004BF712 - 57                         - push edi
+  004BF713 - 8b bc 24 f8 03 00 00       - mov edi,[esp+000003f8]           edi ＝ 设施指针
+  004BF71A - 57                         - push edi
+  004BF71B - e8 10 af fb ff             - call 0047a630
+  004BF720 - 83 c4 04                   - add esp,04
+  004BF723 - 85 c0                      - test eax,eax
+  004BF725 - 0f 84 e7 01 00 00          - je 004bf912
+  
+  004BF72B - 57                         - push edi
+  004BF72C - b9 58 19 20 07             - mov ecx,07201958
+  004BF731 - e8 3a 20 fd ff             - call 00491770                   根据设施指针获取设施ID
+  004BF736 - 89 44 24 14                - mov [esp+14],eax                [esp+14]＝设施ID
+  
+  004BF73A - 8b 86 a0 00 00 00          - mov eax,[esi+000000a0]          身份
+  004BF740 - 89 44 24 0c                - mov [esp+0c],eax                [esp+0c]=武将身份
+  004BF744 - 8b 86 98 00 00 00          - mov eax,[esi+00000098]           所属
+  004BF74A - 50                         - push eax
+  004BF74B - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF750 - e8 ab 15 fd ff             - call 00490d00                     根据设施ID获取设施指针
+  004BF755 - 8b 16                      - mov edx,[esi] 
+  004BF757 - 8b ce                      - mov ecx,esi
+  004BF759 - 89 44 24 18                - mov [esp+18],eax                [esp+18]＝所属城市指针
+  
+  004BF75D - ff 52 44                   - call dword ptr [edx+44]            军团ID
+  004BF760 - 50                         - push eax
+  004BF761 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF766 - e8 65 13 fd ff             - call 00490ad0                      根据军团ID获取军团指针
+  004BF76B - 8b cf                      - mov ecx,edi                        edi ＝ 设施指针
+  004BF76D - 89 44 24 10                - mov [esp+10],eax                [esp+10] ＝ 军团指针
+  004BF771 - e8 1a 71 fc ff             - call 00486890                     获取城市、港、关太守ID
+  004BF776 - 50                         - push eax
+  004BF777 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF77C - e8 7f 13 fd ff             - call 00490b00                    武将指针
+  
+  
+  004BF781 - 8b 84 24 fc 03 00 00       - mov eax,[esp+000003fc]           第四个参数(前面传的是01)
+  004BF788 - 85 c0                      - test eax,eax
+  004BF78A - 74 3c                      - je 004bf7c8
+  
+  004BF78C - 8b ce                      - mov ecx,esi                      esi = 
+  004BF78E - e8 3d af fb ff             - call 0047a6d0
+  004BF793 - 85 c0                      - test eax,eax
+  004BF795 - 74 31                      - je 004bf7c8
+  004BF797 - 8b ce                      - mov ecx,esi
+  004BF799 - e8 d2 94 fc ff             - call 00488c70
+  004BF79E - 85 c0                      - test eax,eax
+  004BF7A0 - 75 26                      - jne 004bf7c8
+  004BF7A2 - 8b 84 24 00 04 00 00       - mov eax,[esp+00000400]
+  004BF7A9 - 6a ff                      - push ff
+  004BF7AB - 6a 01                      - push 01
+  004BF7AD - 57                         - push edi
+  004BF7AE - 50                         - push eax
+  004BF7AF - 57                         - push edi
+  004BF7B0 - 56                         - push esi
+  004BF7B1 - 68 5d 17 00 00             - push 0000175d
+  004BF7B6 - 8d 4c 24 3c                - lea ecx,[esp+3c]
+  004BF7BA - e8 11 9c ff ff             - call 004b93d0
+  004BF7BF - 50                         - push eax
+  004BF7C0 - e8 1b 5e 03 00             - call 004f55e0
+  004BF7C5 - 83 c4 10                   - add esp,10
+  
+  
+  004BF7C8 - 8b 16                      - mov edx,[esi]                        edi ＝ 设施指针
+  004BF7CA - 55                         - push ebp
+  004BF7CB - 8b ce                      - mov ecx,esi
+  004BF7CD - ff 52 40                   - call dword ptr [edx+40]              所属势力
+  004BF7D0 - 50                         - push eax
+  004BF7D1 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF7D6 - e8 c5 12 fd ff             - call 00490aa0                         势力指针
+  004BF7DB - 8b ce                      - mov ecx,esi
+  004BF7DD - 89 44 24 20                - mov [esp+20],eax
+  004BF7E1 - e8 1a 94 fc ff             - call 00488c00                        判断武将是否是君主
+  004BF7E6 - 85 c0                      - test eax,eax
+  004BF7E8 - 74 4c                      - je 004bf836
+  
+  004BF7EA - 8b 06                      - mov eax,[esi]
+  004BF7EC - 8b ce                      - mov ecx,esi
+  004BF7EE - ff 50 40                   - call dword ptr [eax+40]
+  004BF7F1 - 8b 17                      - mov edx,[edi]
+  004BF7F3 - 8b cf                      - mov ecx,edi
+  004BF7F5 - 8b e8                      - mov ebp,eax
+  004BF7F7 - ff 52 40                   - call dword ptr [edx+40]
+  004BF7FA - 3b c5                      - cmp eax,ebp
+  004BF7FC - 75 38                      - jne 004bf836
+  004BF7FE - 8b 6c 24 20                - mov ebp,[esp+20]
+  004BF802 - 55                         - push ebp
+  004BF803 - e8 28 ae fb ff             - call 0047a630
+  004BF808 - 83 c4 04                   - add esp,04
+  004BF80B - 85 c0                      - test eax,eax
+  004BF80D - 74 27                      - je 004bf836
+  004BF80F - 8b 85 28 01 00 00          - mov eax,[ebp+00000128]
+  004BF815 - 85 c0                      - test eax,eax
+  004BF817 - 75 1d                      - jne 004bf836
+  004BF819 - 8b 06                      - mov eax,[esi]
+  004BF81B - 8b ce                      - mov ecx,esi
+  004BF81D - ff 50 44                   - call dword ptr [eax+44]
+  004BF820 - 6a 00                      - push 00
+  004BF822 - 50                         - push eax
+  004BF823 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF828 - e8 a3 12 fd ff             - call 00490ad0
+  004BF82D - 50                         - push eax
+  004BF82E - 57                         - push edi
+  004BF82F - 8b cb                      - mov ecx,ebx
+  004BF831 - e8 8a 48 ff ff             - call 004b40c0
+  
+  004BF836 - 8b 4c 24 18                - mov ecx,[esp+18]
+  004BF83A - 51                         - push ecx
+  004BF83B - 56                         - push esi
+  004BF83C - 8b cb                      - mov ecx,ebx
+  004BF83E - e8 9d 39 fe ff             - call 004a31e0
+  004BF843 - 8b ce                      - mov ecx,esi
+  004BF845 - e8 76 99 fc ff             - call 004891c0
+  004BF84A - 85 c0                      - test eax,eax
+  004BF84C - 75 10                      - jne 004bf85e
+  004BF84E - 8b cf                      - mov ecx,edi
+  004BF850 - e8 2b 6e fc ff             - call 00486680
+  004BF855 - 50                         - push eax
+  004BF856 - 56                         - push esi
+  004BF857 - 8b cb                      - mov ecx,ebx
+  004BF859 - e8 52 14 fe ff             - call 004a0cb0
+  004BF85E - 8b 16                      - mov edx,[esi]
+  004BF860 - 8b ce                      - mov ecx,esi
+  004BF862 - ff 52 40                   - call dword ptr [edx+40]
+  004BF865 - 85 c0                      - test eax,eax
+  004BF867 - 0f 8c a4 00 00 00          - jl 004bf911
+  004BF86D - 83 f8 2e                   - cmp eax,2e
+  004BF870 - 0f 8f 9b 00 00 00          - jg 004bf911
+  004BF876 - 8b 06                      - mov eax,[esi]
+  004BF878 - 8b ce                      - mov ecx,esi
+  004BF87A - ff 50 40                   - call dword ptr [eax+40]
+  004BF87D - 8b 17                      - mov edx,[edi]
+  004BF87F - 8b cf                      - mov ecx,edi
+  004BF881 - 8b e8                      - mov ebp,eax
+  004BF883 - ff 52 40                   - call dword ptr [edx+40]
+  004BF886 - 3b e8                      - cmp ebp,eax
+  004BF888 - 0f 85 83 00 00 00          - jne 004bf911
+  004BF88E - 8b 07                      - mov eax,[edi]
+  004BF890 - 8b cf                      - mov ecx,edi
+  004BF892 - ff 50 44                   - call dword ptr [eax+44]
+  004BF895 - 50                         - push eax
+  004BF896 - 56                         - push esi
+  004BF897 - 8b cb                      - mov ecx,ebx
+  004BF899 - e8 52 3a fe ff             - call 004a32f0
+  004BF89E - 8b 17                      - mov edx,[edi]
+  004BF8A0 - 8b cf                      - mov ecx,edi
+  004BF8A2 - ff 52 44                   - call dword ptr [edx+44]
+  004BF8A5 - 50                         - push eax
+  004BF8A6 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+  004BF8AB - e8 20 12 fd ff             - call 00490ad0
+  004BF8B0 - 8b f0                      - mov esi,eax
+  004BF8B2 - 83 7c 24 10 01             - cmp dword ptr [esp+10],01
+  004BF8B7 - 7f 1f                      - jg 004bf8d8
+  004BF8B9 - 8b 6c 24 14                - mov ebp,[esp+14]
+  004BF8BD - 55                         - push ebp
+  004BF8BE - e8 6d ad fb ff             - call 0047a630
+  004BF8C3 - 83 c4 04                   - add esp,04
+  004BF8C6 - 85 c0                      - test eax,eax
+  004BF8C8 - 74 0e                      - je 004bf8d8
+  004BF8CA - 3b ee                      - cmp ebp,esi
+  004BF8CC - 74 0a                      - je 004bf8d8
+  004BF8CE - 6a 00                      - push 00
+  004BF8D0 - 55                         - push ebp
+  004BF8D1 - 8b cb                      - mov ecx,ebx
+  004BF8D3 - e8 c8 e9 ff ff             - call 004be2a0
+  004BF8D8 - 6a 00                      - push 00
+  004BF8DA - 56                         - push esi
+  004BF8DB - 8b cb                      - mov ecx,ebx
+  004BF8DD - e8 be e9 ff ff             - call 004be2a0
+  004BF8E2 - 8b 74 24 1c                - mov esi,[esp+1c]
+  004BF8E6 - 56                         - push esi
+  004BF8E7 - e8 44 ad fb ff             - call 0047a630
+  004BF8EC - 83 c4 04                   - add esp,04
+  004BF8EF - 85 c0                      - test eax,eax
+  004BF8F1 - 74 1e                      - je 004bf911
+  004BF8F3 - 8b 07                      - mov eax,[edi]
+  004BF8F5 - 8b cf                      - mov ecx,edi
+  004BF8F7 - ff 50 44                   - call dword ptr [eax+44]
+  004BF8FA - 8b 16                      - mov edx,[esi]
+  004BF8FC - 8b ce                      - mov ecx,esi
+  004BF8FE - 8b f8                      - mov edi,eax
+  004BF900 - ff 52 44                   - call dword ptr [edx+44]
+  004BF903 - 3b c7                      - cmp eax,edi
+  004BF905 - 74 0a                      - je 004bf911
+  004BF907 - 6a 00                      - push 00
+  004BF909 - 56                         - push esi
+  004BF90A - 8b cb                      - mov ecx,ebx
+  004BF90C - e8 1f d1 ff ff             - call 004bca30
+  
+  004BF911 - 5d                         - pop ebp
+  004BF912 - 5f                         - pop edi
+  004BF913 - 5e                         - pop esi
+  004BF914 - 5b                         - pop ebx
+  004BF915 - 81 c4 e4 03 00 00          - add esp,000003e4
+  004BF91B - c2 10 00                   - ret 0010
+
+
+0058C8D2 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]          所在
+0058C8D8 - 85 c0                      - test eax,eax
+0058C8DA - 7c 05                      - jnge 0058c8e1
+0058C8DC - 83 f8 29                   - cmp eax,29
+0058C8DF - 7e 03                      - jle 0058c8e4
+0058C8E1 - 83 c8 ff                   - or eax,ff
+0058C8E4 - 50                         - push eax
+0058C8E5 - b9 58 19 20 07             - mov ecx,07201958
+0058C8EA - e8 21 41 f0 ff             - call 00490a10                   根据城市ID获取城市指针
+0058C8EF - 8b f8                      - mov edi,eax
+0058C8F1 - 57                         - push edi
+0058C8F2 - e8 39 dd ee ff             - call 0047a630
+0058C8F7 - 83 c4 04                   - add esp,04
+0058C8FA - 85 c0                      - test eax,eax
+0058C8FC - 75 08                      - jne 0058c906
+0058C8FE - 5f                         - pop edi
+0058C8FF - 5e                         - pop esi
+0058C900 - 83 c4 18                   - add esp,18
+0058C903 - c2 04 00                   - ret 0004
+
+0058C906 - 8b 86 10 01 00 00          - mov eax,[esi+00000110]          地元执着
+0058C90C - 83 e8 00                   - sub eax,00
+0058C90F - 53                         - push ebx
+0058C910 - 55                         - push ebp
+0058C911 - 0f 84 fc 00 00 00          - je 0058ca13
+0058C917 - 48                         - dec eax
+0058C918 - 74 5f                      - je 0058c979
+0058C91A - 48                         - dec eax
+0058C91B - 0f 85 6c 01 00 00          - jne 0058ca8d
+
+地元执着 ＝ 漫不经心
+0058C921 - 6a 32                      - push 32                         50％概率
+0058C923 - e8 a8 58 ee ff             - call 004721d0
+0058C928 - 83 c4 04                   - add esp,04
+0058C92B - 85 c0                      - test eax,eax
+0058C92D - 0f 84 5a 01 00 00          - je 0058ca8d
+0058C933 - 8b 86 e4 00 00 00          - mov eax,[esi+000000e4]
+0058C939 - 50                         - push eax
+0058C93A - 68 e0 84 55 00             - push 005584e0
+0058C93F - 8d 44 24 18                - lea eax,[esp+18]
+0058C943 - 57                         - push edi
+0058C944 - 50                         - push eax
+0058C945 - e8 a6 fd ff ff             - call 0058c6f0
+0058C94A - 83 c4 10                   - add esp,10
+0058C94D - 85 c0                      - test eax,eax
+0058C94F - 0f 8e 38 01 00 00          - jng 0058ca8d
+0058C955 - 50                         - push eax
+0058C956 - 8d 4c 24 14                - lea ecx,[esp+14]
+0058C95A - 51                         - push ecx
+0058C95B - e8 e0 fd ff ff             - call 0058c740
+0058C960 - 50                         - push eax
+0058C961 - 56                         - push esi
+0058C962 - e8 29 fe ff ff             - call 0058c790
+0058C967 - 83 c4 10                   - add esp,10
+0058C96A - 5d                         - pop ebp
+0058C96B - 5b                         - pop ebx
+0058C96C - 5f                         - pop edi
+0058C96D - b8 01 00 00 00             - mov eax,00000001
+0058C972 - 5e                         - pop esi
+0058C973 - 83 c4 18                   - add esp,18
+0058C976 - c2 04 00                   - ret 0004
+
+地元执着 ＝ 临机应变
+0058C979 - 8b 86 e4 00 00 00          - mov eax,[esi+000000e4]           出生地
+0058C97F - 50                         - push eax
+0058C980 - b9 58 19 20 07             - mov ecx,07201958
+0058C985 - e8 c6 41 f0 ff             - call 00490b50                    根据州ID获取州地址
+0058C98A - 8b 9e e4 00 00 00          - mov ebx,[esi+000000e4]
+0058C990 - 56                         - push esi
+0058C991 - 8b e8                      - mov ebp,eax                      ebp ＝ 州地址(出生)
+0058C993 - e8 a8 fc ff ff             - call 0058c640                    获取武将所在的所在州ID
+0058C998 - 83 c4 04                   - add esp,04
+0058C99B - 3b d8                      - cmp ebx,eax                      比较是否相同
+0058C99D - 74 1c                      - je 0058c9bb                      相同跳转
+
+0058C99F - 56                         - push esi
+0058C9A0 - e8 9b fc ff ff             - call 0058c640                    获取武将所在的所在州ID
+0058C9A5 - 83 c4 04                   - add esp,04
+0058C9A8 - 50                         - push eax
+0058C9A9 - 8b cd                      - mov ecx,ebp
+0058C9AB - e8 70 d9 ee ff             - call 0047a320                    判断A州与B州是否邻接
+0058C9B0 - 85 c0                      - test eax,eax
+0058C9B2 - 75 07                      - jne 0058c9bb                     邻接跳转
+0058C9B4 - 6a 1e                      - push 1e                          不邻接，30％概率
+0058C9B6 - e9 bd 00 00 00             - jmp 0058ca78 
+
+0058C9BB - 6a 1e                      - push 1e                          30％概率
+0058C9BD - e8 0e 58 ee ff             - call 004721d0
+0058C9C2 - 83 c4 04                   - add esp,04
+0058C9C5 - 85 c0                      - test eax,eax
+0058C9C7 - 0f 84 c0 00 00 00          - je 0058ca8d
+0058C9CD - 8b 86 e4 00 00 00          - mov eax,[esi+000000e4]           出生地
+0058C9D3 - 50                         - push eax
+0058C9D4 - 68 a0 c6 58 00             - push 0058c6a0
+0058C9D9 - 8d 54 24 18                - lea edx,[esp+18]
+0058C9DD - 57                         - push edi
+0058C9DE - 52                         - push edx
+0058C9DF - e8 0c fd ff ff             - call 0058c6f0
+0058C9E4 - 83 c4 10                   - add esp,10
+0058C9E7 - 85 c0                      - test eax,eax
+0058C9E9 - 0f 8e 9e 00 00 00          - jng 0058ca8d
+0058C9EF - 50                         - push eax
+0058C9F0 - 8d 44 24 14                - lea eax,[esp+14]
+0058C9F4 - 50                         - push eax
+0058C9F5 - e8 46 fd ff ff             - call 0058c740
+0058C9FA - 50                         - push eax
+0058C9FB - 56                         - push esi
+0058C9FC - e8 8f fd ff ff             - call 0058c790
+0058CA01 - 83 c4 10                   - add esp,10
+0058CA04 - 5d                         - pop ebp
+0058CA05 - 5b                         - pop ebx
+0058CA06 - 5f                         - pop edi
+0058CA07 - b8 01 00 00 00             - mov eax,00000001
+0058CA0C - 5e                         - pop esi
+0058CA0D - 83 c4 18                   - add esp,18
+0058CA10 - c2 04 00                   - ret 0004
+
+地元执着 ＝ 重视
+0058CA13 - 8b 9e e4 00 00 00          - mov ebx,[esi+000000e4]
+0058CA19 - 56                         - push esi
+0058CA1A - e8 21 fc ff ff             - call 0058c640                                     获取武将所在的所在州ID
+0058CA1F - 83 c4 04                   - add esp,04
+0058CA22 - 3b d8                      - cmp ebx,eax
+0058CA24 - 75 50                      - jne 0058ca76
+0058CA26 - 6a 1e                      - push 1e
+0058CA28 - e8 a3 57 ee ff             - call 004721d0
+0058CA2D - 83 c4 04                   - add esp,04
+0058CA30 - 85 c0                      - test eax,eax
+0058CA32 - 74 59                      - je 0058ca8d
+0058CA34 - 8b 86 e4 00 00 00          - mov eax,[esi+000000e4]
+0058CA3A - 50                         - push eax
+0058CA3B - 68 80 c6 58 00             - push 0058c680 : [0424448B]
+0058CA40 - 8d 4c 24 18                - lea ecx,[esp+18]
+0058CA44 - 57                         - push edi
+0058CA45 - 51                         - push ecx
+0058CA46 - e8 a5 fc ff ff             - call 0058c6f0
+0058CA4B - 83 c4 10                   - add esp,10
+0058CA4E - 85 c0                      - test eax,eax
+0058CA50 - 7e 3b                      - jle 0058ca8d
+0058CA52 - 50                         - push eax
+0058CA53 - 8d 54 24 14                - lea edx,[esp+14]
+0058CA57 - 52                         - push edx
+0058CA58 - e8 e3 fc ff ff             - call 0058c740
+0058CA5D - 50                         - push eax
+0058CA5E - 56                         - push esi
+0058CA5F - e8 2c fd ff ff             - call 0058c790
+0058CA64 - 83 c4 10                   - add esp,10
+0058CA67 - 5d                         - pop ebp
+0058CA68 - 5b                         - pop ebx
+0058CA69 - 5f                         - pop edi
+0058CA6A - b8 01 00 00 00             - mov eax,00000001
+0058CA6F - 5e                         - pop esi
+0058CA70 - 83 c4 18                   - add esp,18
+0058CA73 - c2 04 00                   - ret 0004
+
+0058CA76 - 6a 3c                      - push 3c
+0058CA78 - e8 53 57 ee ff             - call 004721d0
+0058CA7D - 83 c4 04                   - add esp,04
+0058CA80 - 85 c0                      - test eax,eax
+0058CA82 - 74 09                      - je 0058ca8d
+0058CA84 - 56                         - push esi
+0058CA85 - e8 36 fd ff ff             - call 0058c7c0
+0058CA8A - 83 c4 04                   - add esp,04
+
+0058CA8D - 5d                         - pop ebp
+0058CA8E - 5b                         - pop ebx
+0058CA8F - 5f                         - pop edi
+0058CA90 - b8 01 00 00 00             - mov eax,00000001
+0058CA95 - 5e                         - pop esi
+0058CA96 - 83 c4 18                   - add esp,18
+0058CA99 - c2 04 00                   - ret 0004

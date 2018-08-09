@@ -1,0 +1,872 @@
+00496570 - 83 ec 40                   - sub esp,40
+00496573 - 53                         - push ebx
+00496574 - 8b 5c 24 4c                - mov ebx,[esp+4c]
+00496578 - 33 c0                      - xor eax,eax
+0049657A - 55                         - push ebp
+0049657B - 8b 6c 24 4c                - mov ebp,[esp+4c]
+0049657F - 8b cd                      - mov ecx,ebp
+00496581 - 89 01                      - mov [ecx],eax
+00496583 - 89 41 04                   - mov [ecx+04],eax
+00496586 - 89 41 08                   - mov [ecx+08],eax
+00496589 - 89 41 0c                   - mov [ecx+0c],eax
+0049658C - 89 41 10                   - mov [ecx+10],eax
+0049658F - 89 41 14                   - mov [ecx+14],eax
+00496592 - 89 41 18                   - mov [ecx+18],eax
+00496595 - 89 41 1c                   - mov [ecx+1c],eax
+00496598 - 57                         - push edi
+00496599 - 89 41 20                   - mov [ecx+20],eax
+0049659C - 8b 3b                      - mov edi,[ebx]
+0049659E - 57                         - push edi
+0049659F - 89 7c 24 10                - mov [esp+10],edi
+004965A3 - e8 88 40 fe ff             - call 0047a630
+004965A8 - 83 c4 04                   - add esp,04
+004965AB - 85 c0                      - test eax,eax
+004965AD - 0f 84 d2 05 00 00          - je 00496b85
+004965B3 - 8b 17                      - mov edx,[edi]                          EDI是主将指针
+004965B5 - 8b cf                      - mov ecx,edi
+004965B7 - ff 52 40                   - call dword ptr [edx+40]                获得部队所属势力ID
+004965BA - 50                         - push eax
+004965BB - b9 58 19 20 07             - mov ecx,07201958
+004965C0 - e8 db a4 ff ff             - call 00490aa0                          根据势力ID获得势力指针
+004965C5 - 50                         - push eax
+004965C6 - 89 44 24 18                - mov [esp+18],eax                       势力指针置入[esp+18]
+004965CA - e8 61 40 fe ff             - call 0047a630                          校验势力指针
+004965CF - 83 c4 04                   - add esp,04
+004965D2 - 85 c0                      - test eax,eax
+004965D4 - 0f 84 ab 05 00 00          - je 00496b85                            校验失败直接返回
+004965DA - 8b 44 24 58                - mov eax,[esp+58]                       校验参数【部队兵种】
+004965DE - 85 c0                      - test eax,eax
+004965E0 - 0f 8c 9f 05 00 00          - jl 00496b85
+004965E6 - 83 f8 0b                   - cmp eax,0b
+004965E9 - 0f 8f 96 05 00 00          - jg 00496b85
+004965EF - 8b 44 24 60                - mov eax,[esp+60]                       校验参数【？？，取值范围0、1】
+004965F3 - 85 c0                      - test eax,eax
+004965F5 - 0f 8c 8a 05 00 00          - jl 00496b85
+004965FB - 83 f8 01                   - cmp eax,01
+004965FE - 0f 8f 81 05 00 00          - jg 00496b85
+00496604 - 8b 44 24 64                - mov eax,[esp+64]                       校验参数【？？，取值范围0～6】
+00496608 - 85 c0                      - test eax,eax
+0049660A - 0f 8c 75 05 00 00          - jl 00496b85
+00496610 - 83 f8 06                   - cmp eax,06
+00496613 - 0f 8f 6c 05 00 00          - jg 00496b85
+00496619 - 83 c3 04                   - add ebx,04
+0049661C - 56                         - push esi
+0049661D - 8b 33                      - mov esi,[ebx]
+0049661F - 85 f6                      - test esi,esi
+00496621 - 75 31                      - jne 00496654
+00496623 - 8b 44 24 58                - mov eax,[esp+58]
+00496627 - 8b 48 08                   - mov ecx,[eax+08]
+0049662A - 85 c9                      - test ecx,ecx
+0049662C - 75 26                      - jne 00496654
+
+[取得部队五围]－部队只有一个武将的情况
+0049662E - 8b 5c 24 70                - mov ebx,[esp+70]                       EBX是参数【是否计算受伤影响】
+00496632 - 85 db                      - test ebx,ebx
+00496634 - 8b cf                      - mov ecx,edi                            EDI是主将指针
+00496636 - 56                         - push esi                               ESI是五维索引
+00496637 - 74 07                      - je 00496640
+00496639 - e8 f2 29 ff ff             - call 00489030                          取武将的指定一个受伤影响的显示属性(push属性Index)
+0049663E - eb 05                      - jmp 00496645
+00496640 - e8 0b 2a ff ff             - call 00489050                          取武将的指定一个不受伤影响的显示属性(push属性Index)
+00496645 - 88 44 2e 18                - mov [esi+ebp+18],al                    主将五维置入EBP+18～EBP+23
+00496649 - 46                         - inc esi
+0049664A - 83 fe 05                   - cmp esi,05                             循环五次（取五维）
+0049664D - 7c e3                      - jnge 00496632
+0049664F - e9 39 02 00 00             - jmp 0049688d                           跳转到0049688D
+
+？？[取得部队五围]－部队有多个武将的情况
+00496654 - 8b 4c 24 58                - mov ecx,[esp+58]
+00496658 - 8b 39                      - mov edi,[ecx]
+0049665A - e8 31 f5 ff ff             - call 00495b90
+0049665F - 85 c0                      - test eax,eax
+00496661 - 0f 85 fe 01 00 00          - jne 00496865
+00496667 - 8b 44 24 58                - mov eax,[esp+58]
+0049666B - 8b 70 08                   - mov esi,[eax+08]
+0049666E - 8b 38                      - mov edi,[eax]
+00496670 - e8 1b f5 ff ff             - call 00495b90
+00496675 - 85 c0                      - test eax,eax
+00496677 - 0f 85 e8 01 00 00          - jne 00496865
+0049667D - 8b 54 24 58                - mov edx,[esp+58]
+00496681 - 8b 72 08                   - mov esi,[edx+08]
+00496684 - 8b 3b                      - mov edi,[ebx]
+00496686 - e8 05 f5 ff ff             - call 00495b90
+0049668B - 85 c0                      - test eax,eax
+0049668D - 0f 85 d2 01 00 00          - jne 00496865
+00496693 - 8d 4c 24 30                - lea ecx,[esp+30]
+00496697 - 89 44 24 4c                - mov [esp+4c],eax
+0049669B - 89 44 24 28                - mov [esp+28],eax
+0049669F - 89 44 24 2c                - mov [esp+2c],eax
+004966A3 - 89 44 24 30                - mov [esp+30],eax
+004966A7 - 89 44 24 34                - mov [esp+34],eax
+004966AB - 89 44 24 38                - mov [esp+38],eax
+004966AF - 89 44 24 3c                - mov [esp+3c],eax
+004966B3 - 89 44 24 40                - mov [esp+40],eax
+004966B7 - 89 44 24 44                - mov [esp+44],eax
+004966BB - 89 44 24 48                - mov [esp+48],eax
+004966BF - 8b f3                      - mov esi,ebx
+004966C1 - 89 4c 24 14                - mov [esp+14],ecx
+004966C5 - c7 44 24 1c 02 00 00 00    - mov [esp+1c],00000002
+004966CD - 8d 49 00                   - lea ecx,[ecx+00]
+004966D0 - 83 3e 00                   - cmp dword ptr [esi],00
+004966D3 - 0f 84 14 01 00 00          - je 004967ed
+004966D9 - 8b 54 24 14                - mov edx,[esp+14]
+004966DD - 8b 44 24 70                - mov eax,[esp+70]
+004966E1 - 33 ed                      - xor ebp,ebp
+004966E3 - 83 c2 f8                   - add edx,f8
+004966E6 - 85 c0                      - test eax,eax
+004966E8 - 0f 84 82 00 00 00          - je 00496770
+004966EE - 8b 7c 24 10                - mov edi,[esp+10]
+004966F2 - 89 54 24 20                - mov [esp+20],edx
+004966F6 - 8b 0e                      - mov ecx,[esi]
+004966F8 - 55                         - push ebp
+004966F9 - e8 32 29 ff ff             - call 00489030
+004966FE - 0f b6 c0                   - movzx eax,al
+00496701 - 50                         - push eax
+00496702 - 55                         - push ebp
+00496703 - 8b cf                      - mov ecx,edi
+00496705 - e8 26 29 ff ff             - call 00489030
+0049670A - 8b 0e                      - mov ecx,[esi]
+0049670C - 0f b6 d8                   - movzx ebx,al
+0049670F - 51                         - push ecx
+00496710 - e8 9b f3 ff ff             - call 00495ab0
+00496715 - 8b 4c 24 28                - mov ecx,[esp+28]
+00496719 - 83 c4 08                   - add esp,08
+0049671C - 89 01                      - mov [ecx],eax
+0049671E - 45                         - inc ebp
+0049671F - 83 c1 04                   - add ecx,04
+00496722 - 83 fd 01                   - cmp ebp,01
+00496725 - 89 4c 24 20                - mov [esp+20],ecx
+00496729 - 7e cb                      - jle 004966f6
+0049672B - 8b 54 24 14                - mov edx,[esp+14]
+0049672F - bd 02 00 00 00             - mov ebp,00000002
+00496734 - 89 54 24 20                - mov [esp+20],edx
+00496738 - 55                         - push ebp
+00496739 - 8b cf                      - mov ecx,edi
+0049673B - e8 f0 28 ff ff             - call 00489030
+00496740 - 8b 0e                      - mov ecx,[esi]
+00496742 - 55                         - push ebp
+00496743 - 8a d8                      - mov bl,al
+00496745 - e8 e6 28 ff ff             - call 00489030
+0049674A - 3a d8                      - cmp bl,al
+0049674C - 55                         - push ebp
+0049674D - 8b cf                      - mov ecx,edi
+0049674F - 77 02                      - ja 00496753
+00496751 - 8b 0e                      - mov ecx,[esi]
+00496753 - e8 d8 28 ff ff             - call 00489030
+00496758 - 0f b6 c8                   - movzx ecx,al
+0049675B - 8b 44 24 20                - mov eax,[esp+20]
+0049675F - 89 08                      - mov [eax],ecx
+00496761 - 45                         - inc ebp
+00496762 - 83 c0 04                   - add eax,04
+00496765 - 83 fd 04                   - cmp ebp,04
+00496768 - 89 44 24 20                - mov [esp+20],eax
+0049676C - 7e ca                      - jle 00496738
+0049676E - eb 79                      - jmp 004967e9
+00496770 - 89 54 24 20                - mov [esp+20],edx
+00496774 - 8b 0e                      - mov ecx,[esi]
+00496776 - 55                         - push ebp
+00496777 - e8 d4 28 ff ff             - call 00489050
+0049677C - 8b 7c 24 10                - mov edi,[esp+10]
+00496780 - 0f b6 c0                   - movzx eax,al
+00496783 - 50                         - push eax
+00496784 - 55                         - push ebp
+00496785 - 8b cf                      - mov ecx,edi
+00496787 - e8 c4 28 ff ff             - call 00489050
+0049678C - 8b 0e                      - mov ecx,[esi]
+0049678E - 0f b6 d8                   - movzx ebx,al
+00496791 - 51                         - push ecx
+00496792 - e8 19 f3 ff ff             - call 00495ab0
+00496797 - 8b 4c 24 28                - mov ecx,[esp+28]
+0049679B - 83 c4 08                   - add esp,08
+0049679E - 89 01                      - mov [ecx],eax
+004967A0 - 45                         - inc ebp
+004967A1 - 83 c1 04                   - add ecx,04
+004967A4 - 83 fd 01                   - cmp ebp,01
+004967A7 - 89 4c 24 20                - mov [esp+20],ecx
+004967AB - 7e c7                      - jle 00496774
+004967AD - 8b 6c 24 14                - mov ebp,[esp+14]
+004967B1 - bf 02 00 00 00             - mov edi,00000002
+004967B6 - 8b 4c 24 10                - mov ecx,[esp+10]
+004967BA - 57                         - push edi
+004967BB - e8 90 28 ff ff             - call 00489050
+004967C0 - 8b 0e                      - mov ecx,[esi]
+004967C2 - 57                         - push edi
+004967C3 - 8a d8                      - mov bl,al
+004967C5 - e8 86 28 ff ff             - call 00489050
+004967CA - 3a d8                      - cmp bl,al
+004967CC - 8b 4c 24 10                - mov ecx,[esp+10]
+004967D0 - 57                         - push edi
+004967D1 - 77 02                      - ja 004967d5
+004967D3 - 8b 0e                      - mov ecx,[esi]
+004967D5 - e8 76 28 ff ff             - call 00489050
+004967DA - 0f b6 d0                   - movzx edx,al
+004967DD - 89 55 00                   - mov [ebp+00],edx
+004967E0 - 47                         - inc edi
+004967E1 - 83 c5 04                   - add ebp,04
+004967E4 - 83 ff 04                   - cmp edi,04
+004967E7 - 7e cd                      - jle 004967b6
+004967E9 - 8b 44 24 4c                - mov eax,[esp+4c]
+004967ED - 8b 54 24 14                - mov edx,[esp+14]
+004967F1 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+004967F5 - 83 c2 14                   - add edx,14
+004967F8 - 83 c6 04                   - add esi,04
+004967FB - 49                         - dec ecx
+004967FC - 89 54 24 14                - mov [esp+14],edx
+00496800 - 89 4c 24 1c                - mov [esp+1c],ecx
+00496804 - 0f 85 c6 fe ff ff          - jne 004966d0
+0049680A - 8b 4c 24 28                - mov ecx,[esp+28]
+0049680E - 8b 54 24 3c                - mov edx,[esp+3c]
+00496812 - 3b ca                      - cmp ecx,edx
+00496814 - 7e 02                      - jle 00496818
+00496816 - 8b d1                      - mov edx,ecx
+00496818 - 8b 4c 24 54                - mov ecx,[esp+54]
+0049681C - 8b 74 24 40                - mov esi,[esp+40]
+00496820 - 88 51 18                   - mov [ecx+18],dl
+00496823 - 8b 54 24 2c                - mov edx,[esp+2c]
+00496827 - 3b d6                      - cmp edx,esi
+00496829 - 7f 02                      - jg 0049682d
+0049682B - 8b d6                      - mov edx,esi
+0049682D - 8b 74 24 44                - mov esi,[esp+44]
+00496831 - 88 51 19                   - mov [ecx+19],dl
+00496834 - 8b 54 24 30                - mov edx,[esp+30]
+00496838 - 3b d6                      - cmp edx,esi
+0049683A - 7f 02                      - jg 0049683e
+0049683C - 8b d6                      - mov edx,esi
+0049683E - 8b 74 24 48                - mov esi,[esp+48]
+00496842 - 88 51 1a                   - mov [ecx+1a],dl
+00496845 - 8b 54 24 34                - mov edx,[esp+34]
+00496849 - 3b d6                      - cmp edx,esi
+0049684B - 7f 02                      - jg 0049684f
+0049684D - 8b d6                      - mov edx,esi
+0049684F - 88 51 1b                   - mov [ecx+1b],dl
+00496852 - 8b 54 24 38                - mov edx,[esp+38]
+00496856 - 3b d0                      - cmp edx,eax
+00496858 - 7e 02                      - jle 0049685c
+0049685A - 8b c2                      - mov eax,edx
+0049685C - 8b 6c 24 54                - mov ebp,[esp+54]
+00496860 - 88 41 1c                   - mov [ecx+1c],al
+00496863 - eb 28                      - jmp 0049688d
+00496865 - 8b 5c 24 70                - mov ebx,[esp+70]
+00496869 - 8b 7c 24 10                - mov edi,[esp+10]
+0049686D - 33 f6                      - xor esi,esi
+0049686F - 90                         - nop
+00496870 - 85 db                      - test ebx,ebx
+00496872 - 8b cf                      - mov ecx,edi
+00496874 - 56                         - push esi
+00496875 - 74 07                      - je 0049687e
+00496877 - e8 b4 27 ff ff             - call 00489030
+0049687C - eb 05                      - jmp 00496883
+0049687E - e8 cd 27 ff ff             - call 00489050
+00496883 - 88 44 2e 18                - mov [esi+ebp+18],al
+00496887 - 46                         - inc esi
+00496888 - 83 fe 05                   - cmp esi,05                             循环五次（取五维）
+0049688B - 7c e3                      - jnge 00496870
+
+[设置部队适性]
+0049688D - 33 ff                      - xor edi,edi                            EDI置0（适性索引）
+0049688F - 90                         - nop
+00496890 - 33 db                      - xor ebx,ebx                            EBX置0（武将索引）
+00496892 - 89 5c 24 1c                - mov [esp+1c],ebx                       [esp+1c] ＝ 0（适性为C）
+00496896 - 8b 44 24 58                - mov eax,[esp+58]                       [esp+58]是存放3个武将指针的内存地址
+0049689A - 8b 34 98                   - mov esi,[eax+ebx*4]                    获得第N个武将指针
+0049689D - 85 f6                      - test esi,esi                           若武将指针为空则循环下一个
+0049689F - 74 1a                      - je 004968bb
+004968A1 - 57                         - push edi
+004968A2 - 8b ce                      - mov ecx,esi
+004968A4 - e8 97 24 ff ff             - call 00488d40                          取武将的指定适性
+004968A9 - 3b 44 24 1c                - cmp eax,[esp+1c]                       通过比较取到最大的适性
+004968AD - 7e 0c                      - jle 004968bb
+004968AF - 57                         - push edi
+004968B0 - 8b ce                      - mov ecx,esi
+004968B2 - e8 89 24 ff ff             - call 00488d40                          取武将的指定适性
+004968B7 - 89 44 24 1c                - mov [esp+1c],eax
+004968BB - 43                         - inc ebx
+004968BC - 83 fb 03                   - cmp ebx,03                             循环三次（三个武将）
+004968BF - 7c d5                      - jnge 00496896
+004968C1 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+004968C5 - 89 4c bd 00                - mov [ebp+edi*4+00],ecx                 设置部队适性
+004968C9 - 47                         - inc edi
+004968CA - 83 ff 06                   - cmp edi,06                             循环六次
+004968CD - 7c c1                      - jnge 00496890
+
+[适性修正计算]
+004968CF - 8b 7c 24 5c                - mov edi,[esp+5c]
+004968D3 - 57                         - push edi
+004968D4 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004968D9 - e8 72 65 00 00             - call 0049ce50
+004968DE - 85 ff                      - test edi,edi                       检查兵种是否为剑兵(edi=0)
+004968E0 - 8b 44 85 00                - mov eax,[ebp+eax*4+00]             装载兵种对应的兵科适性
+004968E4 - 74 23                      - je 00496909                        是剑兵则跳转到00496909
+004968E6 - 83 ff 09                   - cmp edi,09                         检查兵种是否为走舸(edi=9)
+004968E9 - 75 07                      - jne 004968f2                       非走舸则跳过下一句
+004968EB - 83 7c 24 64 01             - cmp dword ptr [esp+64],01          如果是剑兵和走舸，则检查是否为输送队
+004968F0 - 74 17                      - je 00496909                        是输送队则跳转到00496909
+004968F2 - 83 c0 07                   - add eax,07                         适性S=3，3+7=10，可以认为是100%的意思
+004968F5 - 89 44 24 24                - mov [esp+24],eax
+004968F9 - db 44 24 24                - fild dword ptr [esp+24]            以上两句装载乘数
+004968FD - d8 0d 88 cc 79 00          - fmul dword ptr [0079cc88]          乘以适性修正倍率(0079cc88=0.1)
+00496903 - d9 5c 24 20                - fstp dword ptr [esp+20]            修正结果存放在esp+20中
+00496907 - eb 08                      - jmp 00496911                       非剑兵或输送队则跳过下一句
+00496909 - c7 44 24 20 9a 99 19 3f    - mov [esp+20],3f19999a              剑兵或输送队攻防适性修正(3F19999A=0.6)存放在esp+20中
+
+[状态修正计算]
+00496911 - 8b 4c 24 68                - mov ecx,[esp+68]                   取得部队特殊状态
+00496915 - b8 01 00 00 00             - mov eax,00000001
+0049691A - 3b c8                      - cmp ecx,eax                        检查部队状态是否是?眩晕?
+0049691C - c7 44 24 1c cd cc 4c 3f    - mov [esp+1c],3f4ccccd              眩晕状态衰减倍率(3F4CCCCD=0.8)存放在esp+1c中
+00496924 - 74 08                      - je 0049692e                        如果部队处于眩晕状态则跳过下一句
+00496926 - c7 44 24 1c 00 00 80 3f    - mov [esp+1c],3f800000              状态正常衰减倍率(3F800000=1)存放在esp+1c中
+
+[输送队攻击衰减]
+0049692E - 39 44 24 64                - cmp [esp+64],eax                   检查部队是否是输送队(esp+64的值为1代表输送队)
+00496932 - c7 44 24 24 cd cc cc 3e    - mov [esp+24],3ecccccd              输送队攻击衰减(0.4)
+0049693A - 74 08                      - je 00496944                        如果部队是输送队则跳过下一句
+0049693C - c7 44 24 24 00 00 80 3f    - mov [esp+24],3f800000              一般队攻击衰减(1)
+
+[精锐X兵攻防修正]
+00496944 - 57                         - push edi
+00496945 - b9 58 19 20 07             - mov ecx,07201958
+0049694A - e8 71 a2 ff ff             - call 00490bc0
+0049694F - 8b f0                      - mov esi,eax                        以上四句载入兵种基本攻防资料地址
+00496951 - 0f b6 56 55                - movzx edx,byte ptr [esi+55]        装载兵种基本攻击
+00496955 - 0f b6 46 56                - movzx eax,byte ptr [esi+56]        装载兵种基本防御
+00496959 - 4f                         - dec edi                            edi自减1
+0049695A - 83 ff 03                   - cmp edi,03
+0049695D - 89 54 24 10                - mov [esp+10],edx                   装载兵种基本攻击置入esp+10
+00496961 - 89 44 24 14                - mov [esp+14],eax                   装载兵种基本攻击置入esp+14
+00496965 - 77 3f                      - ja 004969a6                        如果是骑兵以上——即兵器或水军，则不进行精锐X兵修正
+00496967 - ff 24 bd 8c 6b 49 00       - jmp dword ptr [edi*4+00496b8c]     根据兵种跳转，00496B8C处16个字节分别是枪(0049696E)/戟(00496972)/弩(00496976)/骑(0049697A)
+0049696E - 6a 03                      - push 03                            03=精锐枪兵
+00496970 - eb 0a                      - jmp 0049697c
+00496972 - 6a 07                      - push 07                            07=精锐戟兵
+00496974 - eb 06                      - jmp 0049697c
+00496976 - 6a 0b                      - push 0b                            0b=精锐弩兵
+00496978 - eb 02                      - jmp 0049697c
+0049697A - 6a 0f                      - push 0f                            0f=精锐骑兵
+0049697C - 8b 5c 24 1c                - mov ebx,[esp+1c]                   ebx=部队所属势力指针
+00496980 - 8b cb                      - mov ecx,ebx                       
+00496982 - e8 59 a8 fe ff             - call 004811e0                      判断势力是否拥有精锐X兵科技，结果置入eax(0或1)
+00496987 - 85 c0                      - test eax,eax
+00496989 - 74 1f                      - je 004969aa                        如果是精锐X兵则开始进行基本攻防修正
+0049698B - 8b 54 24 10                - mov edx,[esp+10]                   esp+10为基本攻击地址
+0049698F - 8b 4c 24 14                - mov ecx,[esp+14]                   esp+14为基本防御地址
+00496993 - b8 0a 00 00 00             - mov eax,0000000a                   若是精锐X兵则修正值为10
+00496998 - 03 d0                      - add edx,eax
+0049699A - 03 c8                      - add ecx,eax
+0049699C - 89 54 24 10                - mov [esp+10],edx 
+004969A0 - 89 4c 24 14                - mov [esp+14],ecx                   以上四句对攻防各增加修正值并置回原地址
+004969A4 - eb 04                      - jmp 004969aa                       开始计算攻击、防御和建设
+004969A6 - 8b 5c 24 18                - mov ebx,[esp+18]                   兵器会直接从00496965跳转到这里
+
+004969AA - e9 d1 2b 41 00             - jmp 008a9580
+004969AF - 90                         - nop
+004969B0 - 90                         - nop
+004969B1 - 90                         - nop
+004969B2 - db 44 24 18                - fild dword ptr [esp+18]
+004969B6 - da 4c 24 10                - fimul [esp+10]
+004969BA - d8 4c 24 20                - fmul dword ptr [esp+20]
+004969BE - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88] : [3C23D70A]
+004969C4 - d8 4c 24 24                - fmul dword ptr [esp+24]
+004969C8 - d8 4c 24 1c                - fmul dword ptr [esp+1c]
+004969CC - d8 15 18 e7 74 00          - fcom dword ptr [0074e718] : [(float)1.0000]
+004969D2 - df e0                      - fnstsw ax
+004969D4 - f6 c4 41                   - test ah,41
+004969D7 - 74 08                      - je 004969e1
+004969D9 - dd d8                      - fstp st(0)
+004969DB - d9 05 18 e7 74 00          - fld dword ptr [0074e718] : [(float)1.0000]
+004969E1 - e8 72 2b 41 00             - call 008a9558
+004969E6 - 88 45 1d                   - mov [ebp+1d],al
+004969E9 - 83 7c 24 64 01             - cmp dword ptr [esp+64],01
+004969EE - 75 08                      - jne 004969f8
+004969F0 - d9 05 24 80 8a 00          - fld dword ptr [008a8024] : [(double)0.0188]
+004969F6 - eb 06                      - jmp 004969fe
+004969F8 - d9 05 18 e7 74 00          - fld dword ptr [0074e718] : [(float)1.0000]
+004969FE - e9 9f 2b 41 00             - jmp 008a95a2
+00496A03 - 90                         - nop
+00496A04 - 90                         - nop
+00496A05 - 90                         - nop
+00496A06 - db 44 24 14                - fild dword ptr [esp+14]
+00496A0A - da 4c 24 24                - fimul [esp+24]
+00496A0E - d8 4c 24 20                - fmul dword ptr [esp+20]
+00496A12 - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88] : [3C23D70A]
+00496A18 - d8 c9                      - fmul st(0),st(1)
+00496A1A - d8 4c 24 1c                - fmul dword ptr [esp+1c]
+00496A1E - d8 15 18 e7 74 00          - fcom dword ptr [0074e718] : [(float)1.0000]
+00496A24 - df e0                      - fnstsw ax
+00496A26 - f6 c4 41                   - test ah,41
+00496A29 - 74 08                      - je 00496a33
+00496A2B - dd d8                      - fstp st(0)
+00496A2D - d9 05 18 e7 74 00          - fld dword ptr [0074e718] : [(float)1.0000]
+00496A33 - e8 20 2b 41 00             - call 008a9558
+00496A38 - 88 45 1e                   - mov [ebp+1e],al
+00496A3B - 0f b6 45 1b                - movzx eax,byte ptr [ebp+1b]
+00496A3F - 89 44 24 24                - mov [esp+24],eax
+00496A43 - db 44 24 24                - fild dword ptr [esp+24]
+00496A47 - d8 0d 84 cc 79 00          - fmul dword ptr [0079cc84] : [3F2AAAAB]
+00496A4D - d8 05 80 cc 79 00          - fadd dword ptr [0079cc80] : [(float)50.0000]
+00496A53 - de c9                      - fmulp st(9),st(0)
+00496A55 - d8 4c 24 1c                - fmul dword ptr [esp+1c]
+00496A59 - d8 15 18 e7 74 00          - fcom dword ptr [0074e718] : [(float)1.0000]
+00496A5F - df e0                      - fnstsw ax
+00496A61 - f6 c4 41                   - test ah,41
+00496A64 - 74 08                      - je 00496a6e
+00496A66 - dd d8                      - fstp st(0)
+00496A68 - d9 05 18 e7 74 00          - fld dword ptr [0074e718] : [(float)1.0000]
+00496A6E - e8 01 10 27 00             - call 00707a74
+00496A73 - 88 45 1f                   - mov [ebp+1f],al
+00496A76 - 8a 4e 57                   - mov cl,[esi+57]
+00496A79 - 8b 44 24 64                - mov eax,[esp+64]
+00496A7D - 85 c0                      - test eax,eax
+00496A7F - 88 4d 20                   - mov [ebp+20],cl
+00496A82 - 5e                         - pop esi
+00496A83 - 0f 85 af 00 00 00          - jne 00496b38
+00496A89 - 83 ff 07                   - cmp edi,07
+00496A8C - 77 6d                      - ja 00496afb
+00496A8E - ff 24 bd 9c 6b 49 00       - jmp dword ptr [edi*4+00496b9c]
+00496A95 - 6a 03                      - push 03
+00496A97 - 8b cb                      - mov ecx,ebx
+00496A99 - e8 42 a7 fe ff             - call 004811e0
+00496A9E - 85 c0                      - test eax,eax
+00496AA0 - 74 59                      - je 00496afb
+00496AA2 - 8a 45 20                   - mov al,[ebp+20]
+00496AA5 - 04 06                      - add al,06
+00496AA7 - eb 4f                      - jmp 00496af8
+00496AA9 - 6a 07                      - push 07
+00496AAB - 8b cb                      - mov ecx,ebx
+00496AAD - e8 2e a7 fe ff             - call 004811e0
+00496AB2 - 85 c0                      - test eax,eax
+00496AB4 - 74 45                      - je 00496afb
+00496AB6 - 8a 45 20                   - mov al,[ebp+20]
+00496AB9 - 04 06                      - add al,06
+00496ABB - eb 3b                      - jmp 00496af8
+00496ABD - 6a 0b                      - push 0b
+00496ABF - 8b cb                      - mov ecx,ebx
+00496AC1 - e8 1a a7 fe ff             - call 004811e0
+00496AC6 - 85 c0                      - test eax,eax
+00496AC8 - 74 31                      - je 00496afb
+00496ACA - 8a 45 20                   - mov al,[ebp+20]
+00496ACD - 04 06                      - add al,06
+00496ACF - eb 27                      - jmp 00496af8
+00496AD1 - 6a 0f                      - push 0f
+00496AD3 - 8b cb                      - mov ecx,ebx
+00496AD5 - e8 06 a7 fe ff             - call 004811e0
+00496ADA - 85 c0                      - test eax,eax
+00496ADC - 74 04                      - je 00496ae2
+00496ADE - 80 45 20 02                - add byte ptr [ebp+20],02
+00496AE2 - 6a 0d                      - push 0d
+00496AE4 - eb 02                      - jmp 00496ae8
+00496AE6 - 6a 14                      - push 14
+00496AE8 - 8b cb                      - mov ecx,ebx
+00496AEA - e8 f1 a6 fe ff             - call 004811e0
+00496AEF - 85 c0                      - test eax,eax
+00496AF1 - 74 08                      - je 00496afb
+00496AF3 - e9 cc 2a 41 00             - jmp 008a95c4
+00496AF8 - 88 45 20                   - mov [ebp+20],al
+00496AFB - 8b 44 24 58                - mov eax,[esp+58]
+00496AFF - 85 c0                      - test eax,eax
+00496B01 - 7c 64                      - jnge 00496b67
+00496B03 - 83 f8 03                   - cmp eax,03
+00496B06 - 7e 2c                      - jle 00496b34
+00496B08 - 83 f8 04                   - cmp eax,04
+00496B0B - 75 27                      - jne 00496b34
+00496B0D - 8b 5c 24 54                - mov ebx,[esp+54]
+00496B11 - 6a 02                      - push 02
+00496B13 - e8 b8 f0 ff ff             - call 00495bd0
+00496B18 - 83 c4 04                   - add esp,04
+00496B1B - 85 c0                      - test eax,eax
+00496B1D - 75 40                      - jne 00496b5f
+00496B1F - 6a 03                      - push 03
+00496B21 - e8 aa f0 ff ff             - call 00495bd0
+00496B26 - 83 c4 04                   - add esp,04
+00496B29 - 85 c0                      - test eax,eax
+00496B2B - 74 3a                      - je 00496b67
+00496B2D - 90                         - nop
+00496B2E - 80 45 20 03                - add byte ptr [ebp+20],03
+00496B32 - eb 33                      - jmp 00496b67
+00496B34 - 6a 02                      - push 02
+00496B36 - eb 17                      - jmp 00496b4f
+00496B38 - 6a 20                      - push 20
+00496B3A - 8b cb                      - mov ecx,ebx
+00496B3C - e8 9f a6 fe ff             - call 004811e0
+00496B41 - 85 c0                      - test eax,eax
+00496B43 - 74 04                      - je 00496b49
+00496B45 - 80 45 20 03                - add byte ptr [ebp+20],03
+00496B49 - 80 45 20 05                - add byte ptr [ebp+20],05
+00496B4D - 6a 07                      - push 07
+00496B4F - 8b 5c 24 58                - mov ebx,[esp+58]
+00496B53 - e8 78 f0 ff ff             - call 00495bd0
+00496B58 - e9 7f 2a 41 00             - jmp 008a95dc
+00496B5D - 74 08                      - je 00496b67
+00496B5F - 8a 45 20                   - mov al,[ebp+20]
+00496B62 - 04 05                      - add al,05
+00496B64 - 88 45 20                   - mov [ebp+20],al
+00496B67 - 8b 44 24 68                - mov eax,[esp+68]
+00496B6B - 85 c0                      - test eax,eax
+00496B6D - 74 16                      - je 00496b85
+00496B6F - 8b 5c 24 54                - mov ebx,[esp+54]
+00496B73 - 6a 05                      - push 05
+00496B75 - e8 56 f0 ff ff             - call 00495bd0
+00496B7A - 83 c4 04                   - add esp,04
+00496B7D - 85 c0                      - test eax,eax
+00496B7F - 74 04                      - je 00496b85
+00496B81 - 80 45 20 04                - add byte ptr [ebp+20],04
+00496B85 - 5f                         - pop edi
+00496B86 - 5d                         - pop ebp
+00496B87 - 5b                         - pop ebx
+00496B88 - 83 c4 40                   - add esp,40
+00496B8B - c3                         - ret
+
+
+
+【五、部队攻防能力计算】
+
+*修改开始
+*004968F2 - 83 e8 03                   - sub eax,03                        适性S=3，3-3=0，倍率修正对S无关，S以下则衰减，S以上则增益
+*修改结束
+ 004968F5 - 89 44 24 24                - mov [esp+24],eax
+ 004968F9 - db 44 24 24                - fild dword ptr [esp+24]           以上两句装载乘数
+*修改开始
+*004968FD - e9 6a 2c 41 00             - jmp 008a956c                      跳转到适性对攻防新修正公式
+*00496902 - 90                         - nop
+*008A956C - d8 0d 10 80 8a 00          - fmul dword ptr [008a8010]         适性与S每差1级，衰减或增益的倍率(008A8010可自行设置)
+*008A9572 - d8 05 18 e7 74 00          - fadd dword ptr [0074e718]         倍率加上1，即S级时修正为100%
+*008A9578 - e9 86 d3 be ff             - jmp 00496903                      跳转回去
+*修改结束
+
+
+ [攻击力]
+ 004969AA - 0f b6 4d 19                - movzx ecx,byte ptr [ebp+19]       ebp+19为部队最高武力(参见统武按百分比决定部队攻击的修改)
+ 004969AE - 89 4c 24 18                - mov [esp+18],ecx
+*修改开始
+*004969AA - e9 d1 2b 41 00             - jmp 008a9580                      跳转到统武固定比例计算攻击代码
+*004969AF - 90 90 90                   - nop nop nop
+*修改结束
+ 004969B2 - db 44 24 18                - fild dword ptr [esp+18]           以上二句装载乘数
+ 004969B6 - da 4c 24 10                - fimul [esp+10]                    部队最高武力×兵种基本攻击值
+ 004969BA - d8 4c 24 20                - fmul dword ptr [esp+20]           所得值乘以适性修正
+ 004969BE - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88]         所得值乘以一定的倍率(0077AA88=0.0100)
+ 004969C4 - d8 4c 24 24                - fmul dword ptr [esp+24]           所得值乘以输送队衰减倍率
+ 004969C8 - d8 4c 24 1c                - fmul dword ptr [esp+1c]           所得值乘以部队状态衰减倍率
+ 004969CC ～ 004969E0                                                      结果最小为1
+ 004969E1 - e8 8e 10 27 00             - call 00707a74                     计算结果从浮点值转换为整形值
+*修改开始
+*004969E1 - e8 72 2b 41 00             - call 008a9558                     调用防止溢出函数，该函数首先执行call 00707a74
+*修改结束
+ 004969E6 - 88 45 1d                   - mov [ebp+1d],al                   结果置回ebp+1d(部队攻击力)
+
+ [输送队防御与建设衰减]
+ 004969E9 - 83 7c 24 64 01             - cmp dword ptr [esp+64],01         检查部队是否是输送队(esp+64的值为1代表输送队)
+ 004969EE - 75 08                      - jne 004969f8                      如果不是输送队则跳转到004969F8
+ 004969F0 - d9 05 e0 5a 79 00          - fld dword ptr [00795ae0]          输送队防御和建设衰减(00795AE0=0.3333)
+ 004969F6 - eb 06                      - jmp 004969fe                      跳过下一句
+ 004969F8 - d9 05 18 e7 74 00          - fld dword ptr [0074e718]          一般队防御和建设衰减(0074E718=1.0000)
+ 
+ [防御力]
+ 004969FE - 0f b6 55 18                - movzx edx,byte ptr [ebp+18]       ebp+18为部队最高统率(参见)
+ 00496A02 - db 44 24 14                - fild dword ptr [esp+14]
+ 00496A06 - 89 54 24 24                - mov [esp+24],edx                  以上二句装载乘数
+*修改开始
+*004969FE - e9 9f 2b 41 00             - jmp 008a95a2                      跳转到统武固定比例计算防御代码
+*00496A03 - 90 90 90                   - nop nop nop
+*00496A06 - db 44 24 14                - fild dword ptr [esp+14]           原00496A02处语句下移一句
+*修改结束
+ 00496A0A - da 4c 24 24                - fimul [esp+24]                    部队最高统率×兵种基本防御值
+ 00496A0E - d8 4c 24 20                - fmul dword ptr [esp+20]           所得值乘以适性修正
+ 00496A12 - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88]         所得值乘以一定的倍率(0077AA88=0.0100)
+ 00496A18 - d8 c9                      - fmul st(0),st(1)                  所得值乘以输送队衰减倍率
+ 00496A1A - d8 4c 24 1c                - fmul dword ptr [esp+1c]           所得值乘以部队状态衰减倍率
+ 00496A1E ～ 00496A32                                                      结果最小为1
+ 00496A33 - e8 3c 10 27 00             - call 00707a74                     计算结果从浮点值转换为整形值
+*修改开始
+*00496A33 - e8 20 2b 41 00             - call 008a9558                     调用防止溢出函数，该函数首先执行call 00707a74
+*修改结束
+ 00496A38 - 88 45 1e                   - mov [ebp+1e],al                   结果置回ebp+1e(部队防御力)
+
+ [建设力]
+ 00496A3B - 0f b6 45 1b                - movzx eax,byte ptr [ebp+1b]       ebp+1b为部队最高政治
+ 00496A3F - 89 44 24 24                - mov [esp+24],eax                               
+ 00496A43 - db 44 24 24                - fild dword ptr [esp+24]           以上二句装载乘数
+ 00496A47 - d8 0d 84 cc 79 00          - fmul dword ptr [0079cc84]         部队最高政治力×最高政治计算建设力的倍率(0079CC84=0.6666)
+ 00496A4D - d8 05 80 cc 79 00          - fadd dword ptr [0079cc80]         上句结果＋建设力附加值(0079CC80=50)
+ 00496A53 - de c9                      - fmulp st(9),st(0)                 所得值乘以输送队衰减倍率
+ 00496A55 - d8 4c 24 1c                - fmul dword ptr [esp+1c]           所得值乘以部队状态衰减倍率
+ 00496A59 ～ 00496A6E                                                      结果最小为1
+ 00496A6E - e8 01 10 27 00             - call 00707a74                     计算结果从浮点值转换为整形值
+*修改开始
+*00496A6E - e9 c9 33 41 00             - jmp 008a9e3c
+*008A9E3C - 83 7c 24 64 01             - cmp dword ptr [esp+64],01
+*008A9E41 - 75 06                      - jne 008a9e49
+*008A9E43 - d8 35 24 80 8a 00          - fdiv dword ptr [008a8024]         运输队的建设力不衰减
+*008A9E49 - e8 0a f7 ff ff             - call 008a9558
+*（008A9E4E - e9 20 cc be ff             - jmp 00496a73）                      
+*008A9E4E - e9 15 02 00 00             - jmp 008aa068                      从这里跳到基础光环函数
+*修改结束
+ 00496A73 - 88 45 1f                   - mov [ebp+1f],al                   结果置回ebp+1f(部队建设力)
+
+
+[新增函数1 -- 防止溢出函数]
+ 008A9558 - e8 17 e5 e5 ff             - call 00707a74
+ 008A955D - 3d ff 00 00 00             - cmp eax,000000ff                  比较部队攻防是否大于255
+ 008A9562 - 7c 05                      - jnge 008a9569
+ 008A9564 - b8 ff 00 00 00             - mov eax,000000ff                  如大于255则将相应值设为255
+ 008A9569 - c3                         - ret
+
+[新增函数2 -- 统武按固定比例计算攻击和防御代码]
+ 以下计算攻击
+ 008A9580 - 0f b6 4d 19                - movzx ecx,byte ptr [ebp+19]       装载部队最高武力
+ 008A9584 - 0f b6 45 18                - movzx eax,byte ptr [ebp+18]       装载部队最高统率
+ 008A9588 - 6b c0 00                   - imul eax,eax,00                   统率乘以一定百分比(计算攻击)
+ 008A958B - 6b c9 64                   - imul ecx,ecx,64                   武力乘以一定百分比(计算攻击)
+ 008A958E - 01 c8                      - add eax,ecx
+ 008A9590 - b9 64 00 00 00             - mov ecx,00000064
+ 008A9595 - 99                         - cdq
+ 008A9596 - f7 f9                      - idiv ecx                          以上四句将两者相加并除以100
+ 008A9598 - 89 44 24 18                - mov [esp+18],eax                  结果置入部队攻击地址
+            89 44 24 24                - mov [esp+24],eax                  结果置入部队防御地址
+ 008A959C - e9 11 d4 be ff             - jmp 004969b2                      跳转回继续计算攻击  
+            e9 43 d4 be ff             - jmp 00496a06                      跳转回继续计算防御
+ 008A95A1 - cc                         - int 3
+ 
+[新增函数3 -- 兵力决定统武计算比例的计算攻击和防御代码]
+ 008A96E8:(80 byte) 由004969AA所跳转到的部队攻击由兵力决定统武计算比例的代码段。
+ 008A9738:(80 byte) 由004969FE所跳转到的部队防御由兵力决定统武计算比例的代码段。
+ 008A96E8 - 8b 4c 24 58                - mov ecx,[esp+58]                  ecx=主将指针所在地址
+ 008A96EC - e8 63 07 00 00             - call 008a9e54                     判断该计算是已生成部队还是在出兵面板
+ 008A96F1 - 90                         - nop
+ 008A96F2 - 85 c9                      - test ecx,ecx
+ 008A96F4 - 75 06                      - jne 008a96fc
+ 008A96F6 - 8b 4c 24 0c                - mov ecx,[esp+0c]                  装载部队兵力（已生成部队的计算）
+ 008A96FA - eb 09                      - jmp 008a9705
+ 008A96FC - 0f b7 91 18 00 00 00       - movzx edx,word ptr [ecx+00000018] 装载部队兵力（出兵面板计算）
+ 008A9703 - 8b ca                      - mov ecx,edx
+ 008A9705 - 0f b6 45 18                - movzx eax,byte ptr [ebp+18]       装载部队最高统率
+ 008A9709 - 81 f9 88 13 00 00          - cmp ecx,00001388                  判断部队兵力是否高过兵力阈值(5000)
+ 008A970F - 7d 1d                      - jnl 008a972e                      如果高过兵力阈值则直接由统决定攻防
+ 008A9711 - 0f af c1                   - imul eax,ecx                      统率影响因子＝统率×部队兵力
+ 008A9714 - 8b d0                      - mov edx,eax                       统率影响因子置入edx
+ 008A9716 - b8 88 13 00 00             - mov eax,00001388
+ 008A971B - 29 c8                      - sub eax,ecx                       兵力阈值－部队兵力
+ 008A971D - 0f b6 4d 19                - movzx ecx,byte ptr [ebp+19]       装载部队最高武力
+ 008A9721 - 0f af c1                   - imul eax,ecx                      武力影响因子＝武力×(兵力阈值－部队兵力)
+ 008A9724 - 01 d0                      - add eax,edx                       武力影响因子＋统率影响因子
+ 008A9726 - b9 88 13 00 00             - mov ecx,00001388
+ 008A972B - 99                         - cdq
+ 008A972C - f7 f9                      - idiv ecx                          攻击力＝(武力影响因子＋统率影响因子)÷兵力阈值
+ 008A972E - 89 44 24 18                - mov [esp+18],eax                  结果置入部队攻击地址
+            89 44 24 24                - mov [esp+24],eax                  结果置入部队防御地址
+ 008A9732 - e9 7b d2 be ff             - jmp 004969b2                      跳转回继续计算攻击
+            e9 7f d2 be ff             - jmp 00496a06                      跳转回继续计算防御
+
+ 
+ 根据武将获得其所在部队指针的函数
+ 008A9E54 - 8b 09                      - mov ecx,[ecx]                     ecx = 主将指针
+ 008A9E56 - 8b 89 9c 00 00 00          - mov ecx,[ecx+0000009c]            取得主将所在
+ 008A9E5C - 83 e9 57                   - sub ecx,57                        小于87代表在据点中，大于87时减去87就是部队ID
+ 008A9E5F - 8b c1                      - mov eax,ecx
+ 008A9E61 - 50                         - push eax
+ 008A9E62 - b9 58 19 20 07             - mov ecx,07201958
+ 008A9E67 - e8 04 70 be ff             - call 00490e70                     根据部队ID获取部队指针
+ 008A9E6C - 8b c8                      - mov ecx,eax
+ 008A9E6E - 51                         - push ecx
+ 008A9E6F - 51                         - push ecx
+ 008A9E70 - e8 bb 07 bd ff             - call 0047a630
+ 008A9E75 - 83 c4 04                   - add esp,04
+ 008A9E78 - 59                         - pop ecx
+ 008A9E79 - 85 c0                      - test eax,eax
+ 008A9E7B - 75 02                      - jne 008a9e7f
+ 008A9E7D - 31 c9                      - xor ecx,ecx
+ 008A9E7F - c3                         - ret
+ 
+ 由008A959D或者008A9733所跳转到的气力对部队攻击产生修正的代码段。
+ 008A9814 - 8b 4c 24 58                - mov ecx,[esp+58]
+ 008A9818 - e8 37 06 00 00             - call 008a9e54                     判断该计算是已生成部队还是在出兵面板
+ 008A981D - 90                         - nop
+ 008A981E - 85 c9                      - test ecx,ecx
+ 008A9820 - 75 07                      - jne 008a9829
+ 008A9822 - b8 64 00 00 00             - mov eax,00000064                  出兵面板时气力按100计算
+ 008A9827 - eb 0c                      - jmp 008a9835
+ 008A9829 - 0f b6 81 1a 00 00 00       - movzx eax,byte ptr [ecx+0000001a] 已生成部队则获取部队气力
+ 008A9830 - 83 f8 64                   - cmp eax,64
+ 008A9833 - 77 ed                      - ja 008a9822
+ 008A9835 - 6b c0 32                   - imul eax,eax,32
+ 008A9838 - b9 64 00 00 00             - mov ecx,00000064
+ 008A983D - 99                         - cdq
+ 008A983E - f7 f9                      - idiv ecx
+ 008A9840 - 83 c0 32                   - add eax,32
+ 008A9843 - 0f af 44 24 18             - imul eax,[esp+18]                 [esp+18]是部队攻击力
+ 008A9848 - b9 64 00 00 00             - mov ecx,00000064
+ 008A984D - 99                         - cdq
+ 008A984E - f7 f9                      - idiv ecx
+ 008A9850 - 89 44 24 18                - mov [esp+18],eax                  计算结果置回[esp+18]
+ 008A9854 - e9 59 d1 be ff             - jmp 004969b2
+ 
+ 由008A95BF或者008A9783所跳转到的气力对部队防御产生修正的代码段。
+ 008A985A - 8b 4c 24 58                - mov ecx,[esp+58]
+ 008A985E - e8 f1 05 00 00             - call 008a9e54
+ 008A9863 - 90                         - nop
+ 008A9864 - 85 c9                      - test ecx,ecx
+ 008A9866 - 75 07                      - jne 008a986f
+ 008A9868 - b8 64 00 00 00             - mov eax,00000064
+ 008A986D - eb 0c                      - jmp 008a987b
+ 008A986F - 0f b6 81 1a 00 00 00       - movzx eax,byte ptr [ecx+0000001a]
+ 008A9876 - 83 f8 64                   - cmp eax,64
+ 008A9879 - 77 ed                      - ja 008a9868
+ 008A987B - 6b c0 32                   - imul eax,eax,32
+ 008A987E - b9 64 00 00 00             - mov ecx,00000064
+ 008A9883 - 99                         - cdq
+ 008A9884 - f7 f9                      - idiv ecx
+ 008A9886 - 83 c0 32                   - add eax,32
+ 008A9889 - 0f af 44 24 24             - imul eax,[esp+24]                 [esp+24]是部队防御力
+ 008A988E - b9 64 00 00 00             - mov ecx,00000064
+ 008A9893 - 99                         - cdq
+ 008A9894 - f7 f9                      - idiv ecx
+ 008A9896 - 89 44 24 24                - mov [esp+24],eax                  计算结果置回[esp+24]
+ 008A989A - e9 67 d1 be ff             - jmp 00496a06
+ 008A989F - cc                         - int 3
+ 
+
+ 
+ 
+ 【六、部队移动力计算】
+ [移动力]
+ 00496A76 - 8a 4e 57                   - mov cl,[esi+57]                   装载兵种基本移动力
+ 00496A79 - 8b 44 24 64                - mov eax,[esp+64]                  esp+64(0-战斗部队, 1-运输队)置入eax
+ 00496A7D - 85 c0                      - test eax,eax                      判断eax是否为0
+ 00496A7F - 88 4d 20                   - mov [ebp+20],cl                   将兵种基本移动力置入ebp+20(部队移动力)
+ 00496A82 - 5e                         - pop esi                           esi使用完毕，故弹出之前压入栈的esi
+ 00496A83 - 0f 85 af 00 00 00          - jne 00496b38                      如果eax不为0(表示部队为运输队)则跳转到00496B38
+ 00496A89 - 83 ff 07                   - cmp edi,07                        
+ 00496A8C - 77 6d                      - ja 00496afb                       如果是兵器以上——即水军，则无科技进行移动力修正
+ 00496A8E - ff 24 bd 9c 6b 49 00       - jmp dword ptr [edi*4+00496b9c]    根据兵种跳转，00496B9C处32个字节分别是枪(00496A95)/戟(00496AA9)/弩(00496ABB)/骑(00496AD1)/
+                                                                           冲车(00496AE6)/井栏(00496AE6)/木兽(00496AE6)/投石(00496AE6)
+ 00496A95 - 6a 03                      - push 03                           03=精锐枪兵
+ 00496A97 - 8b cb                      - mov ecx,ebx                       
+ 00496A99 - e8 42 a7 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496A9E - 85 c0                      - test eax,eax                      
+ 00496AA0 - 74 59                      - je 00496afb
+ 00496AA2 - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496AA5 - 04 06                      - add al,06                         移动力加6
+ 00496AA7 - eb 4f                      - jmp 00496af8                      
+ 00496AA9 - 6a 07                      - push 07                           07=精锐戟兵
+ 00496AAB - 8b cb                      - mov ecx,ebx                       
+ 00496AAD - e8 2e a7 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496AB2 - 85 c0                      - test eax,eax
+ 00496AB4 - 74 45                      - je 00496afb
+ 00496AB6 - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496AB9 - 04 06                      - add al,06                         移动力加6
+ 00496ABB - eb 3b                      - jmp 00496af8
+ 00496ABD - 6a 0b                      - push 0b                           0b=精锐弩兵
+ 00496ABF - 8b cb                      - mov ecx,ebx
+ 00496AC1 - e8 1a a7 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496AC6 - 85 c0                      - test eax,eax
+ 00496AC8 - 74 31                      - je 00496afb
+ 00496ACA - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496ACD - 04 06                      - add al,06                         移动力加6
+ 00496ACF - eb 27                      - jmp 00496af8
+ 00496AD1 - 6a 0f                      - push 0f                           0f=精锐骑兵
+ 00496AD3 - 8b cb                      - mov ecx,ebx                       
+ 00496AD5 - e8 06 a7 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496ADA - 85 c0                      - test eax,eax
+ 00496ADC - 74 04                      - je 00496ae2
+ 00496ADE - 80 45 20 02                - add byte ptr [ebp+20],02
+ 00496AE2 - 6a 0d                      - push 0d                           0d=出产良马
+ 00496AE4 - eb 02                      - jmp 00496ae8
+ 00496AE6 - 6a 14                      - push 14                           14=强化车轴
+ 00496AE8 - 8b cb                      - mov ecx,ebx                       
+ 00496AEA - e8 f1 a6 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496AEF - 85 c0                      - test eax,eax
+ 00496AF1 - 74 08                      - je 00496afb
+ 00496AF3 - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496AF6 - 04 04                      - add al,04                         出产良马和强化车轴移动力都加4
+*修改开始
+*00496AF3 - e9 cc 2a 41 00             - jmp 008a95c4                      跳转到出产良马和强化车轴区别对待的代码
+*008A95C4 - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+*008A95C7 - 83 ff 03                   - cmp edi,03                   
+*008A95CA - 74 07                      - je 008a95d3                       如果是骑兵(3)则跳转到008A95D3
+*008A95CC - 04 04                      - add al,04                         兵器移动力增加4
+*008A95CE - e9 25 d5 be ff             - jmp 00496af8
+*008A95D3 - 04 04                      - add al,04                         骑兵移动力增加4
+*008A95D5 - e9 1e d5 be ff             - jmp 00496af8
+*修改结束
+
+ 00496AF8 - 88 45 20                   - mov [ebp+20],al                   移动力计算结果置回ebp+20(部队移动力)
+ 00496AFB - 8b 44 24 58                - mov eax,[esp+58]                  esp+58应该是原始的兵种类型(应该=edi+1)
+ 00496AFF - 85 c0                      - test eax,eax
+ 00496B01 - 7c 64                      - jnge 00496b67                     <0跳转
+ 00496B03 - 83 f8 03                   - cmp eax,03
+ 00496B06 - 7e 2c                      - jle 00496b34                      0-3跳转
+ 00496B08 - 83 f8 04                   - cmp eax,04
+ 00496B0B - 75 5a                      - jne 00496b67                      >4跳转，改为跳转到00496B34则表示强行对兵器水军有效
+ 00496B0D - 8b 5c 24 54                - mov ebx,[esp+54]                  EBX=武将数组指针
+ 00496B11 - 6a 02                      - push 02                           02=强行
+ 00496B13 - e8 b8 f0 ff ff             - call 00495bd0                     判断武将数组是否拥有特技，结果置入eax(0或1)
+ 00496B18 - 83 c4 04                   - add esp,04
+ 00496B1B - 85 c0                      - test eax,eax
+ 00496B1D - 75 40                      - jne 00496b5f                      有强行则跳转到00496B5F，强行和长驱不叠加
+ 00496B1F - 6a 03                      - push 03                           03=长驱
+ 00496B21 - e8 aa f0 ff ff             - call 00495bd0                     判断部队武将是否拥有特技，结果置入eax(0或1)
+ 00496B26 - 83 c4 04                   - add esp,04
+ 00496B29 - 85 c0                      - test eax,eax
+ 00496B2B - 74 3a                      - je 00496b67
+ 00496B2D - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496B30 - 04 03                      - add al,03                         长驱移动力加3
+ 00496B32 - eb 30                      - jmp 00496b64
+*修改开始
+*00496B2D - 90                         - nop
+*00496B2E - 80 45 20 03                - add byte ptr [ebp+20],03
+*00496B32 - eb 33                      - jmp 00496b67                      配合00496B62处的相应修改
+*修改结束
+ 00496B34 - 6a 02                      - push 02                           02=强行
+ 00496B36 - eb 17                      - jmp 00496b4f
+
+ 00496B38 - 6a 20                      - push 20                           20=木牛流马
+ 00496B3A - 8b cb                      - mov ecx,ebx
+ 00496B3C - e8 9f a6 fe ff             - call 004811e0                     判断势力是否拥有相应科技，结果置入eax(0或1)
+ 00496B41 - 85 c0                      - test eax,eax
+ 00496B43 - 74 04                      - je 00496b49
+ 00496B45 - 80 45 20 03                - add byte ptr [ebp+20],03          有木牛流马先3
+ 00496B49 - 80 45 20 05                - add byte ptr [ebp+20],05          运输队无条件加5(在剑兵行动力的基础上)
+*修改开始
+*00496B41 - C6 45 20 10                - mov byte ptr [ebp+20],10          可设置基础移动力
+*00496B45 - 85 C0                      - test eax,eax
+*00496B47 - 74 04                      - je 00496B4D
+*00496B49 - 80 45 20 03                - add byte ptr [ebp+20],03          木牛流马增加移动力
+*修改结束
+ 00496B4D - 6a 07                      - push 07                           07=搬运
+ 00496B4F - 8b 5c 24 58                - mov ebx,[esp+58]                  EBX=武将数组指针
+ 00496B53 - e8 78 f0 ff ff             - call 00495bd0                     判断武将数组是否拥有特技，结果置入eax(0或1)
+ 00496B58 - 83 c4 04                   - add esp,04                        
+ 00496B5B - 85 c0                      - test eax,eax
+*修改开始
+*00496B58 - e9 7f 2a 41 00             - jmp 008a95dc                      跳转到强行和搬运区别对待的代码
+*008A95DC - 83 c4 04                   - add esp,04
+*008A95DF - 85 c0                      - test eax,eax
+*008A95E1 - 74 10                      - je 008a95f3
+*008A95E3 - 8b 44 24 60                - mov eax,[esp+60]                  判断是否是运输队(前面esp已经+4，所以现在是esp+60而不是esp+64)
+*008A95E7 - 85 c0                      - test eax,eax
+*008A95E9 - 0f 84 70 d5 be ff          - je 00496b5f
+*008A95EF - 80 45 20 05                - add byte ptr [ebp+20],05          搬运使运输队行动力增加5
+*008A95F3 - e9 6f d5 be ff             - jmp 00496b67
+*修改结束
+ 00496B5D - 74 08                      - je 00496b67
+ 00496B5F - 8a 45 20                   - mov al,[ebp+20]                   装载移动力
+ 00496B62 - 04 05                      - add al,05                         强行移动力加5
+ 00496B64 - 88 45 20                   - mov [ebp+20],al                   移动力计算结果置回ebp+20(部队移动力)
+*修改开始
+*00496B5F - 80 45 20 05                - add byte ptr [ebp+20],05          配合强行对水军有效的修改，强行移动力加5        
+*00496B63 - eb 02                      - jmp 00496b67                      跳转到操舵判定，强行对水军有效，则跳过操舵判定
+*00496B65 - 90 90                      - nop nop
+*修改结束
+
+ 00496B67 - 8b 44 24 68                - mov eax,[esp+68]                  判断是否是水上队
+ 00496B6B - 85 c0                      - test eax,eax
+ 00496B6D - 74 16                      - je 00496b85                       操舵对非水上队移动力不加成，操舵对运输有加成
+ 00496B6F - 8b 5c 24 54                - mov ebx,[esp+54]                  EBX=武将数组指针
+ 00496B73 - 6a 05                      - push 05                           05=操舵
+ 00496B75 - e8 56 f0 ff ff             - call 00495bd0                     判断武将数组是否拥有特技，结果置入eax(0或1)
+ 00496B7A - 83 c4 04                   - add esp,04                        
+ 00496B7D - 85 c0                      - test eax,eax
+ 00496B7F - 74 04                      - je 00496b85
+ 00496B81 - 80 45 20 04                - add byte ptr [ebp+20],04          操舵移动力加4
+ 00496B85 ～ 00496B8A                                                      善后处理
+ 00496B8B - c3                         - ret

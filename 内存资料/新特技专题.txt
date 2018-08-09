@@ -1,0 +1,2254 @@
+【原来函数修改】
+004899DD - 83 f8 f9                   - cmp eax,f9             设定特技时上限扩展到250
+004899E0 - 77 06                      - ja 004899e8
+（cmp eax,63; jg 004899e8;）
+
+004890F8 - 83 f8 f9                   - cmp eax,f9             判断特技时上限扩展到250
+004890FB - 77 14                      - ja 00489111
+（cmp eax,63; jg 00489111;）
+
+00489106 - e8 11 6f 48 00             - call 0091001c          判断武将是否有特技时查找组合特技表
+（cmp esi,eax; sete dl;）
+
+00490C6A - e9 91 f3 47 00             - jmp 00910000           100以上特技资料所在的地址
+（xor eax,eax; ret 0004;）
+
+004915EA - e9 d9 ea 47 00             - jmp 009100c8           100以上特技地址转ID跳转
+004915EF - 90                         - nop
+
+（lea edi,[ecx+00080ef8]）
+
+0048A9CF - e9 74 56 48 00             - jmp 00910048           载入编号>127特技时的特殊处理
+（movsx eax,byte ptr [esp+0c];）
+
+00490DAC - b8 64 00 00 00             - mov eax,00000064       特技数量，改FA【暂未做入SIRE】
+
+004C93E2 - 6a 05                      - push 05                新特技参与排序，否则会按预设的顺序（在0079CAC8）进行排序，而新特技无预设顺序
+（push 01）
+
+
+【获取新特技资料地址】
+00910000 - 83 f8 64                   - cmp eax,64
+00910003 - 7c 11                      - jnge 00910016
+00910005 - 3c f9                      - cmp al,f9
+00910007 - 77 0d                      - ja 00910016
+00910009 - 83 e8 64                   - sub eax,64
+0091000C - 6b c0 6c                   - imul eax,eax,6c
+0091000F - 05 00 c0 90 00             - add eax,0090c000
+00910014 - eb 02                      - jmp 00910018
+00910016 - 31 c0                      - xor eax,eax
+00910018 - c2 04 00                   - ret 0004
+0091001B - cc                         - int 3
+
+0090C000: 新特技资料所在
+
+
+【判断组合特技】
+0091001C - 39 c6                      - cmp esi,eax
+0091001E - 75 02                      - jne 00910022
+00910020 - 42                         - inc edx
+00910021 - c3                         - ret
+00910022 - 83 fe ff                   - cmp esi,ff
+00910025 - 74 1f                      - je 00910046
+00910027 - 6b f6 10                   - imul esi,esi,10
+0091002A - b9 00 b0 90 00             - mov ecx,0090b000
+0091002F - 01 f1                      - add ecx,esi
+00910031 - 53                         - push ebx
+00910032 - 31 db                      - xor ebx,ebx
+00910034 - 0f b6 34 0b                - movzx esi,byte ptr [ebx+ecx]
+00910038 - 39 c6                      - cmp esi,eax
+0091003A - 74 08                      - je 00910044
+0091003C - 43                         - inc ebx
+0091003D - 83 fb 08                   - cmp ebx,08                     最大8个组合特技
+00910040 - 7c f2                      - jnge 00910034
+00910042 - eb 01                      - jmp 00910045
+00910044 - 42                         - inc edx
+00910045 - 5b                         - pop ebx
+00910046 - c3                         - ret
+00910047 - cc                         - int 3
+
+0090B000: 组合特技表，每个特技0x10字节，其中00-07存储8个被组合特技的ID，0A-0F存放该特技是否匹配6种兵科
+
+
+【特技载入时>=128的特技高位不补FFFFFF】
+00910048 - 0f be 44 24 0c             - movsx eax,byte ptr [esp+0c]
+0091004D - 3c f9                      - cmp al,f9
+0091004F - 77 05                      - ja 00910056
+00910051 - 25 ff 00 00 00             - and eax,000000ff
+00910056 - e9 79 a9 b7 ff             - jmp 0048a9d4
+0091005B - cc                         - int 3
+
+
+【根据组合特技设定判定匹配的兵种】
+0091005C - 8b 44 24 04                - mov eax,[esp+04]
+00910060 - 6b c0 10                   - imul eax,eax,10
+00910063 - 8d 88 0a b0 90 00          - lea ecx,[eax+0090b00a]
+00910069 - 8b 44 24 08                - mov eax,[esp+08]
+0091006D - 83 f8 01                   - cmp eax,01
+00910070 - 7c 13                      - jnge 00910085
+00910072 - 83 f8 0b                   - cmp eax,0b
+00910075 - 7f 0e                      - jg 00910085
+00910077 - 0f b6 90 8a 00 91 00       - movzx edx,byte ptr [eax+0091008a]
+0091007E - 0f b6 04 0a                - movzx eax,byte ptr [edx+ecx]
+00910082 - c2 08 00                   - ret 0008
+00910085 - 31 c0                      - xor eax,eax
+00910087 - c2 08 00                   - ret 0008
+
+0091008A: ff 00 01 02 03 04 04 04 04 05 05 05  兵种ID对应兵科 
+
+
+【富豪、米道、征收、征税的特殊特技判定函数修改】
+*旧代码
+004CEA41 - 85 c0                      - test eax,eax                   特技上下限判定
+004CEA43 - 7c 0c                      - jnge 004cea51
+004CEA45 - 83 f8 63                   - cmp eax,63
+004CEA48 - 7f 07                      - jg 004cea51
+004CEA4A - c7 04 83 01 00 00 00       - mov [ebx+eax*4],00000001       特技的数组位置1
+*新代码
+004CEA41 - E8 52 16 44 00             - call 00910098
+004CEA46 - E8 01 17 44 00             - call 0091014C                  修正4个特技无法被组合
+004CEA4B - E8 B8 16 44 00             - call 00910108                  修正4个特技无法被附加到宝物
+004CEA50 - 90                         - nop
+*设置标志函数
+00910098 - 85 c0                      - test eax,eax
+0091009A - 7c 0c                      - jnge 009100a8
+0091009C - 83 f8 63                   - cmp eax,63
+0091009F - 7f 07                      - jg 009100a8
+009100A1 - c7 04 83 01 00 00 00       - mov [ebx+eax*4],00000001
+009100A8 - c3                         - ret
+*修正4个特技无法被附加到宝物
+00910108 - 57                    - push edi
+00910109 - 55                    - push ebp
+0091010A - 31 ED                 - xor ebp,ebp                         循环宝物
+0091010C - 55                    - push ebp
+0091010D - B9 58192007           - mov ecx,07201958
+00910112 - E8 190AB8FF           - call 00490B30
+00910117 - 8B F8                 - mov edi,eax
+00910119 - 57                    - push edi
+0091011A - E8 11A5B6FF           - call 0047A630
+0091011F - 83 C4 04              - add esp,04
+00910122 - 85 C0                 - test eax,eax
+00910124 - 74 1C                 - je 00910142
+00910126 - 56                    - push esi                            esi = 武将指针
+00910127 - B9 58192007           - mov ecx,07201958
+0091012C - E8 DF11B8FF           - call 00491310
+00910131 - 3B 47 40              - cmp eax,[edi+40]                    比较宝物所属ID和武将ID是否一致
+00910134 - 75 0C                 - jne 00910142
+00910136 - 0FB6 85 5C828A00      - movzx eax,byte ptr [ebp+008A825C]   宝物附加特技配置参数
+0091013D - E8 56FFFFFF           - call 00910098
+00910142 - 45                    - inc ebp
+00910143 - 83 FD 64              - cmp ebp,64
+00910146 - 7C C4                 - jl 0091010C
+00910148 - 5D                    - pop ebp
+00910149 - 5F                    - pop edi
+0091014A - C3                    - ret
+*修正4个特技无法被组合
+0091014C - 6B C0 10              - imul eax,eax,10
+0091014F - 8D 88 00B09000        - lea ecx,[eax+0090B000]
+00910155 - 56                    - push esi
+00910156 - 31 F6                 - xor esi,esi
+00910158 - 0FB6 04 31            - movzx eax,byte ptr [ecx+esi]
+0091015C - E8 37FFFFFF           - call 00910098
+00910161 - 46                    - inc esi
+00910162 - 83 FE 08              - cmp esi,08
+00910165 - 7C F1                 - jl 00910158
+00910167 - 5E                    - pop esi
+00910168 - C3                    - ret 
+
+【根据新特技资料地址获得特技ID】
+009100C8 - 81 fe 00 00 91 00          - cmp esi,00910000
+009100CE - 7f 29                      - jg 009100f9
+009100D0 - 81 ee 00 c0 90 00          - sub esi,0090c000
+009100D6 - b9 6c 00 00 00             - mov ecx,0000006c
+009100DB - 8b c6                      - mov eax,esi
+009100DD - 99                         - cdq
+009100DE - f7 f9                      - idiv ecx
+009100E0 - 83 c0 64                   - add eax,64
+009100E3 - 83 f8 64                   - cmp eax,64
+009100E6 - 7c 0c                      - jnge 009100f4
+009100E8 - 3d f9 00 00 00             - cmp eax,000000f9
+009100ED - 7f 05                      - jg 009100f4
+009100EF - e9 2f 15 b8 ff             - jmp 00491623
+009100F4 - e9 27 15 b8 ff             - jmp 00491620
+009100F9 - 8d b9 f8 0e 08 00          - lea edi,[ecx+00080ef8]
+009100FF - e9 ec 14 b8 ff             - jmp 004915f0
+00910104 - cc                         - int 3
+00910105 - cc                         - int 3
+00910106 - cc                         - int 3
+00910107 - cc                         - int 3
+
+
+－以下一些相关地址－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+0053777d：编辑新武将时的特技选单，但选择超过64编号的特技时会跳出
+00538c7f：编辑新武将时的特技选单？还是遇到南斗时的特技选单？
+0059D7D3：这里是个0－99的循环（无限制，不知道是什么选单?）
+00623EC6：全情报－特技列表中已能够显示出新特技，但关闭后就退出
+0069F965：编辑武将界面的特技选单
+
+
+0059d7d3: 有一段复杂的函数
+00491E4B: 这里也是计算特技资料地址
+
+
+006808BB  调用下一行的函数
+00493FB8
+
+00493D28
+00488290  这里可能要改
+
+0049EEF0  这里也要改
+0049F599
+0049F5ED
+0049FC07
+0049FD34
+005E6B61
+005ED579
+005EE4DD
+
+004CEA45  应该和特技研究有关
+
+×以下6个地方会CALL 004890F0，且有0～63的限制
+0049FB50
+004C87F6
+005E0B84
+005EE481
+005EE65C
+005F684E
+
+
+×调用004899D0的地方
+00485DC2  ？？猜测是某个载入，因为一次加载了很多数据
+004A3DA5  ？、猜测是设置武将属性的公共函数
+0059DA88  设置特技
+  0059DA80 - e8 5b 3b ef ff             - call 004915e0   //该函数是设置特技前的判断
+  
+005DAAB0  ？？猜测是遇到南斗学特技，因为附近有取得设施指针的代码
+
+0069A612  这里是在选项中进入编辑武将界面时赋予特技
+0069B792  这里是编辑界面中按取消时，给武将的特技赋予-1的值。
+006A28C9  这里时编辑界面中给武将赋予特技的设置。
+
+0053d6c9: 暂存新特技ID
+
+
+-----------------------------------------------------------------------------------
+【新特技】
+
+115 清野－设施被破坏不会丢失资源
+{
+ 004BA6BB - 0F84 45050000         - je 004BAC06
+}
+004BA6BB - E9 DC664500           - jmp 00910D9C
+004BA6C0 - 90                    - nop 
+
+00910D9C - 74 1B                 - je 00910DB9
+00910D9E - 8B C3                 - mov eax,ebx
+00910DA0 - E8 1BB7B6FF           - call 0047C4C0
+00910DA5 - 8B C8                 - mov ecx,eax
+00910DA7 - 8B 01                 - mov eax,[ecx]
+00910DA9 - 68 73000000           - push 00000073 { 115 }
+00910DAE - FF 50 58              - call dword ptr [eax+58]
+00910DB1 - 85 C0                 - test eax,eax
+00910DB3 - 0F84 0899BAFF         - je 004BA6C1
+00910DB9 - E9 489EBAFF           - jmp 004BAC06
+
+
+116 拱戍－自己领土上作战能力增强
+
+00910998 - E9 77050000           - jmp 00910F14                        兵圣主动攻击处理完成
+009109A4 - E9 BB050000           - jmp 00910F64                        兵圣辅助攻击处理完成
+
+函数，ecx=部队指针，判定部队是否在本方领土上
+00910EA4 - 57                    - push edi
+00910EA5 - 8B F9                 - mov edi,ecx			       edi = 部队指针
+00910EA7 - 0FB7 47 3C            - movzx eax,word ptr [edi+3C]         部队坐标X
+00910EAB - 0FB7 4F 3E            - movzx ecx,word ptr [edi+3E]         部队坐标Y
+00910EAF - 69 C0 C8000000        - imul eax,eax,000000C8
+00910EB5 - 01 C8                 - add eax,ecx
+00910EB7 - 8D 04 80              - lea eax,[eax+eax*4]
+00910EBA - 8D 0C 85 680EFB06     - lea ecx,[eax*4+06FB0E68]            ecx = 坐标指针
+00910EC1 - 8B 41 04              - mov eax,[ecx+04]
+00910EC4 - 25 E00F0000           - and eax,00000FE0
+00910EC9 - C1 F8 05              - sar eax,05                          eax = 坐标所属城市港关id（取坐标指针第四字节高3位和第五字节低4位）
+00910ECC - 50                    - push eax
+00910ECD - B9 58192007           - mov ecx,07201958
+00910ED2 - E8 29FEB7FF           - call 00490D00                       获得坐标所属城市港关指针
+00910ED7 - 56                    - push esi
+00910ED8 - 8B F0                 - mov esi,eax                         esi = 获得坐标所属城市港关指针
+00910EDA - 56                    - push esi
+00910EDB - E8 5097B6FF           - call 0047A630                       校验指针
+00910EE0 - 83 C4 04              - add esp,04
+00910EE3 - 85 C0                 - test eax,eax
+00910EE5 - 74 1B                 - je 00910F02
+00910EE7 - 8B CE                 - mov ecx,esi
+00910EE9 - 8B 06                 - mov eax,[esi]
+00910EEB - FF 50 40              - call dword ptr [eax+40]             获得坐标所属城市港关的势力ID
+00910EEE - 8B F0                 - mov esi,eax
+00910EF0 - 8B CF                 - mov ecx,edi
+00910EF2 - 8B 07                 - mov eax,[edi]
+00910EF4 - FF 50 40              - call dword ptr [eax+40]             获得部队的势力ID
+00910EF7 - 8B F8                 - mov edi,eax
+00910EF9 - 31 C0                 - xor eax,eax
+00910EFB - 39 FE                 - cmp esi,edi                         判断是否相同
+00910EFD - 75 03                 - jne 00910F02
+00910EFF - 83 C0 01              - add eax,01		               返回1代表部队在本方领土
+00910F02 - 5E                    - pop esi
+00910F03 - 5F                    - pop edi
+00910F04 - C3                    - ret 
+函数，ecx=部队指针，判定部队是否持有拱戍特技
+00910F08 - 8B 01                 - mov eax,[ecx]
+00910F0A - 68 74000000           - push 00000074 { 116 }
+00910F0F - FF 50 58              - call dword ptr [eax+58]
+00910F12 - C3                    - ret 
+兵圣主动攻击跳到此处
+00910F14 - 50                    - push eax                            保留兵圣处理最后两句中获取的值
+00910F15 - 8B CF                 - mov ecx,edi                         edi = 防御方部队指针
+00910F17 - E8 88FFFFFF           - call 00910EA4                       防御方是否在本方领土
+00910F1C - 85 C0                 - test eax,eax
+00910F1E - 74 17                 - je 00910F37
+00910F20 - 8B CF                 - mov ecx,edi
+00910F22 - E8 E1FFFFFF           - call 00910F08                       防御方是否持有拱戍
+00910F27 - 85 C0                 - test eax,eax
+00910F29 - 74 0C                 - je 00910F37
+00910F2B - DB 45 0C              - fild dword ptr [ebp+0C]
+00910F2E - D8 0D BC0F9100        - fmul dword ptr [00910FBC] { [0.80] }
+00910F34 - DB 5D 0C              - fistp dword ptr [ebp+0C]
+00910F37 - 8B CB                 - mov ecx,ebx                         ebx = 攻击方部队指针
+00910F39 - E8 66FFFFFF           - call 00910EA4                       攻击方是否在本方领土
+00910F3E - 85 C0                 - test eax,eax
+00910F40 - 74 17                 - je 00910F59
+00910F42 - 8B CB                 - mov ecx,ebx
+00910F44 - E8 BFFFFFFF           - call 00910F08                       攻击方是否持有拱戍
+00910F49 - 85 C0                 - test eax,eax
+00910F4B - 74 0C                 - je 00910F59
+00910F4D - DB 45 0C              - fild dword ptr [ebp+0C]
+00910F50 - D8 0D B80F9100        - fmul dword ptr [00910FB8] { [1.20] }
+00910F56 - DB 5D 0C              - fistp dword ptr [ebp+0C]
+00910F59 - 58                    - pop eax                             取出兵圣处理最后两句中获取的值
+00910F5A - 85 C0                 - test eax,eax                        用于跳转回去后的判定
+00910F5C - E9 C1F4C9FF           - jmp 005B0422
+兵圣辅助攻击跳到此处
+00910F64 - 50                    - push eax
+00910F65 - 8B CE                 - mov ecx,esi
+00910F67 - E8 38FFFFFF           - call 00910EA4
+00910F6C - 85 C0                 - test eax,eax
+00910F6E - 74 17                 - je 00910F87
+00910F70 - 8B CE                 - mov ecx,esi
+00910F72 - E8 91FFFFFF           - call 00910F08
+00910F77 - 85 C0                 - test eax,eax
+00910F79 - 74 0C                 - je 00910F87
+00910F7B - DB 45 0C              - fild dword ptr [ebp+0C]
+00910F7E - D8 0D BC0F9100        - fmul dword ptr [00910FBC] { [0.80] }
+00910F84 - DB 5D 0C              - fistp dword ptr [ebp+0C]
+00910F87 - 8B 4C 24 44           - mov ecx,[esp+44]
+00910F8B - E8 14FFFFFF           - call 00910EA4
+00910F90 - 85 C0                 - test eax,eax
+00910F92 - 74 19                 - je 00910FAD
+00910F94 - 8B 4C 24 44           - mov ecx,[esp+44]
+00910F98 - E8 6BFFFFFF           - call 00910F08
+00910F9D - 85 C0                 - test eax,eax
+00910F9F - 74 0C                 - je 00910FAD
+00910FA1 - DB 45 0C              - fild dword ptr [ebp+0C]
+00910FA4 - D8 0D B80F9100        - fmul dword ptr [00910FB8] { [1.20] }
+00910FAA - DB 5D 0C              - fistp dword ptr [ebp+0C]
+00910FAD - 58                    - pop eax
+00910FAE - 85 C0                 - test eax,eax
+00910FB0 - E9 72FCC9FF           - jmp 005B0C27
+数据区
+00910FB8 - float 攻击倍率
+00910FBC - float 防御倍率
+
+117 布阵－防暴击，消除兵种相克负面影响
+防止暴击
+{
+ 005AE675 - E8 A670EEFF           - call 00495720
+}
+005AE675 - E9 86273600           - jmp 00910E00
+
+00910E00 - E8 1B49B8FF           - call 00495720
+00910E05 - 8B F8                 - mov edi,eax
+00910E07 - 8B CD                 - mov ecx,ebp
+00910E09 - 8B 01                 - mov eax,[ecx]
+00910E0B - 68 75000000           - push 00000075 { 117 }
+00910E10 - FF 50 58              - call dword ptr [eax+58]
+00910E13 - 85 C0                 - test eax,eax
+00910E15 - 0F84 68D8C9FF         - je 005AE683
+00910E1B - 5F                    - pop edi
+00910E1C - 5D                    - pop ebp
+00910E1D - 31 C0                 - xor eax,eax
+00910E1F - 5B                    - pop ebx
+00910E20 - 59                    - pop ecx
+00910E21 - C3                    - ret 
+00910E22 - CC                    - int 3 
+00910E23 - CC                    - int 3 
+
+消除兵种相克负面影响
+{
+ 008AA585 - E9 9E680600           - jmp 00910E28
+ 008AA58A - E9 C5680600           - jmp 00910E54
+}
+
+00910E24 - D9 44 24 3C           - fld dword ptr [esp+3C]
+00910E28 - DB 15 400E9100        - fist dword ptr [00910E40]           暂存兵种相克前的伤害
+00910E2E - D8 09                 - fmul dword ptr [ecx]
+00910E30 - DB 15 440E9100        - fist dword ptr [00910E44]           暂存兵种相克后的伤害
+00910E36 - D9 5C 24 3C           - fstp dword ptr [esp+3C]
+00910E3A - E9 4B97F9FF           - jmp 008AA58A			       (jmp 008AA58F 跳过布阵判定)
+00910E3F - CC                    - int 3 
+数据区
+00910E40 - int 兵种相克前的伤害
+00910E44 - int 兵种相克后的伤害
+
+00910E48 - 8B 01                 - mov eax,[ecx]                       以下四句是判定布阵的公共函数
+00910E4A - 68 75000000           - push 00000075 { 117 }
+00910E4F - FF 50 58              - call dword ptr [eax+58]
+00910E52 - C3                    - ret 
+
+00910E54 - 8B CB                 - mov ecx,ebx
+00910E56 - E8 EDFFFFFF           - call 00910E48		       攻方布阵判定
+00910E5B - 85 C0                 - test eax,eax
+00910E5D - 74 14                 - je 00910E73
+00910E5F - A1 400E9100           - mov eax,[00910E40]                  获取兵种相克前的伤害
+00910E64 - 8B 0D 440E9100        - mov ecx,[00910E44]                  获取兵种相克后的伤害
+00910E6A - 39 C8                 - cmp eax,ecx
+00910E6C - 7C 05                 - jl 00910E73
+00910E6E - A3 440E9100           - mov [00910E44],eax                  消除防御倍率
+00910E73 - 8B CF                 - mov ecx,edi
+00910E75 - E8 CEFFFFFF           - call 00910E48		       守方布阵判定
+00910E7A - 85 C0                 - test eax,eax
+00910E7C - 74 14                 - je 00910E92
+00910E7E - A1 400E9100           - mov eax,[00910E40]                  获取兵种相克前的伤害
+00910E83 - 8B 0D 440E9100        - mov ecx,[00910E44]                  获取兵种相克后的伤害
+00910E89 - 39 C8                 - cmp eax,ecx
+00910E8B - 7F 05                 - jg 00910E92
+00910E8D - A3 440E9100           - mov [00910E44],eax                  消除攻击倍率
+00910E92 - DB 05 440E9100        - fild dword ptr [00910E44]	       
+00910E98 - D9 5C 24 3C           - fstp dword ptr [esp+3C]	       最终结果置回
+00910E9C - E9 EE96F9FF           - jmp 008AA58F
+
+
+118 要击－主动攻击异常状态部队伤害提升
+{
+ 005AFFE4 - 0F84 21010000         - je 005B010B
+}
+005AFFE4 - E9 D70D3600           - jmp 00910DC0
+005AFFE9 - 90                    - nop
+
+00910DC0 - 0F85 24F2C9FF         - jne 005AFFEA
+00910DC6 - 8B 4C 24 3C           - mov ecx,[esp+3C]			ecx = 攻击部队指针
+00910DCA - 8B 01                 - mov eax,[ecx]
+00910DCC - 68 76000000           - push 00000076 { 118 }
+00910DD1 - FF 50 58              - call dword ptr [eax+58]
+00910DD4 - 85 C0                 - test eax,eax
+00910DD6 - 74 18                 - je 00910DF0
+00910DD8 - 8B 4C 24 50           - mov ecx,[esp+50]			ecx = 被攻击部队指针
+00910DDC - 83 79 24 00           - cmp dword ptr [ecx+24],00		判定是否是异常状态
+00910DE0 - 74 0E                 - je 00910DF0
+00910DE2 - D9 44 24 38           - fld dword ptr [esp+38]
+00910DE6 - D8 0D DCB68400        - fmul dword ptr [0084B6DC]
+00910DEC - D9 5C 24 38           - fstp dword ptr [esp+38]
+00910DF0 - E9 16F3C9FF           - jmp 005B010B
+00910DF5 - 90 90 90              - nop nop nop
+数据区
+00910DF8 - 9A 99 99 3F [float 1.2]
+
+
+119 商才－交易效果增加
+单次交易上限翻倍
+已写在008A9ACC代码段中
+
+计算商人收支
+{
+ 005CA6BC - e8 df e9 eb ff             - call 004890a0
+ 005CA6C1 - 0f b6 d8                   - movzx ebx,al
+}
+005CA6BC - e8 cf 64 34 00             - call 00910b90
+005CA6C1 - 8b d8                      - mov ebx,eax
+005CA6C3 - 90                         - nop
+
+计算商人上下限
+{
+ 005CA7F6 - e8 a5 e8 eb ff             - call 004890a0
+ 005CA7FB - 0f b6 e8                   - movzx ebp,al
+}
+005CA7F6 - e8 95 63 34 00             - call 00910b90
+005CA7FB - 8b e8                      - mov ebp,eax
+005CA7FD - 90                         - nop
+
+显示商人效果
+{
+ 00609172 - e8 29 ff e7 ff             - call 004890a0
+ 00609177 - 0f b6 c0                   - movzx eax,al
+}
+00609172 - e8 19 7a 30 00             - call 00910b90
+00609177 - 8b c0                      - mov eax,eax
+00609179 - 90                         - nop
+ 
+00910B90 - 53                    - push ebx
+00910B91 - E8 0A85B7FF           - call 004890A0
+00910B96 - 0FB6 D8               - movzx ebx,al
+00910B99 - 68 77000000           - push 00000077 { 119 }
+00910B9E - E8 4D85B7FF           - call 004890F0
+00910BA3 - 85 C0                 - test eax,eax
+00910BA5 - 74 03                 - je 00910BAA
+00910BA7 - 83 C3 1E              - add ebx,1E { 30 }
+00910BAA - 8B C3                 - mov eax,ebx
+00910BAC - 5B                    - pop ebx
+00910BAD - C3                    - ret 
+
+
+120 兵圣－敌伤害减半
+主动攻击
+{
+ 005B041C - 8b 45 08                   - mov eax,[ebp+08]
+ 005B041F - 83 e8 03                   - sub eax,03
+}
+005B041C - e9 70 05 36 00             - jmp 00910991
+005B0421 - 90                         - nop
+
+辅助攻击
+{
+ 005B0C21 - 8b 45 08                   - mov eax,[ebp+08]
+ 005B0C24 - 83 e8 03                   - sub eax,03
+}
+005B0C21 - e9 77 fd 35 00             - jmp 0091099d
+005B0C26 - 90                         - nop
+
+00910974 - 8b 11                      - mov edx,[ecx]
+00910976 - 68 78 00 00 00             - push 00000078
+0091097B - ff 52 58                   - call dword ptr [edx+58]
+0091097E - 85 c0                      - test eax,eax
+00910980 - eb 08                      - jmp 0091098a
+00910982 - 8b 45 0c                   - mov eax,[ebp+0c]
+00910985 - d1 f8                      - sar eax,1
+00910987 - 89 45 0c                   - mov [ebp+0c],eax
+0091098A - 8b 45 08                   - mov eax,[ebp+08]
+0091098D - 83 e8 03                   - sub eax,03
+00910990 - c3                         - ret
+
+00910991 - 8b cf                      - mov ecx,edi                    edi = 被攻击部队指针
+00910993 - e8 dc ff ff ff             - call 00910974
+00910998 - e9 85 fa c9 ff             - jmp 005b0422
+0091099D - 8b ce                      - mov ecx,esi                    esi = 被攻击部队指针
+0091099F - e8 d0 ff ff ff             - call 00910974
+009109A4 - e9 7e 02 ca ff             - jmp 005b0c27
+
+
+121 兵神－敌战法成功率减半
+122 兵仙－对统率低于自己的部队战法必成功(必须和战法成功率005AFAD3处的修改连起来，否则会跳出)
+{
+ 005AFAE2 - 5d                         - pop ebp
+ 005AFAE3 - 83 c4 08                   - add esp,08
+ 005AFAE6 - c3                         - ret
+ 005AFAE7 - 90                         - nop
+}
+005AFAE2 - e9 19 07 36 00             - jmp 00910200
+
+00910200 - 81 3f 18 cc 79 00          - cmp [edi],0079cc18             如果被攻击对象不是部队则不处理
+00910206 - 75 35                      - jne 0091023d
+00910208 - 8b d8                      - mov ebx,eax
+0091020A - 8b ce                      - mov ecx,esi
+0091020C - 6a 00                      - push 00                        比较统率
+0091020E - 68 7a 00 00 00             - push 0000007a                  兵仙
+00910213 - e8 68 54 b8 ff             - call 00495680
+00910218 - 0f b6 8f c4 00 00 00       - movzx ecx,byte ptr [edi+000000c4]
+0091021F - 39 c8                      - cmp eax,ecx
+00910221 - 7e 05                      - jle 00910228
+00910223 - bb 64 00 00 00             - mov ebx,00000064
+00910228 - 8b 17                      - mov edx,[edi]
+0091022A - 8b cf                      - mov ecx,edi
+0091022C - 68 79 00 00 00             - push 00000079                  兵神
+00910231 - ff 52 58                   - call dword ptr [edx+58]
+00910234 - 85 c0                      - test eax,eax
+00910236 - 74 03                      - je 0091023b
+00910238 - 83 EB 32                   - sub ebx,32		       成果率减掉50
+0091023B - 8b c3                      - mov eax,ebx
+0091023D - 5f                         - pop edi
+0091023E - 5b                         - pop ebx
+0091023F - 5e                         - pop esi
+00910240 - 5d                         - pop ebp
+00910241 - 83 c4 08                   - add esp,08
+00910244 - c3                         - ret
+
+
+123 战神－战法爆击时伤害翻倍
+{
+ 005B0393 - d8 0d 0c 80 8a 00          - fmul dword ptr [008a800c]
+ 005B050E - d8 0d 0c 80 8a 00          - fmul dword ptr [008a800c]
+}
+005B0393 - e8 b0 fe 35 00             - call 00910248
+005B0398 - 90                         - nop
+005B050E - e8 35 fd 35 00             - call 00910248
+005B0513 - 90                         - nop
+
+00910248 - 8b 13                      - mov edx,[ebx]
+0091024A - 8b cb                      - mov ecx,ebx
+0091024C - 68 7b 00 00 00             - push 0000007b
+00910251 - ff 52 58                   - call dword ptr [edx+58]
+00910254 - 85 c0                      - test eax,eax
+00910256 - 74 08                      - je 00910260
+00910258 - d8 0d 68 02 91 00          - fmul dword ptr [00910268]
+0091025E - eb 06                      - jmp 00910266
+00910260 - d8 0d 0c 80 8a 00          - fmul dword ptr [008a800c]
+00910266 - c3                         - ret
+00910267 - 90                         - nop
+数据区
+00910268 - 00 00 00 40 [float 2.0]
+
+
+124 战将－敌方防御力低于本方攻击力时，战法成功必爆击
+126 游侠－己方士兵少于对方一半时，战法成功必爆击
+{
+ 005AE6B2 - 0f 8f a8 00 00 00          - jg 005ae760
+}
+005AE6B2 - e9 be 1b 36 00             - jmp 00910275
+005AE6B7 - 90                         - nop
+
+00910270 - e9 eb e4 c9 ff             - jmp 005ae760
+00910275 - 7f f9                      - jg 00910270
+00910277 - 85 ed                      - test ebp,ebp                   EBP=0表示被攻击对象不是部队
+00910279 - 74 40                      - je 009102bb
+0091027B - eb 00                      - jmp 0091027d                   战将开关，如果[jmp 0091029b]则代表不启用
+0091027D - 8b 16                      - mov edx,[esi]
+0091027F - 8b ce                      - mov ecx,esi
+00910281 - 68 7c 00 00 00             - push 0000007c
+00910286 - ff 52 58                   - call dword ptr [edx+58]
+00910289 - 85 c0                      - test eax,eax
+0091028B - 74 0e                      - je 0091029b
+0091028D - 8a 86 c9 00 00 00          - mov al,[esi+000000c9]          我方攻击
+00910293 - 3a 85 ca 00 00 00          - cmp al,[ebp+000000ca]          比较敌方防御
+00910299 - 77 d5                      - ja 00910270
+0091029B - eb 00                      - jmp 0091029d                   游侠开关，如果[jmp 009102bb]则代表不启用
+0091029D - 8b 16                      - mov edx,[esi]
+0091029F - 8b ce                      - mov ecx,esi
+009102A1 - 68 7e 00 00 00             - push 0000007e
+009102A6 - ff 52 58                   - call dword ptr [edx+58]
+009102A9 - 85 c0                      - test eax,eax
+009102AB - 74 0e                      - je 009102bb
+009102AD - 0f b7 46 18                - movzx eax,word ptr [esi+18]    我方兵力
+009102B1 - 0f b7 4d 18                - movzx ecx,word ptr [ebp+18]    敌方兵力
+009102B5 - d1 e0                      - shl eax,1                      我方兵力×2
+009102B7 - 39 c8                      - cmp eax,ecx
+009102B9 - 7c b5                      - jl 00910270
+009102BB - e9 f8 e3 c9 ff             - jmp 005ae6b8
+
+
+125 巧变－可无视地形限制施放战法
+{
+ 005A405F - 8b 54 24 18                - mov edx,[esp+18]
+ 005A4063 - 8b 42 04                   - mov eax,[edx+04]
+}
+005A405F - 8b ce                      - mov ecx,esi
+005A4061 - e9 5e c2 36 00             - jmp 009102c4
+
+009102C4 - 68 7d 00 00 00             - push 0000007d
+009102C9 - 8b 06                      - mov eax,[esi]
+009102CB - ff 50 58                   - call dword ptr [eax+58]
+009102CE - 85 c0                      - test eax,eax
+009102D0 - 0f 85 ce 3d c9 ff          - jne 005a40a4
+009102D6 - 8b 54 24 18                - mov edx,[esp+18]
+009102DA - 8b 42 04                   - mov eax,[edx+04]
+009102DD - e9 84 3d c9 ff             - jmp 005a4066
+
+
+127 百战－战法耗费气力20%
+显示战法耗气
+{
+ 004951A0 - 8b 44 24 04                - mov eax,[esp+04]
+ 004951A4 - 50                         - push eax
+ 004951A5 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+ 004951AA - e8 e1 ba ff ff             - call 00490c90
+ 004951AF - 0f b6 40 30                - movzx eax,byte ptr [eax+30]
+ 004951B3 - c2 04 00                   - ret 0004
+}
+004951A0 - 8b d1                      - mov edx,ecx
+004951A2 - 8b 44 24 04                - mov eax,[esp+04]
+004951A6 - 50                         - push eax
+004951A7 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004951AC - e8 df ba ff ff             - call 00490c90
+004951B1 - 0f b6 40 30                - movzx eax,byte ptr [eax+30]
+004951B5 - e9 5e b1 47 00             - jmp 00910318
+
+00910318 - 50                         - push eax
+00910319 - 8b ca                      - mov ecx,edx
+0091031B - 8b 01                      - mov eax,[ecx]
+0091031D - 68 7f 00 00 00             - push 0000007f
+00910322 - ff 50 58                   - call dword ptr [eax+58]
+00910325 - 85 c0                      - test eax,eax
+00910327 - 58                         - pop eax
+00910328 - 74 0b                      - je 00910335
+0091032A - 6b c0 14                   - imul eax,eax,14
+0091032D - b9 64 00 00 00             - mov ecx,00000064
+00910332 - 99                         - cdq
+00910333 - f7 f9                      - idiv ecx
+00910335 - c2 04 00                   - ret 0004
+
+要求之气力
+{
+ 005A3B2D - 8a 4d 30                   - mov cl,[ebp+30]
+ 005A3B30 - 8b 16                      - mov edx,[esi]
+}
+005A3B2D - e9 06 c8 36 00             - jmp 00910338
+
+00910338 - 50                         - push eax
+00910339 - 0f b6 45 30                - movzx eax,byte ptr [ebp+30]
+0091033D - 8b d6                      - mov edx,esi
+0091033F - e8 d4 ff ff ff             - call 00910318
+00910344 - 83 ec 04                   - sub esp,04
+00910347 - 88 c1                      - mov cl,al
+00910349 - 8b 16                      - mov edx,[esi]
+0091034B - 58                         - pop eax
+0091034C - e9 e1 37 c9 ff             - jmp 005a3b32
+
+实际耗费气力
+{
+ 005A31E8 - 8a 41 30                   - mov al,[ecx+30]
+ 005A31EB - c3                         - ret
+}
+005A31E8 - e9 64 d1 36 00             - jmp 00910351
+
+00910351 - 8b 54 24 04                - mov edx,[esp+04]
+00910355 - 0f b6 41 30                - movzx eax,byte ptr [ecx+30]
+00910359 - e8 ba ff ff ff             - call 00910318
+0091035E - 83 ec 04                   - sub esp,04
+00910361 - c3                         - ret
+
+
+128 狙击－狙伤率100％
+{
+ 00597546 - e8 85 ac ed ff             - call 004721d0
+}
+00597546 - e9 f9 8e 37 00             - jmp 00910444
+
+00910444 - 58                         - pop eax
+00910445 - 8b f0                      - mov esi,eax
+00910447 - 8b 9c 24 e8 03 00 00       - mov ebx,[esp+000003e8]         主将指针
+0091044E - b9 58 19 20 07             - mov ecx,07201958
+00910453 - 53                         - push ebx
+00910454 - e8 b7 0e b8 ff             - call 00491310                  获得主将ID
+00910459 - 8b d0                      - mov edx,eax
+0091045B - 31 db                      - xor ebx,ebx                    以下开始循环部队，查找主将与主将ID匹配的部队指针
+0091045D - 53                         - push ebx
+0091045E - e8 0d 0a b8 ff             - call 00490e70
+00910463 - 85 c0                      - test eax,eax
+00910465 - 74 09                      - je 00910470
+00910467 - 3b 50 0c                   - cmp edx,[eax+0c]
+0091046A - 75 04                      - jne 00910470
+0091046C - 8b c8                      - mov ecx,eax
+0091046E - eb 0b                      - jmp 0091047b
+00910470 - 43                         - inc ebx
+00910471 - 81 fb e8 03 00 00          - cmp ebx,000003e8
+00910477 - 7c e4                      - jnge 0091045d
+00910479 - 31 c9                      - xor ecx,ecx
+0091047B - 85 c9                      - test ecx,ecx
+0091047D - 74 11                      - je 00910490
+0091047F - 8b 11                      - mov edx,[ecx]
+00910481 - 68 80 00 00 00             - push 00000080
+00910486 - ff 52 58                   - call dword ptr [edx+58]
+00910489 - 85 c0                      - test eax,eax
+0091048B - 74 03                      - je 00910490
+0091048D - 83 c6 64                   - add esi,64                     成功率＋100
+00910490 - 8b c6                      - mov eax,esi
+00910492 - 50                         - push eax
+00910493 - e8 38 1d b6 ff             - call 004721d0
+00910498 - e9 ae 70 c8 ff             - jmp 0059754b
+
+
+129 神臂－弩兵攻击射程＋1
+普攻
+{
+ 005A38C4 - 85 c0                      - test eax,eax
+ 005A38C6 - 0f 95 c1                   - setnc cl
+}
+005A38C4 - e9 af ca 36 00             - jmp 00910378
+
+战法
+{
+ 005A3B70 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+ 005A3B74 - 6a 0a                      - push 0a
+}
+005A3B70 - e9 16 c8 36 00             - jmp 0091038b
+005A3B75 - 90                         - nop
+
+00910364 - 50                         - push eax
+00910365 - 8b 16                      - mov edx,[esi]
+00910367 - 8b ce                      - mov ecx,esi
+00910369 - 68 81 00 00 00             - push 00000081
+0091036E - ff 52 58                   - call dword ptr [edx+58]
+00910371 - 85 c0                      - test eax,eax
+00910373 - 58                         - pop eax
+00910374 - 74 01                      - je 00910377
+00910376 - 40                         - inc eax
+00910377 - c3                         - ret                            以上是公共函数
+00910378 - 85 c0                      - test eax,eax                   普攻入口
+0091037A - 0f 95 c1                   - setnc cl
+0091037D - 8b c1                      - mov eax,ecx
+0091037F - e8 e0 ff ff ff             - call 00910364
+00910384 - 8b c8                      - mov ecx,eax
+00910386 - e9 3e 35 c9 ff             - jmp 005a38c9
+0091038B - 8b 44 24 2c                - mov eax,[esp+2c]               战法入口
+0091038F - e8 d0 ff ff ff             - call 00910364
+00910394 - 89 44 24 2c                - mov [esp+2c],eax
+00910398 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+0091039C - 6a 0a                      - push 0a
+0091039E - e9 d3 37 c9 ff             - jmp 005a3b76
+
+
+130 治军－物理眩晕免疫
+防枪兵螺旋
+{
+00593D4F - 8b 87 00 06 00 00          - mov eax,[edi+00000600]
+}
+00593D4F - e9 4c c7 37 00             - jmp 009104a0
+00593D54 - 90                         - nop
+
+009104A0 - 8b ce                      - mov ecx,esi
+009104A2 - 8b 06                      - mov eax,[esi]
+009104A4 - 68 82 00 00 00             - push 00000082
+009104A9 - ff 50 58                   - call dword ptr [eax+58]
+009104AC - 85 c0                      - test eax,eax
+009104AE - 74 06                      - je 009104b6
+009104B0 - 31 c0                      - xor eax,eax
+009104B2 - 89 44 24 20                - mov [esp+20],eax
+009104B6 - 8b 87 00 06 00 00          - mov eax,[edi+00000600]
+009104BC - e9 94 38 c8 ff             - jmp 00593d55
+
+防犄角晕
+{
+ 00586BFE - 83 c4 04                   - add esp,04
+ 00586C01 - 85 c0                      - test eax,eax
+}
+00586BFE - e9 be 98 38 00             - jmp 009104c1
+
+009104C1 - 83 c4 04                   - add esp,04
+009104C4 - 85 c0                      - test eax,eax
+009104C6 - 0f 84 64 67 c7 ff          - je 00586c30
+009104CC - 8b cb                      - mov ecx,ebx
+009104CE - 8b 03                      - mov eax,[ebx]
+009104D0 - 68 82 00 00 00             - push 00000082
+009104D5 - ff 50 58                   - call dword ptr [eax+58]
+009104D8 - f7 d8                      - neg eax
+009104DA - 40                         - inc eax
+009104DB - 85 c0                      - test eax,eax
+009104DD - e9 21 67 c7 ff             - jmp 00586c03
+
+防疾驰晕
+{
+ 00593B91 - 83 c4 04                   - add esp,04
+ 00593B94 - 85 c0                      - test eax,eax
+}
+00593B91 - e9 4c c9 37 00             - jmp 009104e2
+
+009104E2 - 83 c4 04                   - add esp,04
+009104E5 - 85 c0                      - test eax,eax
+009104E7 - 0f 84 f9 36 c8 ff          - je 00593be6
+009104ED - 8b cb                      - mov ecx,ebx
+009104EF - 8b 03                      - mov eax,[ebx]
+009104F1 - 68 82 00 00 00             - push 00000082
+009104F6 - ff 50 58                   - call dword ptr [eax+58]
+009104F9 - f7 d8                      - neg eax
+009104FB - 40                         - inc eax
+009104FC - 85 c0                      - test eax,eax
+009104FE - e9 93 36 c8 ff             - jmp 00593b96
+
+防兵少/恫吓晕
+{
+  0059A127 - 0f 85 e3 00 00 00          - jne 0059a210
+}
+0059A127 - e9 dd 63 37 00             - jmp 00910509
+0059A12C - 90                         - nop
+
+00910504 - e9 07 9d c8 ff             - jmp 0059a210
+00910509 - 74 f9                      - je 00910504
+0091050B - 8b 16                      - mov edx,[esi]
+0091050D - 8b ce                      - mov ecx,esi
+0091050F - 68 82 00 00 00             - push 00000082
+00910514 - ff 52 58                   - call dword ptr [edx+58]
+00910517 - 85 c0                      - test eax,eax
+00910519 - 75 e9                      - jne 00910504                   中断自动眩晕判定
+0091051B - e9 0d 9c c8 ff             - jmp 0059a12d                   跳回继续自动眩晕判定（如果启用恫吓，则这里先跳转到恫吓判定）
+
+防枪兵二段突刺撞击晕，直接写在代码中
+008AA7CB
+
+
+131 坚城－守城时城防下降和士兵数下降减半
+保存指针
+{
+ 005B0516 - 74 66                      - je 005b057e
+ 005B0518 - 8b 76 08                   - mov esi,[esi+08]
+}
+005B0516 - e9 89 fe 35 00             - jmp 009103a4
+
+009103A4 - 89 35 dc 03 9a 00          - mov [009a03dc],esi             暂时保存据点指针
+009103AA - 0f 84 ce 01 ca ff          - je 005b057e
+009103B0 - 8b 76 08                   - mov esi,[esi+08]
+009103B3 - e9 63 01 ca ff             - jmp 005b051b
+
+耐久伤害减半
+{
+ 008AA555 - e8 1a d5 e5 ff             - call 00707a74                 从骑兵队设施伤害衰减处跳转
+}
+008AA555 - e9 5e 5e 06 00             - jmp 009103b8
+
+009103B8 - e8 b7 76 df ff             - call 00707a74
+009103BD - 8b 0d dc 03 9a 00          - mov ecx,[009a03dc]             取得据点指针
+009103C3 - 8b 11                      - mov edx,[ecx]
+009103C5 - 68 83 00 00 00             - push 00000083
+009103CA - 8b f0                      - mov esi,eax                    保存局部变量－伤害值
+009103CC - ff 52 58                   - call dword ptr [edx+58]
+009103CF - 85 c0                      - test eax,eax
+009103D1 - 8b c6                      - mov eax,esi                    恢复局部变量－伤害值
+009103D3 - 74 02                      - je 009103d7
+009103D5 - d1 f8                      - sar eax,1
+009103D7 - e9 a7 01 ca ff             - jmp 005b0583
+
+士兵伤害减半
+{
+ 005B0031 - 8b 44 24 48                - mov eax,[esp+48]
+ 005B0035 - 33 f6                      - xor esi,esi
+}
+005B0031 - e9 aa 03 36 00             - jmp 009103e0
+005B0036 - 90                         - nop
+
+009103E0 - 8b 4c 24 10                - mov ecx,[esp+10]
+009103E4 - 85 c9                      - test ecx,ecx                   设施指针
+009103E6 - 74 1c                      - je 00910404
+009103E8 - 8b 11                      - mov edx,[ecx]
+009103EA - 68 83 00 00 00             - push 00000083
+009103EF - ff 52 58                   - call dword ptr [edx+58]
+009103F2 - 85 c0                      - test eax,eax
+009103F4 - 74 0e                      - je 00910404
+009103F6 - d9 44 24 38                - fld dword ptr [esp+38]
+009103FA - d8 0d 10 04 91 00          - fmul dword ptr [00910410]      倍率0.5
+00910400 - d9 5c 24 38                - fstp dword ptr [esp+38]
+00910404 - 8b 44 24 48                - mov eax,[esp+48]
+00910408 - 31 f6                      - xor esi,esi
+0091040A - e9 28 fc c9 ff             - jmp 005b0037
+
+数据区
+00910410 - 00 00 00 3F [float 0.5]
+
+
+132 料敌－敌方计策成功率50％
+必中特技也要被料敌消减
+{
+ 005AEC3D - 5f                         - pop edi
+ 005AEC3E - 5e                         - pop esi
+ 005AEC3F - 5d                         - pop ebp
+ 005AEC40 - 5b                         - pop ebx
+ 005AEC41 - 83 c4 0c                   - add esp,0c
+}
+005AEC3D - e9 67 08 00 00             - jmp 005af4a9
+005AEC42 - 90 90
+
+料敌判定
+{
+ 005AF4AD - 83 7c 24 10 64             - cmp dword ptr [esp+10],64
+}
+005AF4AD - e9 62 0f 36 00             - jmp 00910414
+
+·对镇定和灭火无料敌效果
+00910414 - 83 7c 24 2c 01             - cmp dword ptr [esp+2c],01
+00910419 - 74 0c                      - je 00910427
+0091041B - 83 7c 24 2c 04             - cmp dword ptr [esp+2c],04
+00910420 - 74 05                      - je 00910427
+00910422 - e9 bd fe ff ff             - jmp 009102e4                   跳转到料敌削减成功率判定
+00910427 - 8b 44 24 10                - mov eax,[esp+10]
+0091042B - 83 f8 64                   - cmp eax,64
+0091042E - 7c 05                      - jnge 00910435
+00910430 - b8 64 00 00 00             - mov eax,00000064
+00910435 - e9 82 f0 c9 ff             - jmp 005af4bc
+
+·料敌削减成功率
+009102E4 - 53                         - push ebx
+009102E5 - e8 46 a3 b6 ff             - call 0047a630
+009102EA - 83 c4 04                   - add esp,04
+009102ED - 85 c0                      - test eax,eax                   判断用计对象是否是部队
+009102EF - 74 0c                      - je 009102fd
+009102F1 - 8b 13                      - mov edx,[ebx]
+009102F3 - 8b cb                      - mov ecx,ebx
+009102F5 - 68 84 00 00 00             - push 00000084
+009102FA - ff 52 58                   - call dword ptr [edx+58]
+009102FD - 85 c0                      - test eax,eax
+009102FF - 8b 44 24 10                - mov eax,[esp+10]
+00910303 - 74 02                      - je 00910307
+00910305 - d1 e8                      - shr eax,1
+00910307 - 83 f8 64                   - cmp eax,64
+0091030A - 7c 05                      - jnge 00910311
+0091030C - b8 64 00 00 00             - mov eax,00000064
+00910311 - e9 a6 f1 c9 ff             - jmp 005af4bc
+
+
+133 陷阵－能对敌方施展的战法予以强势的反击
+{
+ 005B004C - d8 0d fc 81 8a 00          - fmul dword ptr [008a81fc]
+}
+005B004C - e8 0f 06 36 00             - call 00910660
+005B0051 - 90                         - nop
+
+00910660 - 8b 13                      - mov edx,[ebx]
+00910662 - 8b cb                      - mov ecx,ebx
+00910664 - 68 85 00 00 00             - push 00000085
+00910669 - ff 52 58                   - call dword ptr [edx+58]
+0091066C - 85 c0                      - test eax,eax
+0091066E - 75 06                      - jne 00910676
+00910670 - d8 0d fc 81 8a 00          - fmul dword ptr [008a81fc] : [3ECCCCCD]
+00910676 - c3                         - ret
+
+
+134 恫吓－周围一格的武力低于己方的部队有50%几率陷入眩晕
+从治军防自动眩晕跳转到此处
+{
+ 009104BC - e9 94 38 c8 ff             - jmp 00593d55
+}
+0091051B - eb 03                      - jmp 00910520
+
+00910520 - 53                    - push ebx
+00910521 - 55                    - push ebp
+00910522 - 57                    - push edi
+00910523 - 31 DB                 - xor ebx,ebx
+00910525 - 53                    - push ebx			       循环所有部队
+00910526 - B9 58 19 20 07        - mov ecx,07201958
+0091052B - E8 40 09 B8 FF        - call 00490E70                       获得部队地址置入EDI
+00910530 - 8B F8                 - mov edi,eax
+00910532 - 57                    - push edi
+00910533 - E8 F8 A0 B6 FF        - call 0047A630                       校验部队指针
+00910538 - 83 C4 04              - add esp,04
+0091053B - 85 C0                 - test eax,eax
+0091053D - 74 6F                 - je 009105AE
+0091053F - 6A 01                 - push 01                             01：距离一格
+00910541 - E8 8A 00 00 00        - call 009105D0                       判断EDI所指向的部队是否在ESI指向部队的一定范围之内
+00910546 - 85 FF                 - test edi,edi                        如果不在范围内则不进入恫吓判定
+00910548 - 74 64                 - je 009105AE
+0091054A - 8B CE                 - mov ecx,esi
+0091054C - 8B 16                 - mov edx,[esi]
+0091054E - FF 52 40              - call dword ptr [edx+40]             获得ESI部队所属势力ID
+00910551 - 8B E8                 - mov ebp,eax
+00910553 - 8B CF                 - mov ecx,edi
+00910555 - 8B 07                 - mov eax,[edi]
+00910557 - FF 50 40              - call dword ptr [eax+40]             获得EDI部队所属势力ID
+0091055A - 39 E8                 - cmp eax,ebp                         如果是同一势力则不进入恫吓判定
+0091055C - 74 50                 - je 009105AE
+0091055E - 50                    - push eax
+0091055F - B9 58 19 20 07        - mov ecx,07201958
+00910564 - E8 37 05 B8 FF        - call 00490AA0                       获得势力指针
+00910569 - 8B 4C 05 64           - mov ecx,[ebp+eax+64]
+0091056D - 85 C9                 - test ecx,ecx                        判断两势力是否停战，停战则不进入恫吓判定
+0091056F - 75 3D                 - jne 009105AE
+00910571 - 55                    - push ebp
+00910572 - 83 C0 50              - add eax,50
+00910575 - 50                    - push eax
+00910576 - E8 15 20 B6 FF        - call 00472590                       判断两势力是否同盟，同盟则不进入恫吓判定
+0091057B - 83 C4 08              - add esp,08
+0091057E - 85 C0                 - test eax,eax
+00910580 - 75 2C                 - jne 009105AE
+00910582 - 8B CF                 - mov ecx,edi
+00910584 - 6A 01                 - push 01                             取特技持有队武力
+00910586 - 68 86 00 00 00        - push 00000086                       0x86 ＝ 恫吓
+0091058B - E8 F0 50 B8 FF        - call 00495680                       队中是否持有“恫吓”特技，有则返回其武力
+00910590 - 0F B6 8E C5 00 00 00  - movzx ecx,byte ptr [esi+000000C5]   取ESI部队武力
+00910597 - 29 C8                 - sub eax,ecx                         获取双方武力差，若有“恫吓”特技的武力低则不进入眩晕
+00910599 - 7C 13                 - jl 009105AE
+0091059B - 83 7F 24 00           - cmp dword ptr [edi+24],00           有“恫吓”特技的部队本身处于异常状态则不进入眩晕
+0091059F - 75 0D                 - jne 009105AE
+009105A1 - 50                    - push eax                            武力差作为概率
+009105A2 - E8 29 1C B6 FF        - call 004721D0                       随机函数
+009105A7 - 83 C4 04              - add esp,04
+009105AA - 85 C0                 - test eax,eax
+009105AC - 75 15                 - jne 009105C3
+009105AE - 43                    - inc ebx                             EBX自加1
+009105AF - 81 FB E8 03 00 00     - cmp ebx,000003E8                    部队上限1000支
+009105B5 - 0F 8C 6A FF FF FF     - jl 00910525
+009105BB - 5F                    - pop edi
+009105BC - 5D                    - pop ebp
+009105BD - 5B                    - pop ebx
+009105BE - E9 6A 9B C8 FF        - jmp 0059A12D                        继续兵少自动眩晕的判定
+009105C3 - 5F                    - pop edi
+009105C4 - 5D                    - pop ebp
+009105C5 - 5B                    - pop ebx
+009105C6 - E9 28 9C C8 FF        - jmp 0059A1F3                        直接眩晕
+
+该函数计算两部队是否相距在一定格数之内(ESI:中心部队；EDI:周边部队；PUSH 相距格数)
+009105D0 - 83 ec 0c                   - sub esp,0c                     
+009105D3 - 53                         - push ebx
+009105D4 - 0f b7 4e 3c                - movzx ecx,word ptr [esi+3c]
+009105D8 - 0f b7 47 3c                - movzx eax,word ptr [edi+3c]
+009105DC - 2b 4c 24 14                - sub ecx,[esp+14]
+009105E0 - 39 c8                      - cmp eax,ecx
+009105E2 - 7c 71                      - jnge 00910655
+009105E4 - 0f b7 4e 3c                - movzx ecx,word ptr [esi+3c]
+009105E8 - 03 4c 24 14                - add ecx,[esp+14]
+009105EC - 39 c8                      - cmp eax,ecx
+009105EE - 7f 65                      - jg 00910655
+009105F0 - 0f b7 4e 3c                - movzx ecx,word ptr [esi+3c]
+009105F4 - 29 c8                      - sub eax,ecx
+009105F6 - 83 f8 00                   - cmp eax,00
+009105F9 - 7d 02                      - jnl 009105fd
+009105FB - f7 d8                      - neg eax
+009105FD - 8b c8                      - mov ecx,eax
+009105FF - d1 e8                      - shr eax,1
+00910601 - 89 44 24 08                - mov [esp+08],eax
+00910605 - 83 e1 01                   - and ecx,01
+00910608 - 89 4c 24 0c                - mov [esp+0c],ecx
+0091060C - 0f b7 4e 3e                - movzx ecx,word ptr [esi+3e]
+00910610 - 2b 4c 24 14                - sub ecx,[esp+14]
+00910614 - 01 c1                      - add ecx,eax
+00910616 - 8b 44 24 0c                - mov eax,[esp+0c]
+0091061A - 0f b7 5e 3c                - movzx ebx,word ptr [esi+3c]
+0091061E - 83 e3 01                   - and ebx,01
+00910621 - 0f af c3                   - imul eax,ebx
+00910624 - 01 c1                      - add ecx,eax
+00910626 - 0f b7 47 3e                - movzx eax,word ptr [edi+3e]
+0091062A - 39 c8                      - cmp eax,ecx
+0091062C - 7c 27                      - jnge 00910655
+0091062E - 0f b7 4e 3e                - movzx ecx,word ptr [esi+3e]
+00910632 - 03 4c 24 14                - add ecx,[esp+14]
+00910636 - 2b 4c 24 08                - sub ecx,[esp+08]
+0091063A - 8b 44 24 0c                - mov eax,[esp+0c]
+0091063E - 0f b7 5e 3c                - movzx ebx,word ptr [esi+3c]
+00910642 - 43                         - inc ebx
+00910643 - 83 e3 01                   - and ebx,01
+00910646 - 0f af c3                   - imul eax,ebx
+00910649 - 29 c1                      - sub ecx,eax
+0091064B - 0f b7 47 3e                - movzx eax,word ptr [edi+3e]
+0091064F - 39 c8                      - cmp eax,ecx
+00910651 - 7f 02                      - jg 00910655
+00910653 - eb 02                      - jmp 00910657
+00910655 - 31 ff                      - xor edi,edi
+00910657 - 5b                         - pop ebx
+00910658 - 83 c4 0c                   - add esp,0c
+0091065B - c2 04 00                   - ret 0004
+以上函数对应C++代码：
+bool isInRadial(int X1, int Y1, int X0, int Y0, int R)
+{
+  if(X1 < (X0 - R))
+  {
+    return false;
+  }
+  if(X1 > (X0 + R))
+  {
+    return false;
+  }
+  int X = abs(X1 - X0);
+  int XPlus = X % 2;
+  if(Y1 < (Y0 - R + X/2 + XPlus * (X0 % 2)))
+  {
+    return false;
+  }
+  if(Y1 > (Y0 + R - X/2 - XPlus * ((X0 + 1) % 2)))
+  {
+    return false;
+  }
+  return true;
+}
+
+
+135 破竹－击破一支敌军后，该敌军周围2格范围内所有敌军气力-50
+{
+ 004BEBE4 - b8 01 00 00 00             - mov eax,00000001
+}
+004BEBE4 - e9 07 1d 45 00             - jmp 009108f0
+
+009108F0 - 51                         - push ecx
+009108F1 - 52                         - push edx
+009108F2 - 55                         - push ebp
+009108F3 - 8b cf                      - mov ecx,edi
+009108F5 - 8b 07                      - mov eax,[edi]
+009108F7 - 68 87 00 00 00             - push 00000087
+009108FC - ff 50 58                   - call dword ptr [eax+58]
+009108FF - 85 c0                      - test eax,eax
+00910901 - 74 61                      - je 00910964
+00910903 - 53                         - push ebx
+00910904 - 57                         - push edi
+00910905 - 31 db                      - xor ebx,ebx
+00910907 - 53                         - push ebx
+00910908 - b9 58 19 20 07             - mov ecx,07201958
+0091090D - e8 5e 05 b8 ff             - call 00490e70                  获得部队指针
+00910912 - 8b f8                      - mov edi,eax
+00910914 - 57                         - push edi
+00910915 - e8 16 9d b6 ff             - call 0047a630
+0091091A - 83 c4 04                   - add esp,04
+0091091D - 85 c0                      - test eax,eax
+0091091F - 74 38                      - je 00910959
+00910921 - 6a 02                      - push 02                        过滤2格内的部队
+00910923 - e8 a8 fc ff ff             - call 009105d0
+00910928 - 85 ff                      - test edi,edi
+0091092A - 74 2d                      - je 00910959
+0091092C - 8b ce                      - mov ecx,esi
+0091092E - 8b 16                      - mov edx,[esi]
+00910930 - ff 52 40                   - call dword ptr [edx+40]
+00910933 - 8b e8                      - mov ebp,eax
+00910935 - 8b cf                      - mov ecx,edi
+00910937 - 8b 17                      - mov edx,[edi]
+00910939 - ff 52 40                   - call dword ptr [edx+40]
+0091093C - 39 e8                      - cmp eax,ebp                    判断势力与击破队是否相同
+0091093E - 75 19                      - jne 00910959
+00910940 - 6a ce                      - push ce                        减气50
+00910942 - 8b cf                      - mov ecx,edi
+00910944 - e8 a7 5b b8 ff             - call 004964f0
+00910949 - 6a ff                      - push ff                        减气演示
+0091094B - 57                         - push edi
+0091094C - 6a 02                      - push 02
+0091094E - 50                         - push eax
+0091094F - b9 d8 59 6a 09             - mov ecx,096a59d8
+00910954 - e8 b7 88 c7 ff             - call 00589210
+00910959 - 43                         - inc ebx
+0091095A - 81 fb e8 03 00 00          - cmp ebx,000003e8
+00910960 - 7c a5                      - jnge 00910907
+00910962 - 5f                         - pop edi
+00910963 - 5b                         - pop ebx
+00910964 - 5d                         - pop ebp
+00910965 - 5a                         - pop edx
+00910966 - 59                         - pop ecx
+00910967 - b8 01 00 00 00             - mov eax,00000001
+0091096C - e9 78 e2 ba ff             - jmp 004bebe9
+
+
+136 安民－攻破城池后保留全部内政设施
+{
+ 004B3511 - e8 9a 5b fd ff             - call 004890b0
+}
+004B3511 - e9 62 d1 45 00             - jmp 00910678
+
+00910678 - b9 58 19 20 07             - mov ecx,07201958
+0091067D - 55                         - push ebp
+0091067E - e8 8d 0c b8 ff             - call 00491310
+00910683 - 8b d0                      - mov edx,eax
+00910685 - 31 f6                      - xor esi,esi
+00910687 - 56                         - push esi
+00910688 - e8 e3 07 b8 ff             - call 00490e70
+0091068D - 85 c0                      - test eax,eax
+0091068F - 74 09                      - je 0091069a
+00910691 - 3b 50 0c                   - cmp edx,[eax+0c]
+00910694 - 75 04                      - jne 0091069a
+00910696 - 8b c8                      - mov ecx,eax
+00910698 - eb 0b                      - jmp 009106a5
+0091069A - 46                         - inc esi
+0091069B - 81 fe e8 03 00 00          - cmp esi,000003e8
+009106A1 - 7c e4                      - jnge 00910687
+009106A3 - 31 c9                      - xor ecx,ecx
+009106A5 - 85 c9                      - test ecx,ecx
+009106A7 - 74 13                      - je 009106bc
+009106A9 - 8b 11                      - mov edx,[ecx]
+009106AB - 68 88 00 00 00             - push 00000088
+009106B0 - ff 52 58                   - call dword ptr [edx+58]
+009106B3 - 85 c0                      - test eax,eax
+009106B5 - 74 05                      - je 009106bc
+009106B7 - e9 cb 2e ba ff             - jmp 004b3587
+009106BC - 8b cd                      - mov ecx,ebp
+009106BE - e8 ed 89 b7 ff             - call 004890b0
+009106C3 - e9 4e 2e ba ff             - jmp 004b3516
+
+
+137 循吏－建设内政设施速度加倍
+{
+ 005BB249 - 0f b7 81 c2 00 00 00       - movzx eax,word ptr [ecx+000000c2]
+}
+005BB249 - e9 06 56 35 00             - jmp 00910854
+005BB24E - 90 90                      - nop nop
+
+00910854 - 51                         - push ecx
+00910855 - 57                         - push edi
+00910856 - 31 ff                      - xor edi,edi
+00910858 - 8b 44 24 20                - mov eax,[esp+20]
+0091085C - 8b 0c b8                   - mov ecx,[eax+edi*4]
+0091085F - 85 c9                      - test ecx,ecx
+00910861 - 74 0e                      - je 00910871
+00910863 - 68 89 00 00 00             - push 00000089
+00910868 - e8 84 88 b7 ff             - call 004890f0
+0091086D - 85 c0                      - test eax,eax
+0091086F - 75 08                      - jne 00910879
+00910871 - 47                         - inc edi
+00910872 - 83 ff 03                   - cmp edi,03
+00910875 - 7c e1                      - jnge 00910858
+00910877 - eb 02                      - jmp 0091087b
+00910879 - d1 e3                      - shl ebx,1
+0091087B - 5f                         - pop edi
+0091087C - 59                         - pop ecx
+0091087D - 0f b7 81 c2 00 00 00       - movzx eax,word ptr [ecx+000000c2]
+00910884 - e9 c7 a9 ca ff             - jmp 005bb250
+
+
+138 贤哲－势力每月增加50点技巧值
+在汉帝和铜雀台之间插入一段代码
+{
+ 00590D0B - 33 db                      - xor ebx,ebx
+ 00590D0D - 8d 49 00                   - lea ecx,[ecx+00]
+}
+00590D0B - e9 28 fa 37 00             - jmp 00910738
+
+00910738 - 31 db                      - xor ebx,ebx
+0091073A - 53                         - push ebx
+0091073B - b9 58 19 20 07             - mov ecx,07201958
+00910740 - e8 bb 03 b8 ff             - call 00490b00
+00910745 - 8b f0                      - mov esi,eax
+00910747 - 56                         - push esi
+00910748 - e8 e3 9e b6 ff             - call 0047a630
+0091074D - 83 c4 04                   - add esp,04
+00910750 - 85 c0                      - test eax,eax
+00910752 - 74 4a                      - je 0091079e
+00910754 - 68 8a 00 00 00             - push 0000008a
+00910759 - 8b ce                      - mov ecx,esi
+0091075B - e8 90 89 b7 ff             - call 004890f0
+00910760 - 85 c0                      - test eax,eax
+00910762 - 74 3a                      - je 0091079e
+00910764 - 8b 8e a0 00 00 00          - mov ecx,[esi+000000a0]         ecx = 持有贤哲特技的武将身份
+0091076A - 83 f9 03                   - cmp ecx,03
+0091076D - 7f 2f                      - jg 0091079e                    武将身份必须是君主、都督、太守或者一般
+0091076F - 8b ce                      - mov ecx,esi
+00910771 - 8b 06                      - mov eax,[esi]
+00910773 - ff 50 40                   - call dword ptr [eax+40]        取得持有贤哲特技的武将的所在势力ID
+00910776 - 50                         - push eax
+00910777 - b9 58 19 20 07             - mov ecx,07201958
+0091077C - e8 1f 03 b8 ff             - call 00490aa0                  根据势力ID获得势力指针
+00910781 - 8b f0                      - mov esi,eax
+00910783 - 56                         - push esi
+00910784 - e8 a7 9e b6 ff             - call 0047a630
+00910789 - 83 c4 04                   - add esp,04
+0091078C - 85 c0                      - test eax,eax
+0091078E - 74 0e                      - je 0091079e
+00910790 - 56                         - push esi
+00910791 - 6a 28                      - push 28
+00910793 - 56                         - push esi
+00910794 - b9 5c 89 99 07             - mov ecx,0799895c
+00910799 - e8 e2 5d ba ff             - call 004b6580                  指定势力增加技巧点
+0091079E - 43                         - inc ebx
+0091079F - 81 fb 4b 04 00 00          - cmp ebx,0000044b
+009107A5 - 7c 93                      - jnge 0091073a
+009107A7 - 31 db                      - xor ebx,ebx
+009107A9 - e9 62 05 c8 ff             - jmp 00590d10
+
+
+139 变法－所在城行动力恢复+20，谷仓和造币厂作用上升为2倍
+造币效果
+{
+ 0049E667 - 74 28                      - je 0049e691
+ 0049E669 - 8d 04 5b                   - lea eax,[ebx+ebx*2]
+}
+0049E667 - e9 7b 20 47 00             - jmp 009106e7
+
+谷仓效果
+{
+ 0049E8F8 - 74 28                      - je 0049e922
+ 0049E8FA - 8d 04 5b                   - lea eax,[ebx+ebx*2]
+}
+0049E8F8 - e9 fe 1d 47 00             - jmp 009106fb
+
+009106CC - e8 ef bd b6 ff             - call 0047c4c0                      根据城市指针获得设施指针
+009106D1 - 8b c8                      - mov ecx,eax
+009106D3 - 8b 01                      - mov eax,[ecx]
+009106D5 - 68 8b 00 00 00             - push 0000008b
+009106DA - ff 50 58                   - call dword ptr [eax+58]
+009106DD - 85 c0                      - test eax,eax
+009106DF - 8d 04 5b                   - lea eax,[ebx+ebx*2]
+009106E2 - 74 02                      - je 009106e6
+009106E4 - 01 d8                      - add eax,ebx
+009106E6 - c3                         - ret
+
+009106E7 - 0f 84 a4 df b8 ff          - je 0049e691
+009106ED - 8b 4c 24 20                - mov ecx,[esp+20]
+009106F1 - e8 d6 ff ff ff             - call 009106cc
+009106F6 - e9 71 df b8 ff             - jmp 0049e66c
+
+009106FB - 0f 84 21 e2 b8 ff          - je 0049e922
+00910701 - 8b 4c 24 24                - mov ecx,[esp+24]
+00910705 - e8 c2 ff ff ff             - call 009106cc
+0091070A - e9 ee e1 b8 ff             - jmp 0049e8fd
+
+行动力恢复+20
+{
+ 0059881B - bb 1e 00 00 00             - mov ebx,0000001e
+}
+0059881B - e9 f0 7e 37 00             - jmp 00910710
+
+00910710 - 8b ce                      - mov ecx,esi
+00910712 - e8 a9 bd b6 ff             - call 0047c4c0
+00910717 - 8b c8                      - mov ecx,eax
+00910719 - 8b 01                      - mov eax,[ecx]
+0091071B - 68 8b 00 00 00             - push 0000008b
+00910720 - ff 50 58                   - call dword ptr [eax+58]
+00910723 - 85 c0                      - test eax,eax
+00910725 - 74 05                      - je 0091072c
+00910727 - 83 44 24 14 14             - add dword ptr [esp+14],14
+0091072C - bb 1e 00 00 00             - mov ebx,0000001e
+00910731 - e9 ea 80 c8 ff             - jmp 00598820
+
+
+140 法治－征兵、灾害、换季不掉治安
+征兵
+{
+ 005C3C1D - b9 5c 89 99 07             - mov ecx,0799895c
+}
+005C3C1D - e9 a8 cb 34 00             - jmp 009107ca
+
+换季
+{
+ 0058D7E4 - 03 c1                      - add eax,ecx
+ 0058D7E6 - 83 c4 04                   - add esp,04
+}
+0058D7E4 - e9 f2 2f 38 00             - jmp 009107db
+
+疫病开始
+{
+ 0058DAC3 - 83 c4 0c                   - add esp,0c
+ 0058DAC6 - 6a f6                      - push f6
+}
+0058DAC3 - e9 24 2d 38 00             - jmp 009107ec
+
+疫病持续
+{
+ 0059AA49 - 29 c1                      - sub ecx,eax
+ 0059AA4B - 83 c4 04                   - add esp,04
+}
+0059AA49 - e9 c8 5d 37 00             - jmp 00910816
+
+蝗灾开始
+{
+ 0058DE23 - 83 c4 0c                   - add esp,0c
+ 0058DE26 - 6a f6                      - push f6
+}
+0058DE23 - e9 d9 29 38 00             - jmp 00910801
+
+蝗灾持续
+{
+ 0059AB33 - 2b d1                      - sub edx,ecx
+ 0059AB35 - 83 c4 04                   - add esp,04
+}
+0059AB33 - e9 fc 5c 37 00             - jmp 00910834
+
+009107B0 - 50                         - push eax                       公共函数
+009107B1 - e8 0a bd b6 ff             - call 0047c4c0
+009107B6 - 8b c8                      - mov ecx,eax
+009107B8 - 8b 01                      - mov eax,[ecx]
+009107BA - 68 8c 00 00 00             - push 0000008c
+009107BF - ff 50 58                   - call dword ptr [eax+58]
+009107C2 - 85 c0                      - test eax,eax
+009107C4 - 58                         - pop eax
+009107C5 - 74 02                      - je 009107c9
+009107C7 - 31 c0                      - xor eax,eax
+009107C9 - c3                         - ret
+009107CA - 8b cb                      - mov ecx,ebx                    征兵跳到此处
+009107CC - e8 df ff ff ff             - call 009107b0
+009107D1 - b9 5c 89 99 07             - mov ecx,0799895c
+009107D6 - e9 47 34 cb ff             - jmp 005c3c22
+009107DB - 01 c8                      - add eax,ecx                    换季跳到此处
+009107DD - 8b ce                      - mov ecx,esi
+009107DF - e8 cc ff ff ff             - call 009107b0
+009107E4 - 83 c4 04                   - add esp,04
+009107E7 - e9 fd cf c7 ff             - jmp 0058d7e9
+009107EC - 83 c4 0c                   - add esp,0c                     瘟疫开始跳到此处
+009107EF - b8 f6 ff ff ff             - mov eax,fffffff6
+009107F4 - 8b ce                      - mov ecx,esi
+009107F6 - e8 b5 ff ff ff             - call 009107b0
+009107FB - 50                         - push eax
+009107FC - e9 c7 d2 c7 ff             - jmp 0058dac8
+00910801 - 83 c4 0c                   - add esp,0c                     蝗虫开始跳到此处
+00910804 - b8 f6 ff ff ff             - mov eax,fffffff6
+00910809 - 8b ce                      - mov ecx,esi
+0091080B - e8 a0 ff ff ff             - call 009107b0
+00910810 - 50                         - push eax
+00910811 - e9 12 d6 c7 ff             - jmp 0058de28
+00910816 - 29 c1                      - sub ecx,eax                    瘟疫持续跳到此处
+00910818 - 83 c4 04                   - add esp,04
+0091081B - 8b c1                      - mov eax,ecx
+0091081D - 50                         - push eax
+0091081E - 8b ce                      - mov ecx,esi
+00910820 - e8 cb 5e b7 ff             - call 004866f0
+00910825 - 8b c8                      - mov ecx,eax
+00910827 - 58                         - pop eax
+00910828 - e8 83 ff ff ff             - call 009107b0
+0091082D - 8b c8                      - mov ecx,eax
+0091082F - e9 1a a2 c8 ff             - jmp 0059aa4e
+00910834 - 29 ca                      - sub edx,ecx                    蝗虫持续跳到此处
+00910836 - 83 c4 04                   - add esp,04
+00910839 - 8b c2                      - mov eax,edx
+0091083B - 50                         - push eax
+0091083C - 8b ce                      - mov ecx,esi
+0091083E - e8 ad 5e b7 ff             - call 004866f0
+00910843 - 8b c8                      - mov ecx,eax
+00910845 - 58                         - pop eax
+00910846 - e8 65 ff ff ff             - call 009107b0
+0091084B - 8b d0                      - mov edx,eax
+0091084D - e9 e6 a2 c8 ff             - jmp 0059ab38
+
+
+141 后勤－所属城军队耗费军粮减半，另一半从城内减
+{
+ 0059C075 - e8 6612f0ff           - call 0049d2e0
+}
+0059C075 - E9 AE503700           - jmp 00911128
+
+[主过程]
+00911128 - 83 7E 08 01           - cmp dword ptr [esi+08],01           esi = 部队指针，判断是否是运输队
+0091112C - 75 0A                 - jne 00911138
+0091112E - E8 ADC1B8FF           - call 0049D2E0                       计算部队应耗粮
+00911133 - E9 54F7FFFF           - jmp 0091088C                        跳转到老后勤的效果      
+//获得据点
+00911138 - 8B CE                 - mov ecx,esi
+0091113A - E8 0149B8FF           - call 00495A40                       获得部队主将
+0091113F - 8B 80 98000000        - mov eax,[eax+00000098]              主将所属据点
+00911145 - 50                    - push eax
+00911146 - B9 58192007           - mov ecx,07201958
+0091114B - E8 B0FBB7FF           - call 00490D00                       获得据点指针
+00911150 - 85 C0                 - test eax,eax
+00911152 - 74 1D                 - je 00911171                         若指针为空则返回
+//后勤和城寨附近判定
+00911154 - 57                    - push edi
+00911155 - 8B F8                 - mov edi,eax                         edi = 据点ID
+00911157 - 8B CF                 - mov ecx,edi
+00911159 - 8B 07                 - mov eax,[edi]
+0091115B - 68 8D000000           - push 0000008D                       后勤判定
+00911160 - FF 50 58              - call dword ptr [eax+58]
+00911163 - 85 C0                 - test eax,eax
+00911165 - 74 09                 - je 00911170
+00911167 - E8 94010000           - call 00911300                       判定部队是否在本方设施覆盖范围内
+0091116C - 85 C0                 - test eax,eax
+0091116E - 75 09                 - jne 00911179
+00911170 - 5F                    - pop edi
+00911171 - B9 CCB38007           - mov ecx,0780B3CC
+00911176 - EB B6                 - jmp 0091112E                        没有后勤或不在设施覆盖范围内直接返回
+//计算补给兵力
+00911178 - 53                    - push ebx
+00911179 - E8 A2010000           - call 00911320                       获得部队需要补充的兵力
+0091117E - 8B D8                 - mov ebx,eax
+00911180 - E8 BB010000           - call 00911340                       获得城市能够补充的最大兵力
+00911185 - 39 D8                 - cmp eax,ebx
+00911187 - 7F 02                 - jg 0091118B
+00911189 - 8B D8                 - mov ebx,eax                         ebx = 补充兵力
+//减少据点兵力和兵装
+0091118B - 8B C3                 - mov eax,ebx
+0091118D - F7 D8                 - neg eax
+0091118F - 50                    - push eax
+00911190 - 57                    - push edi
+00911191 - B9 5C899907           - mov ecx,0799895C
+00911196 - E8 25D2B9FF           - call 004AE3C0                       据点减兵
+0091119B - 8B 4E 48              - mov ecx,[esi+48]
+0091119E - 83 F9 04              - cmp ecx,04
+009111A1 - 7F 16                 - jg 009111B9
+009111A3 - 83 F9 01              - cmp ecx,01
+009111A6 - 7C 11                 - jl 009111B9
+009111A8 - 8B C3                 - mov eax,ebx
+009111AA - F7 D8                 - neg eax
+009111AC - 50                    - push eax
+009111AD - 51                    - push ecx
+009111AE - 57                    - push edi
+009111AF - B9 5C899907           - mov ecx,0799895C
+009111B4 - E8 77D2B9FF           - call 004AE430                       据点减兵装
+//增加部队兵力
+009111B9 - 53                    - push ebx
+009111BA - 56                    - push esi
+009111BB - B9 5C899907           - mov ecx,0799895C
+009111C0 - E8 DBD2B9FF           - call 004AE4A0                       部队加兵
+009111C5 - 68 FF000000           - push 000000FF
+009111CA - 56                    - push esi
+009111CB - 6A 01                 - push 01 { 1 }
+009111CD - 53                    - push ebx
+009111CE - B9 D8596A09           - mov ecx,096A59D8
+009111D3 - E8 3880C7FF           - call 00589210                       加兵演示
+//计算部队气力
+009111D8 - 8B 17                 - mov edx,[edi]
+009111DA - 8B CF                 - mov ecx,edi
+009111DC - FF 52 54              - call dword ptr [edx+54]
+009111DF - 50                    - push eax
+009111E0 - 53                    - push ebx
+009111E1 - 8B 16                 - mov edx,[esi]
+009111E3 - 8B CE                 - mov ecx,esi
+009111E5 - FF 52 54              - call dword ptr [edx+54]
+009111E8 - 50                    - push eax
+009111E9 - 66 8B 46 18           - mov ax,[esi+18]
+009111ED - 0FB7 C0               - movzx eax,ax
+009111F0 - 50                    - push eax
+009111F1 - 57                    - push edi
+009111F2 - B9 5C899907           - mov ecx,0799895C
+009111F7 - E8 4486BAFF           - call 004B9840                       计算加兵后的部队气力
+009111FC - 50                    - push eax                            eax = 部队新的气力
+009111FD - 2A 46 1A              - sub al,[esi+1A]                     计算部队气力增减值
+00911200 - 0FBE C0               - movsx eax,al
+00911203 - 68 FF000000           - push 000000FF
+00911208 - 56                    - push esi
+00911209 - 6A 02                 - push 02
+0091120B - 50                    - push eax
+0091120C - B9 D8596A09           - mov ecx,096A59D8
+00911211 - E8 FA7FC7FF           - call 00589210                       加减气力演示
+00911216 - 8B CE                 - mov ecx,esi
+00911218 - E8 7352B8FF           - call 00496490                       设置部队气力
+//返回
+0091121D - 5B                    - pop ebx
+0091121E - E9 4DFFFFFF           - jmp 00911170
+[函数1 - 判定势力是否在城塞、砦、阵范围之内]
+00911228 - 55                    - push ebp
+00911229 - 53                    - push ebx
+0091122A - 8B CE                 - mov ecx,esi
+0091122C - 8B 06                 - mov eax,[esi]
+0091122E - FF 50 40              - call dword ptr [eax+40]             获得部队所属势力ID
+00911231 - 50                    - push eax
+00911232 - B9 58192007           - mov ecx,07201958
+00911237 - E8 64F8B7FF           - call 00490AA0                       获得势力指针
+0091123C - BD 05000000           - mov ebp,00000005                    ebp = 5（城塞）
+00911241 - 8B D8                 - mov ebx,eax                         ebx = 势力指针
+00911243 - 8B CB                 - mov ecx,ebx
+00911245 - 6A 1A                 - push 1A                             1A(26=强化城墙)
+00911247 - E8 94FFB6FF           - call 004811E0                       判定势力科技
+0091124C - 85 C0                 - test eax,eax
+0091124E - 75 0F                 - jne 0091125F
+00911250 - 4D                    - dec ebp                             ebp = 4（砦）
+00911251 - 8B CB                 - mov ecx,ebx
+00911253 - 6A 19                 - push 19                             19(25=强化设施)
+00911255 - E8 86FFB6FF           - call 004811E0                       判定势力科技
+0091125A - 85 C0                 - test eax,eax
+0091125C - 75 01                 - jne 0091125F
+0091125E - 4D                    - dec ebp                             ebp = 3（阵）
+0091125F - 55                    - push ebp
+00911260 - B9 58192007           - mov ecx,07201958
+00911265 - E8 26F9B7FF           - call 00490B90                       获得设施类型指针
+0091126A - 8A 88 C8000000        - mov cl,[eax+000000C8]               获得设施类型覆盖半径
+00911270 - 0FB6 E9               - movzx ebp,cl                        ebp = 设施覆盖半径
+00911273 - 6A 00                 - push 00                             第一个参数 - 00
+00911275 - 53                    - push ebx                            ebx = 势力指针
+00911276 - B9 58192007           - mov ecx,07201958
+0091127B - E8 F0FFB7FF           - call 00491270                       获得势力ID
+00911280 - 50                    - push eax                            第二个参数 - 势力ID
+00911281 - 68 D08B5900           - push 00598BD0                       第三个参数 - 00598BD0（过滤函数指针）
+00911286 - 55                    - push ebp                            第四个参数 - 半径
+00911287 - 8B 16                 - mov edx,[esi]
+00911289 - 8B CE                 - mov ecx,esi
+0091128B - FF 52 3C              - call dword ptr [edx+3C]             获得部队XY坐标
+0091128E - 8B 00                 - mov eax,[eax]
+00911290 - 50                    - push eax                            第五个参数 - 中型坐标
+00911291 - B9 680EFB06           - mov ecx,06FB0E68
+00911296 - E8 0531B7FF           - call 004843A0                       取指定半径以内符合“过滤函数”要求的势力部队或设施
+0091129B - 5B                    - pop ebx
+0091129C - 5D                    - pop ebp
+0091129D - C3                    - ret 
+[函数2 - 判定一个部队需要补给的兵力数量]
+009112A0 - 55                    - push ebp
+009112A1 - 8B CE                 - mov ecx,esi
+009112A3 - E8 9847B8FF           - call 00495A40                       获得主将指针
+009112A8 - 8B C8                 - mov ecx,eax
+009112AA - E8 4192B7FF           - call 0048A4F0                       获得主将最大指挥兵力
+009112AF - 8B C8                 - mov ecx,eax
+009112B1 - 66 2B 46 18           - sub ax,[esi+18]                     最大兵力减去当前兵力
+009112B5 - 0FB7 C0               - movzx eax,ax
+009112B8 - 8B E8                 - mov ebp,eax
+009112BA - 8B C1                 - mov eax,ecx
+009112BC - 6B C0 02              - imul eax,eax,02                     每次最多补给最大兵力的2%
+009112BF - B9 64000000           - mov ecx,00000064
+009112C4 - 99                    - cdq 
+009112C5 - F7 F9                 - idiv ecx
+009112C7 - 39 E8                 - cmp eax,ebp
+009112C9 - 7C 02                 - jl 009112CD
+009112CB - 8B C5                 - mov eax,ebp
+009112CD - 5D                    - pop ebp
+009112CE - C3                    - ret 
+[函数3 - 判定一个城市所能供给的补给兵力数量]
+009112D0 - 8B CF                 - mov ecx,edi
+009112D2 - E8 195BB7FF           - call 00486DF0                       获得城市粮草
+009112D7 - 3D 204E0000           - cmp eax,00004E20                    保留20000粮草
+009112DC - 7C 0E                 - jl 009112EC
+009112DE - 8B CF                 - mov ecx,edi
+009112E0 - E8 2B58B7FF           - call 00486B10                       获得城市兵力
+009112E5 - 2D 10270000           - sub eax,00002710                    保留10000兵力
+009112EA - 7F 03                 - jg 009112EF
+009112EC - 31 C0                 - xor eax,eax
+009112EE - C3                    - ret 
+009112EF - 55                    - push ebp
+009112F0 - 8B E8                 - mov ebp,eax
+009112F2 - 8B 46 48              - mov eax,[esi+48]                    eax = 部队兵种
+009112F5 - 83 F8 04              - cmp eax,04
+009112F8 - 7F 11                 - jg 0091130B
+009112FA - 83 F8 01              - cmp eax,01
+009112FD - 7C 0C                 - jl 0091130B                         如果不是枪戟弩骑，直接返回可以补给的最大兵力
+009112FF - 50                    - push eax
+00911300 - 8B CF                 - mov ecx,edi
+00911302 - E8 4956B7FF           - call 00486950                       获得城市指定类型兵装
+00911307 - 39 E8                 - cmp eax,ebp                         比较兵装数量和可补给兵力数量
+00911309 - 7C 02                 - jl 0091130D                         取两者较小
+0091130B - 8B C5                 - mov eax,ebp                         返回可以补给相应兵种的最大兵力数量
+0091130D - 5D                    - pop ebp
+0091130E - C3                    - ret
+
+[老后勤]
+0091088C - 57                    - push edi
+0091088D - 53                    - push ebx
+0091088E - 8B D8                 - mov ebx,eax
+00910890 - 8B CE                 - mov ecx,esi
+00910892 - E8 A951B8FF           - call 00495A40                       获得部队主将指针
+00910897 - 8B 80 98000000        - mov eax,[eax+00000098]
+0091089D - 50                    - push eax
+0091089E - B9 58192007           - mov ecx,07201958
+009108A3 - E8 5804B8FF           - call 00490D00                       获得部队所属据点指针
+009108A8 - 85 C0                 - test eax,eax
+009108AA - 74 36                 - je 009108E2
+009108AC - 8B F8                 - mov edi,eax
+009108AE - 8B CF                 - mov ecx,edi
+009108B0 - 8B 07                 - mov eax,[edi]
+009108B2 - 68 8D000000           - push 0000008D                       后勤判定
+009108B7 - FF 50 58              - call dword ptr [eax+58]
+009108BA - 85 C0                 - test eax,eax
+009108BC - 74 24                 - je 009108E2
+009108BE - 8B CF                 - mov ecx,edi
+009108C0 - E8 2B65B7FF           - call 00486DF0                       获得据点目前粮草
+009108C5 - 3D 204E0000           - cmp eax,00004E20                    城市20000粮下限保护
+009108CA - 7C 16                 - jl 009108E2
+009108CC - D1 FB                 - sar ebx,1                           耗粮减半
+009108CE - 8B CB                 - mov ecx,ebx                         据点应耗粮置入ECX
+009108D0 - 39 C8                 - cmp eax,ecx                         判断据点中粮草是否不够
+009108D2 - 7C 0E                 - jl 009108E2
+009108D4 - F7 D9                 - neg ecx
+009108D6 - 51                    - push ecx
+009108D7 - 57                    - push edi
+009108D8 - B9 5C899907           - mov ecx,0799895C
+009108DD - E8 1EDAB9FF           - call 004AE300                       执行据点耗粮
+009108E2 - 8B C3                 - mov eax,ebx
+009108E4 - 5B                    - pop ebx
+009108E5 - 5F                    - pop edi
+009108E6 - E9 8FB7C8FF           - jmp 0059C07A
+
+
+142 亲和－亲善效果加倍
+{
+ 005C2D97 - e8 54 fe ff ff             - call 005c2bf0
+}
+005C2D97 - e9 10 dc 34 00             - jmp 009109ac
+
+009109AC - e8 3f 22 cb ff             - call 005c2bf0
+009109B1 - 50                         - push eax
+009109B2 - 8b 4e 04                   - mov ecx,[esi+04]               获得执行武将指针
+009109B5 - 68 8e 00 00 00             - push 0000008e
+009109BA - e8 31 87 b7 ff             - call 004890f0
+009109BF - 85 c0                      - test eax,eax
+009109C1 - 58                         - pop eax
+009109C2 - 74 02                      - je 009109c6
+009109C4 - 01 c0                      - add eax,eax
+009109C6 - e9 d1 23 cb ff             - jmp 005c2d9c
+009109CB - cc                         - int 3
+
+
+143 圣人－登用在野武将必定成功
+{
+ 004AFDB7 - 8d 44 24 14                - lea eax,[esp+14]
+ 004AFDBB - 50                         - push eax
+}
+004AFDB7 - e9 10 0c 46 00             - jmp 009109cc
+
+009109CC - 8b ce                      - mov ecx,esi
+009109CE - 8b 06                      - mov eax,[esi]
+009109D0 - ff 50 40                   - call dword ptr [eax+40]
+009109D3 - 85 c0                      - test eax,eax
+009109D5 - 7c 05                      - jnge 009109dc
+009109D7 - 83 f8 2e                   - cmp eax,2e
+009109DA - 7e 14                      - jle 009109f0
+009109DC - 8b cf                      - mov ecx,edi
+009109DE - 68 8f 00 00 00             - push 0000008f
+009109E3 - e8 08 87 b7 ff             - call 004890f0
+009109E8 - 85 c0                      - test eax,eax
+009109EA - 0f 85 e6 f3 b9 ff          - jne 004afdd6
+009109F0 - 8d 44 24 14                - lea eax,[esp+14]
+009109F4 - 50                         - push eax
+009109F5 - e9 c2 f3 b9 ff             - jmp 004afdbc
+
+发现直接登用
+{
+ 005C51D0 - 8d 44 24 0c                - lea eax,[esp+0c]
+ 005C51D4 - 50                         - push eax
+}
+005C51D0 - e9 27 b8 34 00             - jmp 009109fc
+
+009109FC - 8b cb                      - mov ecx,ebx
+009109FE - 8b 03                      - mov eax,[ebx]
+00910A00 - ff 50 40                   - call dword ptr [eax+40]
+00910A03 - 85 c0                      - test eax,eax
+00910A05 - 7c 05                      - jnge 00910a0c
+00910A07 - 83 f8 2e                   - cmp eax,2e
+00910A0A - 7e 14                      - jle 00910a20
+00910A0C - 8b cf                      - mov ecx,edi
+00910A0E - 68 8f 00 00 00             - push 0000008f
+00910A13 - e8 d8 86 b7 ff             - call 004890f0
+00910A18 - 85 c0                      - test eax,eax
+00910A1A - 0f 85 d2 47 cb ff          - jne 005c51f2
+00910A20 - 8d 44 24 0c                - lea eax,[esp+0c]
+00910A24 - 50                         - push eax
+00910A25 - e9 ab 47 cb ff             - jmp 005c51d5
+
+
+144 运筹－用计成功后有一定几率再行动一次
+145 激励－战法成功后有一定几率再行动一次
+计算用计是否成功
+{
+ 00593402 - e8 e9 c0 01 00             - call 005af4f0
+}
+00593402 - e9 25 d6 37 00             - jmp 00910a2c
+
+00910A2C - e8 bf ea c9 ff             - call 005af4f0                          计算计略是否成功
+00910A31 - 8b e8                      - mov ebp,eax
+00910A33 - 0f b6 47 08                - movzx eax,byte ptr [edi+08]            判断是否是运输队，是运输队直接返回
+00910A37 - 85 c0                      - test eax,eax
+00910A39 - 75 3d                      - jne 00910a78
+00910A3B - 85 ed                      - test ebp,ebp                           判断计略是否成功
+00910A3D - 74 32                      - je 00910a71                            不成功则跳转
+00910A3F - 0f b6 87 a4 00 00 00       - movzx eax,byte ptr [edi+000000a4]      判断标志位
+00910A46 - 85 c0                      - test eax,eax
+00910A48 - 75 27                      - jne 00910a71                           标志位不符合二动要求则跳转
+00910A4A - 8b cf                      - mov ecx,edi
+00910A4C - 8b 07                      - mov eax,[edi]
+00910A4E - 68 90 00 00 00             - push 00000090
+00910A53 - ff 50 58                   - call dword ptr [eax+58]                判断特技
+00910A56 - 85 c0                      - test eax,eax
+00910A58 - 74 17                      - je 00910a71
+00910A5A - 6a 32                      - push 32                                随机值
+00910A5C - e8 6f 17 b6 ff             - call 004721d0                          随机决定是否能够二动
+00910A61 - 83 c4 04                   - add esp,04
+00910A64 - 85 c0                      - test eax,eax
+00910A66 - 74 09                      - je 00910a71
+00910A68 - c6 87 a4 00 00 00 01       - mov byte ptr [edi+000000a4],01
+00910A6F - eb 07                      - jmp 00910a78
+00910A71 - c6 87 a4 00 00 00 08       - mov byte ptr [edi+000000a4],08         该标志位的设置使运筹和连环不能叠加使用
+00910A78 - e9 8c 29 c8 ff             - jmp 00593409
+
+计算战法是否成功
+{
+ 005AFDC9 - 89 45 54                   - mov [ebp+54],eax
+ 005AFDCC - eb 25                      - jmp 005afdf3
+}
+005AFDC9 - e9 b2 0c 36 00             - jmp 00910a80
+
+00910A80 - 89 45 54                   - mov [ebp+54],eax
+00910A83 - 0f b6 4e 08                - movzx ecx,byte ptr [esi+08]            判断是否是运输队，是运输队直接返回
+00910A87 - 85 c9                      - test ecx,ecx
+00910A89 - 75 34                      - jne 00910abf
+00910A8B - 85 c0                      - test eax,eax                           判断战法是否成功
+00910A8D - 74 30                      - je 00910abf                            不成功则跳转
+00910A8F - 0f b6 86 a4 00 00 00       - movzx eax,byte ptr [esi+000000a4]      判断标志位
+00910A96 - 85 c0                      - test eax,eax
+00910A98 - 75 25                      - jne 00910abf                           标志位不符合二动要求则跳转
+00910A9A - 8b ce                      - mov ecx,esi
+00910A9C - 8b 06                      - mov eax,[esi]
+00910A9E - 68 91 00 00 00             - push 00000091
+00910AA3 - ff 50 58                   - call dword ptr [eax+58]                判断特技
+00910AA6 - 85 c0                      - test eax,eax
+00910AA8 - 74 15                      - je 00910abf
+00910AAA - 6a 32                      - push 32                                随机值
+00910AAC - e8 1f 17 b6 ff             - call 004721d0                          随机决定是否能够二动
+00910AB1 - 83 c4 04                   - add esp,04
+00910AB4 - 85 c0                      - test eax,eax
+00910AB6 - 74 07                      - je 00910abf
+00910AB8 - c6 86 a4 00 00 00 02       - mov byte ptr [esi+000000a4],02
+00910ABF - e9 2f f3 c9 ff             - jmp 005afdf3
+
+A 委任部队
+{
+ 005ADA79 - a1 70 5a 8a 00             - mov eax,[008a5a70]
+ 005ADA7E - 83 c4 08                   - add esp,08
+}
+005ADA79 - 83 c4 08                   - add esp,08
+005ADA7C - e8 93 30 36 00             - call 00910b14
+
+B 移动后待命/委任的第一下
+{
+ 00576C66 - a1 70 5a 8a 00             - mov eax,[008a5a70]
+ 00576C6B - 83 c4 08                   - add esp,08
+ 00576C6E - 85 c0                      - test eax,eax
+ 00576C70 - c7 05 08 96 8b 00 ff ff 00 00 - mov [008b9608],0000ffff
+}
+00576C66 - 83 c4 08                   - add esp,08
+00576C69 - c7 05 08 96 8b 00 ff ff 00 00 - mov [008b9608],0000ffff
+00576C73 - e8 50 9e 39 00             - call 00910ac8
+00576C78 - 85 c0                      - test eax,eax
+
+C 攻击，战法，单挑，计略，设置，修补等
+{
+ 00579CFD - a1 70 5a 8a 00             - mov eax,[008a5a70]
+ 00579D02 - 83 c4 08                   - add esp,08
+}
+00579CFD - 83 c4 08                   - add esp,08
+00579D00 - e8 c3 6d 39 00             - call 00910ac8
+
+行动结束时根据标志位决定部队是否能够联动
+[B/C的入口]
+00910AC8 - a1 70 5a 8a 00             - mov eax,[008a5a70]                     部队无限行动标志位，1表示部队可无限行动
+00910ACD - 85 c0                      - test eax,eax
+00910ACF - 75 33                      - jne 00910b04
+00910AD1 - 0f b7 46 08                - movzx eax,word ptr [esi+08]            获得部队ID
+00910AD5 - 50                         - push eax
+00910AD6 - b9 58 19 20 07             - mov ecx,07201958
+00910ADB - e8 90 03 b8 ff             - call 00490e70                          获得部队指针
+00910AE0 - 8b c8                      - mov ecx,eax
+00910AE2 - 0f b6 41 08                - movzx eax,byte ptr [ecx+08]            如果部队是运输队则直接跳过
+00910AE6 - 85 c0                      - test eax,eax
+00910AE8 - 75 27                      - jne 00910b11
+00910AEA - 0f b6 81 a4 00 00 00       - movzx eax,byte ptr [ecx+000000a4]      判断二动标志位
+00910AF1 - 83 f8 01                   - cmp eax,01
+00910AF4 - 74 07                      - je 00910afd                            计策二动标志
+00910AF6 - 83 f8 02                   - cmp eax,02
+00910AF9 - 74 02                      - je 00910afd                            战法二动标志
+00910AFB - eb 0d                      - jmp 00910b0a
+00910AFD - c6 81 a4 00 00 00 08       - mov byte ptr [ecx+000000a4],08         置二动标志为已经二动
+00910B04 - b8 01 00 00 00             - mov eax,00000001
+00910B09 - c3                         - ret
+00910B0A - c6 81 a4 00 00 00 00       - mov byte ptr [ecx+000000a4],00         置二动标志为零
+00910B11 - 31 c0                      - xor eax,eax
+00910B13 - c3                         - ret
+[A的入口]
+00910B14 - a1 70 5a 8a 00             - mov eax,[008a5a70]
+00910B19 - 85 c0                      - test eax,eax
+00910B1B - 75 e7                      - jne 00910b04
+00910B1D - 8b cb                      - mov ecx,ebx
+00910B1F - eb c1                      - jmp 00910ae2
+
+每回合开始时将二动状态清0
+{
+ 00599B99 - bb 01 00 00 00             - mov ebx,00000001
+}
+00599B99 - e9 d6 6f 37 00             - jmp 00910b74
+
+00910B74 - 0f b6 5e 08                - movzx ebx,byte ptr [esi+08]            判断部队是否是运输队
+00910B78 - 85 db                      - test ebx,ebx
+00910B7A - 75 07                      - jne 00910b83
+00910B7C - c6 86 a4 00 00 00 00       - mov byte ptr [esi+000000a4],00         不是运输队，将二动标志清零
+00910B83 - bb 01 00 00 00             - mov ebx,00000001
+00910B88 - e9 11 90 c8 ff             - jmp 00599b9e
+
+
+146 伯乐
+旧效果－所在城市可以登用非己方势力所属城市的在野武将
+*004CF711 - 0f 85 90 00 00 00          - jne 004cf7a7
+004CF711 - e9 2e 14 44 00             - jmp 00910b44
+[主过程]
+00910B44 - 74 21                      - je 00910b67
+00910B46 - 8b 44 24 18                - mov eax,[esp+18]
+00910B4A - 8b c8                      - mov ecx,eax
+00910B4C - 8b 01                      - mov eax,[ecx]
+00910B4E - 68 92 00 00 00             - push 00000092
+00910B53 - ff 50 5c                   - call dword ptr [eax+5c]
+00910B56 - 85 c0                      - test eax,eax
+00910B58 - 7c 12                      - jnge 00910b6c
+00910B5A - 8b ce                      - mov ecx,esi
+00910B5C - 50                         - push eax
+00910B5D - e8 1e 94 b7 ff             - call 00489f80
+00910B62 - 83 f8 19                   - cmp eax,19                     限定能够登用的相性差
+00910B65 - 7f 05                      - jg 00910b6c
+00910B67 - e9 ab eb bb ff             - jmp 004cf717
+00910B6C - e9 36 ec bb ff             - jmp 004cf7a7
+00910B71 - cc                         - int 3
+
+新效果－月初概率推荐近向性武将
+*00590DDD - 8b 74 24 08                - mov esi,[esp+08]
+*00590DE1 - 85 f6                      - test esi,esi
+00590DDD - E9 E2013800           - jmp 00910FC4
+00590DE2 - 90                    - nop 
+[主过程]
+00910FC4 - 57                    - push edi
+00910FC5 - 53                    - push ebx
+00910FC6 - 31 DB                 - xor ebx,ebx                         ebx = 武将ID
+00910FC8 - 53                    - push ebx
+00910FC9 - B9 58192007           - mov ecx,07201958
+00910FCE - E8 2DFBB7FF           - call 00490B00                       根据武将ID获取武将指针
+00910FD3 - 8B F0                 - mov esi,eax
+00910FD5 - 56                    - push esi                            esi = 武将指针
+00910FD6 - E8 5596B6FF           - call 0047A630                       校验指针
+00910FDB - 83 C4 04              - add esp,04
+00910FDE - 85 C0                 - test eax,eax
+00910FE0 - 0F84 89000000         - je 0091106F
+00910FE6 - 8B CE                 - mov ecx,esi
+00910FE8 - 68 92000000           - push 00000092                       146 = 伯乐
+00910FED - E8 FE80B7FF           - call 004890F0                       判断是否持有伯乐
+00910FF2 - 85 C0                 - test eax,eax
+00910FF4 - 74 79                 - je 0091106F
+00910FF6 - 8B 8E A0000000        - mov ecx,[esi+000000A0]
+00910FFC - 83 F9 03              - cmp ecx,03                          判断武将身份是否是君主、都督、太守、一般
+00910FFF - 7F 6E                 - jg 0091106F
+00911001 - 83 BE 9C000000 57     - cmp dword ptr [esi+0000009C],57     判断武将是否在城中（出征不推荐）
+00911008 - 73 65                 - jae 0091106F
+0091100A - E8 7D000000           - call 0091108C                       挑选被推荐武将
+0091100F - 85 C0                 - test eax,eax
+00911011 - 74 5C                 - je 0091106F
+00911013 - 8B F8                 - mov edi,eax
+00911015 - B9 5C899907           - mov ecx,0799895C
+0091101A - 50                    - push eax
+0091101B - E8 2053B9FF           - call 004A6340                       获取被推荐武将所在城市关港id
+00911020 - 50                    - push eax
+00911021 - B9 58192007           - mov ecx,07201958
+00911026 - E8 D5FCB7FF           - call 00490D00                       根据设施ID获取设施指针
+0091102B - 85 C0                 - test eax,eax
+0091102D - 74 40                 - je 0091106F
+0091102F - 50                    - push eax                            这个eax压栈是作为调用后面发现人才函数的第一个参数
+00911030 - 56                    - push esi
+00911031 - E8 9A71CAFF           - call 005B81D0                       判断是否属于玩家势力第一军团
+00911036 - 83 C4 04              - add esp,04
+00911039 - 85 C0                 - test eax,eax
+0091103B - 74 28                 - je 00911065
+0091103D - E8 BE2F0000           - call 00914000                       初始化MSG参数表
+00911042 - 89 72 04              - mov [edx+04],esi                    esi = 推荐人
+00911045 - 89 7A 0C              - mov [edx+0C],edi                    edi = 被推荐人
+00911048 - C7 02 CB130000        - mov [edx],000013CB                  复用发现武将MSG
+0091104E - 52                    - push edx
+0091104F - E8 3CA3B8FF           - call 0049B390                       返回对应MSG字符串
+00911054 - 83 C4 04              - add esp,04
+00911057 - 6A 01                 - push 01
+00911059 - 6A 00                 - push 00
+0091105B - 56                    - push esi                            说话武将指针（推荐人）
+0091105C - 50                    - push eax                            说话MSG
+0091105D - E8 EE43BEFF           - call 004F5450                       武将说话
+00911062 - 83 C4 10              - add esp,10
+00911065 - 56                    - push esi
+00911066 - 57                    - push edi
+00911067 - E8 3446CCFF           - call 005D56A0                       调用探索发现人才的函数
+0091106C - 83 C4 0C              - add esp,0C
+0091106F - 43                    - inc ebx
+00911070 - 81 FB 4C040000        - cmp ebx,0000044C
+00911076 - 0F8C 4CFFFFFF         - jl 00910FC8                         循环下一个伯乐
+0091107C - 5B                    - pop ebx
+0091107D - 5F                    - pop edi
+0091107E - 8B 74 24 08           - mov esi,[esp+08]                    跳转前的处理
+00911082 - 85 F6                 - test esi,esi
+00911084 - E9 5AFDC7FF           - jmp 00590DE3
+[函数 - 选择被推荐的武将]
+0091108C - 6A 32                 - push 32                             50%概率推荐
+0091108E - E8 3D11B6FF           - call 004721D0
+00911093 - 83 C4 04              - add esp,04
+00911096 - 85 C0                 - test eax,eax
+00911098 - 75 01                 - jne 0091109B
+0091109A - C3                    - ret 
+0091109B - 83 EC 10              - sub esp,10
+0091109E - 53                    - push ebx
+0091109F - 55                    - push ebp
+009110A0 - 31 DB                 - xor ebx,ebx
+009110A2 - 31 ED                 - xor ebp,ebp
+009110A4 - 83 ED 01              - sub ebp,01
+009110A7 - 89 5C 24 0C           - mov [esp+0C],ebx                    选中的被推荐武将指针
+009110AB - 89 6C 24 10           - mov [esp+10],ebp                    被推荐武将相性差（初始置最大）
+009110AF - 53                    - push ebx
+009110B0 - B9 58192007           - mov ecx,07201958
+009110B5 - E8 46FAB7FF           - call 00490B00                       根据武将ID获取武将指针
+009110BA - 8B F8                 - mov edi,eax
+009110BC - 57                    - push edi
+009110BD - E8 6E95B6FF           - call 0047A630                       校验指针
+009110C2 - 83 C4 04              - add esp,04
+009110C5 - 85 C0                 - test eax,eax
+009110C7 - 74 48                 - je 00911111
+009110C9 - 8B 8F A0000000        - mov ecx,[edi+000000A0]
+009110CF - 83 F9 04              - cmp ecx,04                          04 = 在野
+009110D2 - 74 05                 - je 009110D9
+009110D4 - 83 F9 07              - cmp ecx,07                          07 = 未发现
+009110D7 - 75 38                 - jne 00911111
+009110D9 - 83 BF 9C000000 57     - cmp dword ptr [edi+0000009C],57     必须有所在城市
+009110E0 - 73 2F                 - jae 00911111
+009110E2 - 8B CE                 - mov ecx,esi
+009110E4 - 53                    - push ebx
+009110E5 - E8 968EB7FF           - call 00489F80                       计算相性差
+009110EA - 83 F8 19              - cmp eax,19                          相性差必须在25以内
+009110ED - 7F 22                 - jg 00911111
+009110EF - C1 E0 02              - shl eax,02                          相性差乘以4，为随机做准备
+009110F2 - 8B E8                 - mov ebp,eax
+009110F4 - 68 90010000           - push 00000190                       随机一个相性差增值
+009110F9 - E8 5210B6FF           - call 00472150
+009110FE - 83 C4 04              - add esp,04
+00911101 - 01 C5                 - add ebp,eax                         相性差加上随机值
+00911103 - 39 6C 24 10           - cmp [esp+10],ebp                    取相性差加上随机值的最小值
+00911107 - 72 08                 - jb 00911111
+00911109 - 89 6C 24 10           - mov [esp+10],ebp
+0091110D - 89 7C 24 0C           - mov [esp+0C],edi
+00911111 - 43                    - inc ebx
+00911112 - 81 FB 4C040000        - cmp ebx,0000044C
+00911118 - 7C 95                 - jl 009110AF                         循环所有武将
+0091111A - 8B 44 24 0C           - mov eax,[esp+0C]                    eax = 被选中武将指针
+0091111E - 5D                    - pop ebp
+0091111F - 5B                    - pop ebx
+00911120 - 83 C4 10              - add esp,10
+00911123 - C3                    - ret 
+
+
+147 清谈－登用在野武将失败必进入舌战
+本回合登用
+{
+ 005C59D2 - e8 89 a3 ee ff             - call 004afd60
+}
+005C59D2 - e9 d9 b1 34 00             - jmp 00910bb0
+
+00910BB0 - e8 ab f1 b9 ff             - call 004afd60
+00910BB5 - 85 c0                      - test eax,eax
+00910BB7 - 75 08                      - jne 00910bc1
+00910BB9 - 57                         - push edi
+00910BBA - 53                         - push ebx
+00910BBB - 56                         - push esi
+00910BBC - e8 3f 00 00 00             - call 00910c00
+00910BC1 - e9 11 4e cb ff             - jmp 005c59d7
+
+非本回合登用
+{
+ 005C5368 - e8 f3 a9 ee ff             - call 004afd60
+}
+005C5368 - e9 5b b8 34 00             - jmp 00910bc8
+
+00910BC8 - e8 93 f1 b9 ff             - call 004afd60
+00910BCD - 85 c0                      - test eax,eax
+00910BCF - 75 26                      - jne 00910bf7
+00910BD1 - 8b 44 24 1c                - mov eax,[esp+1c]
+00910BD5 - 50                         - push eax
+00910BD6 - b9 58 19 20 07             - mov ecx,07201958
+00910BDB - e8 20 01 b8 ff             - call 00490d00
+00910BE0 - 8b d8                      - mov ebx,eax
+00910BE2 - 53                         - push ebx
+00910BE3 - e8 48 9a b6 ff             - call 0047a630
+00910BE8 - 83 c4 04                   - add esp,04
+00910BEB - 85 c0                      - test eax,eax
+00910BED - 74 08                      - je 00910bf7
+00910BEF - 53                         - push ebx
+00910BF0 - 56                         - push esi
+00910BF1 - 57                         - push edi
+00910BF2 - e8 09 00 00 00             - call 00910c00
+00910BF7 - e9 71 47 cb ff             - jmp 005c536d
+
+[判断清谈特技的公共函数]
+00910C00 - 56                         - push esi
+00910C01 - 57                         - push edi
+00910C02 - 53                         - push ebx
+00910C03 - 8b 74 24 10                - mov esi,[esp+10]
+00910C07 - 8b 7c 24 14                - mov edi,[esp+14]
+00910C0B - 8b 5c 24 18                - mov ebx,[esp+18]
+00910C0F - 8b ce                      - mov ecx,esi
+00910C11 - 8b 06                      - mov eax,[esi]
+00910C13 - ff 50 40                   - call dword ptr [eax+40]
+00910C16 - 85 c0                      - test eax,eax
+00910C18 - 7c 05                      - jnge 00910c1f
+00910C1A - 83 f8 2e                   - cmp eax,2e
+00910C1D - 7e 1a                      - jle 00910c39
+00910C1F - 8b cf                      - mov ecx,edi
+00910C21 - 68 93 00 00 00             - push 00000093
+00910C26 - e8 c5 84 b7 ff             - call 004890f0
+00910C2B - 85 c0                      - test eax,eax
+00910C2D - 74 0a                      - je 00910c39
+00910C2F - 53                         - push ebx
+00910C30 - 57                         - push edi
+00910C31 - 56                         - push esi
+00910C32 - e8 0d 00 00 00             - call 00910c44                  调用舌战函数
+00910C37 - eb 02                      - jmp 00910c3b
+00910C39 - 31 c0                      - xor eax,eax
+00910C3B - 5b                         - pop ebx
+00910C3C - 5f                         - pop edi
+00910C3D - 5e                         - pop esi
+00910C3E - c2 0c 00                   - ret 000c
+[该函数是舌战函数，与探索发现人才并登用中的舌战段落极为相似] 
+00910C44 - 55                         - push ebp
+00910C45 - 8b ec                      - mov ebp,esp
+00910C47 - 83 e4 f8                   - and esp,f8
+00910C4A - 81 ec d4 07 00 00          - sub esp,000007d4
+00910C50 - 53                         - push ebx
+00910C51 - 8b 5d 0c                   - mov ebx,[ebp+0c]
+00910C54 - 56                         - push esi
+00910C55 - 57                         - push edi
+00910C56 - 8b cb                      - mov ecx,ebx
+00910C58 - e8 e3 90 b7 ff             - call 00489d40
+00910C5D - 50                         - push eax
+00910C5E - b9 58 19 20 07             - mov ecx,07201958
+00910C63 - e8 98 fe b7 ff             - call 00490b00
+00910C68 - 89 44 24 14                - mov [esp+14],eax
+00910C6C - 8b 75 08                   - mov esi,[ebp+08]
+00910C6F - 53                         - push ebx
+00910C70 - e8 5b 75 ca ff             - call 005b81d0
+00910C75 - 83 c4 04                   - add esp,04
+00910C78 - 85 c0                      - test eax,eax
+00910C7A - 0f 84 9b 00 00 00          - je 00910d1b
+00910C80 - 8b 44 24 14                - mov eax,[esp+14]
+00910C84 - 50                         - push eax
+00910C85 - 53                         - push ebx
+00910C86 - 56                         - push esi
+00910C87 - 68 ea 13 00 00             - push 000013ea
+00910C8C - 8d 4c 24 50                - lea ecx,[esp+50]
+00910C90 - e8 4b c2 b9 ff             - call 004acee0
+00910C95 - 8b f0                      - mov esi,eax
+00910C97 - b9 f4 00 00 00             - mov ecx,000000f4
+00910C9C - 8d bc 24 10 04 00 00       - lea edi,[esp+00000410]
+00910CA3 - f3 a5                      - repe movsd
+00910CA5 - 8d 8c 24 10 04 00 00       - lea ecx,[esp+00000410]
+00910CAC - 51                         - push ecx
+00910CAD - e8 de a6 b8 ff             - call 0049b390
+00910CB2 - 8b 75 08                   - mov esi,[ebp+08]
+00910CB5 - 6a 01                      - push 01
+00910CB7 - 6a 00                      - push 00
+00910CB9 - 56                         - push esi
+00910CBA - 50                         - push eax
+00910CBB - e8 90 47 be ff             - call 004f5450
+00910CC0 - 83 c4 14                   - add esp,14
+00910CC3 - 68 09 14 00 00             - push 00001409
+00910CC8 - 8d 4c 24 44                - lea ecx,[esp+44]
+00910CCC - e8 8f be b8 ff             - call 0049cb60
+00910CD1 - 53                         - push ebx
+00910CD2 - 6a 00                      - push 00
+00910CD4 - 8d 4c 24 48                - lea ecx,[esp+48]
+00910CD8 - e8 a3 be b8 ff             - call 0049cb80
+00910CDD - 56                         - push esi
+00910CDE - 6a 01                      - push 01
+00910CE0 - 8d 4c 24 48                - lea ecx,[esp+48]
+00910CE4 - e8 97 be b8 ff             - call 0049cb80
+00910CE9 - 8d 54 24 40                - lea edx,[esp+40]
+00910CED - 52                         - push edx
+00910CEE - 8d 8c 24 14 04 00 00       - lea ecx,[esp+00000414]
+00910CF5 - e8 a6 b8 b8 ff             - call 0049c5a0
+00910CFA - 8d 84 24 10 04 00 00       - lea eax,[esp+00000410]
+00910D01 - 50                         - push eax
+00910D02 - e8 89 a6 b8 ff             - call 0049b390
+00910D07 - 6a 01                      - push 01
+00910D09 - 6a 00                      - push 00
+00910D0B - 6a 00                      - push 00
+00910D0D - 50                         - push eax
+00910D0E - e8 8d 47 be ff             - call 004f54a0
+00910D13 - 83 c4 14                   - add esp,14
+00910D16 - 83 f8 01                   - cmp eax,01
+00910D19 - 75 75                      - jne 00910d90
+00910D1B - b8 e8 03 00 00             - mov eax,000003e8
+00910D20 - 31 ff                      - xor edi,edi
+00910D22 - 8d 4c 24 20                - lea ecx,[esp+20]
+00910D26 - 89 44 24 24                - mov [esp+24],eax
+00910D2A - 89 7c 24 28                - mov [esp+28],edi
+00910D2E - 89 44 24 30                - mov [esp+30],eax
+00910D32 - 89 7c 24 34                - mov [esp+34],edi
+00910D36 - 89 7c 24 38                - mov [esp+38],edi
+00910D3A - c7 44 24 3c 1d 00 00 00    - mov [esp+3c],0000001d
+00910D42 - 89 5c 24 20                - mov [esp+20],ebx
+00910D46 - 89 74 24 2c                - mov [esp+2c],esi
+00910D4A - e8 31 ce c0 ff             - call 0051db80
+00910D4F - 8d 4c 24 20                - lea ecx,[esp+20]
+00910D53 - 51                         - push ecx
+00910D54 - e8 27 f9 c0 ff             - call 00520680
+00910D59 - 83 c4 04                   - add esp,04
+00910D5C - 85 c0                      - test eax,eax
+00910D5E - 74 18                      - je 00910d78
+00910D60 - b9 d8 59 6a 09             - mov ecx,096a59d8
+00910D65 - e8 16 d0 c6 ff             - call 0057dd80
+00910D6A - 85 c0                      - test eax,eax
+00910D6C - 74 16                      - je 00910d84
+00910D6E - b9 d8 59 6a 09             - mov ecx,096a59d8
+00910D73 - e8 28 d0 c6 ff             - call 0057dda0
+00910D78 - b9 14 52 8b 00             - mov ecx,008b5214
+00910D7D - e8 ae ce c0 ff             - call 0051dc30
+00910D82 - eb 0e                      - jmp 00910d92
+00910D84 - a1 18 a0 1b 09             - mov eax,[091ba018]
+00910D89 - 39 f8                      - cmp eax,edi
+00910D8B - 74 03                      - je 00910d90
+00910D8D - 89 78 10                   - mov [eax+10],edi
+00910D90 - 31 c0                      - xor eax,eax
+00910D92 - 5f                         - pop edi
+00910D93 - 5e                         - pop esi
+00910D94 - 5b                         - pop ebx
+00910D95 - 8b e5                      - mov esp,ebp
+00910D97 - 5d                         - pop ebp
+00910D98 - c2 0c 00                   - ret 000c
+
+
+148 军魂－光环效果增加
+在各个光环效果函数处调用以下函数（ECX=主将指针，EBX=原始效果值，返回EAX=处理后的效果值）
+00910B24 - 68 94 00 00 00             - push 00000094
+00910B29 - e8 c2 85 b7 ff             - call 004890f0
+00910B2E - 85 c0                      - test eax,eax
+00910B30 - 8b c3                      - mov eax,ebx                    EBX＝原光环效果，置入EAX
+00910B32 - 74 0b                      - je 00910b3f
+00910B34 - 6b c0 64                   - imul eax,eax,64                光环效果增加倍率64/32＝2倍
+00910B37 - bb 32 00 00 00             - mov ebx,00000032
+00910B3C - 99                         - cdq
+00910B3D - f7 fb                      - idiv ebx
+00910B3F - c3                         - ret
+
+149 武干－光环范围增加
+已写在008A9F3E代码段中

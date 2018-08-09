@@ -1,0 +1,122 @@
+005AE000 - 53                         - push ebx
+005AE001 - 55                         - push ebp
+005AE002 - 57                         - push edi
+005AE003 - 8b f8                      - mov edi,eax                        edi = 战法ID
+005AE005 - 8b 01                      - mov eax,[ecx]
+005AE007 - ff 50 3c                   - call dword ptr [eax+3c]
+005AE00A - 8b 16                      - mov edx,[esi]                      esi为被攻击部队指针
+005AE00C - 8b 18                      - mov ebx,[eax]                      ebx = 攻击部队坐标X,Y值
+005AE00E - 8b ce                      - mov ecx,esi
+005AE010 - ff 52 3c                   - call dword ptr [edx+3c]
+005AE013 - 85 ff                      - test edi,edi                       edi为战法ID
+005AE015 - 8b 28                      - mov ebp,[eax]                      ebp = 被攻击部队坐标X,Y值
+005AE017 - 7c 09                      - jnge 005ae022
+005AE019 - 83 ff 1f                   - cmp edi,1f
+005AE01C - 0f 8e 12 01 00 00          - jng 005ae134                       *需要改为jne 005ae0b6，启动不屈金刚对战法有效
+005AE022 - 83 be a8 00 00 00 02       - cmp dword ptr [esi+000000a8],02    检查兵科是否是戟兵
+005AE029 - 0f 85 87 00 00 00          - jne 005ae0b6
+005AE02F - 8b 06                      - mov eax,[esi]
+005AE031 - 6a 05                      - push 05                            05＝矢盾
+005AE033 - 8b ce                      - mov ecx,esi
+005AE035 - ff 50 60                   - call dword ptr [eax+60]            判断势力是否拥有某项科技
+005AE038 - 85 c0                      - test eax,eax
+005AE03A - 74 32                      - je 005ae06e
+005AE03C - 55                         - push ebp                           被攻击部队坐标X,Y值
+005AE03D - 53                         - push ebx                           攻击部队坐标X,Y值
+005AE03E - 8b c7                      - mov eax,edi                        eax = 战法ID
+005AE040 - e8 7b ff ff ff             - call 005adfc0                      判定是否是远程攻击，会调用00483db0
+005AE045 - 83 c4 08                   - add esp,08
+005AE048 - 85 c0                      - test eax,eax
+005AE04A - 74 22                      - je 005ae06e
+005AE04C - 6a 32                      - push 32                            随机率50％
+005AE04E - e8 7d 41 ec ff             - call 004721d0
+005AE053 - 83 c4 04                   - add esp,04
+005AE056 - 85 c0                      - test eax,eax
+005AE058 - 74 14                      - je 005ae06e
+005AE05A - 8b 4c 24 10                - mov ecx,[esp+10]                   此处[esp+10]参数是一个攻击函数中的临时数据结构的指针
+005AE05E - 5f                         - pop edi
+005AE05F - 5d                         - pop ebp
+005AE060 - c7 41 6c 05 00 00 00       - mov [ecx+6c],00000005              矢盾效果
+005AE067 - b8 01 00 00 00             - mov eax,00000001                   格档发动
+005AE06C - 5b                         - pop ebx
+005AE06D - c3                         - ret
+005AE06E - 8b 16                      - mov edx,[esi]
+005AE070 - 6a 06                      - push 06                            06＝大盾
+005AE072 - 8b ce                      - mov ecx,esi
+005AE074 - ff 52 60                   - call dword ptr [edx+60]            判断势力是否拥有某项科技
+005AE077 - 85 c0                      - test eax,eax
+005AE079 - 74 3b                      - je 005ae0b6
+005AE07B - 85 ff                      - test edi,edi
+005AE07D - 7c 05                      - jnge 005ae084
+005AE07F - 83 ff 1f                   - cmp edi,1f
+005AE082 - 7e 32                      - jle 005ae0b6
+005AE084 - 55                         - push ebp                           被攻击部队坐标X,Y值
+005AE085 - 53                         - push ebx                           攻击部队坐标X,Y值
+005AE086 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005AE08B - e8 20 5d ed ff             - call 00483db0                      判断两坐标是否临接
+005AE090 - 85 c0                      - test eax,eax
+005AE092 - 74 22                      - je 005ae0b6
+005AE094 - 6a 32                      - push 32                            随机率50％
+005AE096 - e8 35 41 ec ff             - call 004721d0
+005AE09B - 83 c4 04                   - add esp,04
+005AE09E - 85 c0                      - test eax,eax
+005AE0A0 - 74 14                      - je 005ae0b6
+005AE0A2 - 8b 44 24 10                - mov eax,[esp+10]                   此处[esp+10]参数是一个攻击函数中的临时数据结构的指针
+005AE0A6 - 5f                         - pop edi
+005AE0A7 - 5d                         - pop ebp
+005AE0A8 - c7 40 6c 06 00 00 00       - mov [eax+6c],00000006              大盾效果
+005AE0AF - b8 01 00 00 00             - mov eax,00000001                   格档发动
+005AE0B4 - 5b                         - pop ebx
+005AE0B5 - c3                         - ret
+005AE0B6 - 85 ff                      - test edi,edi
+005AE0B8 - 7c 05                      - jnge 005ae0bf                      *改为jmp 005ae0bf则不屈、金刚对战法有效
+005AE0BA - 83 ff 1f                   - cmp edi,1f
+005AE0BD - 7e 75                      - jle 005ae134
+005AE0BF - 8b 16                      - mov edx,[esi]
+005AE0C1 - 8b ce                      - mov ecx,esi
+005AE0C3 - ff 52 50                   - call dword ptr [edx+50]
+005AE0C6 - 3d b8 0b 00 00             - cmp eax,00000bb8                   兵力阈值3000
+005AE0CB - 7d 2f                      - jnl 005ae0fc
+005AE0CD - 8b 06                      - mov eax,[esi]
+005AE0CF - 6a 1b                      - push 1b                            1b＝不屈
+005AE0D1 - 8b ce                      - mov ecx,esi
+005AE0D3 - ff 50 58                   - call dword ptr [eax+58]            判断部队武将是否拥有指定特技
+005AE0D6 - 85 c0                      - test eax,eax
+005AE0D8 - 74 22                      - je 005ae0fc
+005AE0DA - 6a 32                      - push 32                            随机率50％
+005AE0DC - e8 ef 40 ec ff             - call 004721d0
+005AE0E1 - 83 c4 04                   - add esp,04
+005AE0E4 - 85 c0                      - test eax,eax
+005AE0E6 - 74 14                      - je 005ae0fc
+005AE0E8 - 8b 4c 24 10                - mov ecx,[esp+10]                   此处[esp+10]参数是一个攻击函数中的临时数据结构的指针
+005AE0EC - 5f                         - pop edi
+005AE0ED - 5d                         - pop ebp
+005AE0EE - c7 41 64 1b 00 00 00       - mov [ecx+64],0000001b              不屈效果
+005AE0F5 - b8 01 00 00 00             - mov eax,00000001                   格档发动
+005AE0FA - 5b                         - pop ebx
+005AE0FB - c3                         - ret
+005AE0FC - 8b 7c 24 10                - mov edi,[esp+10]                   此处[esp+10]参数是一个攻击函数中的临时数据结构的指针
+005AE100 - 81 7f 0c f4 01 00 00       - cmp [edi+0c],000001f4              伤害阈值500
+005AE107 - 7d 2b                      - jnl 005ae134
+005AE109 - 8b 16                      - mov edx,[esi]
+005AE10B - 6a 1c                      - push 1c                            1c＝金刚
+005AE10D - 8b ce                      - mov ecx,esi
+005AE10F - ff 52 58                   - call dword ptr [edx+58]
+005AE112 - 85 c0                      - test eax,eax
+005AE114 - 74 1e                      - je 005ae134
+005AE116 - 6a 32                      - push 32                            随机率50％
+005AE118 - e8 b3 40 ec ff             - call 004721d0
+005AE11D - 83 c4 04                   - add esp,04
+005AE120 - 85 c0                      - test eax,eax
+005AE122 - 74 10                      - je 005ae134
+005AE124 - c7 47 64 1c 00 00 00       - mov [edi+64],0000001c              金刚效果
+005AE12B - 5f                         - pop edi
+005AE12C - 5d                         - pop ebp
+005AE12D - b8 01 00 00 00             - mov eax,00000001                   格档发动
+005AE132 - 5b                         - pop ebx
+005AE133 - c3                         - ret
+005AE134 - 5f                         - pop edi
+005AE135 - 5d                         - pop ebp
+005AE136 - 33 c0                      - xor eax,eax
+005AE138 - 5b                         - pop ebx
+005AE139 - c3                         - ret

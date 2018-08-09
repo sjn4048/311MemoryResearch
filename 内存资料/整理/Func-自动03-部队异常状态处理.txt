@@ -1,0 +1,150 @@
+功能: 每旬处理部队异常状态
+参数表: [esp+04]=部队指针
+
+*****************************************************************************************************************************************************
+
+00599B90 - 53                         - push ebx
+00599B91 - 56                         - push esi
+00599B92 - 8b 74 24 0c                - mov esi,[esp+0c]               esi = 部队指针
+00599B96 - 8b 46 24                   - mov eax,[esi+24]               eax = 部队状态
+00599B99 - bb 01 00 00 00             - mov ebx,00000001
+
+【混乱状态处理】
+00599B9E - 3b c3                      - cmp eax,ebx                    判断部队状态是否是0x01(混乱)
+00599BA0 - 57                         - push edi
+00599BA1 - 75 13                      - jne 00599bb6
+00599BA3 - 8b ce                      - mov ecx,esi
+00599BA5 - e8 16 b7 ef ff             - call 004952c0                  判断部队是否行动
+00599BAA - 85 c0                      - test eax,eax
+00599BAC - 75 08                      - jne 00599bb6
+00599BAE - 53                         - push ebx                       ebx = 0x01(已行动)
+00599BAF - 8b ce                      - mov ecx,esi
+00599BB1 - e8 ea bd ef ff             - call 004959a0                  设置部队为已行动
+
+【伪报状态处理】
+00599BB6 - 83 7e 24 02                - cmp dword ptr [esi+24],02      判断部队状态是否是0x02(伪报)
+00599BBA - 75 54                      - jne 00599c10
+00599BBC - 8b ce                      - mov ecx,esi
+00599BBE - e8 fd b6 ef ff             - call 004952c0
+00599BC3 - 85 c0                      - test eax,eax
+00599BC5 - 75 49                      - jne 00599c10
+00599BC7 - 8b ce                      - mov ecx,esi
+00599BC9 - e8 52 b9 ef ff             - call 00495520
+00599BCE - 50                         - push eax
+00599BCF - b9 58 19 20 07             - mov ecx,07201958
+00599BD4 - e8 27 71 ef ff             - call 00490d00                  根据设施ID获取设施指针
+00599BD9 - 8b f8                      - mov edi,eax
+00599BDB - 57                         - push edi
+00599BDC - e8 4f 0a ee ff             - call 0047a630
+00599BE1 - 83 c4 04                   - add esp,04
+00599BE4 - 85 c0                      - test eax,eax
+00599BE6 - 74 20                      - je 00599c08
+00599BE8 - 56                         - push esi
+00599BE9 - b9 50 93 6a 09             - mov ecx,096a9350
+00599BEE - e8 5d e7 00 00             - call 005a8350
+00599BF3 - 57                         - push edi
+00599BF4 - b9 50 93 6a 09             - mov ecx,096a9350
+00599BF9 - e8 42 2b 01 00             - call 005ac740
+00599BFE - b9 50 93 6a 09             - mov ecx,096a9350
+00599C03 - e8 c8 bd 00 00             - call 005a59d0
+00599C08 - 53                         - push ebx
+00599C09 - 8b ce                      - mov ecx,esi
+00599C0B - e8 90 bd ef ff             - call 004959a0
+
+【状态回合减少】
+[根据势力科技确定使异常状态加倍恢复的设施类型]
+00599C10 - 56                         - push esi                       esi = 部队指针
+00599C11 - e8 1a 0a ee ff             - call 0047a630                  校验指针
+00599C16 - 83 c4 04                   - add esp,04
+00599C19 - 85 c0                      - test eax,eax
+00599C1B - 0f 84 c8 00 00 00          - je 00599ce9
+00599C21 - 8b 06                      - mov eax,[esi]
+00599C23 - 8b ce                      - mov ecx,esi
+00599C25 - 89 5c 24 10                - mov [esp+10],ebx               ebx = 0x01，异常状态恢复速度正常(每回合恢复1计数点)
+00599C29 - ff 50 40                   - call dword ptr [eax+40]        获取部队所属势力ID
+00599C2C - 50                         - push eax
+00599C2D - b9 58 19 20 07             - mov ecx,07201958
+00599C32 - e8 69 6e ef ff             - call 00490aa0                  根据势力ID获取势力指针
+00599C37 - 8b f8                      - mov edi,eax                    edi = 势力指针
+00599C39 - 85 ff                      - test edi,edi
+00599C3B - 74 76                      - je 00599cb3
+00599C3D - 6a 19                      - push 19                        0x19 = 强化设施
+00599C3F - 8b cf                      - mov ecx,edi
+00599C41 - bb 03 00 00 00             - mov ebx,00000003               ebx = 0x03(阵)
+00599C46 - e8 95 75 ee ff             - call 004811e0                  判断势力是否拥有某项科技
+00599C4B - 85 c0                      - test eax,eax
+00599C4D - 74 05                      - je 00599c54
+00599C4F - bb 04 00 00 00             - mov ebx,00000004               有强化设施时，ebx = 0x04              
+00599C54 - 6a 1a                      - push 1a                        0x1a = 强化城墙(砦)
+00599C56 - 8b cf                      - mov ecx,edi
+00599C58 - e8 83 75 ee ff             - call 004811e0
+00599C5D - 85 c0                      - test eax,eax
+00599C5F - 74 05                      - je 00599c66
+00599C61 - bb 05 00 00 00             - mov ebx,00000005               有强化城墙时，ebx = 0x05(城塞)
+[判断部队周边有无使异常状态加倍恢复的设施]
+00599C66 - 55                         - push ebp
+00599C67 - 53                         - push ebx
+00599C68 - b9 58 19 20 07             - mov ecx,07201958
+00599C6D - e8 1e 6f ef ff             - call 00490b90                  根据设施类型ID获取设施类型指针
+00599C72 - 8b 16                      - mov edx,[esi]
+00599C74 - 8a 98 c8 00 00 00          - mov bl,[eax+000000c8]          获取设施类型的最大有效范围
+00599C7A - 8b ce                      - mov ecx,esi
+00599C7C - ff 52 3c                   - call dword ptr [edx+3c]        获取部队坐标指针
+00599C7F - 6a 00                      - push 00
+00599C81 - 57                         - push edi                       edi = 势力指针
+00599C82 - b9 58 19 20 07             - mov ecx,07201958
+00599C87 - 8b e8                      - mov ebp,eax                    ebp = 部队坐标指针
+00599C89 - e8 e2 75 ef ff             - call 00491270                  根据势力指针获取势力ID
+00599C8E - 8b 4d 00                   - mov ecx,[ebp+00]               ecx = 部队坐标
+00599C91 - 50                         - push eax
+00599C92 - 0f b6 c3                   - movzx eax,bl                   eax = 设施类型最大范围
+00599C95 - 68 d0 8b 59 00             - push 00598bd0                  过滤函数
+00599C9A - 50                         - push eax
+00599C9B - 51                         - push ecx
+00599C9C - b9 68 0e fb 06             - mov ecx,06fb0e68
+00599CA1 - e8 fa a6 ee ff             - call 004843a0                  获取指定半径以内符合“过滤函数”要求的部队或设施
+00599CA6 - 85 c0                      - test eax,eax
+00599CA8 - 5d                         - pop ebp
+00599CA9 - 74 08                      - je 00599cb3                    如果没有符合要求的设施则异常状态恢复速度为正常
+00599CAB - c7 44 24 10 02 00 00 00    - mov [esp+10],00000002          有符合要求的设施，异常状态恢复速度加倍(每回合恢复2计数点)
+[异常状态回合数减少]
+00599CB3 - 8a 46 28                   - mov al,[esi+28]                al = 异常状态回合数
+00599CB6 - 84 c0                      - test al,al
+00599CB8 - 76 2f                      - jna 00599ce9
+00599CBA - 8b 4c 24 10                - mov ecx,[esp+10]               ecx = 异常状态恢复速度
+00599CBE - 0f b6 c0                   - movzx eax,al
+00599CC1 - 2b c1                      - sub eax,ecx                    异常状态回合数减少
+00599CC3 - 33 d2                      - xor edx,edx
+00599CC5 - 85 c0                      - test eax,eax
+00599CC7 - 0f 9e c2                   - setle dl
+00599CCA - 8b ce                      - mov ecx,esi                    ecx = 部队指针
+00599CCC - 4a                         - dec edx
+00599CCD - 23 c2                      - and eax,edx                    保证异常状态回合数最小为0
+00599CCF - 50                         - push eax
+00599CD0 - e8 7b c6 ef ff             - call 00496350                  设置部队状态回合数
+[异常状态回合数为0则恢复正常状态]
+00599CD5 - 8a 46 28                   - mov al,[esi+28]                al = 异常状态回合数
+00599CD8 - 84 c0                      - test al,al
+00599CDA - 75 0d                      - jne 00599ce9
+00599CDC - 6a 01                      - push 01
+00599CDE - 56                         - push esi
+00599CDF - b9 5c 89 99 07             - mov ecx,0799895c
+00599CE4 - e8 b7 3b f1 ff             - call 004ad8a0
+
+00599CE9 - 5f                         - pop edi
+00599CEA - 5e                         - pop esi
+00599CEB - 5b                         - pop ebx
+00599CEC - c2 04 00                   - ret 0004
+
+
+=====================================================================================================================================================
+
+修改 - 每回合重置激励和运筹的标志位
+00599B99 - e9 d6 6f 37 00             - jmp 00910b74
+
+00910B74 - 0f b6 5e 08                - movzx ebx,byte ptr [esi+08]            判断部队是否是运输队
+00910B78 - 85 db                      - test ebx,ebx
+00910B7A - 75 07                      - jne 00910b83
+00910B7C - c6 86 a4 00 00 00 00       - mov byte ptr [esi+000000a4],00         不是运输队则将激励运筹标志位置0
+00910B83 - bb 01 00 00 00             - mov ebx,00000001
+00910B88 - e9 11 90 c8 ff             - jmp 00599b9e

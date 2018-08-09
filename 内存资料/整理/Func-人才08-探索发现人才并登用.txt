@@ -1,0 +1,387 @@
+功能: 探索发现人才并登用
+参数表: [esp+04]=被登用武将指针，[esp+08]=登用武将指针，[esp+0c]=设施指针
+
+*****************************************************************************************************************************************************
+
+005D5220 - 55                         - push ebp
+005D5221 - 8b ec                      - mov ebp,esp
+005D5223 - 83 e4 f8                   - and esp,f8
+005D5226 - 81 ec d4 07 00 00          - sub esp,000007d4
+
+【计算登用成功概率】
+005D522C - 53                         - push ebx
+005D522D - 8b 5d 0c                   - mov ebx,[ebp+0c]                   ebx = 武将指针(登用方)
+005D5230 - 56                         - push esi
+005D5231 - 57                         - push edi
+005D5232 - 8b cb                      - mov ecx,ebx
+005D5234 - e8 07 4b eb ff             - call 00489d40                      获取武将所属君主ID
+005D5239 - 50                         - push eax
+005D523A - b9 58 19 20 07             - mov ecx,07201958
+005D523F - e8 bc b8 eb ff             - call 00490b00                      根据武将ID获取武将指针
+005D5244 - 8b 75 08                   - mov esi,[ebp+08]                   esi = 武将指针(被登用方)
+005D5247 - 6a 00                      - push 00
+005D5249 - 6a 00                      - push 00
+005D524B - 53                         - push ebx
+005D524C - 56                         - push esi
+005D524D - 89 44 24 24                - mov [esp+24],eax                   [esp+24](实际是[esp+14]) = 武将指针(登用方君主)
+005D5251 - e8 6a ff fe ff             - call 005c51c0                      根据武将相性、忠诚、义理等因素计算登用成功概率
+005D5256 - 83 c4 10                   - add esp,10
+005D5259 - 56                         - push esi                           esi = 武将指针(被登用方)
+005D525A - b9 58 19 20 07             - mov ecx,07201958
+005D525F - 8b f8                      - mov edi,eax                        edi = 登用成功概率
+005D5261 - e8 aa c0 eb ff             - call 00491310                      根据武将指针获取武将ID
+005D5266 - 50                         - push eax
+005D5267 - 8b cb                      - mov ecx,ebx                        ebx = 武将指针(登用方)
+005D5269 - e8 12 4d eb ff             - call 00489f80                      计算A与B的相性差(参数A)
+005D526E - 0f b6 c0                   - movzx eax,al
+005D5271 - 89 44 24 1c                - mov [esp+1c],eax                   [esp+1c] = 参数A
+
+【计算登用是否成功】
+005D5275 - e8 86 49 fe ff             - call 005b9c00                      返回当前日*7+当前月*5+当前年*3(参数B)
+005D527A - 53                         - push ebx
+005D527B - b9 58 19 20 07             - mov ecx,07201958
+005D5280 - 89 44 24 14                - mov [esp+14],eax                   [esp+14](实际是[esp+10]) = 参数B
+005D5284 - e8 87 c0 eb ff             - call 00491310                      根据武将指针获取武将ID
+005D5289 - 8b 4c 24 1c                - mov ecx,[esp+1c]                   ecx = 参数A
+005D528D - 6a 00                      - push 00
+005D528F - 6a 00                      - push 00
+005D5291 - 6a 00                      - push 00
+005D5293 - 51                         - push ecx
+005D5294 - 56                         - push esi                           esi = 武将指针(被登用方)
+005D5295 - b9 58 19 20 07             - mov ecx,07201958
+005D529A - 89 44 24 2c                - mov [esp+2c],eax                   [esp+2c](实际是[esp+18]) = 武将ID(登用方)
+005D529E - e8 6d c0 eb ff             - call 00491310                      根据武将指针获取武将ID
+005D52A3 - 8b 54 24 28                - mov edx,[esp+28]
+005D52A7 - 50                         - push eax                           eax = 武将ID(被登用方)
+005D52A8 - 8b 44 24 24                - mov eax,[esp+24]
+005D52AC - 52                         - push edx                           edx = 武将ID(登用方)
+005D52AD - 50                         - push eax                           eax = 参数B
+005D52AE - e8 0d 52 fe ff             - call 005ba4c0                      根据参数A、参数B、登用武将ID，被登用武将ID计算一个值
+005D52B3 - 83 c4 1c                   - add esp,1c
+005D52B6 - 3b c7                      - cmp eax,edi                        比较计算所得值与参数A
+005D52B8 - 7d 13                      - jnl 005d52cd                       如果计算所得值小于登用成功概率，则跳转到登用失败处理
+
+【登用成功处理】
+005D52BA - 6a 01                      - push 01                            0x01 = 登用成功
+005D52BC - 53                         - push ebx                           ebx = 武将指针(登用方)
+005D52BD - 56                         - push esi                           esi = 武将指针(被登用方)
+005D52BE - e8 cd e9 ff ff             - call 005d3c90                      登用武将成功或失败的处理，包括增加经验功勋及消息显示
+005D52C3 - 83 c4 0c                   - add esp,0c
+005D52C6 - 5f                         - pop edi
+005D52C7 - 5e                         - pop esi
+005D52C8 - 5b                         - pop ebx
+005D52C9 - 8b e5                      - mov esp,ebp
+005D52CB - 5d                         - pop ebp
+005D52CC - c3                         - ret
+
+【登用失败处理】
+[计算是否进入舌战]
+005D52CD - 8b cb                      - mov ecx,ebx                        ebx = 武将指针(登用方)
+005D52CF - e8 dc 3d eb ff             - call 004890b0                      获取武将魅力
+005D52D4 - 0f b6 c8                   - movzx ecx,al                       ecx = 武将魅力
+005D52D7 - 89 4c 24 10                - mov [esp+10],ecx
+005D52DB - 8b cb                      - mov ecx,ebx
+005D52DD - e8 5e 4a eb ff             - call 00489d40                      获取武将所属君主ID
+005D52E2 - 50                         - push eax
+005D52E3 - 8b cb                      - mov ecx,ebx
+005D52E5 - e8 96 4c eb ff             - call 00489f80                      计算A与B的相性差
+005D52EA - 0f b6 d0                   - movzx edx,al
+005D52ED - 8b 44 24 10                - mov eax,[esp+10]                   eax = 武将魅力
+005D52F1 - 2b c2                      - sub eax,edx
+005D52F3 - 03 c7                      - add eax,edi                        eax = 登用武将魅力-登用武将与君主的相性差+登用成功概率
+005D52F5 - 83 f8 50                   - cmp eax,50
+005D52F8 - 7f 13                      - jg 005d530d                        如果eax大于80，则跳转到舌战处理
+[登用失败处理]
+005D52FA - 6a 00                      - push 00                            0x00 = 登用失败
+005D52FC - 53                         - push ebx                           ebx = 武将指针(登用方)
+005D52FD - 56                         - push esi                           esi = 武将指针(被登用方)
+005D52FE - e8 8d e9 ff ff             - call 005d3c90                      登用武将成功或失败的处理，包括增加经验功勋及消息显示
+005D5303 - 83 c4 0c                   - add esp,0c
+005D5306 - 5f                         - pop edi
+005D5307 - 5e                         - pop esi
+005D5308 - 5b                         - pop ebx
+005D5309 - 8b e5                      - mov esp,ebp
+005D530B - 5d                         - pop ebp
+005D530C - c3                         - ret
+
+【舌战处理】
+005D530D - 53                         - push ebx                           ebx = 武将指针(登用方)
+005D530E - e8 bd 2e fe ff             - call 005b81d0                      判断武将是否属于玩家势力第一军团
+005D5313 - 83 c4 04                   - add esp,04
+005D5316 - 85 c0                      - test eax,eax
+005D5318 - 0f 84 9b 00 00 00          - je 005d53b9
+[玩家第一军团显示执行消息和武将语言，猜测还包括执行舌战]
+005D531E - 8b 44 24 14                - mov eax,[esp+14]                   eax = 武将指针(登用方君主)
+005D5322 - 50                         - push eax
+005D5323 - 53                         - push ebx
+005D5324 - 56                         - push esi
+005D5325 - 68 ea 13 00 00             - push 000013ea
+005D532A - 8d 4c 24 50                - lea ecx,[esp+50]
+005D532E - e8 ad 7b ed ff             - call 004acee0
+005D5333 - 8b f0                      - mov esi,eax
+005D5335 - b9 f4 00 00 00             - mov ecx,000000f4
+005D533A - 8d bc 24 10 04 00 00       - lea edi,[esp+00000410]
+005D5341 - f3 a5                      - repe movsd
+005D5343 - 8d 8c 24 10 04 00 00       - lea ecx,[esp+00000410]
+005D534A - 51                         - push ecx
+005D534B - e8 40 60 ec ff             - call 0049b390
+005D5350 - 8b 75 08                   - mov esi,[ebp+08]
+005D5353 - 6a 01                      - push 01
+005D5355 - 6a 00                      - push 00
+005D5357 - 56                         - push esi
+005D5358 - 50                         - push eax
+005D5359 - e8 f2 00 f2 ff             - call 004f5450
+005D535E - 83 c4 14                   - add esp,14
+005D5361 - 68 09 14 00 00             - push 00001409
+005D5366 - 8d 4c 24 44                - lea ecx,[esp+44]
+005D536A - e8 f1 77 ec ff             - call 0049cb60
+005D536F - 53                         - push ebx
+005D5370 - 6a 00                      - push 00
+005D5372 - 8d 4c 24 48                - lea ecx,[esp+48]
+005D5376 - e8 05 78 ec ff             - call 0049cb80
+005D537B - 56                         - push esi
+005D537C - 6a 01                      - push 01
+005D537E - 8d 4c 24 48                - lea ecx,[esp+48]
+005D5382 - e8 f9 77 ec ff             - call 0049cb80
+005D5387 - 8d 54 24 40                - lea edx,[esp+40]
+005D538B - 52                         - push edx
+005D538C - 8d 8c 24 14 04 00 00       - lea ecx,[esp+00000414]
+005D5393 - e8 08 72 ec ff             - call 0049c5a0
+005D5398 - 8d 84 24 10 04 00 00       - lea eax,[esp+00000410]
+005D539F - 50                         - push eax
+005D53A0 - e8 eb 5f ec ff             - call 0049b390
+005D53A5 - 6a 01                      - push 01
+005D53A7 - 6a 00                      - push 00
+005D53A9 - 6a 00                      - push 00
+005D53AB - 50                         - push eax
+005D53AC - e8 ef 00 f2 ff             - call 004f54a0
+005D53B1 - 83 c4 14                   - add esp,14
+005D53B4 - 83 f8 01                   - cmp eax,01
+005D53B7 - 75 7c                      - jne 005d5435                       如果eax不等于1则跳转到登用失败处理
+[非玩家第一军团，猜测需要计算舌战是否胜利]
+005D53B9 - b8 e8 03 00 00             - mov eax,000003e8
+005D53BE - 33 ff                      - xor edi,edi
+005D53C0 - 8d 4c 24 20                - lea ecx,[esp+20]
+005D53C4 - 89 44 24 24                - mov [esp+24],eax
+005D53C8 - 89 7c 24 28                - mov [esp+28],edi
+005D53CC - 89 44 24 30                - mov [esp+30],eax
+005D53D0 - 89 7c 24 34                - mov [esp+34],edi
+005D53D4 - 89 7c 24 38                - mov [esp+38],edi
+005D53D8 - c7 44 24 3c 1d 00 00 00    - mov [esp+3c],0000001d
+005D53E0 - 89 5c 24 20                - mov [esp+20],ebx
+005D53E4 - 89 74 24 2c                - mov [esp+2c],esi
+005D53E8 - e8 93 87 f4 ff             - call 0051db80
+005D53ED - 8d 4c 24 20                - lea ecx,[esp+20]
+005D53F1 - 51                         - push ecx
+005D53F2 - e8 89 b2 f4 ff             - call 00520680
+005D53F7 - 83 c4 04                   - add esp,04
+005D53FA - 85 c0                      - test eax,eax
+005D53FC - 74 18                      - je 005d5416                        如果eax等于0则跳转到根据舌战结果调用登用武将成功或失败的处理
+[未明处理1]
+005D53FE - b9 d8 59 6a 09             - mov ecx,096a59d8
+005D5403 - e8 78 89 fa ff             - call 0057dd80
+005D5408 - 85 c0                      - test eax,eax
+005D540A - 74 16                      - je 005d5422
+005D540C - b9 d8 59 6a 09             - mov ecx,096a59d8
+005D5411 - e8 8a 89 fa ff             - call 0057dda0
+[根据舌战结果调用登用武将成功或失败的处理]
+005D5416 - e8 25 e9 ff ff             - call 005d3d40                      根据舌战结果调用登用武将成功或失败的处理
+005D541B - 5f                         - pop edi
+005D541C - 5e                         - pop esi
+005D541D - 5b                         - pop ebx
+005D541E - 8b e5                      - mov esp,ebp
+005D5420 - 5d                         - pop ebp
+005D5421 - c3                         - ret
+[未明处理2]
+005D5422 - a1 18 a0 1b 09             - mov eax,[091ba018]
+005D5427 - 3b c7                      - cmp eax,edi
+005D5429 - 74 19                      - je 005d5444
+005D542B - 89 78 10                   - mov [eax+10],edi
+005D542E - 5f                         - pop edi
+005D542F - 5e                         - pop esi
+005D5430 - 5b                         - pop ebx
+005D5431 - 8b e5                      - mov esp,ebp
+005D5433 - 5d                         - pop ebp
+005D5434 - c3                         - ret
+[登用失败处理]
+005D5435 - 8b 55 08                   - mov edx,[ebp+08]
+005D5438 - 6a 00                      - push 00                            0x00 = 登用失败
+005D543A - 53                         - push ebx                           ebx = 武将指针(登用方)
+005D543B - 52                         - push edx                           edx = 武将指针(被登用方)
+005D543C - e8 4f e8 ff ff             - call 005d3c90                      登用武将成功或失败的处理，包括增加经验功勋及消息显示
+005D5441 - 83 c4 0c                   - add esp,0c
+[未明处理3]
+005D5444 - 5f                         - pop edi
+005D5445 - 5e                         - pop esi
+005D5446 - 5b                         - pop ebx
+005D5447 - 8b e5                      - mov esp,ebp
+005D5449 - 5d                         - pop ebp
+005D544A - c3                         - ret
+
+*****************************************************************************************************************************************************
+
+子函数A - 登用武将成功或失败的处理
+
+005D3C90 - 8b 44 24 04                - mov eax,[esp+04]                   eax = 武将指针(被登用方)
+005D3C94 - 8b 88 98 00 00 00          - mov ecx,[eax+00000098]             ecx = 武将所属(被登用方)
+005D3C9A - 56                         - push esi
+005D3C9B - 8b 74 24 0c                - mov esi,[esp+0c]                   esi = 武将指针(登用方)
+005D3C9F - 57                         - push edi
+005D3CA0 - 8b 7c 24 14                - mov edi,[esp+14]                   edi = 登用是否成功
+005D3CA4 - 6a 01                      - push 01
+005D3CA6 - 57                         - push edi
+005D3CA7 - 51                         - push ecx
+005D3CA8 - 50                         - push eax
+005D3CA9 - 56                         - push esi
+005D3CAA - e8 91 0b ff ff             - call 005c4840                      登用成功时被登用武将处理，及无论登用成功与否的消息显示和武将语言
+005D3CAF - 83 c4 14                   - add esp,14
+005D3CB2 - 85 ff                      - test edi,edi                       判断登用是否成功
+005D3CB4 - b9 5c 89 99 07             - mov ecx,0799895c
+005D3CB9 - 74 24                      - je 005d3cdf
+[登用成功，增加武将经验和勋功]
+005D3CBB - 68 c8 00 00 00             - push 000000c8                      增加勋功200点
+005D3CC0 - 56                         - push esi
+005D3CC1 - e8 8a 30 ed ff             - call 004a6d50                      武将增加勋功
+005D3CC6 - 6a 01                      - push 01
+005D3CC8 - 6a 03                      - push 03                            增加经验3点
+005D3CCA - 6a 03                      - push 03                            0x03 = 政治
+005D3CCC - 56                         - push esi
+005D3CCD - b9 5c 89 99 07             - mov ecx,0799895c
+005D3CD2 - e8 f9 33 ed ff             - call 004a70d0                      武将增加属性经验
+005D3CD7 - 6a 01                      - push 01
+005D3CD9 - 6a 05                      - push 05                            增加经验5点
+005D3CDB - 6a 04                      - push 04                            0x04 = 魅力
+005D3CDD - eb 0e                      - jmp 005d3ced                       跳转到登用成功或失败的公共处理
+[登用失败，增加武将经验和勋功]
+005D3CDF - 6a 64                      - push 64                            增加勋功100点
+005D3CE1 - 56                         - push esi
+005D3CE2 - e8 69 30 ed ff             - call 004a6d50                      武将增加勋功
+005D3CE7 - 6a 01                      - push 01
+005D3CE9 - 6a 03                      - push 03                            增加经验3点
+005D3CEB - 6a 03                      - push 03                            0x03 = 政治
+[登用成功或失败的公共处理]
+005D3CED - b9 5c 89 99 07             - mov ecx,0799895c
+005D3CF2 - 56                         - push esi
+005D3CF3 - e8 d8 33 ed ff             - call 004a70d0                      武将增加属性经验
+005D3CF8 - 6a 01                      - push 01                            0x01 = 已行动
+005D3CFA - 56                         - push esi
+005D3CFB - b9 5c 89 99 07             - mov ecx,0799895c
+005D3D00 - e8 fb 18 ed ff             - call 004a5600                      设置武将状态是否为已行动
+[扣除军团行动力]
+005D3D05 - 8b b6 98 00 00 00          - mov esi,[esi+00000098]             esi = 武将所属(登用方)
+005D3D0B - 56                         - push esi
+005D3D0C - b9 58 19 20 07             - mov ecx,07201958
+005D3D11 - e8 ea cf eb ff             - call 00490d00                      根据设施ID获取设施指针
+005D3D16 - 56                         - push esi
+005D3D17 - b9 58 19 20 07             - mov ecx,07201958
+005D3D1C - 8b f8                      - mov edi,eax                        edi = 设施指针
+005D3D1E - e8 dd cf eb ff             - call 00490d00                      根据设施ID获取设施指针
+005D3D23 - 50                         - push eax
+005D3D24 - e8 07 e2 ff ff             - call 005d1f30                      计算探索所需要的行动力
+005D3D29 - 83 c4 04                   - add esp,04
+005D3D2C - 50                         - push eax                           eax = 探索所需要的行动力
+005D3D2D - 6a 0b                      - push 0b
+005D3D2F - 57                         - push edi
+005D3D30 - b9 90 15 77 09             - mov ecx,09771590
+005D3D35 - e8 06 56 fe ff             - call 005b9340                      扣除军团行动力
+005D3D3A - 5f                         - pop edi
+005D3D3B - 5e                         - pop esi
+005D3D3C - c3                         - ret
+
+*****************************************************************************************************************************************************
+
+子函数B - 根据舌战结果调用登用武将成功或失败的处理
+
+005D3D40 - 56                         - push esi
+005D3D41 - 57                         - push edi
+005D3D42 - b9 14 52 8b 00             - mov ecx,008b5214
+005D3D47 - e8 54 9f f4 ff             - call 0051dca0                      取[ecx]
+005D3D4C - b9 14 52 8b 00             - mov ecx,008b5214
+005D3D51 - 8b f0                      - mov esi,eax                        esi = 武将指针(登用方)
+005D3D53 - e8 68 7a 08 00             - call 0065b7c0                      取[ecx+0c]
+005D3D58 - 56                         - push esi
+005D3D59 - 8b f8                      - mov edi,eax                        edi = 武将指针(被登用方)
+005D3D5B - e8 d0 68 ea ff             - call 0047a630                      校验指针
+005D3D60 - 83 c4 04                   - add esp,04
+005D3D63 - 85 c0                      - test eax,eax
+005D3D65 - 74 22                      - je 005d3d89                        校验失败则跳过登用武将成功或失败的处理
+005D3D67 - 57                         - push edi
+005D3D68 - e8 c3 68 ea ff             - call 0047a630                      校验指针
+005D3D6D - 83 c4 04                   - add esp,04
+005D3D70 - 85 c0                      - test eax,eax
+005D3D72 - 74 15                      - je 005d3d89                        校验失败则跳过登用武将成功或失败的处理
+005D3D74 - b9 14 52 8b 00             - mov ecx,008b5214
+005D3D79 - e8 b2 9e f4 ff             - call 0051dc30                      判断[ecx+1c]-[ecx+18]是否是负值，如果是负值eax=0，否则eax=1
+005D3D7E - 50                         - push eax
+005D3D7F - 56                         - push esi                           esi = 武将指针(登用方)
+005D3D80 - 57                         - push edi                           edi = 武将指针(被登用方)
+005D3D81 - e8 0a ff ff ff             - call 005d3c90                      登用武将成功或失败的处理，包括增加经验功勋及消息显示
+005D3D86 - 83 c4 0c                   - add esp,0c
+005D3D89 - 5f                         - pop edi
+005D3D8A - 5e                         - pop esi
+005D3D8B - c3                         - ret
+
+*****************************************************************************************************************************************************
+
+子函数C - 计算登用成功概率
+
+005C51C0 - 51                         - push ecx
+005C51C1 - 53                         - push ebx
+005C51C2 - 8b 5c 24 0c                - mov ebx,[esp+0c]                   ebx = 武将指针(被登用方)
+005C51C6 - 56                         - push esi
+005C51C7 - 8b 74 24 18                - mov esi,[esp+18]                   esi = 参数三
+005C51CB - 57                         - push edi
+005C51CC - 8b 7c 24 18                - mov edi,[esp+18]                   edi = 武将指针(登用方)
+005C51D0 - 8d 44 24 0c                - lea eax,[esp+0c]
+005C51D4 - 50                         - push eax
+005C51D5 - 56                         - push esi
+005C51D6 - 57                         - push edi
+005C51D7 - 53                         - push ebx
+005C51D8 - b9 5c 89 99 07             - mov ecx,0799895c
+005C51DD - c7 44 24 1c 00 00 00 00    - mov [esp+1c],00000000
+005C51E5 - e8 e6 a5 ee ff             - call 004af7d0                      登用必成功和必不成功判定，会考虑厌恶、结义、亲善、禁止仕官期等条件
+005C51EA - 85 c0                      - test eax,eax                   
+005C51EC - 74 10                      - je 005c51fe
+005C51EE - 8b 44 24 0c                - mov eax,[esp+0c]
+005C51F2 - f7 d8                      - neg eax
+005C51F4 - 5f                         - pop edi
+005C51F5 - 1b c0                      - sbb eax,eax
+005C51F7 - 5e                         - pop esi
+005C51F8 - 83 e0 64                   - and eax,64                         必成功返回100，必不成功返回0
+005C51FB - 5b                         - pop ebx
+005C51FC - 59                         - pop ecx
+005C51FD - c3                         - ret
+005C51FE - 8b 4c 24 20                - mov ecx,[esp+20]                   ecx = 参数四
+005C5202 - 51                         - push ecx
+005C5203 - 56                         - push esi
+005C5204 - 57                         - push edi
+005C5205 - 53                         - push ebx
+005C5206 - e8 75 fd ff ff             - call 005c4f80                      计算登用人物的成功概率
+005C520B - 83 c4 10                   - add esp,10
+005C520E - 5f                         - pop edi
+005C520F - 5e                         - pop esi
+005C5210 - 5b                         - pop ebx
+005C5211 - 59                         - pop ecx
+005C5212 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 有“圣人”特技则登用发现的武将必成功
+005C51D0 - e9 27 b8 34 00             - jmp 009109fc
+
+009109FC - 8b cb                      - mov ecx,ebx                        ebx = 武将指针(被登用方)
+009109FE - 8b 03                      - mov eax,[ebx]
+00910A00 - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+00910A03 - 85 c0                      - test eax,eax
+00910A05 - 7c 05                      - jnge 00910a0c
+00910A07 - 83 f8 2e                   - cmp eax,2e
+00910A0A - 7e 14                      - jle 00910a20                       如果势力ID在0～46之间则跳过圣人判定
+00910A0C - 8b cf                      - mov ecx,edi                        edi = 武将指针(登用方)
+00910A0E - 68 8f 00 00 00             - push 0000008f                      0x8f = 圣人
+00910A13 - e8 d8 86 b7 ff             - call 004890f0                      判断武将是否持有圣人特技
+00910A18 - 85 c0                      - test eax,eax
+00910A1A - 0f 85 d2 47 cb ff          - jne 005c51f2                       如果登用武将持有圣人特技则直接跳转到将登用人物的成功概率置为100
+00910A20 - 8d 44 24 0c                - lea eax,[esp+0c]
+00910A24 - 50                         - push eax
+00910A25 - e9 ab 47 cb ff             - jmp 005c51d5

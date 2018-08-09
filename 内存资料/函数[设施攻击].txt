@@ -1,0 +1,242 @@
+005B0EE0 - 83 ec 08                   - sub esp,08
+005B0EE3 - 53                         - push ebx
+005B0EE4 - 55                         - push ebp
+005B0EE5 - 8b 6c 24 14                - mov ebp,[esp+14]
+005B0EE9 - 56                         - push esi
+005B0EEA - 8b 74 24 20                - mov esi,[esp+20]                   esi=被攻击部队指针
+005B0EEE - 57                         - push edi
+005B0EEF - 33 c0                      - xor eax,eax
+005B0EF1 - b9 20 00 00 00             - mov ecx,00000020
+005B0EF6 - 8b fd                      - mov edi,ebp
+005B0EF8 - f3 ab                      - repe stosd
+005B0EFA - 8b 7c 24 20                - mov edi,[esp+20]                   edi=攻击设施指针
+005B0EFE - 83 c8 ff                   - or eax,ff
+005B0F01 - 85 f6                      - test esi,esi
+005B0F03 - 89 45 08                   - mov [ebp+08],eax
+005B0F06 - 89 45 50                   - mov [ebp+50],eax
+005B0F09 - 89 45 60                   - mov [ebp+60],eax
+005B0F0C - 89 45 68                   - mov [ebp+68],eax
+005B0F0F - 89 45 64                   - mov [ebp+64],eax
+005B0F12 - 89 45 6c                   - mov [ebp+6c],eax
+005B0F15 - a1 d0 c1 79 00             - mov eax,[0079c1d0]
+005B0F1A - 89 45 74                   - mov [ebp+74],eax
+005B0F1D - 8b 0d d0 c1 79 00          - mov ecx,[0079c1d0]
+005B0F23 - 89 4d 78                   - mov [ebp+78],ecx
+005B0F26 - c7 45 7c 01 00 00 00       - mov [ebp+7c],00000001
+005B0F2D - 0f 84 09 01 00 00          - je 005b103c
+
+【不明条件判断】
+005B0F33 - 8b 1e                      - mov ebx,[esi]
+005B0F35 - e8 26 7f eb ff             - call 00468e60                      eax=11
+005B0F3A - 50                         - push eax
+005B0F3B - 8b ce                      - mov ecx,esi
+005B0F3D - ff 53 2c                   - call dword ptr [ebx+2c]            由于eax=11，该函数必然返回1
+005B0F40 - 85 c0                      - test eax,eax
+005B0F42 - 0f 84 f4 00 00 00          - je 005b103c                        此跳转无用，必然进入下一行
+005B0F48 - 8b 16                      - mov edx,[esi]
+005B0F4A - 6a 0b                      - push 0b
+005B0F4C - 8b ce                      - mov ecx,esi
+005B0F4E - ff 52 2c                   - call dword ptr [edx+2c]            和上面一样，push 11，该函数必然返回1
+005B0F51 - 85 c0                      - test eax,eax
+005B0F53 - 0f 84 e3 00 00 00          - je 005b103c                        此跳转无用，必然进入下一行
+
+【被攻击对象是部队】
+005B0F59 - 8b 47 08                   - mov eax,[edi+08]                   eax=设施类型
+005B0F5C - 83 f8 0a                   - cmp eax,0a               
+005B0F5F - 0f 87 b1 00 00 00          - ja 005b1016                        设施类型不能大于10（即从都市到投石台）
+005B0F65 - 0f b6 80 7c 11 5b 00       - movzx eax,byte ptr [eax+005b117c]  根据设施类型取得设施攻击型态，其中都市港关为一类（根据设施兵力和太守能力），石墙土垒是一类（不攻击），其它一类（固定+浮动伤害）
+005B0F6C - ff 24 85 70 11 5b 00       - jmp dword ptr [eax*4+005b1170]     根据设施攻击型态跳转
+
+[城市港关类设施]
+005B0F73 - 0f b6 9e ca 00 00 00       - movzx ebx,byte ptr [esi+000000ca]
+005B0F7A - 56                         - push esi
+005B0F7B - e8 60 cc ff ff             - call 005adbe0                      取得被攻击部队的兵力
+005B0F80 - 8d 4c 24 14                - lea ecx,[esp+14]
+005B0F84 - 51                         - push ecx
+005B0F85 - 89 44 24 2c                - mov [esp+2c],eax
+005B0F89 - 8d 54 24 24                - lea edx,[esp+24]
+005B0F8D - 52                         - push edx
+005B0F8E - 8d 44 24 20                - lea eax,[esp+20]
+005B0F92 - 50                         - push eax
+005B0F93 - 8d 44 24 30                - lea eax,[esp+30]
+005B0F97 - e8 14 cf ff ff             - call 005adeb0                      取得被攻击设施太守的统武较大值和实际指挥兵力（城市兵力大于太守指挥兵力则取太守指挥兵力）
+005B0F9C - 8b 4c 24 34                - mov ecx,[esp+34]
+005B0FA0 - 8b 54 24 2c                - mov edx,[esp+2c]
+005B0FA4 - 8b 44 24 30                - mov eax,[esp+30]
+005B0FA8 - 51                         - push ecx
+005B0FA9 - 6a 00                      - push 00
+005B0FAB - 52                         - push edx
+005B0FAC - 53                         - push ebx
+005B0FAD - 8b 5c 24 30                - mov ebx,[esp+30]
+005B0FB1 - 50                         - push eax
+005B0FB2 - e8 79 cc ff ff             - call 005adc30                      计算伤害，该函数与部队攻击的计算伤害函数一致
+005B0FB7 - d8 0d 78 a6 75 00          - fmul dword ptr [0075a678]          伤害倍率(0075a678=0.8)
+005B0FBD - 83 c4 24                   - add esp,24
+005B0FC0 - e8 af 6a 15 00             - call 00707a74
+005B0FC5 - 89 45 0c                   - mov [ebp+0c],eax                   伤害值置入[ebp+0c]
+005B0FC8 - eb 27                      - jmp 005b0ff1
+
+[固定+浮动伤害类设施]
+005B0FCA - 56                         - push esi
+005B0FCB - e8 10 50 ee ff             - call 00495fe0
+005B0FD0 - 50                         - push eax
+005B0FD1 - 8b f7                      - mov esi,edi
+005B0FD3 - e8 68 d1 ff ff             - call 005ae140                      计算各类设施的伤害值
+005B0FD8 - 8b 74 24 2c                - mov esi,[esp+2c]                   esi=被攻击部队指针
+005B0FDC - 89 45 0c                   - mov [ebp+0c],eax
+005B0FDF - 8b 57 08                   - mov edx,[edi+08]                   edx=设施类型
+005B0FE2 - 33 c0                      - xor eax,eax                        eax=0
+005B0FE4 - 83 c4 08                   - add esp,08
+005B0FE7 - 83 fa 0a                   - cmp edx,0a
+005B0FEA - 0f 95 c0                   - setnc al
+005B0FED - 85 c0                      - test eax,eax                       设施类型大于10则跳转（实际上无须再次判断）
+005B0FEF - 74 25                      - je 005b1016
+
+[建筑对于攻城武器的伤害衰减]
+005B0FF1 - 8b 86 a8 00 00 00          - mov eax,[esi+000000a8]             eax=当前被攻击部队使用兵种
+005B0FF7 - 50                         - push eax
+005B0FF8 - e8 83 dc ec ff             - call 0047ec80                      根据兵种(0-11)获得兵科适性类型(0-5)
+005B0FFD - 83 c4 04                   - add esp,04
+005B1000 - 83 f8 04                   - cmp eax,04                         如果是04（攻城武器）
+005B1003 - 75 11                      - jne 005b1016
+005B1005 - db 45 0c                   - fild dword ptr [ebp+0c]
+005B1008 - d8 0d 78 a6 75 00          - fmul dword ptr [0075a678]          建筑对于攻城武器的伤害倍率指标(0075A678=0.8)
+005B100E - e8 61 6a 15 00             - call 00707a74
+005B1013 - 89 45 0c                   - mov [ebp+0c],eax                   伤害值置回[ebp+0c]
+
+【超级难度伤害衰减判定】
+005B1016 - 83 3d 78 19 20 07 02       - cmp dword ptr [07201978],02        02=超级难度
+005B101D - 75 1d                      - jne 005b103c
+005B101F - 8b 17                      - mov edx,[edi]
+005B1021 - 8b cf                      - mov ecx,edi
+005B1023 - ff 52 48                   - call dword ptr [edx+48]            判断设施所属势力是否是玩家势力
+005B1026 - 85 c0                      - test eax,eax
+005B1028 - 74 12                      - je 005b103c
+005B102A - 8b 45 0c                   - mov eax,[ebp+0c]
+005B102D - 6b c0 50                   - imul eax,eax,50                    伤害倍率80%
+005B1030 - b9 64 00 00 00             - mov ecx,00000064
+005B1035 - 99                         - cdq
+005B1036 - f7 f9                      - idiv ecx
+005B1038 - 90                         - nop
+005B1039 - 89 45 0c                   - mov [ebp+0c],eax                   伤害值置回[ebp+0c]
+
+【不明条件判断】
+005B103C - 8b 06                      - mov eax,[esi]
+005B103E - 6a 05                      - push 05
+005B1040 - 8b ce                      - mov ecx,esi
+005B1042 - ff 50 2c                   - call dword ptr [eax+2c]            由于eax=5，该函数必然返回0
+005B1045 - 85 c0                      - test eax,eax
+005B1047 - 0f 84 da 00 00 00          - je 005b1127                        必然执行此跳转
+
+【被攻击对象是设施，计算被耐久伤害，实际上不会进入此段代码】
+005B104D - 8b 1e                      - mov ebx,[esi]
+005B104F - e8 1c 24 fc ff             - call 00573470
+005B1054 - 50                         - push eax
+005B1055 - 8b ce                      - mov ecx,esi
+005B1057 - ff 53 2c                   - call dword ptr [ebx+2c]
+005B105A - 8b d8                      - mov ebx,eax
+005B105C - 8b 47 08                   - mov eax,[edi+08]
+005B105F - f7 db                      - neg ebx
+005B1061 - 1b db                      - sbb ebx,ebx
+005B1063 - 23 de                      - and ebx,esi
+005B1065 - 83 e8 06                   - sub eax,06
+005B1068 - 74 25                      - je 005b108f
+005B106A - 48                         - dec eax
+005B106B - 74 10                      - je 005b107d
+005B106D - 83 e8 03                   - sub eax,03
+005B1070 - 0f 85 8b 00 00 00          - jne 005b1101
+005B1076 - b8 f4 01 00 00             - mov eax,000001f4
+005B107B - eb 17                      - jmp 005b1094
+005B107D - c7 44 24 1c 96 00 00 00    - mov [esp+1c],00000096
+005B1085 - c7 44 24 24 64 00 00 00    - mov [esp+24],00000064
+005B108D - eb 0d                      - jmp 005b109c
+005B108F - b8 64 00 00 00             - mov eax,00000064
+005B1094 - 89 44 24 1c                - mov [esp+1c],eax
+005B1098 - 89 44 24 24                - mov [esp+24],eax
+005B109C - 8b cf                      - mov ecx,edi
+005B109E - e8 ad 60 ed ff             - call 00487150
+005B10A3 - 66 3d 01 00                - cmp ax,0001
+005B10A7 - 76 0c                      - jna 005b10b5
+005B10A9 - 8b cf                      - mov ecx,edi
+005B10AB - e8 a0 60 ed ff             - call 00487150
+005B10B0 - 0f b7 c0                   - movzx eax,ax
+005B10B3 - eb 05                      - jmp 005b10ba
+005B10B5 - b8 01 00 00 00             - mov eax,00000001
+005B10BA - 0f bf 4b 10                - movsx ecx,word ptr [ebx+10]
+005B10BE - 89 44 24 10                - mov [esp+10],eax
+005B10C2 - 99                         - cdq
+005B10C3 - 2b c2                      - sub eax,edx
+005B10C5 - d1 f8                      - sar eax,1
+005B10C7 - 3b c8                      - cmp ecx,eax
+005B10C9 - 89 4c 24 20                - mov [esp+20],ecx
+005B10CD - 7f 04                      - jg 005b10d3
+005B10CF - 89 44 24 20                - mov [esp+20],eax
+005B10D3 - 8b 4c 24 24                - mov ecx,[esp+24]
+005B10D7 - 51                         - push ecx
+005B10D8 - e8 73 10 ec ff             - call 00472150
+005B10DD - 0f b7 d0                   - movzx edx,ax
+005B10E0 - 89 54 24 28                - mov [esp+28],edx
+005B10E4 - 83 c4 04                   - add esp,04
+005B10E7 - db 44 24 24                - fild dword ptr [esp+24]
+005B10EB - db 44 24 20                - fild dword ptr [esp+20]
+005B10EF - da 74 24 10                - fidiv [esp+10]
+005B10F3 - da 4c 24 1c                - fimul [esp+1c]
+005B10F7 - de c1                      - faddp
+005B10F9 - e8 76 69 15 00             - call 00707a74
+005B10FE - 89 45 10                   - mov [ebp+10],eax
+005B1101 - 83 3d 78 19 20 07 02       - cmp dword ptr [07201978],02
+005B1108 - 75 1d                      - jne 005b1127
+005B110A - 8b 07                      - mov eax,[edi]
+005B110C - 8b cf                      - mov ecx,edi
+005B110E - ff 50 48                   - call dword ptr [eax+48]
+005B1111 - 85 c0                      - test eax,eax
+005B1113 - 74 12                      - je 005b1127
+005B1115 - 8b 45 10                   - mov eax,[ebp+10]
+005B1118 - 6b c0 50                   - imul eax,eax,50
+005B111B - b9 64 00 00 00             - mov ecx,00000064
+005B1120 - 99                         - cdq
+005B1121 - f7 f9                      - idiv ecx
+005B1123 - 90                         - nop
+005B1124 - 89 45 10                   - mov [ebp+10],eax                   伤害值置回[ebp+0c]
+
+【强化防卫判定】
+005B1127 - 8b 17                      - mov edx,[edi]
+005B1129 - 6a 1b                      - push 1b                            1b=强化防卫
+005B112B - 8b cf                      - mov ecx,edi
+005B112D - ff 52 60                   - call dword ptr [edx+60]            判断设施是否拥有势力科技
+005B1130 - 85 c0                      - test eax,eax
+005B1132 - 74 19                      - je 005b114d
+005B1134 - 8b 47 08                   - mov eax,[edi+08]                   eax=设施类型
+005B1137 - 85 c0                      - test eax,eax
+005B1139 - 7c 12                      - jnge 005b114d
+005B113B - 83 f8 05                   - cmp eax,05
+005B113E - 7f 0d                      - jg 005b114d                        设施类型在都市(0)-城赛(5)之间可享受强化防卫科技
+005B1140 - db 45 0c                   - fild dword ptr [ebp+0c]
+005B1143 - dc c0                      - fadd st(0),st(0)                   伤害翻倍
+005B1145 - e8 2a 69 15 00             - call 00707a74
+005B114A - 89 45 0c                   - mov [ebp+0c],eax                   伤害值置回[ebp+0c]
+
+
+005B114D - 8b 07                      - mov eax,[edi]
+005B114F - 8b cf                      - mov ecx,edi
+005B1151 - ff 50 3c                   - call dword ptr [eax+3c]
+005B1154 - 8b 08                      - mov ecx,[eax]
+005B1156 - 89 4d 58                   - mov [ebp+58],ecx
+005B1159 - 8b 16                      - mov edx,[esi]
+005B115B - 8b ce                      - mov ecx,esi
+005B115D - ff 52 3c                   - call dword ptr [edx+3c]
+005B1160 - 8b 00                      - mov eax,[eax]
+005B1162 - 5f                         - pop edi
+005B1163 - 5e                         - pop esi
+005B1164 - 89 45 5c                   - mov [ebp+5c],eax
+005B1167 - 5d                         - pop ebp
+005B1168 - 5b                         - pop ebx
+005B1169 - 83 c4 08                   - add esp,08
+005B116C - c3                         - ret
+
+
+数据区1－005B1170
+73 0F 5B 00 CA 0F 5B 00 16 10 5B 00 
+
+数据区2－005B117C
+00 00 00 01 01 01 01 01 02 02 01

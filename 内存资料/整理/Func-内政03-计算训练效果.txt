@@ -1,0 +1,158 @@
+功能: 计算训练效果
+参数表: [esp+04]=设施指针，[esp+08]=训练武将数组指针
+备注：有两个入口调用这个函数：
+  1、执行训练
+  005C4309 - e8 42 fc ff ff             - call 005c3f50
+  2、展现训练界面
+  0060530B - e8 40 ec fb ff             - call 005c3f50
+
+*****************************************************************************************************************************************************
+
+005C3F50 - 51                         - push ecx
+005C3F51 - 57                         - push edi
+005C3F52 - 8b 7c 24 0c                - mov edi,[esp+0c]               edi = 设施指针
+005C3F56 - 57                         - push edi
+005C3F57 - e8 d4 66 eb ff             - call 0047a630                  校验指针
+005C3F5C - 83 c4 04                   - add esp,04
+005C3F5F - 85 c0                      - test eax,eax
+005C3F61 - 0f 84 06 01 00 00          - je 005c406d                    校验失败则返回0
+005C3F67 - 8b 44 24 10                - mov eax,[esp+10]               eax = 训练武将数组指针
+005C3F6B - 8b 08                      - mov ecx,[eax]                  ecx = 首个征兵武将指针
+005C3F6D - 51                         - push ecx
+005C3F6E - e8 bd 66 eb ff             - call 0047a630                  校验指针
+005C3F73 - 83 c4 04                   - add esp,04
+005C3F76 - 85 c0                      - test eax,eax
+005C3F78 - 0f 84 ef 00 00 00          - je 005c406d                    校验失败则返回0
+005C3F7E - 8b 17                      - mov edx,[edi]
+005C3F80 - 8b cf                      - mov ecx,edi
+005C3F82 - ff 52 40                   - call dword ptr [edx+40]        获取设施所属势力ID
+005C3F85 - 50                         - push eax
+005C3F86 - b9 58 19 20 07             - mov ecx,07201958
+005C3F8B - e8 10 cb ec ff             - call 00490aa0                  根据势力ID获取势力指针
+005C3F90 - 50                         - push eax
+005C3F91 - e8 9a 66 eb ff             - call 0047a630                  校验指针 
+005C3F96 - 83 c4 04                   - add esp,04
+005C3F99 - 85 c0                      - test eax,eax
+005C3F9B - 0f 84 cc 00 00 00          - je 005c406d                    校验失败则返回0
+005C3FA1 - 53                         - push ebx
+005C3FA2 - 55                         - push ebp
+005C3FA3 - 33 ed                      - xor ebp,ebp                    ebp = 0
+005C3FA5 - 56                         - push esi
+005C3FA6 - 89 6c 24 10                - mov [esp+10],ebp
+005C3FAA - bb 00 00 00 80             - mov ebx,80000000
+005C3FAF - 90                         - nop
+
+【获取武将武力】
+005C3FB0 - 8b 44 24 1c                - mov eax,[esp+1c]               eax = 训练武将数组指针
+005C3FB4 - 8b 34 a8                   - mov esi,[eax+ebp*4]            esi = 武将指针
+005C3FB7 - 56                         - push esi
+005C3FB8 - e8 73 66 eb ff             - call 0047a630                  校验指针
+005C3FBD - 83 c4 04                   - add esp,04
+005C3FC0 - 85 c0                      - test eax,eax
+005C3FC2 - 74 1a                      - je 005c3fde                    校验失败则循环下一个武将
+005C3FC4 - 8b ce                      - mov ecx,esi
+005C3FC6 - e8 b5 50 ec ff             - call 00489080                  获取武将武力
+005C3FCB - 8b 54 24 10                - mov edx,[esp+10]
+005C3FCF - 0f b6 c0                   - movzx eax,al
+005C3FD2 - 03 d0                      - add edx,eax
+005C3FD4 - 3b d8                      - cmp ebx,eax
+005C3FD6 - 89 54 24 10                - mov [esp+10],edx               [esp+10] = 武力和
+005C3FDA - 7d 02                      - jnl 005c3fde
+005C3FDC - 8b d8                      - mov ebx,eax                    ebx = 3人中的最高武力值
+005C3FDE - 45                         - inc ebp
+005C3FDF - 83 fd 03                   - cmp ebp,03                     循环3次
+005C3FE2 - 7c cc                      - jnge 005c3fb0
+
+【计算训练效果】
+005C3FE4 - 8b cf                      - mov ecx,edi                    edi = 设施指针
+005C3FE6 - e8 25 30 ec ff             - call 00487010                  获取城市气力上限（训练时调用）
+005C3FEB - 8b 17                      - mov edx,[edi]
+005C3FED - 8b cf                      - mov ecx,edi
+005C3FEF - 8b e8                      - mov ebp,eax                    ebp = 气力上限
+005C3FF1 - ff 52 50                   - call dword ptr [edx+50]        获取兵力
+005C3FF4 - 8b c8                      - mov ecx,eax
+005C3FF6 - b8 d3 4d 62 10             - mov eax,10624dd3
+005C3FFB - f7 e9                      - imul ecx
+005C3FFD - c1 fa 07                   - sar dl,07
+005C4000 - 8b c2                      - mov eax,edx
+005C4002 - c1 e8 1f                   - shr eax,1f
+005C4005 - 8d 44 02 14                - lea eax,[edx+eax+14]
+005C4009 - 83 f8 64                   - cmp eax,64
+005C400C - b9 64 00 00 00             - mov ecx,00000064
+005C4011 - 7f 02                      - jg 005c4015
+005C4013 - 8b c8                      - mov ecx,eax
+005C4015 - 8b 54 24 10                - mov edx,[esp+10]
+005C4019 - 8d 04 13                   - lea eax,[ebx+edx]
+005C401C - 99                         - cdq
+005C401D - f7 f9                      - idiv ecx
+005C401F - 8b f0                      - mov esi,eax                    esi = 训练效果计算值
+005C4021 - 8b 47 08                   - mov eax,[edi+08]               eax = 设施类型
+005C4024 - 83 c6 03                   - add esi,03                     武力为1时，也能有3点效果
+005C4027 - 85 c0                      - test eax,eax
+005C4029 - 75 22                      - jne 005c404d
+
+【练兵所训练增加】
+005C402B - 6a 2d                      - push 2d                        0x2d = 练兵所
+005C402D - 8b cf                      - mov ecx,edi
+005C402F - e8 bc 26 ec ff             - call 004866f0                  根据设施指针获取城市指针
+005C4034 - 50                         - push eax
+005C4035 - b9 cc b3 80 07             - mov ecx,0780b3cc
+005C403A - e8 71 9a ed ff             - call 0049dab0                  判断城市是否有练兵所
+005C403F - 85 c0                      - test eax,eax
+005C4041 - 74 0a                      - je 005c404d
+005C4043 - 8d 04 76                   - lea eax,[esi+esi*2]            有练兵所，训练效果1.5倍
+005C4046 - 99                         - cdq
+005C4047 - 2b c2                      - sub eax,edx
+005C4049 - d1 f8                      - sar eax,1
+005C404B - 8b f0                      - mov esi,eax                    esi = 训练效果计算值
+
+【城市气力上限判定】
+005C404D - 8b 07                      - mov eax,[edi]                  edi = 设施指针
+005C404F - 8b cf                      - mov ecx,edi
+005C4051 - ff 50 54                   - call dword ptr [eax+54]        获取原始气力
+005C4054 - 03 c6                      - add eax,esi                    eax = 原始气力+训练值
+005C4056 - 3b e8                      - cmp ebp,eax                    比较气力上限
+005C4058 - 7d 0b                      - jnl 005c4065
+005C405A - 8b 17                      - mov edx,[edi]
+005C405C - 8b cf                      - mov ecx,edi
+005C405E - ff 52 54                   - call dword ptr [edx+54]        获取原始气力
+005C4061 - 2b e8                      - sub ebp,eax
+005C4063 - 8b f5                      - mov esi,ebp                    esi = 气力上限与原始气力之差
+
+005C4065 - 8b c6                      - mov eax,esi                    eax = esi(最终返回的训练效果值)
+005C4067 - 5e                         - pop esi
+005C4068 - 5d                         - pop ebp
+005C4069 - 5b                         - pop ebx
+005C406A - 5f                         - pop edi
+005C406B - 59                         - pop ecx
+005C406C - c3                         - ret
+005C406D - 33 c0                      - xor eax,eax
+005C406F - 5f                         - pop edi
+005C4070 - 59                         - pop ecx
+005C4071 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改1 - 训练倍率可调整
+005C401F - e9 94 5d 2e 00             - jmp 008a9db8
+
+008A9DB8 - 69 c0 64 00 00 00          - imul eax,eax,00000064          训练倍率(0x64表示100%，每增加或减少1表示倍率上调或下降1%)
+008A9DBE - b9 64 00 00 00             - mov ecx,00000064
+008A9DC3 - 99                         - cdq
+008A9DC4 - f7 f9                      - idiv ecx
+008A9DC6 - 8b f0                      - mov esi,eax
+008A9DC8 - 8b 47 08                   - mov eax,[edi+08]
+008A9DCB - e9 54 a2 d1 ff             - jmp 005c4024
+
+
+=====================================================================================================================================================
+
+修改2 - 练兵所训练倍率可调整
+005C4046 - e9 89 5d 2e 00             - jmp 008a9dd4
+
+008A9DD4 - 69 c6 96 00 00 00          - imul eax,esi,00000096          训练倍率(0x96表示150%，每增加或减少1表示倍率上调或下降1%)
+008A9DDA - b9 64 00 00 00             - mov ecx,00000064
+008A9DDF - 99                         - cdq
+008A9DE0 - f7 f9                      - idiv ecx
+008A9DE2 - e9 64 a2 d1 ff             - jmp 005c404b

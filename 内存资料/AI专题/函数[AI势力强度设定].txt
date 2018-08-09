@@ -1,0 +1,705 @@
+005E8E50 - 55                    - push ebp
+005E8E51 - 8B EC                 - mov ebp,esp
+005E8E53 - 83 E4 F8              - and esp,-08 { 248 }
+005E8E56 - 6A FF                 - push -01 { 255 }
+005E8E58 - 68 54537300           - push 00735354 { [892F70B8] }
+005E8E5D - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+005E8E63 - 50                    - push eax
+005E8E64 - 64 89 25 00000000     - mov fs:[00000000],esp { 0 }
+005E8E6B - 81 EC A4010000        - sub esp,000001A4 { 420 }
+005E8E71 - 53                    - push ebx
+005E8E72 - 55                    - push ebp
+005E8E73 - 56                    - push esi
+005E8E74 - 57                    - push edi
+005E8E75 - 8B E9                 - mov ebp,ecx
+005E8E77 - 33 FF                 - xor edi,edi
+005E8E79 - BB 90623F07           - mov ebx,073F6290 { [00FF004D] }
+005E8E7E - 8B FF                 - mov edi,edi
+005E8E80 - 57                    - push edi
+005E8E81 - B9 58192007           - mov ecx,07201958 { [0079C134] }
+005E8E86 - E8 157CEAFF           - call 00490AA0
+005E8E8B - 8B F0                 - mov esi,eax
+005E8E8D - 56                    - push esi
+005E8E8E - E8 9D17E9FF           - call 0047A630
+005E8E93 - 83 C4 04              - add esp,04 { 4 }
+005E8E96 - 85 C0                 - test eax,eax
+005E8E98 - 74 10                 - je 005E8EAA
+005E8E9A - 8B 06                 - mov eax,[esi]
+005E8E9C - 8B CE                 - mov ecx,esi
+005E8E9E - FF 50 48              - call dword ptr [eax+48]
+005E8EA1 - 85 C0                 - test eax,eax
+005E8EA3 - 75 05                 - jne 005E8EAA
+005E8EA5 - 80 3B 00              - cmp byte ptr [ebx],00 { 0 }
+005E8EA8 - 77 13                 - ja 005E8EBD
+005E8EAA - 81 C3 D4000000        - add ebx,000000D4 { 212 }
+005E8EB0 - 47                    - inc edi
+005E8EB1 - 81 FB 58853F07        - cmp ebx,073F8558 { [FFFF0104] }
+005E8EB7 - 7C C7                 - jl 005E8E80
+005E8EB9 - 33 FF                 - xor edi,edi
+005E8EBB - EB 2F                 - jmp 005E8EEC
+005E8EBD - A1 B4192007           - mov eax,[072019B4] { [00000001] }
+005E8EC2 - 33 FF                 - xor edi,edi
+005E8EC4 - 3B C7                 - cmp eax,edi
+005E8EC6 - 76 24                 - jna 005E8EEC
+005E8EC8 - 6A 01                 - push 01 { 1 }
+005E8ECA - B9 C416A909           - mov ecx,09A916C4 { [00000000] }
+005E8ECF - E8 BCEB0000           - call 005F7A90
+005E8ED4 - 85 C0                 - test eax,eax
+005E8ED6 - 75 14                 - jne 005E8EEC
+005E8ED8 - 6A 01                 - push 01 { 1 }
+005E8EDA - B9 C416A909           - mov ecx,09A916C4 { [00000000] }
+005E8EDF - E8 5CEC0000           - call 005F7B40
+005E8EE4 - 85 C0                 - test eax,eax
+005E8EE6 - 0F84 3B080000         - je 005E9727
+005E8EEC - B8 0A000000           - mov eax,0000000A { 10 }
+005E8EF1 - 89 7C 24 48           - mov [esp+48],edi
+005E8EF5 - 89 7C 24 4C           - mov [esp+4C],edi
+005E8EF9 - 89 7C 24 44           - mov [esp+44],edi
+005E8EFD - 89 7C 24 40           - mov [esp+40],edi
+005E8F01 - 89 7C 24 50           - mov [esp+50],edi
+005E8F05 - 89 44 24 54           - mov [esp+54],eax
+005E8F09 - 89 7C 24 58           - mov [esp+58],edi
+005E8F0D - C7 44 24 3C F8CE8400  - mov [esp+3C],0084CEF8 { [005E1390] }
+005E8F15 - 89 BC 24 BC010000     - mov [esp+000001BC],edi
+005E8F1C - 89 7C 24 28           - mov [esp+28],edi
+005E8F20 - 89 7C 24 2C           - mov [esp+2C],edi
+005E8F24 - 89 7C 24 24           - mov [esp+24],edi
+005E8F28 - 89 7C 24 20           - mov [esp+20],edi
+005E8F2C - 89 7C 24 30           - mov [esp+30],edi
+005E8F30 - 89 44 24 34           - mov [esp+34],eax
+005E8F34 - 89 7C 24 38           - mov [esp+38],edi
+005E8F38 - C7 44 24 1C 9C7B7E00  - mov [esp+1C],007E7B9C { [005E1390] }
+005E8F40 - C6 84 24 BC010000 01  - mov byte ptr [esp+000001BC],01 { 1 }
+005E8F48 - EB 06                 - jmp 005E8F50
+005E8F4A - 8D 9B 00000000        - lea ebx,[ebx+00000000]
+005E8F50 - 57                    - push edi
+005E8F51 - B9 58192007           - mov ecx,07201958 { [0079C134] }
+005E8F56 - E8 457BEAFF           - call 00490AA0
+005E8F5B - 8B F0                 - mov esi,eax
+005E8F5D - 56                    - push esi
+005E8F5E - E8 CD16E9FF           - call 0047A630
+005E8F63 - 83 C4 04              - add esp,04 { 4 }
+005E8F66 - 85 C0                 - test eax,eax
+005E8F68 - 75 1B                 - jne 005E8F85
+005E8F6A - 8B 45 08              - mov eax,[ebp+08]
+005E8F6D - 50                    - push eax
+005E8F6E - B9 58192007           - mov ecx,07201958 { [0079C134] }
+005E8F73 - E8 F882EAFF           - call 00491270
+005E8F78 - 50                    - push eax
+005E8F79 - B9 C416A909           - mov ecx,09A916C4 { [00000000] }
+005E8F7E - E8 1DDA0000           - call 005F69A0
+005E8F83 - EB 19                 - jmp 005E8F9E
+005E8F85 - 8B 16                 - mov edx,[esi]
+005E8F87 - 8B CE                 - mov ecx,esi
+005E8F89 - FF 52 48              - call dword ptr [edx+48]
+005E8F8C - 85 C0                 - test eax,eax
+005E8F8E - 56                    - push esi
+005E8F8F - 8D 4C 24 20           - lea ecx,[esp+20]
+005E8F93 - 74 04                 - je 005E8F99
+005E8F95 - 8D 4C 24 40           - lea ecx,[esp+40]
+005E8F99 - E8 12D8EBFF           - call 004A67B0
+005E8F9E - 47                    - inc edi
+005E8F9F - 83 FF 2A              - cmp edi,2A { 42 }
+005E8FA2 - 7C AC                 - jl 005E8F50
+005E8FA4 - 8B 4C 24 28           - mov ecx,[esp+28]
+005E8FA8 - 33 DB                 - xor ebx,ebx
+005E8FAA - 3B CB                 - cmp ecx,ebx
+005E8FAC - 75 4A                 - jne 005E8FF8
+005E8FAE - C7 44 24 1C 7C7B7E00  - mov [esp+1C],007E7B7C { [005E1390] }
+005E8FB6 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E8FBA - C6 84 24 BC010000 02  - mov byte ptr [esp+000001BC],02 { 2 }
+005E8FC2 - E8 8961EBFF           - call 0049F150
+005E8FC7 - BE 587B7E00           - mov esi,007E7B58 { [0049EFE0] }
+005E8FCC - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E8FD0 - 88 9C 24 BC010000     - mov [esp+000001BC],bl
+005E8FD7 - 89 74 24 1C           - mov [esp+1C],esi
+005E8FDB - E8 7061EBFF           - call 0049F150
+005E8FE0 - C7 44 24 3C D8CE8400  - mov [esp+3C],0084CED8 { [005E1390] }
+005E8FE8 - C7 84 24 BC010000 03000000 - mov [esp+000001BC],00000003 { 3 }
+005E8FF3 - E9 0E070000           - jmp 005E9706
+005E8FF8 - 8B 44 24 48           - mov eax,[esp+48]
+005E8FFC - 03 C8                 - add ecx,eax
+005E8FFE - 83 F9 04              - cmp ecx,04 { 4 }
+005E9001 - 0F8D EE000000         - jnl 005E90F5
+005E9007 - 3B C3                 - cmp eax,ebx
+005E9009 - 0F8E E6000000         - jng 005E90F5
+005E900F - 8B 44 24 20           - mov eax,[esp+20]
+005E9013 - 3B C3                 - cmp eax,ebx
+005E9015 - 89 44 24 14           - mov [esp+14],eax
+005E9019 - 74 4F                 - je 005E906A
+005E901B - EB 03                 - jmp 005E9020
+
+005E901D - 8D 49 00              - lea ecx,[ecx+00]
+005E9020 - 50                    - push eax
+005E9021 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E9025 - E8 A67FEBFF           - call 004A0FD0
+005E902A - 8B 30                 - mov esi,[eax]
+005E902C - 8B 06                 - mov eax,[esi]
+005E902E - 8B CE                 - mov ecx,esi
+005E9030 - FF 50 28              - call dword ptr [eax+28]
+005E9033 - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E9039 - C6 80 90623F07 64     - mov byte ptr [eax+073F6290],64 { 100 }
+005E9040 - 8B 16                 - mov edx,[esi]
+005E9042 - 8B CE                 - mov ecx,esi
+005E9044 - FF 52 28              - call dword ptr [edx+28]
+005E9047 - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E904D - C6 80 91623F07 64     - mov byte ptr [eax+073F6291],64 { 100 }
+005E9054 - 8D 44 24 14           - lea eax,[esp+14]
+005E9058 - 50                    - push eax
+005E9059 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E905D - E8 EE5EEBFF           - call 0049EF50
+005E9062 - 8B 44 24 14           - mov eax,[esp+14]
+005E9066 - 3B C3                 - cmp eax,ebx
+005E9068 - 75 B6                 - jne 005E9020
+005E906A - 8B 44 24 40           - mov eax,[esp+40]
+005E906E - 3B C3                 - cmp eax,ebx
+005E9070 - 89 44 24 14           - mov [esp+14],eax
+005E9074 - 74 34                 - je 005E90AA
+005E9076 - 50                    - push eax
+005E9077 - 8D 4C 24 40           - lea ecx,[esp+40]
+005E907B - E8 507FEBFF           - call 004A0FD0
+005E9080 - 8B 08                 - mov ecx,[eax]
+005E9082 - 8B 11                 - mov edx,[ecx]
+005E9084 - FF 52 28              - call dword ptr [edx+28]
+005E9087 - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E908D - C6 80 90623F07 64     - mov byte ptr [eax+073F6290],64 { 100 }
+005E9094 - 8D 44 24 14           - lea eax,[esp+14]
+005E9098 - 50                    - push eax
+005E9099 - 8D 4C 24 40           - lea ecx,[esp+40]
+005E909D - E8 AE5EEBFF           - call 0049EF50
+005E90A2 - 8B 44 24 14           - mov eax,[esp+14]
+005E90A6 - 3B C3                 - cmp eax,ebx
+005E90A8 - 75 CC                 - jne 005E9076
+005E90AA - C7 44 24 1C 7C7B7E00  - mov [esp+1C],007E7B7C { [005E1390] }
+005E90B2 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E90B6 - C6 84 24 BC010000 04  - mov byte ptr [esp+000001BC],04 { 4 }
+005E90BE - E8 8D60EBFF           - call 0049F150
+005E90C3 - BE 587B7E00           - mov esi,007E7B58 { [0049EFE0] }
+005E90C8 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E90CC - C6 84 24 BC010000 00  - mov byte ptr [esp+000001BC],00 { 0 }
+005E90D4 - 89 74 24 1C           - mov [esp+1C],esi
+005E90D8 - E8 7360EBFF           - call 0049F150
+005E90DD - C7 44 24 3C D8CE8400  - mov [esp+3C],0084CED8 { [005E1390] }
+005E90E5 - C7 84 24 BC010000 05000000 - mov [esp+000001BC],00000005 { 5 }
+005E90F0 - E9 11060000           - jmp 005E9706
+
+/*--------循环42个势力--------*/ 设置基础势力强度
+005E90F5 - 53                    - push ebx
+005E90F6 - 53                    - push ebx
+005E90F7 - 33 C0                 - xor eax,eax
+005E90F9 - B9 2A000000           - mov ecx,0000002A { 42 }
+005E90FE - 8D 7C 24 68           - lea edi,[esp+68]
+005E9102 - 6A 18                 - push 18 { 24 }
+005E9104 - F3 AB                 - repe stosd 
+005E9106 - 6A 01                 - push 01 { 1 }
+005E9108 - 8D 4C 24 2C           - lea ecx,[esp+2C]
+005E910C - E8 AF94FCFF           - call 005B25C0
+
+005E9111 - 8B 44 24 20           - mov eax,[esp+20]				一种循环方式
+005E9115 - 3B C3                 - cmp eax,ebx
+005E9117 - 89 44 24 14           - mov [esp+14],eax
+005E911B - 74 71                 - je 005E918E
+005E911D - 8D 49 00              - lea ecx,[ecx+00]
+
+005E9120 - 8D 4C 24 14           - lea ecx,[esp+14]
+005E9124 - 51                    - push ecx
+005E9125 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E9129 - E8 225EEBFF           - call 0049EF50				取列表指针
+005E912E - 8B 30                 - mov esi,[eax]				esi = 势力指针
+005E9130 - 56                    - push esi
+005E9131 - E8 FA14E9FF           - call 0047A630				校验指针
+005E9136 - 83 C4 04              - add esp,04
+005E9139 - 85 C0                 - test eax,eax
+005E913B - 74 51                 - je 005E918E					校验失败则直接进入下一环节
+005E913D - 8B 16                 - mov edx,[esi]
+005E913F - 8B CE                 - mov ecx,esi
+005E9141 - FF 52 28              - call dword ptr [edx+28]			根据势力指针获取势力ID
+005E9144 - 85 C0                 - test eax,eax
+005E9146 - 7D 0C                 - jnl 005E9154
+005E9148 - 8B 06                 - mov eax,[esi]
+005E914A - 8B CE                 - mov ecx,esi
+005E914C - FF 50 28              - call dword ptr [eax+28]			根据势力指针获取势力ID
+005E914F - 83 F8 2A              - cmp eax,2A
+005E9152 - 7D 3A                 - jnl 005E918E					势力ID如不在0-41区间内则进入下一环节
+005E9154 - 6A 18                 - push 18
+005E9156 - 56                    - push esi
+005E9157 - E8 04B1EDFF           - call 004C4260				该函数的作用是获取势力据点内总兵力
+005E915C - 8B C8                 - mov ecx,eax
+005E915E - 81 C1 0F270000        - add ecx,0000270F { 9999 }            ecx = 总兵力 + 9999
+005E9164 - B8 AD8BDB68           - mov eax,68DB8BAD { 1759218605 }	
+005E9169 - F7 E9                 - imul ecx
+005E916B - C1 FA 0C              - sar edx,0C { 12 }
+005E916E - 8B C2                 - mov eax,edx
+005E9170 - C1 E8 1F              - shr eax,1F { 31 }
+005E9173 - 03 C2                 - add eax,edx                          eax = ecx * 0.0001
+005E9175 - 8B 16                 - mov edx,[esi]
+005E9177 - 8D 3C 80              - lea edi,[eax+eax*4]			edi = eax * 5
+005E917A - 83 C4 08              - add esp,08 { 8 }
+005E917D - 8B CE                 - mov ecx,esi
+005E917F - D1 E7                 - shl edi,1                            edi = edi * 2 (即edi = 势力据点内总兵力 * 0.001, 向上十位取整)
+005E9181 - FF 52 28              - call dword ptr [edx+28]			根据势力指针获取势力ID
+005E9184 - 89 7C 84 60           - mov [esp+eax*4+60],edi			edi = 势力基础强度
+
+005E9188 - 39 5C 24 14           - cmp [esp+14],ebx				也是一种循环的方式，不为0则取列表中下一个指针
+005E918C - 75 92                 - jne 005E9120
+
+/*--------循环42个势力--------*/ 设置附加势力强度
+005E918E - 33 F6                 - xor esi,esi					esi = 0（势力ID）
+005E9190 - 56                    - push esi
+005E9191 - B9 58192007           - mov ecx,07201958
+005E9196 - E8 0579EAFF           - call 00490AA0				根据势力ID获取势力指针
+005E919B - 8B F8                 - mov edi,eax					edi = 势力指针
+005E919D - 57                    - push edi
+005E919E - E8 8D14E9FF           - call 0047A630				校验指针
+005E91A3 - 83 C4 04              - add esp,04
+005E91A6 - 85 C0                 - test eax,eax
+005E91A8 - 0F84 98010000         - je 005E9346					校验失败则循环下一个
+005E91AE - 8B 47 04              - mov eax,[edi+04]				eax = 势力君主ID
+005E91B1 - 3D 57010000           - cmp eax,00000157 { 343 }			343 = 曹操
+005E91B6 - 0F84 2F030000         - je 005E94EB
+005E91BC - 3D 72010000           - cmp eax,00000172 { 370 }			370 = 孙策
+005E91C1 - 0F84 24030000         - je 005E94EB
+005E91C7 - 3D 48010000           - cmp eax,00000148 { 328 }			328 = 曹睿
+005E91CC - 0F84 19030000         - je 005E94EB
+005E91D2 - 3D 5B010000           - cmp eax,0000015B { 347 }			347 = 曹丕
+005E91D7 - 0F84 0E030000         - je 005E94EB
+005E91DD - 3D 7B020000           - cmp eax,0000027B { 635 }			635 = 刘备
+005E91E2 - 0F84 03030000         - je 005E94EB
+												以上君主ID，势力强度 + 2000
+005E91E8 - 3D 6D010000           - cmp eax,0000016D { 365 }			365 = 孙坚
+005E91ED - 0F84 EA020000         - je 005E94DD
+005E91F3 - 3D 6F010000           - cmp eax,0000016F { 367 }			367 = 孙权
+005E91F8 - 0F84 DF020000         - je 005E94DD
+												以上君主ID，势力强度 + 1900
+005E91FE - 3D 21010000           - cmp eax,00000121 { 289 }			289 = 诸葛亮
+005E9203 - 0F84 C6020000         - je 005E94CF
+005E9209 - 3D F5000000           - cmp eax,000000F5 { 245 }			245 = 周瑜
+005E920E - 0F84 BB020000         - je 005E94CF
+005E9214 - 3D 52010000           - cmp eax,00000152 { 338 }			338 = 曹彰
+005E9219 - 0F84 B0020000         - je 005E94CF
+005E921F - 3D E1000000           - cmp eax,000000E1 { 225 }			225 = 司马懿
+005E9224 - 0F84 A5020000         - je 005E94CF
+												以上君主ID，势力强度 + 1800
+005E922A - 3D ED010000           - cmp eax,000001ED { 493 }			493 = 董卓
+005E922F - 0F84 8C020000         - je 005E94C1
+005E9235 - 3D 94020000           - cmp eax,00000294 { 660 }			660 = 吕布
+005E923A - 0F84 81020000         - je 005E94C1
+												以上君主ID，势力强度 + 1700
+005E9240 - 3D 93010000           - cmp eax,00000193 { 403 }			403 = 张角
+005E9245 - 0F84 68020000         - je 005E94B3
+005E924B - 83 F8 12              - cmp eax,12 { 18 }				18 = 袁绍
+005E924E - 0F84 5F020000         - je 005E94B3
+												以上君主ID，势力强度 + 1600
+005E9254 - 3D 03020000           - cmp eax,00000203 { 515 }			515 = 马超
+005E9259 - 0F84 46020000         - je 005E94A5
+005E925F - 3D B4000000           - cmp eax,000000B4 { 180 }			180 = 公孙瓒
+005E9264 - 0F84 3B020000         - je 005E94A5
+												以上君主ID，势力强度 + 1500
+005E926A - 3D 73020000           - cmp eax,00000273 { 627 }			627 = 刘谌
+005E926F - 0F84 22020000         - je 005E9497
+005E9275 - 3D 80020000           - cmp eax,00000280 { 640 }			640 = 刘封
+005E927A - 0F84 17020000         - je 005E9497
+												以上君主ID，势力强度 + 1400
+005E9280 - 3D 7C010000           - cmp eax,0000017C { 380 }			380 = 孙登
+005E9285 - 0F84 FE010000         - je 005E9489
+005E928B - 3D 75020000           - cmp eax,00000275 { 629 }			629 = 刘禅
+005E9290 - 0F84 F3010000         - je 005E9489
+												以上君主ID，势力强度 + 1300
+005E9296 - 83 F8 10              - cmp eax,10 { 16 }				16 = 袁术
+005E9299 - 75 0E                 - jne 005E92A9
+005E929B - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E929F - 05 B0040000           - add eax,000004B0 { 1200 }		袁术君主ID，势力强度 + 1200
+005E92A4 - E9 99000000           - jmp 005E9342
+005E92A9 - 3D 07010000           - cmp eax,00000107 { 263 }			263 = 钟会
+005E92AE - 0F84 C7010000         - je 005E947B
+005E92B4 - 3D E1010000           - cmp eax,000001E1 { 481 }			481 = 邓艾
+005E92B9 - 0F84 BC010000         - je 005E947B
+005E92BF - 83 F8 62              - cmp eax,62 { 98 }				98 = 关羽
+005E92C2 - 0F84 B3010000         - je 005E947B
+005E92C8 - 3D 5A020000           - cmp eax,0000025A { 602 }			602 = 陆逊
+005E92CD - 0F84 A8010000         - je 005E947B
+												以上君主ID，势力强度 + 1100
+005E92D3 - 3D E3000000           - cmp eax,000000E3 { 227 }			602 = 司马师
+005E92D8 - 74 5F                 - je 005E9339
+005E92DA - 3D E4000000           - cmp eax,000000E4 { 228 }			602 = 司马昭
+005E92DF - 74 58                 - je 005E9339
+005E92E1 - 3D E2000000           - cmp eax,000000E2 { 226 }			602 = 司马炎
+005E92E6 - 74 51                 - je 005E9339
+												以上君主ID，势力强度 + 1000
+005E92E8 - 3D 70020000           - cmp eax,00000270 { 624 }			624 = 刘璋
+005E92ED - 74 21                 - je 005E9310
+005E92EF - 3D 7C020000           - cmp eax,0000027C { 636 }			636 = 刘表
+005E92F4 - 74 1A                 - je 005E9310
+005E92F6 - 83 F8 32              - cmp eax,32 { 50 }				50 = 王朗
+005E92F9 - 74 15                 - je 005E9310
+005E92FB - 3D A0000000           - cmp eax,000000A0 { 160 }			160 = 严白虎
+005E9300 - 74 0E                 - je 005E9310
+005E9302 - 3D 82020000           - cmp eax,00000282 { 642 }			624 = 刘繇
+005E9307 - 74 07                 - je 005E9310
+005E9309 - 3D E4010000           - cmp eax,000001E4 { 484 }			484 = 陶谦
+005E930E - 75 04                 - jne 005E9314
+005E9310 - 89 5C B4 60           - mov [esp+esi*4+60],ebx			以上君主ID，势力强度 = ebx（猜测无视基础值强行清零）
+
+005E9314 - 68 21010000           - push 00000121 { 289 }			289 = 诸葛亮
+005E9319 - B9 58192007           - mov ecx,07201958
+005E931E - E8 DD77EAFF           - call 00490B00				根据武将ID获取武将指针
+005E9323 - 8B 10                 - mov edx,[eax]
+005E9325 - 8B C8                 - mov ecx,eax
+005E9327 - FF 52 40              - call dword ptr [edx+40]			获取武将所属势力ID
+005E932A - 50                    - push eax
+005E932B - B9 58192007           - mov ecx,07201958
+005E9330 - E8 6B77EAFF           - call 00490AA0				根据势力ID获取势力指针
+005E9335 - 3B F8                 - cmp edi,eax					判定诸葛亮是否属于当前势力
+005E9337 - 75 0D                 - jne 005E9346
+005E9339 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E933D - 05 E8030000           - add eax,000003E8 { 1000 }		当前君主ID强度+1000 
+005E9342 - 89 44 B4 60           - mov [esp+esi*4+60],eax
+
+005E9346 - 46                    - inc esi					esi++
+005E9347 - 83 FE 2A              - cmp esi,2A					最多42个势力
+005E934A - 0F8C 40FEFFFF         - jl 005E9190					循环下一个
+
+005E947B - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E947F - 05 4C040000           - add eax,0000044C { 1100 }
+005E9484 - E9 B9FEFFFF           - jmp 005E9342
+005E9489 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E948D - 05 14050000           - add eax,00000514 { 1300 }
+005E9492 - E9 ABFEFFFF           - jmp 005E9342
+005E9497 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E949B - 05 78050000           - add eax,00000578 { 1400 }
+005E94A0 - E9 9DFEFFFF           - jmp 005E9342
+005E94A5 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94A9 - 05 DC050000           - add eax,000005DC { 1500 }
+005E94AE - E9 8FFEFFFF           - jmp 005E9342
+005E94B3 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94B7 - 05 40060000           - add eax,00000640 { 1600 }
+005E94BC - E9 81FEFFFF           - jmp 005E9342
+005E94C1 - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94C5 - 05 A4060000           - add eax,000006A4 { 1700 }
+005E94CA - E9 73FEFFFF           - jmp 005E9342
+005E94CF - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94D3 - 05 08070000           - add eax,00000708 { 1800 }
+005E94D8 - E9 65FEFFFF           - jmp 005E9342
+005E94DD - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94E1 - 05 6C070000           - add eax,0000076C { 1900 }
+005E94E6 - E9 57FEFFFF           - jmp 005E9342
+005E94EB - 8B 44 B4 60           - mov eax,[esp+esi*4+60]
+005E94EF - 05 D0070000           - add eax,000007D0 { 2000 }
+005E94F4 - E9 49FEFFFF           - jmp 005E9342
+
+
+005E9350 - 6A 00                 - push 00 { 0 }
+005E9352 - 8D 44 24 64           - lea eax,[esp+64]
+005E9356 - 50                    - push eax
+005E9357 - 68 80685F00           - push 005F6880 { [245C8B53] }
+005E935C - 6A 01                 - push 01 { 1 }
+005E935E - 8D 4C 24 2C           - lea ecx,[esp+2C]
+005E9362 - E8 290BECFF           - call 004A9E90
+005E9367 - 8B 44 24 20           - mov eax,[esp+20]
+005E936B - 8B 5C 24 28           - mov ebx,[esp+28]
+005E936F - 33 FF                 - xor edi,edi
+005E9371 - 85 C0                 - test eax,eax
+005E9373 - 89 44 24 14           - mov [esp+14],eax
+005E9377 - 74 6A                 - je 005E93E3
+005E9379 - 8D A4 24 00000000     - lea esp,[esp+00000000]
+005E9380 - 8D 4C 24 14           - lea ecx,[esp+14]
+005E9384 - 51                    - push ecx
+005E9385 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E9389 - E8 C25BEBFF           - call 0049EF50
+005E938E - 8B 30                 - mov esi,[eax]
+005E9390 - 56                    - push esi
+005E9391 - E8 9A12E9FF           - call 0047A630
+005E9396 - 83 C4 04              - add esp,04 { 4 }
+005E9399 - 85 C0                 - test eax,eax
+005E939B - 74 46                 - je 005E93E3
+005E939D - 8B 16                 - mov edx,[esi]
+005E939F - 8B CE                 - mov ecx,esi
+005E93A1 - FF 52 28              - call dword ptr [edx+28]
+005E93A4 - 85 C0                 - test eax,eax
+005E93A6 - 7D 0C                 - jnl 005E93B4
+005E93A8 - 8B 06                 - mov eax,[esi]
+005E93AA - 8B CE                 - mov ecx,esi
+005E93AC - FF 50 28              - call dword ptr [eax+28]
+005E93AF - 83 F8 2A              - cmp eax,2A { 42 }
+005E93B2 - 7D 2F                 - jnl 005E93E3
+005E93B4 - 8B C3                 - mov eax,ebx
+005E93B6 - 2B C7                 - sub eax,edi
+005E93B8 - 6B C0 64              - imul eax,eax,64
+005E93BB - 33 D2                 - xor edx,edx
+005E93BD - F7 F3                 - div ebx
+005E93BF - 8B 16                 - mov edx,[esi]
+005E93C1 - 8B CE                 - mov ecx,esi
+005E93C3 - 89 44 24 5C           - mov [esp+5C],eax
+005E93C7 - FF 52 28              - call dword ptr [edx+28]
+005E93CA - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E93D0 - 8A 4C 24 5C           - mov cl,[esp+5C]
+005E93D4 - 88 88 90623F07        - mov [eax+073F6290],cl
+005E93DA - 8B 44 24 14           - mov eax,[esp+14]
+005E93DE - 47                    - inc edi
+005E93DF - 85 C0                 - test eax,eax
+005E93E1 - 75 9D                 - jne 005E9380
+005E93E3 - 8B 44 24 40           - mov eax,[esp+40]
+005E93E7 - 85 C0                 - test eax,eax
+005E93E9 - 89 44 24 14           - mov [esp+14],eax
+005E93ED - 74 35                 - je 005E9424
+005E93EF - 90                    - nop 
+005E93F0 - 50                    - push eax
+005E93F1 - 8D 4C 24 40           - lea ecx,[esp+40]
+005E93F5 - E8 D67BEBFF           - call 004A0FD0
+005E93FA - 8B 08                 - mov ecx,[eax]
+005E93FC - 8B 11                 - mov edx,[ecx]
+005E93FE - FF 52 28              - call dword ptr [edx+28]
+005E9401 - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E9407 - C6 80 90623F07 64     - mov byte ptr [eax+073F6290],64 { 100 }
+005E940E - 8D 44 24 14           - lea eax,[esp+14]
+005E9412 - 50                    - push eax
+005E9413 - 8D 4C 24 40           - lea ecx,[esp+40]
+005E9417 - E8 345BEBFF           - call 0049EF50
+005E941C - 8B 44 24 14           - mov eax,[esp+14]
+005E9420 - 85 C0                 - test eax,eax
+005E9422 - 75 CC                 - jne 005E93F0
+005E9424 - 8B 44 24 48           - mov eax,[esp+48]
+005E9428 - 85 C0                 - test eax,eax
+005E942A - 0F85 C9000000         - jne 005E94F9
+005E9430 - C7 44 24 1C 7C7B7E00  - mov [esp+1C],007E7B7C { [005E1390] }
+005E9438 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E943C - C6 84 24 BC010000 06  - mov byte ptr [esp+000001BC],06 { 6 }
+005E9444 - E8 075DEBFF           - call 0049F150
+005E9449 - BE 587B7E00           - mov esi,007E7B58 { [0049EFE0] }
+005E944E - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E9452 - C6 84 24 BC010000 00  - mov byte ptr [esp+000001BC],00 { 0 }
+005E945A - 89 74 24 1C           - mov [esp+1C],esi
+005E945E - E8 ED5CEBFF           - call 0049F150
+005E9463 - C7 44 24 3C D8CE8400  - mov [esp+3C],0084CED8 { [005E1390] }
+005E946B - C7 84 24 BC010000 07000000 - mov [esp+000001BC],00000007 { 7 }
+005E9476 - E9 8B020000           - jmp 005E9706
+
+005E94F9 - 33 C0                 - xor eax,eax
+005E94FB - B9 2A000000           - mov ecx,0000002A { 42 }
+005E9500 - 8D BC 24 08010000     - lea edi,[esp+00000108]
+005E9507 - F3 AB                 - repe stosd 
+005E9509 - 33 ED                 - xor ebp,ebp
+005E950B - EB 03                 - jmp 005E9510
+
+
+005E950D - 8D 49 00              - lea ecx,[ecx+00]
+005E9510 - 55                    - push ebp
+005E9511 - B9 58192007           - mov ecx,07201958
+005E9516 - E8 E577EAFF           - call 00490D00				根据设施ID获取设施指针
+005E951B - 8B F0                 - mov esi,eax					esi = 设施指针
+005E951D - 56                    - push esi
+005E951E - E8 0D11E9FF           - call 0047A630				校验指针
+005E9523 - 83 C4 04              - add esp,04
+005E9526 - 85 C0                 - test eax,eax
+005E9528 - 74 78                 - je 005E95A2
+005E952A - 8B 16                 - mov edx,[esi]
+005E952C - 8B CE                 - mov ecx,esi
+005E952E - FF 52 48              - call dword ptr [edx+48]			判断是否属于玩家
+005E9531 - 85 C0                 - test eax,eax
+005E9533 - 74 6D                 - je 005E95A2					不属于玩家则跳过
+
+005E9535 - 33 DB                 - xor ebx,ebx					ebx = 0
+005E9537 - 53                    - push ebx					ebx = 玩家序号
+005E9538 - 55                    - push ebp					ebp = 设施ID
+005E9539 - B9 C416A909           - mov ecx,09A916C4
+005E953E - E8 4DD60000           - call 005F6B90				会根据玩家序号和当前设施ID去获得一个设定的设施ID，什么意思看不明白
+005E9543 - 50                    - push eax
+005E9544 - B9 58192007           - mov ecx,07201958
+005E9549 - E8 B277EAFF           - call 00490D00				根据设施ID获取设施指针
+005E954E - 8B F0                 - mov esi,eax					esi = 设施指针
+005E9550 - 56                    - push esi
+005E9551 - E8 DA10E9FF           - call 0047A630				校验指针
+005E9556 - 83 C4 04              - add esp,04
+005E9559 - 85 C0                 - test eax,eax
+005E955B - 74 3F                 - je 005E959C
+005E955D - 8B 06                 - mov eax,[esi]
+005E955F - 8B CE                 - mov ecx,esi
+005E9561 - FF 50 40              - call dword ptr [eax+40]			获取所属势力ID
+005E9564 - 8B F8                 - mov edi,eax					edi = 势力ID
+005E9566 - 57                    - push edi
+005E9567 - B9 58192007           - mov ecx,07201958
+005E956C - E8 2F75EAFF           - call 00490AA0				根据势力ID获取势力指针
+005E9571 - 8B F0                 - mov esi,eax					esi = 势力指针
+005E9573 - 56                    - push esi
+005E9574 - E8 B710E9FF           - call 0047A630				校验指针
+005E9579 - 83 C4 04              - add esp,04
+005E957C - 85 C0                 - test eax,eax
+005E957E - 74 1C                 - je 005E959C
+005E9580 - 8B 16                 - mov edx,[esi]				esi = 势力指针
+005E9582 - 8B CE                 - mov ecx,esi
+005E9584 - FF 52 48              - call dword ptr [edx+48]			判断是否属于玩家
+005E9587 - 85 C0                 - test eax,eax
+005E9589 - 75 11                 - jne 005E959C					属于玩家则跳过下面4句
+005E958B - 8B 8C BC 08010000     - mov ecx,[esp+edi*4+00000108]
+005E9592 - 8D 84 BC 08010000     - lea eax,[esp+edi*4+00000108]
+005E9599 - 41                    - inc ecx
+005E959A - 89 08                 - mov [eax],ecx				会将一个值设置为1
+005E959C - 43                    - inc ebx 
+005E959D - 83 FB 07              - cmp ebx,07					ebx 范围在 0-7 之间（玩家序号）
+005E95A0 - 7C 95                 - jl 005E9537
+
+005E95A2 - 45                    - inc ebp
+005E95A3 - 83 FD 57              - cmp ebp,57
+005E95A6 - 0F8C 64FFFFFF         - jl 005E9510
+
+
+005E95AC - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E95B0 - E8 9B5BEBFF           - call 0049F150
+005E95B5 - 33 F6                 - xor esi,esi
+005E95B7 - EB 07                 - jmp 005E95C0
+
+
+005E95B9 - 8D A4 24 00000000     - lea esp,[esp+00000000]
+005E95C0 - 8B 84 B4 08010000     - mov eax,[esp+esi*4+00000108]		接上面，如果这个值为1，则进行下面的处理
+005E95C7 - 85 C0                 - test eax,eax
+005E95C9 - 7E 15                 - jle 005E95E0
+005E95CB - 56                    - push esi
+005E95CC - B9 58192007           - mov ecx,07201958 { [0079C134] }
+005E95D1 - E8 CA74EAFF           - call 00490AA0
+005E95D6 - 50                    - push eax
+005E95D7 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E95DB - E8 D0D1EBFF           - call 004A67B0
+005E95E0 - 46                    - inc esi
+005E95E1 - 83 FE 2A              - cmp esi,2A { 42 }
+005E95E4 - 7C DA                 - jl 005E95C0
+
+005E95E6 - 8B 44 24 28           - mov eax,[esp+28]
+005E95EA - 85 C0                 - test eax,eax
+005E95EC - 75 4B                 - jne 005E9639
+005E95EE - C7 44 24 1C 7C7B7E00  - mov [esp+1C],007E7B7C { [005E1390] }
+005E95F6 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E95FA - C6 84 24 BC010000 08  - mov byte ptr [esp+000001BC],08 { 8 }
+005E9602 - E8 495BEBFF           - call 0049F150
+005E9607 - BE 587B7E00           - mov esi,007E7B58 { [0049EFE0] }
+005E960C - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E9610 - C6 84 24 BC010000 00  - mov byte ptr [esp+000001BC],00 { 0 }
+005E9618 - 89 74 24 1C           - mov [esp+1C],esi
+005E961C - E8 2F5BEBFF           - call 0049F150
+005E9621 - C7 44 24 3C D8CE8400  - mov [esp+3C],0084CED8 { [005E1390] }
+005E9629 - C7 84 24 BC010000 09000000 - mov [esp+000001BC],00000009 { 9 }
+005E9634 - E9 CD000000           - jmp 005E9706
+005E9639 - 8D 44 24 60           - lea eax,[esp+60]
+005E963D - 50                    - push eax
+005E963E - 8D 8C 24 0C010000     - lea ecx,[esp+0000010C]
+005E9645 - 51                    - push ecx
+005E9646 - 68 80685F00           - push 005F6880 { [245C8B53] }
+005E964B - 6A 01                 - push 01 { 1 }
+005E964D - 8D 4C 24 2C           - lea ecx,[esp+2C]
+005E9651 - E8 3A08ECFF           - call 004A9E90
+005E9656 - B8 64000000           - mov eax,00000064 { 100 }
+005E965B - 99                    - cdq 
+005E965C - F7 7C 24 28           - idiv [esp+28]
+005E9660 - B3 64                 - mov bl,64 { 100 }
+005E9662 - 88 44 24 1B           - mov [esp+1B],al
+005E9666 - 8B 44 24 20           - mov eax,[esp+20]
+005E966A - 85 C0                 - test eax,eax
+005E966C - 89 44 24 14           - mov [esp+14],eax
+005E9670 - 74 4E                 - je 005E96C0
+005E9672 - 50                    - push eax
+005E9673 - 8D 4C 24 20           - lea ecx,[esp+20]
+005E9677 - E8 5479EBFF           - call 004A0FD0
+005E967C - 8B 00                 - mov eax,[eax]
+005E967E - 50                    - push eax
+005E967F - B9 58192007           - mov ecx,07201958 { [0079C134] }
+005E9684 - E8 E77BEAFF           - call 00491270
+005E9689 - 69 C0 D4000000        - imul eax,eax,000000D4 { 212 }
+005E968F - 8A 4C 24 1B           - mov cl,[esp+1B]
+005E9693 - 88 98 91623F07        - mov [eax+073F6291],bl
+005E9699 - 2A D9                 - sub bl,cl
+005E969B - 84 DB                 - test bl,bl
+005E969D - 7F 04                 - jg 005E96A3
+005E969F - 32 DB                 - xor bl,bl
+005E96A1 - EB 07                 - jmp 005E96AA
+005E96A3 - 80 FB 64              - cmp bl,64 { 100 }
+005E96A6 - 7C 02                 - jl 005E96AA
+005E96A8 - B3 64                 - mov bl,64 { 100 }
+005E96AA - 8D 54 24 14           - lea edx,[esp+14]
+005E96AE - 52                    - push edx
+005E96AF - 8D 4C 24 20           - lea ecx,[esp+20]
+005E96B3 - E8 9858EBFF           - call 0049EF50
+005E96B8 - 8B 44 24 14           - mov eax,[esp+14]
+005E96BC - 85 C0                 - test eax,eax
+005E96BE - 75 B2                 - jne 005E9672
+005E96C0 - C7 44 24 1C 7C7B7E00  - mov [esp+1C],007E7B7C { [005E1390] }
+005E96C8 - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E96CC - C6 84 24 BC010000 0A  - mov byte ptr [esp+000001BC],0A { 10 }
+005E96D4 - E8 775AEBFF           - call 0049F150
+005E96D9 - BE 587B7E00           - mov esi,007E7B58 { [0049EFE0] }
+005E96DE - 8D 4C 24 1C           - lea ecx,[esp+1C]
+005E96E2 - C6 84 24 BC010000 00  - mov byte ptr [esp+000001BC],00 { 0 }
+005E96EA - 89 74 24 1C           - mov [esp+1C],esi
+005E96EE - E8 5D5AEBFF           - call 0049F150
+005E96F3 - C7 44 24 3C D8CE8400  - mov [esp+3C],0084CED8 { [005E1390] }
+005E96FB - C7 84 24 BC010000 0B000000 - mov [esp+000001BC],0000000B { 11 }
+
+005E9706 - 8D 4C 24 3C           - lea ecx,[esp+3C]
+005E970A - E8 415AEBFF           - call 0049F150
+005E970F - 8D 4C 24 3C           - lea ecx,[esp+3C]
+005E9713 - 89 74 24 3C           - mov [esp+3C],esi
+005E9717 - C7 84 24 BC010000 FFFFFFFF - mov [esp+000001BC],FFFFFFFF { -1 }
+005E9722 - E8 295AEBFF           - call 0049F150
+005E9727 - 8B 8C 24 B4010000     - mov ecx,[esp+000001B4]
+005E972E - 5F                    - pop edi
+005E972F - B8 01000000           - mov eax,00000001 { 1 }
+005E9734 - 64 89 0D 00000000     - mov fs:[00000000],ecx { 0 }
+005E973B - 5E                    - pop esi
+005E973C - 5D                    - pop ebp
+005E973D - 5B                    - pop ebx
+005E973E - 8B E5                 - mov esp,ebp
+005E9740 - 5D                    - pop ebp
+005E9741 - C3                    - ret 
+
+
+=======================================================================================================
+004C4639 - 6A 13                 - push 13 { 19 }
+004C463B - 57                    - push edi					edi = 势力指针
+004C463C - E8 8FF6FFFF           - call 004C3CD0
+
+004C3CD0 - 51                    - push ecx
+004C3CD1 - 53                    - push ebx
+004C3CD2 - 55                    - push ebp
+004C3CD3 - 8B 6C 24 10           - mov ebp,[esp+10]				ebp = 势力指针
+004C3CD7 - 56                    - push esi
+004C3CD8 - 33 DB                 - xor ebx,ebx					ebx = 0
+004C3CDA - 57                    - push edi
+004C3CDB - 89 5C 24 10           - mov [esp+10],ebx				[esp+10] 初始清零
+004C3CDF - 90                    - nop 
+004C3CE0 - 53                    - push ebx
+004C3CE1 - B9 58192007           - mov ecx,07201958
+004C3CE6 - E8 15D0FCFF           - call 00490D00				根据设施ID获取设施指针
+004C3CEB - 8B F0                 - mov esi,eax
+004C3CED - 56                    - push esi					esi = 设施指针
+004C3CEE - E8 3D69FBFF           - call 0047A630				校验指针
+004C3CF3 - 83 C4 04              - add esp,04 { 4 }
+004C3CF6 - 85 C0                 - test eax,eax
+004C3CF8 - 74 30                 - je 004C3D2A
+
+004C3CFA - 55                    - push ebp
+004C3CFB - B9 58192007           - mov ecx,07201958
+004C3D00 - E8 6BD5FCFF           - call 00491270				根据势力指针获取势力ID
+004C3D05 - 8B F8                 - mov edi,eax
+004C3D07 - 8B 06                 - mov eax,[esi]
+004C3D09 - 8B CE                 - mov ecx,esi
+004C3D0B - FF 50 40              - call dword ptr [eax+40]			获取所属势力ID
+004C3D0E - 3B C7                 - cmp eax,edi					比较
+004C3D10 - 75 18                 - jne 004C3D2A
+
+004C3D12 - 8B 4C 24 1C           - mov ecx,[esp+1C]
+004C3D16 - 51                    - push ecx					ecx = 19
+004C3D17 - 56                    - push esi					esi = 设施指针
+004C3D18 - E8 832C0000           - call 004C69A0				获取城市、港、关信息(push命令编码, push设施指针)
+004C3D1D - 8B 4C 24 18           - mov ecx,[esp+18]
+004C3D21 - 83 C4 08              - add esp,08
+004C3D24 - 03 C8                 - add ecx,eax					ecx = 势力所属城市港关累积兵力
+004C3D26 - 89 4C 24 10           - mov [esp+10],ecx
+
+004C3D2A - 43                    - inc ebx
+004C3D2B - 83 FB 57              - cmp ebx,57 { 87 }				最多87，也就是城市+港关
+004C3D2E - 7C B0                 - jl 004C3CE0
+004C3D30 - 8B 44 24 10           - mov eax,[esp+10]				eax = 势力所属城市港关累积兵力
+004C3D34 - 5F                    - pop edi
+004C3D35 - 5E                    - pop esi
+004C3D36 - 5D                    - pop ebp
+004C3D37 - 5B                    - pop ebx
+004C3D38 - 59                    - pop ecx
+004C3D39 - C3                    - ret 

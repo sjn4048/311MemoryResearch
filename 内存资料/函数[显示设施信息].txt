@@ -1,0 +1,279 @@
+005A1770 - 81 ec 64 0f 00 00          - sub esp,00000f64
+005A1776 - 53                         - push ebx
+005A1777 - 55                         - push ebp
+005A1778 - 56                         - push esi
+005A1779 - 57                         - push edi
+005A177A - bb 1c 98 8b 00             - mov ebx,008b981c : [00000001]
+005A177F - c7 44 24 18 02 00 00 00    - mov [esp+18],00000002
+005A1787 - 83 3b 00                   - cmp dword ptr [ebx],00
+005A178A - 0f 84 38 02 00 00          - je 005a19c8
+005A1790 - 8b 7b 04                   - mov edi,[ebx+04]
+005A1793 - 0f bf c7                   - movsx eax,di
+005A1796 - 8b cf                      - mov ecx,edi
+005A1798 - c1 f9 10                   - sar cl,10
+005A179B - 85 c0                      - test eax,eax
+005A179D - c7 03 00 00 00 00          - mov [ebx],00000000
+005A17A3 - 89 7c 24 10                - mov [esp+10],edi
+005A17A7 - 0f 8c 1b 02 00 00          - jl 005a19c8
+005A17AD - 3d c8 00 00 00             - cmp eax,000000c8
+005A17B2 - 0f 8d 10 02 00 00          - jnl 005a19c8
+005A17B8 - 85 c9                      - test ecx,ecx
+005A17BA - 0f 8c 08 02 00 00          - jl 005a19c8
+005A17C0 - 81 f9 c8 00 00 00          - cmp ecx,000000c8
+005A17C6 - 0f 8d fc 01 00 00          - jnl 005a19c8
+005A17CC - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005A17D2 - 03 c1                      - add eax,ecx
+005A17D4 - 8d 0c 80                   - lea ecx,[eax+eax*4]
+005A17D7 - 8d 0c 8d 68 0e fb 06       - lea ecx,[ecx*4+06fb0e68]
+005A17DE - e8 3d 23 ee ff             - call 00483b20                          根据坐标指针获得？？
+005A17E3 - 8b f0                      - mov esi,eax
+005A17E5 - 56                         - push esi
+005A17E6 - e8 45 8e ed ff             - call 0047a630
+005A17EB - 83 c4 04                   - add esp,04
+005A17EE - 85 c0                      - test eax,eax
+005A17F0 - 74 7f                      - je 005a1871
+005A17F2 - 8b 46 08                   - mov eax,[esi+08]
+005A17F5 - 85 c0                      - test eax,eax
+005A17F7 - 75 78                      - jne 005a1871
+005A17F9 - 8b 06                      - mov eax,[esi]
+005A17FB - 8b ce                      - mov ecx,esi
+005A17FD - ff 50 3c                   - call dword ptr [eax+3c]
+005A1800 - 8b 08                      - mov ecx,[eax]
+005A1802 - 51                         - push ecx
+005A1803 - 6a 01                      - push 01
+005A1805 - 8d 54 24 24                - lea edx,[esp+24]
+005A1809 - 52                         - push edx
+005A180A - b9 68 0e fb 06             - mov ecx,06fb0e68 : [00300000]
+005A180F - e8 6c 24 ee ff             - call 00483c80
+005A1814 - 89 44 24 10                - mov [esp+10],eax
+005A1818 - 8b 06                      - mov eax,[esi]
+005A181A - 8b ce                      - mov ecx,esi
+005A181C - ff 50 3c                   - call dword ptr [eax+3c]
+005A181F - 8b 08                      - mov ecx,[eax]
+005A1821 - 51                         - push ecx
+005A1822 - 8d 7c 24 38                - lea edi,[esp+38]
+005A1826 - e8 d5 f5 ff ff             - call 005a0e00
+005A182B - 8b e8                      - mov ebp,eax
+005A182D - 8b 44 24 14                - mov eax,[esp+14]
+005A1831 - 83 c4 04                   - add esp,04
+005A1834 - 85 c0                      - test eax,eax
+005A1836 - 7e 48                      - jle 005a1880
+005A1838 - 8d 54 24 1c                - lea edx,[esp+1c]
+005A183C - 89 54 24 14                - mov [esp+14],edx
+005A1840 - 89 44 24 10                - mov [esp+10],eax
+005A1844 - 8b 44 24 14                - mov eax,[esp+14]
+005A1848 - 8b 08                      - mov ecx,[eax]
+005A184A - 51                         - push ecx
+005A184B - 8d 7c ac 38                - lea edi,[esp+ebp*4+38]
+005A184F - e8 ac f5 ff ff             - call 005a0e00
+005A1854 - 8b 4c 24 18                - mov ecx,[esp+18]
+005A1858 - 03 e8                      - add ebp,eax
+005A185A - 8b 44 24 14                - mov eax,[esp+14]
+005A185E - 83 c1 04                   - add ecx,04
+005A1861 - 83 c4 04                   - add esp,04
+005A1864 - 48                         - dec eax
+005A1865 - 89 4c 24 14                - mov [esp+14],ecx
+005A1869 - 89 44 24 10                - mov [esp+10],eax
+005A186D - 75 d5                      - jne 005a1844
+005A186F - eb 0f                      - jmp 005a1880
+005A1871 - 57                         - push edi
+005A1872 - 8d 7c 24 38                - lea edi,[esp+38]
+005A1876 - e8 85 f5 ff ff             - call 005a0e00
+005A187B - 83 c4 04                   - add esp,04
+005A187E - 8b e8                      - mov ebp,eax
+005A1880 - 8b 53 08                   - mov edx,[ebx+08]
+005A1883 - 6a 00                      - push 00
+005A1885 - 52                         - push edx
+005A1886 - 55                         - push ebp
+005A1887 - 8d 44 24 40                - lea eax,[esp+40]
+005A188B - 50                         - push eax
+005A188C - 68 b0 02 26 03             - push 032602b0 : [00779B90]
+005A1891 - b9 60 08 26 03             - mov ecx,03260860 : [00779BB4]
+005A1896 - e8 15 cb e7 ff             - call 0041e3b0
+005A189B - 56                         - push esi                               esi是设施指针
+005A189C - e8 8f 8d ed ff             - call 0047a630                          校验指针
+005A18A1 - 83 c4 04                   - add esp,04
+005A18A4 - 85 c0                      - test eax,eax
+005A18A6 - 0f 84 1c 01 00 00          - je 005a19c8
+005A18AC - 8b 46 14                   - mov eax,[esi+14]                       判断是否建设完成
+005A18AF - 85 c0                      - test eax,eax
+005A18B1 - 0f 84 11 01 00 00          - je 005a19c8
+005A18B7 - 8b 46 08                   - mov eax,[esi+08]                       获得设施类型
+005A18BA - 50                         - push eax
+005A18BB - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005A18C0 - e8 cb f2 ee ff             - call 00490b90                          根据设施类型ID获得设施类型指针
+005A18C5 - 8b 16                      - mov edx,[esi]                          
+005A18C7 - 8b ce                      - mov ecx,esi
+005A18C9 - 8b e8                      - mov ebp,eax                            ebp是设施类型指针
+005A18CB - ff 52 40                   - call dword ptr [edx+40]                获得设施所属势力ID
+005A18CE - 85 c0                      - test eax,eax
+005A18D0 - 7c 45                      - jnge 005a1917
+005A18D2 - 83 f8 2e                   - cmp eax,2e
+005A18D5 - 7f 40                      - jg 005a1917                            势力范围0～46（跳转到火球这些无势力的设施）
+005A18D7 - 0f b6 43 0a                - movzx eax,byte ptr [ebx+0a]
+005A18DB - 0f b6 4b 09                - movzx ecx,byte ptr [ebx+09]
+005A18DF - 0f b6 53 0b                - movzx edx,byte ptr [ebx+0b]
+005A18E3 - 83 e0 fe                   - and eax,fe
+005A18E6 - c1 e0 08                   - shl eax,08
+005A18E9 - 0b c1                      - or eax,ecx
+005A18EB - 83 e2 fe                   - and edx,fe
+005A18EE - 83 e0 fe                   - and eax,fe
+005A18F1 - c1 e2 10                   - shl edx,10
+005A18F4 - 0b c2                      - or eax,edx
+005A18F6 - c1 e0 07                   - shl eax,07
+005A18F9 - 0f b6 4b 08                - movzx ecx,byte ptr [ebx+08]
+005A18FD - d1 e9                      - shr ecx,1
+005A18FF - 0b c1                      - or eax,ecx
+005A1901 - 50                         - push eax
+005A1902 - 8d 54 24 38                - lea edx,[esp+38]
+005A1906 - 56                         - push esi
+005A1907 - 52                         - push edx
+005A1908 - 8b cd                      - mov ecx,ebp                            ebp＝设施类型地址
+005A190A - e8 71 f5 ff ff             - call 005a0e80                          显示设施范围                          
+005A190F - 83 c4 0c                   - add esp,0c
+005A1912 - e9 b1 00 00 00             - jmp 005a19c8                           跳转
+以下火种火球
+005A1917 - 8b 46 08                   - mov eax,[esi+08]                       esi＝设施地址，eax＝设施类型
+005A191A - 83 c0 f0                   - add eax,f0                             设施类型-16
+005A191D - 83 f8 06                   - cmp eax,06                             设施类型大于22跳转
+005A1920 - 0f 87 a2 00 00 00          - ja 005a19c8
+005A1926 - 0f b6 80 f0 19 5a 00       - movzx eax,byte ptr [eax+005a19f0]      eax=0(火种)or1(火球)
+005A192D - ff 24 85 e8 19 5a 00       - jmp dword ptr [eax*4+005a19e8]         跳转到相应地址
+火种
+005A1934 - 0f b6 43 0b                - movzx eax,byte ptr [ebx+0b]
+005A1938 - 0f b6 4b 0a                - movzx ecx,byte ptr [ebx+0a]
+005A193C - 0f b6 53 09                - movzx edx,byte ptr [ebx+09]
+005A1940 - 83 e0 fe                   - and eax,fe
+005A1943 - c1 e0 07                   - shl eax,07
+005A1946 - 0b c1                      - or eax,ecx
+005A1948 - c1 e0 08                   - shl eax,08
+005A194B - 0b c2                      - or eax,edx
+005A194D - c1 e0 08                   - shl eax,08
+005A1950 - eb a7                      - jmp 005a18f9                           向上跳转到一般的设施处理
+火球
+005A1952 - a1 e4 61 6a 09             - mov eax,[096a61e4] : [00000001]
+005A1957 - 8b 0c 85 84 b3 84 00       - mov ecx,[eax*4+0084b384]
+005A195E - 89 4c 24 10                - mov [esp+10],ecx
+005A1962 - 33 ff                      - xor edi,edi
+005A1964 - 39 7c 24 10                - cmp [esp+10],edi
+005A1968 - 0f b6 43 0b                - movzx eax,byte ptr [ebx+0b]
+005A196C - 75 22                      - jne 005a1990
+005A196E - 0f b6 53 0a                - movzx edx,byte ptr [ebx+0a]
+005A1972 - 0f b6 4b 09                - movzx ecx,byte ptr [ebx+09]
+005A1976 - 83 e0 fe                   - and eax,fe
+005A1979 - c1 e0 07                   - shl eax,07
+005A197C - 0b c2                      - or eax,edx
+005A197E - 0f b6 53 08                - movzx edx,byte ptr [ebx+08]
+005A1982 - c1 e0 08                   - shl eax,08
+005A1985 - 0b c1                      - or eax,ecx
+005A1987 - c1 e0 08                   - shl eax,08
+005A198A - d1 ea                      - shr edx,1
+005A198C - 0b c2                      - or eax,edx
+005A198E - eb 20                      - jmp 005a19b0
+005A1990 - 0f b6 4b 0a                - movzx ecx,byte ptr [ebx+0a]
+005A1994 - 0f b6 53 09                - movzx edx,byte ptr [ebx+09]
+005A1998 - 83 e0 fc                   - and eax,fc
+005A199B - c1 e0 06                   - shl eax,06
+005A199E - 0b c1                      - or eax,ecx
+005A19A0 - 0f b6 4b 08                - movzx ecx,byte ptr [ebx+08]
+005A19A4 - c1 e0 08                   - shl eax,08
+005A19A7 - 0b c2                      - or eax,edx
+005A19A9 - c1 e0 08                   - shl eax,08
+005A19AC - d1 e9                      - shr ecx,1
+005A19AE - 0b c1                      - or eax,ecx
+005A19B0 - 57                         - push edi
+005A19B1 - 50                         - push eax
+005A19B2 - 8d 54 24 3c                - lea edx,[esp+3c]
+005A19B6 - 55                         - push ebp
+005A19B7 - 52                         - push edx
+005A19B8 - 8b c6                      - mov eax,esi
+005A19BA - e8 61 fc ff ff             - call 005a1620                          是画火球的范围，其中写死了三种火球的长度
+005A19BF - 83 c4 10                   - add esp,10
+005A19C2 - 47                         - inc edi
+005A19C3 - 83 ff 06                   - cmp edi,06
+005A19C6 - 7c 9c                      - jnge 005a1964
+
+005A19C8 - 8b 44 24 18                - mov eax,[esp+18]
+005A19CC - 83 c3 0c                   - add ebx,0c
+005A19CF - 48                         - dec eax
+005A19D0 - 89 44 24 18                - mov [esp+18],eax
+005A19D4 - 0f 85 ad fd ff ff          - jne 005a1787
+005A19DA - 5f                         - pop edi
+005A19DB - 5e                         - pop esi
+005A19DC - 5d                         - pop ebp
+005A19DD - 5b                         - pop ebx
+005A19DE - 81 c4 64 0f 00 00          - add esp,00000f64
+005A19E4 - c3                         - ret
+
+数据区
+005a19e8 - 34 19 5a 00（火种地址） 52 19 5a 00（火球跳转地址） 
+005a19f0 - 00 00 01 01 00 01 00 CC  （0表示火种，1表示火球）
+
+
+
+－显示设施信息－
+005A0E80 - 83 ec 68                   - sub esp,68
+005A0E83 - 53                         - push ebx
+005A0E84 - 55                         - push ebp
+005A0E85 - 0f b6 a9 c7 00 00 00       - movzx ebp,byte ptr [ecx+000000c7]      最小范围（ecx是设施类型地址）
+005A0E8C - 56                         - push esi
+005A0E8D - 57                         - push edi
+005A0E8E - 8b bc 24 80 00 00 00       - mov edi,[esp+00000080]                 edi是设施地址
+005A0E95 - 8b 77 08                   - mov esi,[edi+08]                       取得设施类型
+005A0E98 - 33 c0                      - xor eax,eax
+005A0E9A - 33 db                      - xor ebx,ebx
+005A0E9C - 85 f6                      - test esi,esi                           判断是否是都市
+005A0E9E - 0f b6 b1 c8 00 00 00       - movzx esi,byte ptr [ecx+000000c8]      最大范围（ecx是设施类型地址）
+005A0EA5 - 0f 94 c0                   - sete al
+005A0EA8 - 03 f0                      - add esi,eax                            是都市则最大范围＋1（因为都市本身占7格）
+005A0EAA - 03 e8                      - add ebp,eax                            是都市则最小范围＋1（因为都市本身占7格）                   
+005A0EAC - 3b ee                      - cmp ebp,esi
+005A0EAE - 89 74 24 14                - mov [esp+14],esi
+005A0EB2 - 7f 5e                      - jg 005a0f12                            如果最小范围大于最大范围则跳转
+005A0EB4 - 8b 07                      - mov eax,[edi]
+005A0EB6 - 8b cf                      - mov ecx,edi
+005A0EB8 - ff 50 3c                   - call dword ptr [eax+3c]                取得设施坐标
+005A0EBB - 8b 08                      - mov ecx,[eax]
+005A0EBD - 51                         - push ecx                               push坐标
+005A0EBE - 55                         - push ebp                               push最小范围
+005A0EBF - 8d 54 24 20                - lea edx,[esp+20]
+005A0EC3 - 52                         - push edx                               push最大范围
+005A0EC4 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005A0EC9 - e8 b2 2d ee ff             - call 00483c80                          取距离坐标中心半径上的所有可进入坐标
+005A0ECE - 85 c0                      - test eax,eax
+005A0ED0 - 7e 3b                      - jle 005a0f0d
+005A0ED2 - 8d 74 24 18                - lea esi,[esp+18]
+005A0ED6 - 89 44 24 10                - mov [esp+10],eax
+005A0EDA - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+005A0EE0 - 8b 06                      - mov eax,[esi]
+005A0EE2 - 8b 4c 24 7c                - mov ecx,[esp+7c]
+005A0EE6 - 50                         - push eax
+005A0EE7 - 8d 3c 99                   - lea edi,[ecx+ebx*4]
+005A0EEA - e8 11 ff ff ff             - call 005a0e00                          ？？
+005A0EEF - 03 d8                      - add ebx,eax
+005A0EF1 - 8b 44 24 14                - mov eax,[esp+14]
+005A0EF5 - 83 c4 04                   - add esp,04
+005A0EF8 - 83 c6 04                   - add esi,04
+005A0EFB - 48                         - dec eax
+005A0EFC - 89 44 24 10                - mov [esp+10],eax
+005A0F00 - 75 de                      - jne 005a0ee0
+005A0F02 - 8b bc 24 80 00 00 00       - mov edi,[esp+00000080]
+005A0F09 - 8b 74 24 14                - mov esi,[esp+14]
+005A0F0D - 45                         - inc ebp
+005A0F0E - 3b ee                      - cmp ebp,esi                            循环画圈？？
+005A0F10 - 7e a2                      - jle 005a0eb4
+005A0F12 - 8b 94 24 84 00 00 00       - mov edx,[esp+00000084]
+005A0F19 - 8b 44 24 7c                - mov eax,[esp+7c]
+005A0F1D - 6a 00                      - push 00
+005A0F1F - 52                         - push edx
+005A0F20 - 53                         - push ebx
+005A0F21 - 50                         - push eax
+005A0F22 - 68 b0 02 26 03             - push 032602b0
+005A0F27 - b9 60 08 26 03             - mov ecx,03260860
+005A0F2C - e8 7f d4 e7 ff             - call 0041e3b0                          这个是画圈函数
+005A0F31 - 5f                         - pop edi
+005A0F32 - 5e                         - pop esi
+005A0F33 - 5d                         - pop ebp
+005A0F34 - 5b                         - pop ebx
+005A0F35 - 83 c4 68                   - add esp,68
+005A0F38 - c3                         - ret

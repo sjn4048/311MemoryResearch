@@ -1,0 +1,45 @@
+功能: 城市金钱增减
+参数表: [esp+04]=城市指针，[esp+08]=金钱变化值
+
+*****************************************************************************************************************************************************
+
+004B3BA0 - 53                         - push ebx
+004B3BA1 - 8b 5c 24 08                - mov ebx,[esp+08]               ebx = 城市指针
+004B3BA5 - 53                         - push ebx
+004B3BA6 - e8 85 6a fc ff             - call 0047a630                  校验指针
+004B3BAB - 83 c4 04                   - add esp,04
+004B3BAE - 85 c0                      - test eax,eax
+004B3BB0 - 74 40                      - je 004b3bf2
+
+004B3BB2 - 8b 44 24 0c                - mov eax,[esp+0c]               eax = 金钱变化值
+004B3BB6 - 56                         - push esi
+004B3BB7 - 57                         - push edi
+004B3BB8 - 8b 7b 44                   - mov edi,[ebx+44]               edi = 城市金钱
+004B3BBB - 03 c7                      - add eax,edi                    eax = 城市金钱+金钱变化值
+004B3BBD - 85 c0                      - test eax,eax
+004B3BBF - 7f 04                      - jg 004b3bc5
+004B3BC1 - 33 f6                      - xor esi,esi
+004B3BC3 - eb 0e                      - jmp 004b3bd3
+
+004B3BC5 - 3d a0 86 01 00             - cmp eax,000186a0               0x186a0 = 100000                          【修改】城市金钱上限
+004B3BCA - be a0 86 01 00             - mov esi,000186a0               0x186a0 = 100000                          【修改】城市金钱上限
+004B3BCF - 7d 02                      - jnl 004b3bd3
+004B3BD1 - 8b f0                      - mov esi,eax
+004B3BD3 - 53                         - push ebx                       ebx = 城市指针
+004B3BD4 - e8 57 6a fc ff             - call 0047a630                  校验指针
+004B3BD9 - 83 c4 04                   - add esp,04
+004B3BDC - 85 c0                      - test eax,eax
+004B3BDE - 74 08                      - je 004b3be8
+004B3BE0 - 56                         - push esi                       esi = 变化后的城市金钱
+004B3BE1 - 8b cb                      - mov ecx,ebx
+004B3BE3 - e8 08 81 fc ff             - call 0047bcf0                  设置城市金钱
+004B3BE8 - 8b c6                      - mov eax,esi
+004B3BEA - 2b c7                      - sub eax,edi                    返回考虑城市金钱上限的金钱变化值
+004B3BEC - 5f                         - pop edi
+004B3BED - 5e                         - pop esi
+004B3BEE - 5b                         - pop ebx
+004B3BEF - c2 08 00                   - ret 0008
+
+004B3BF2 - 33 c0                      - xor eax,eax
+004B3BF4 - 5b                         - pop ebx
+004B3BF5 - c2 08 00                   - ret 0008

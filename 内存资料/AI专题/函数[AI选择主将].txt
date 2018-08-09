@@ -1,0 +1,210 @@
+005F6CF0 - 51                         - push ecx
+005F6CF1 - 8b 44 24 18                - mov eax,[esp+18]
+005F6CF5 - 53                         - push ebx
+005F6CF6 - 55                         - push ebp
+005F6CF7 - 8b 6c 24 18                - mov ebp,[esp+18]               ebp=[esp+18]预定主将指针
+005F6CFB - 56                         - push esi
+005F6CFC - 8b 74 24 14                - mov esi,[esp+14]
+005F6D00 - 57                         - push edi
+005F6D01 - 8b 7c 24 1c                - mov edi,[esp+1c]
+005F6D05 - 8b d9                      - mov ebx,ecx
+005F6D07 - 89 06                      - mov [esi],eax
+005F6D09 - 55                         - push ebp
+005F6D0A - 89 5c 24 14                - mov [esp+14],ebx
+005F6D0E - 89 07                      - mov [edi],eax
+005F6D10 - e8 1b 39 e8 ff             - call 0047a630                  校验ebp（预定主将指针）
+005F6D15 - 83 c4 04                   - add esp,04
+005F6D18 - 85 c0                      - test eax,eax
+005F6D1A - 74 20                      - je 005f6d3c                    如校验通过再继续计算，否则EAX置0返回
+005F6D1C - 8b 44 24 24                - mov eax,[esp+24]               [esp+24]置入EAX（兵器ID）
+005F6D20 - 50                         - push eax
+005F6D21 - b9 58 19 20 07             - mov ecx,07201958
+005F6D26 - e8 95 9e e9 ff             - call 00490bc0                  获得兵装ID对应的首地址
+005F6D2B - 50                         - push eax        
+005F6D2C - 89 44 24 1c                - mov [esp+1c],eax               兵装ID对应的首地址置入[esp+1c]
+005F6D30 - e8 fb 38 e8 ff             - call 0047a630                  校验EAX指针（兵装ID对应的首地址）
+005F6D35 - 83 c4 04                   - add esp,04
+005F6D38 - 85 c0                      - test eax,eax                   如校验通过再继续计算，否则EAX置0返回
+005F6D3A - 75 0a                      - jne 005f6d46
+005F6D3C - 5f                         - pop edi
+005F6D3D - 5e                         - pop esi
+005F6D3E - 5d                         - pop ebp
+005F6D3F - 33 c0                      - xor eax,eax
+005F6D41 - 5b                         - pop ebx
+005F6D42 - 59                         - pop ecx
+005F6D43 - c2 18 00                   - ret 0018
+
+005F6D46 - 8b 4c 24 24                - mov ecx,[esp+24]               [esp+24]置入EAX（兵器ID）
+005F6D4A - 51                         - push ecx
+005F6D4B - 55                         - push ebp
+005F6D4C - 8b cb                      - mov ecx,ebx
+005F6D4E - e8 5d f0 ff ff             - call 005f5db0                  计算武将适性（C=0,B=1,A=2,S=3）+势力技术加成值（精锐XX＋1）
+005F6D53 - 8b d8                      - mov ebx,eax                    武将适性+势力技术加成值置入EBX
+005F6D55 - 83 c3 07                   - add ebx,07                     EBX＋7
+005F6D58 - 8b cd                      - mov ecx,ebp                    EBP置入ECX（预定主将指针）
+
+005F6D5A - 89 1e                      - mov [esi],ebx                  （计算武将适性+势力技术加成值＋7）置入[esi]
+005F6D5C - e8 1f 23 e9 ff             - call 00489080                  获得预定主将武力
+*call 008A9CB4                                                         自适应攻击力统武计算规则
+005F6D61 - 8b 54 24 18                - mov edx,[esp+18]               [esp+18]=兵装ID对应的首地址
+005F6D65 - 0f b6 c0                   - movzx eax,al                   武力置入EAX作乘法
+005F6D68 - 0f af 06                   - imul eax,[esi]
+005F6D6B - 89 06                      - mov [esi],eax
+005F6D6D - 0f b6 4a 55                - movzx ecx,byte ptr [edx+55]    兵装攻击力置入ECX
+005F6D71 - 0f af c8                   - imul ecx,eax                   作乘法
+005F6D74 - b8 d3 4d 62 10             - mov eax,10624dd3               以下6句将乘法结果×0.001
+005F6D79 - f7 e9                      - imul ecx
+005F6D7B - c1 fa 06                   - sar dl,06
+005F6D7E - 8b c2                      - mov eax,edx
+005F6D80 - c1 e8 1f                   - shr eax,1f
+005F6D83 - 03 c2                      - add eax,edx
+005F6D85 - 69 c0 d0 07 00 00          - imul eax,eax,000007d0          再乘以2000
+005F6D8B - 89 06                      - mov [esi],eax                  结果置入[ESI]
+
+005F6D8D - 8b cd                      - mov ecx,ebp                    EBP置入ECX（预定主将指针）
+005F6D8F - 89 1f                      - mov [edi],ebx                  （计算武将适性+势力技术加成值＋7）置入[esi]
+005F6D91 - e8 da 22 e9 ff             - call 00489070                  取得武将统率
+*call 008A9CE0                                                         自适应防御力统武计算规则
+005F6D96 - 8b 4c 24 18                - mov ecx,[esp+18]               [esp+18]=兵装ID对应的首地址
+005F6D9A - 0f b6 c0                   - movzx eax,al                   统率置入EAX作乘法
+005F6D9D - 0f af 07                   - imul eax,[edi]
+005F6DA0 - 89 07                      - mov [edi],eax
+005F6DA2 - 0f b6 49 56                - movzx ecx,byte ptr [ecx+56]    兵装防御力置入ECX
+005F6DA6 - 0f af c8                   - imul ecx,eax                   作乘法
+005F6DA9 - b8 d3 4d 62 10             - mov eax,10624dd3               以下6句将乘法结果×0.001
+005F6DAE - f7 e9                      - imul ecx
+005F6DB0 - 8b 5c 24 24                - mov ebx,[esp+24]               [esp+24]置入EAX（兵器ID）
+005F6DB4 - c1 fa 06                   - sar dl,06
+005F6DB7 - 8b c2                      - mov eax,edx
+005F6DB9 - c1 e8 1f                   - shr eax,1f
+005F6DBC - 03 c2                      - add eax,edx
+005F6DBE - 69 c0 e8 03 00 00          - imul eax,eax,000003e8          再乘以1000
+005F6DC4 - 89 07                      - mov [edi],eax
+
+005F6DC6 - 8b 16                      - mov edx,[esi]                  EDX＝攻击方面得分
+005F6DC8 - 8b 44 24 28                - mov eax,[esp+28]               [esp+28]??
+005F6DCC - 03 d0                      - add edx,eax                    EDX＋[esp+28]并置回[ESI]
+005F6DCE - 89 16                      - mov [esi],edx
+005F6DD0 - 8b 0f                      - mov ecx,[edi]                  ECX＝防御方面得分
+005F6DD2 - 03 c8                      - add ecx,eax                    ECX＋[esp+28]并置回[EDI]
+005F6DD7 - 89 0f                      - mov [edi],ecx
+
+005F6DD4 - 83 fb 01                   - cmp ebx,01                     是否是枪兵？
+005F6DD9 - 75 10                      - jne 005f6deb                   不是枪兵跳转到戟兵
+005F6DDB - 8b 44 24 2c                - mov eax,[esp+2c]               [esp+2c]=预定攻击对象的兵种
+005F6DDF - 83 f8 04                   - cmp eax,04
+005F6DE2 - 74 2a                      - je 005f6e0e                    如果对方是骑兵则跳到优势处理005f6e0e
+005F6DE4 - 83 f8 02                   - cmp eax,02
+005F6DE7 - 74 49                      - je 005f6e32                    如果对方是戟兵则跳到劣势处理005f6e32
+005F6DE9 - eb 77                      - jmp 005f6e62
+
+005F6DEB - 83 fb 02                   - cmp ebx,02                     是否是戟兵？
+005F6DEE - 75 10                      - jne 005f6e00                   不是戟兵跳转到骑兵
+005F6DF0 - 8b 44 24 2c                - mov eax,[esp+2c]               [esp+2c]=预定攻击对象的兵种
+005F6DF4 - 83 f8 01                   - cmp eax,01
+005F6DF7 - 74 15                      - je 005f6e0e                    如果对方是枪兵则跳到优势处理005f6e0e
+005F6DF9 - 83 f8 04                   - cmp eax,04
+005F6DFC - 74 34                      - je 005f6e32                    如果对方是骑兵则跳到劣势处理005f6e32
+005F6DFE - eb 62                      - jmp 005f6e62
+
+005F6E00 - 83 fb 04                   - cmp ebx,04                     是否是骑兵？
+005F6E03 - 75 5d                      - jne 005f6e62
+005F6E05 - 8b 44 24 2c                - mov eax,[esp+2c]               [esp+2c]=预定攻击对象的兵种
+005F6E09 - 83 f8 02                   - cmp eax,02
+005F6E0C - 75 1f                      - jne 005f6e2d                   如果对方是戟兵则继续优势处理，否则跳到005f6e2d
+005F6E0E - 8b 0e                      - mov ecx,[esi]                  优势处理：攻击得分×1.3，防御得分×1.3
+005F6E10 - 6b c9 0d                   - imul ecx,ecx,0d
+005F6E13 - b8 67 66 66 66             - mov eax,66666667
+005F6E18 - f7 e9                      - imul ecx
+005F6E1A - c1 fa 02                   - sar dl,02
+005F6E1D - 8b ca                      - mov ecx,edx
+005F6E1F - c1 e9 1f                   - shr ecx,1f
+005F6E22 - 03 ca                      - add ecx,edx
+005F6E24 - 89 0e                      - mov [esi],ecx
+005F6E26 - 8b 0f                      - mov ecx,[edi]
+005F6E28 - 6b c9 0d                   - imul ecx,ecx,0d
+005F6E2B - eb 22                      - jmp 005f6e4f
+005F6E2D - 83 f8 01                   - cmp eax,01                     如果对方是枪兵则继续劣势处理
+005F6E30 - 75 30                      - jne 005f6e62                
+005F6E32 - 8b 0e                      - mov ecx,[esi]                  劣势处理：攻击得分×0.7，防御得分×0.7
+005F6E34 - 6b c9 07                   - imul ecx,ecx,07
+005F6E37 - b8 67 66 66 66             - mov eax,66666667
+005F6E3C - f7 e9                      - imul ecx
+005F6E3E - c1 fa 02                   - sar dl,02
+005F6E41 - 8b ca                      - mov ecx,edx
+005F6E43 - c1 e9 1f                   - shr ecx,1f
+005F6E46 - 03 ca                      - add ecx,edx
+005F6E48 - 89 0e                      - mov [esi],ecx
+005F6E4A - 8b 0f                      - mov ecx,[edi]
+005F6E4C - 6b c9 07                   - imul ecx,ecx,07
+005F6E4F - b8 67 66 66 66             - mov eax,66666667
+005F6E54 - f7 e9                      - imul ecx
+005F6E56 - c1 fa 02                   - sar dl,02
+005F6E59 - 8b c2                      - mov eax,edx
+005F6E5B - c1 e8 1f                   - shr eax,1f
+005F6E5E - 03 c2                      - add eax,edx
+005F6E60 - 89 07                      - mov [edi],eax
+
+005F6E62 - 8b ad e8 00 00 00          - mov ebp,[ebp+000000e8]         预定主将特技置入EBP
+005F6E68 - 8b 4c 24 10                - mov ecx,[esp+10]               [esp+10]？？
+005F6E6C - 53                         - push ebx                       EBX＝兵种
+005F6E6D - 55                         - push ebp                       EBP＝特技ID
+005F6E6E - e8 8d f0 ff ff             - call 005f5f00                  判断特技与兵装的契合程度，契合为1，不契合为0
+                                      [005F6008开始：26辅佐改07(弓) 28铁壁、22攻心、29金刚改06(戟) 15乱战改08(枪、戟) 17攻城改09]
+*005F6E6E - e8 e9 91 31 00             - call 0091005c                 调用组合特技匹配兵种判定
+005F6E73 - 85 c0                      - test eax,eax
+005F6E75 - 74 29                      - je 005f6ea0                    如果不契合则直接返回
+005F6E77 - 55                         - push ebp                       EBP＝特技ID
+005F6E78 - b9 58 19 20 07             - mov ecx,07201958
+005F6E7D - e8 ce 9d e9 ff             - call 00490c50                  获得特技指针
+005F6E82 - 8b 48 60                   - mov ecx,[eax+60]               ECX＝特技等级
+005F6E85 - 8b 16                      - mov edx,[esi]
+005F6E87 - 69 c9 e8 03 00 00          - imul ecx,ecx,000003e8          攻击得分＋特技等级×1000[改×10000]
+005F6E8D - 03 d1                      - add edx,ecx
+005F6E8F - 89 16                      - mov [esi],edx
+005F6E91 - 8b 50 60                   - mov edx,[eax+60]
+005F6E94 - 8b 07                      - mov eax,[edi]
+005F6E96 - 69 d2 e8 03 00 00          - imul edx,edx,000003e8          防御得分＋特技等级×1000[改×10000]
+005F6E9C - 03 c2                      - add eax,edx
+005F6E9E - 89 07                      - mov [edi],eax
+005F6EA0 - 5f                         - pop edi
+005F6EA1 - 5e                         - pop esi
+005F6EA2 - 5d                         - pop ebp
+005F6EA3 - b8 01 00 00 00             - mov eax,00000001
+005F6EA8 - 5b                         - pop ebx
+005F6EA9 - 59                         - pop ecx
+005F6EAA - c2 18 00                   - ret 0018
+
+与统武设定相配套
+008A9CB4 - 8a 91 70 01 00 00          - mov dl,[ecx+00000170]
+008A9CBA - 0f b6 d2                   - movzx edx,dl
+008A9CBD - 6b d2 64                   - imul edx,edx,64
+008A9CC0 - 8a 81 71 01 00 00          - mov al,[ecx+00000171]
+008A9CC6 - 0f b6 c0                   - movzx eax,al
+008A9CC9 - 6b c0 00                   - imul eax,eax,00
+008A9CCC - 01 d0                      - add eax,edx
+008A9CCE - b9 64 00 00 00             - mov ecx,00000064
+008A9CD3 - 99                         - cdq
+008A9CD4 - f7 f9                      - idiv ecx
+008A9CD6 - 83 f8 3e                   - cmp eax,3e
+008A9CD9 - 7d 02                      - jnl 008a9cdd
+008A9CDB - 31 c0                      - xor eax,eax
+008A9CDD - c3                         - ret
+008A9CDE - cc                         - int 3
+008A9CDF - cc                         - int 3
+008A9CE0 - 8a 91 70 01 00 00          - mov dl,[ecx+00000170]
+008A9CE6 - 0f b6 d2                   - movzx edx,dl
+008A9CE9 - 6b d2 64                   - imul edx,edx,64
+008A9CEC - 8a 81 71 01 00 00          - mov al,[ecx+00000171]
+008A9CF2 - 0f b6 c0                   - movzx eax,al
+008A9CF5 - 6b c0 00                   - imul eax,eax,00
+008A9CF8 - 01 d0                      - add eax,edx
+008A9CFA - b9 64 00 00 00             - mov ecx,00000064
+008A9CFF - 99                         - cdq
+008A9D00 - f7 f9                      - idiv ecx
+008A9D02 - 83 f8 3e                   - cmp eax,3e
+008A9D05 - 7d 02                      - jnl 008a9d09
+008A9D07 - 31 c0                      - xor eax,eax
+008A9D09 - c3                         - ret
+008A9D0A - cc                         - int 3
+008A9D0B - cc                         - int 3

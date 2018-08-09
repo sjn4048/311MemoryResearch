@@ -1,0 +1,197 @@
+功能: 计算可登用武将
+参数表: [esp+04]=用于返回武将列表的数组指针，[esp+08]=设施指针，ecx=07999808
+备注：有两个入口调用这个函数：
+  1、执行登用(在执行登用函数所调用0x005c56d0函数中)
+  005C580A - e8 f1 9d f0 ff             - call 004cf600
+  2、展现登用界面
+  00606348 - e8 b3 92 ec ff             - call 004cf600
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+004CF600 - 8b 4c 24 04                - mov ecx,[esp+04]
+004CF604 - 56                         - push esi
+004CF605 - e8 46 c8 fa ff             - call 0047be50                      作用未明，猜测是重置列表数组
+004CF60A - 8b 74 24 0c                - mov esi,[esp+0c]                   esi = 设施指针
+004CF60E - 56                         - push esi
+004CF60F - e8 1c b0 fa ff             - call 0047a630                      校验指针
+004CF614 - 83 c4 04                   - add esp,04
+004CF617 - 85 c0                      - test eax,eax
+004CF619 - 75 04                      - jne 004cf61f                       校验成功则跳转到后续处理
+004CF61B - 5e                         - pop esi
+004CF61C - c2 08 00                   - ret 0008
+004CF61F - 53                         - push ebx
+004CF620 - 56                         - push esi                           esi = 设施指针
+004CF621 - b9 58 19 20 07             - mov ecx,07201958
+004CF626 - e8 45 21 fc ff             - call 00491770                      根据设施指针获取设施ID
+004CF62B - 8b 06                      - mov eax,[esi]
+004CF62D - 8b ce                      - mov ecx,esi
+004CF62F - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+004CF632 - 8b d8                      - mov ebx,eax                        ebx = 势力ID
+004CF634 - 85 db                      - test ebx,ebx
+004CF636 - 7c 05                      - jnge 004cf63d
+004CF638 - 83 fb 2e                   - cmp ebx,2e
+004CF63B - 7e 07                      - jle 004cf644                       势力ID在0～46之间则跳转到后续处理
+004CF63D - 5b                         - pop ebx
+004CF63E - 33 c0                      - xor eax,eax
+004CF640 - 5e                         - pop esi
+004CF641 - c2 08 00                   - ret 0008
+
+【循环过滤武将】
+[获取武将指针并校验]
+004CF644 - 55                         - push ebp
+004CF645 - 57                         - push edi
+004CF646 - 33 ed                      - xor ebp,ebp                        ebp = 武将ID
+004CF648 - eb 06                      - jmp 004cf650
+004CF64A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+004CF650 - 55                         - push ebp
+004CF651 - b9 58 19 20 07             - mov ecx,07201958
+004CF656 - e8 a5 14 fc ff             - call 00490b00                      根据武将ID获取武将指针
+004CF65B - 8b f0                      - mov esi,eax
+004CF65D - 56                         - push esi
+004CF65E - e8 cd af fa ff             - call 0047a630                      校验指针
+004CF663 - 83 c4 04                   - add esp,04
+004CF666 - 85 c0                      - test eax,eax
+004CF668 - 0f 84 39 01 00 00          - je 004cf7a7                        校验失败则跳转到循环下一个武将
+[过滤武将ID及武将所属势力ID]
+004CF66E - 81 fd bc 02 00 00          - cmp ebp,000002bc                                                               【修改】不可登用武将ID开始
+004CF674 - 7c 0c                      - jnge 004cf682
+004CF676 - 81 fd 1f 03 00 00          - cmp ebp,0000031f                                                               【修改】不可登用武将ID结束
+004CF67C - 0f 8e 25 01 00 00          - jng 004cf7a7                       武将ID在700～799之间是事件武将，跳转到循环下一个武将
+004CF682 - 8b 16                      - mov edx,[esi]
+004CF684 - 8b ce                      - mov ecx,esi
+004CF686 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004CF689 - 83 f8 2a                   - cmp eax,2a
+004CF68C - 7c 09                      - jnge 004cf697
+004CF68E - 83 f8 2d                   - cmp eax,2d
+004CF691 - 0f 8e 10 01 00 00          - jng 004cf7a7                       势力ID在42～45之间是异族武将，跳转到循环下一个武将
+004CF697 - 8b 06                      - mov eax,[esi]
+004CF699 - 8b ce                      - mov ecx,esi
+004CF69B - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+004CF69E - 83 f8 2e                   - cmp eax,2e
+004CF6A1 - 0f 84 00 01 00 00          - je 004cf7a7                        势力ID=46是贼武将，跳转到循环下一个武将
+[过滤任务武将]
+004CF6A7 - 8b ce                      - mov ecx,esi
+004CF6A9 - e8 c2 9b fb ff             - call 00489270                      判断武将留守计数是否为0
+004CF6AE - 85 c0                      - test eax,eax
+004CF6B0 - 74 0d                      - je 004cf6bf
+004CF6B2 - 83 be 3c 01 00 00 ff       - cmp dword ptr [esi+0000013c],ff    判断武将任务编号是否是-1
+004CF6B9 - 0f 84 e8 00 00 00          - je 004cf7a7                        武将留守计数不为0且武将任务编号是-1，跳转到循环下一个武将
+[过滤在野武将]
+004CF6BF - 6a 10                      - push 10                            0x10 = 00010000b(在野)
+004CF6C1 - 8b ce                      - mov ecx,esi
+004CF6C3 - e8 18 a9 fb ff             - call 00489fe0                      判断武将身份是否是包含在武将身份标志位
+004CF6C8 - 85 c0                      - test eax,eax
+004CF6CA - 74 50                      - je 004cf71c
+004CF6CC - 8b 86 98 00 00 00          - mov eax,[esi+00000098]             eax = 武将所属
+004CF6D2 - 50                         - push eax
+004CF6D3 - b9 58 19 20 07             - mov ecx,07201958
+004CF6D8 - e8 23 16 fc ff             - call 00490d00                      根据设施ID获取设施指针
+004CF6DD - 8b f8                      - mov edi,eax                        edi = 设施指针
+004CF6DF - 57                         - push edi
+004CF6E0 - e8 4b af fa ff             - call 0047a630                      校验指针
+004CF6E5 - 83 c4 04                   - add esp,04
+004CF6E8 - 85 c0                      - test eax,eax
+004CF6EA - 0f 84 b7 00 00 00          - je 004cf7a7                        校验失败则跳转到循环下一个武将
+004CF6F0 - 8b 17                      - mov edx,[edi]                      
+004CF6F2 - 8b cf                      - mov ecx,edi
+004CF6F4 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004CF6F7 - 50                         - push eax
+004CF6F8 - e8 b3 2c f4 ff             - call 004123b0                      校验势力ID是否在0～46号之间
+004CF6FD - 83 c4 04                   - add esp,04
+004CF700 - 85 c0                      - test eax,eax
+004CF702 - 0f 84 95 00 00 00          - je 004cf79d
+004CF708 - 8b 07                      - mov eax,[edi]
+004CF70A - 8b cf                      - mov ecx,edi
+004CF70C - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+004CF70F - 3b c3                      - cmp eax,ebx                        比较被登用方所属是否与登用设施是同一势力
+004CF711 - 0f 85 90 00 00 00          - jne 004cf7a7                       所属势力不相同则跳转到循环下一个武将(不能登用本势力地界之外的在野武将)
+004CF717 - e9 81 00 00 00             - jmp 004cf79d
+[过滤俘虏武将]
+004CF71C - 6a 20                      - push 20                            0x20 = 00100000b(俘虏)
+004CF71E - 8b ce                      - mov ecx,esi
+004CF720 - e8 bb a8 fb ff             - call 00489fe0                      判断武将身份是否是包含在武将身份标志位
+004CF725 - 85 c0                      - test eax,eax
+004CF727 - 74 2b                      - je 004cf754
+004CF729 - 8b be 98 00 00 00          - mov edi,[esi+00000098]             eax = 武将所属
+004CF72F - 57                         - push edi
+004CF730 - e8 fb e8 fa ff             - call 0047e030                      校验设施ID是否在0～16383之间
+004CF735 - 83 c4 04                   - add esp,04
+004CF738 - 85 c0                      - test eax,eax
+004CF73A - 74 6b                      - je 004cf7a7
+004CF73C - 57                         - push edi
+004CF73D - b9 58 19 20 07             - mov ecx,07201958
+004CF742 - e8 b9 15 fc ff             - call 00490d00                      根据设施ID获取设施指针
+004CF747 - 8b 10                      - mov edx,[eax]
+004CF749 - 8b c8                      - mov ecx,eax
+004CF74B - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004CF74E - 3b c3                      - cmp eax,ebx                        比较被登用方所属是否与登用设施是同一势力
+004CF750 - 75 55                      - jne 004cf7a7                       所属势力不相同则跳转到循环下一个武将(不能登用其它势力的俘虏)
+004CF752 - eb 49                      - jmp 004cf79d
+[过滤一般武将]
+004CF754 - 6a 0e                      - push 0e                            0x0e = 00001111b(都督、太守、一般)
+004CF756 - 8b ce                      - mov ecx,esi
+004CF758 - e8 83 a8 fb ff             - call 00489fe0                      判断武将身份是否是包含在武将身份标志位
+004CF75D - 85 c0                      - test eax,eax
+004CF75F - 74 46                      - je 004cf7a7
+004CF761 - 8b 06                      - mov eax,[esi]
+004CF763 - 8b ce                      - mov ecx,esi
+004CF765 - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+004CF768 - 3b c3                      - cmp eax,ebx                        比较被登用方所属是否与登用设施是同一势力
+004CF76A - 74 3b                      - je 004cf7a7                        所属势力相同则跳转到循环下一个武将(只能登用其它势力的一般武将)
+004CF76C - 8b ce                      - mov ecx,esi
+004CF76E - e8 4d 9a fb ff             - call 004891c0                      判断武将是否在部队中
+004CF773 - 85 c0                      - test eax,eax
+004CF775 - 74 26                      - je 004cf79d
+004CF777 - 8b ce                      - mov ecx,esi
+004CF779 - e8 a2 9a fb ff             - call 00489220                      获取得武将所在部队ID
+004CF77E - 50                         - push eax
+004CF77F - b9 58 19 20 07             - mov ecx,07201958
+004CF784 - e8 e7 16 fc ff             - call 00490e70                      根据部队ID获取部队指针
+004CF789 - 8b f8                      - mov edi,eax
+004CF78B - 57                         - push edi
+004CF78C - e8 9f ae fa ff             - call 0047a630                      校验指针
+004CF791 - 83 c4 04                   - add esp,04
+004CF794 - 85 c0                      - test eax,eax
+004CF796 - 74 05                      - je 004cf79d
+004CF798 - 39 5f 44                   - cmp [edi+44],ebx                   比较部队所属是否与登用设施是同一势力
+004CF79B - 74 0a                      - je 004cf7a7                        所属势力相同则跳转到循环下一个武将(只能登用其它势力的一般武将)
+[可登用武将置入列表]
+004CF79D - 8b 4c 24 14                - mov ecx,[esp+14]
+004CF7A1 - 56                         - push esi
+004CF7A2 - e8 09 ca fa ff             - call 0047c1b0                      列表数组指针前移一个单元并将值置入列表
+[循环过滤下一个武将]
+004CF7A7 - 45                         - inc ebp
+004CF7A8 - 81 fd 4c 04 00 00          - cmp ebp,0000044c
+004CF7AE - 0f 8c 9c fe ff ff          - jl 004cf650
+
+004CF7B4 - 8b 4c 24 14                - mov ecx,[esp+14]
+004CF7B8 - 8b 41 0c                   - mov eax,[ecx+0c]
+004CF7BB - 5f                         - pop edi
+004CF7BC - 5d                         - pop ebp
+004CF7BD - 5b                         - pop ebx
+004CF7BE - 5e                         - pop esi
+004CF7BF - c2 08 00                   - ret 0008
+
+
+=====================================================================================================================================================
+
+修改 - 有“伯乐”特技则所在城市可以登用非己方势力所属城市的在野武将
+004CF711 - e9 2e 14 44 00             - jmp 00910b44
+
+00910B44 - 74 21                      - je 00910b67
+00910B46 - 8b 44 24 18                - mov eax,[esp+18]
+00910B4A - 8b c8                      - mov ecx,eax
+00910B4C - 8b 01                      - mov eax,[ecx]
+00910B4E - 68 92 00 00 00             - push 00000092                  0x92 = 伯乐
+00910B53 - ff 50 5c                   - call dword ptr [eax+5c]        获得城市中持有伯乐特技的武将ID
+00910B56 - 85 c0                      - test eax,eax
+00910B58 - 7c 12                      - jnge 00910b6c
+00910B5A - 8b ce                      - mov ecx,esi
+00910B5C - 50                         - push eax
+00910B5D - e8 1e 94 b7 ff             - call 00489f80                  计算A与B的相性差
+00910B62 - 83 f8 19                   - cmp eax,19                     0x19 = 25(限定能够登用的相性差)
+00910B65 - 7f 05                      - jg 00910b6c
+00910B67 - e9 ab eb bb ff             - jmp 004cf717
+00910B6C - e9 36 ec bb ff             - jmp 004cf7a7
+00910B71 - cc                         - int 3

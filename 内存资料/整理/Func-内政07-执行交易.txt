@@ -1,0 +1,244 @@
+功能: 执行商人
+参数表: [esp+04]=存放执行商人系列参数的数组指针
+
+*****************************************************************************************************************************************************
+
+005CAC20 - 81 ec a0 07 00 00          - sub esp,000007a0
+005CAC26 - 56                         - push esi
+005CAC27 - 8b b4 24 a8 07 00 00       - mov esi,[esp+000007a8]
+005CAC2E - 8b 06                      - mov eax,[esi]                  eax = 设施指针
+005CAC30 - 50                         - push eax
+005CAC31 - e8 1a fd ff ff             - call 005ca950
+005CAC36 - 83 c4 04                   - add esp,04
+005CAC39 - 85 c0                      - test eax,eax
+005CAC3B - 74 0b                      - je 005cac48
+005CAC3D - 8b ce                      - mov ecx,esi
+005CAC3F - e8 0c f8 ff ff             - call 005ca450                  判断交易后城市兵粮是否超过兵粮上限【参见子函数A】
+005CAC44 - 85 c0                      - test eax,eax
+005CAC46 - 75 0a                      - jne 005cac52                   不超过则进行后续处理
+005CAC48 - 33 c0                      - xor eax,eax
+005CAC4A - 5e                         - pop esi
+005CAC4B - 81 c4 a0 07 00 00          - add esp,000007a0
+005CAC51 - c3                         - ret
+
+【获取指针并校验】
+[获取城市指针]
+005CAC52 - 8b 06                      - mov eax,[esi]                  eax = 设施指针
+005CAC54 - 50                         - push eax
+005CAC55 - b9 58 19 20 07             - mov ecx,07201958
+005CAC5A - e8 11 6b ec ff             - call 00491770                  根据设施指针获取设施ID
+005CAC5F - 85 c0                      - test eax,eax
+005CAC61 - 7c 05                      - jnge 005cac68
+005CAC63 - 83 f8 29                   - cmp eax,29
+005CAC66 - 7e 03                      - jle 005cac6b
+005CAC68 - 83 c8 ff                   - or eax,ff
+005CAC6B - 53                         - push ebx
+005CAC6C - 50                         - push eax
+005CAC6D - b9 58 19 20 07             - mov ecx,07201958
+005CAC72 - e8 99 5d ec ff             - call 00490a10                  根据城市ID获取城市指针
+005CAC77 - 8b d8                      - mov ebx,eax                    ebx = 城市指针
+005CAC79 - 53                         - push ebx
+005CAC7A - e8 b1 f9 ea ff             - call 0047a630                  校验指针
+005CAC7F - 83 c4 04                   - add esp,04
+005CAC82 - 85 c0                      - test eax,eax
+005CAC84 - 75 09                      - jne 005cac8f                   校验成功则跳转到后续处理
+005CAC86 - 5b                         - pop ebx
+005CAC87 - 5e                         - pop esi
+005CAC88 - 81 c4 a0 07 00 00          - add esp,000007a0
+005CAC8E - c3                         - ret
+[获取执行武将指针]
+005CAC8F - 57                         - push edi
+005CAC90 - 8b 7e 04                   - mov edi,[esi+04]               edi = 执行武将指针
+005CAC93 - 57                         - push edi
+005CAC94 - e8 97 f9 ea ff             - call 0047a630                  校验指针
+005CAC99 - 83 c4 04                   - add esp,04
+005CAC9C - 85 c0                      - test eax,eax
+005CAC9E - 75 0a                      - jne 005cacaa                   校验成功则跳转到后续处理
+005CACA0 - 5f                         - pop edi
+005CACA1 - 5b                         - pop ebx
+005CACA2 - 5e                         - pop esi
+005CACA3 - 81 c4 a0 07 00 00          - add esp,000007a0
+005CACA9 - c3                         - ret
+
+【商人处理】
+[增加武将经验和勋功]
+005CACAA - 6a 01                      - push 01                        0x01 = 已行动
+005CACAC - 57                         - push edi                       edi = 执行武将指针
+005CACAD - b9 5c 89 99 07             - mov ecx,0799895c
+005CACB2 - e8 49 a9 ed ff             - call 004a5600                  设置武将状态是否为已行动
+005CACB7 - 6a 01                      - push 01
+005CACB9 - 6a 05                      - push 05                        增加经验5点
+005CACBB - 6a 03                      - push 03                        0x03 = 政治
+005CACBD - 57                         - push edi
+005CACBE - b9 5c 89 99 07             - mov ecx,0799895c
+005CACC3 - e8 08 c4 ed ff             - call 004a70d0                  武将增加属性经验
+005CACC8 - 6a 32                      - push 32                        增加勋功50点
+005CACCA - 57                         - push edi
+005CACCB - b9 5c 89 99 07             - mov ecx,0799895c
+005CACD0 - e8 7b c0 ed ff             - call 004a6d50                  武将增加勋功
+[设置城市已商人状态]
+005CACD5 - 6a 01                      - push 01
+005CACD7 - 8b cb                      - mov ecx,ebx                    ebx = 城市指针
+005CACD9 - e8 12 0a eb ff             - call 0047b6f0                  设置城市商人状态
+[计算交易钱粮]
+005CACDE - 8b 4e 08                   - mov ecx,[esi+08]               ecx = 买卖军粮数
+005CACE1 - 8b 16                      - mov edx,[esi]                  edx = 设施指针
+005CACE3 - 51                         - push ecx
+005CACE4 - 57                         - push edi                       edi = 执行武将指针
+005CACE5 - 52                         - push edx
+005CACE6 - e8 35 f9 ff ff             - call 005ca620                  计算交易收入或支出
+005CACEB - 83 c4 0c                   - add esp,0c
+005CACEE - f7 d8                      - neg eax
+005CACF0 - 50                         - push eax                       eax = 设施金钱增加或减少值
+005CACF1 - 8b 06                      - mov eax,[esi]                  eax = 设施指针
+005CACF3 - 50                         - push eax
+005CACF4 - b9 5c 89 99 07             - mov ecx,0799895c
+005CACF9 - e8 a2 35 ee ff             - call 004ae2a0                  加减设施金钱
+005CACFE - 8b 4e 08                   - mov ecx,[esi+08]               ecx = 设施军粮增加或减少值
+005CAD01 - 8b 16                      - mov edx,[esi]                  edx = 设施指针
+005CAD03 - 51                         - push ecx
+005CAD04 - 52                         - push edx
+005CAD05 - b9 5c 89 99 07             - mov ecx,0799895c
+005CAD0A - e8 f1 35 ee ff             - call 004ae300                  加减设施军粮
+[扣除军团行动力]
+005CAD0F - 8b 06                      - mov eax,[esi]                  eax = 设施指针
+005CAD11 - 6a 14                      - push 14                        0x14 = 20(扣除的行动力)
+005CAD13 - 6a 04                      - push 04
+005CAD15 - 50                         - push eax
+005CAD16 - b9 90 15 77 09             - mov ecx,09771590
+005CAD1B - e8 20 e6 fe ff             - call 005b9340                  扣除军团行动力
+
+【显示执行消息和武将语言】
+005CAD20 - 8b 0e                      - mov ecx,[esi]                  ecx = 设施指针
+005CAD22 - 51                         - push ecx
+005CAD23 - e8 58 d4 fe ff             - call 005b8180                  判断设施是否属于玩家势力第一军团
+005CAD28 - 83 c4 04                   - add esp,04
+005CAD2B - 85 c0                      - test eax,eax
+005CAD2D - 0f 84 95 00 00 00          - je 005cadc8
+005CAD33 - 8b 46 08                   - mov eax,[esi+08]               eax = 设施类型
+005CAD36 - 85 c0                      - test eax,eax
+005CAD38 - 55                         - push ebp
+005CAD39 - 7d 02                      - jnl 005cad3d
+005CAD3B - f7 d8                      - neg eax
+005CAD3D - 57                         - push edi                       edi = 执行武将指针
+005CAD3E - 8b e8                      - mov ebp,eax
+005CAD40 - e8 eb f8 ea ff             - call 0047a630                  校验指针
+005CAD45 - 83 c4 04                   - add esp,04
+005CAD48 - 85 c0                      - test eax,eax
+005CAD4A - 74 7b                      - je 005cadc7
+005CAD4C - 8b cf                      - mov ecx,edi
+005CAD4E - e8 ed ef eb ff             - call 00489d40                  取武将所属君主ID
+005CAD53 - 50                         - push eax
+005CAD54 - b9 58 19 20 07             - mov ecx,07201958
+005CAD59 - e8 a2 5d ec ff             - call 00490b00                  根据武将ID获取武将指针
+005CAD5E - 8d 4c 24 10                - lea ecx,[esp+10]
+005CAD62 - 8b d8                      - mov ebx,eax
+005CAD64 - e8 d7 1d ed ff             - call 0049cb40
+005CAD69 - 8b 46 08                   - mov eax,[esi+08]
+005CAD6C - 85 c0                      - test eax,eax
+005CAD6E - 55                         - push ebp
+005CAD6F - 53                         - push ebx
+005CAD70 - 8d 8c 24 e8 03 00 00       - lea ecx,[esp+000003e8]
+005CAD77 - 57                         - push edi
+005CAD78 - 7e 07                      - jle 005cad81
+005CAD7A - 68 70 14 00 00             - push 00001470
+005CAD7F - eb 05                      - jmp 005cad86
+005CAD81 - 68 76 14 00 00             - push 00001476
+005CAD86 - e8 45 b2 fe ff             - call 005b5fd0
+005CAD8B - 8d 4c 24 10                - lea ecx,[esp+10]
+005CAD8F - 50                         - push eax
+005CAD90 - e8 0b 18 ed ff             - call 0049c5a0
+005CAD95 - 8d 54 24 10                - lea edx,[esp+10]
+005CAD99 - 52                         - push edx
+005CAD9A - e8 f1 05 ed ff             - call 0049b390
+005CAD9F - 83 c4 04                   - add esp,04
+005CADA2 - 6a 00                      - push 00
+005CADA4 - 6a 00                      - push 00
+005CADA6 - 68 00 00 80 bf             - push bf800000
+005CADAB - 6a 00                      - push 00
+005CADAD - 6a 06                      - push 06
+005CADAF - b9 10 98 11 09             - mov ecx,09119810
+005CADB4 - 8b d8                      - mov ebx,eax
+005CADB6 - e8 b5 57 f0 ff             - call 004d0570
+005CADBB - 6a 00                      - push 00
+005CADBD - 57                         - push edi
+005CADBE - 53                         - push ebx
+005CADBF - e8 cc b8 f2 ff             - call 004f6690
+005CADC4 - 83 c4 0c                   - add esp,0c
+005CADC7 - 5d                         - pop ebp
+005CADC8 - 56                         - push esi
+005CADC9 - 6a 04                      - push 04
+005CADCB - b9 2c 61 3f 07             - mov ecx,073f612c
+005CADD0 - e8 2b 87 fa ff             - call 00573500
+005CADD5 - 5f                         - pop edi
+005CADD6 - 5b                         - pop ebx
+005CADD7 - b8 01 00 00 00             - mov eax,00000001
+005CADDC - 5e                         - pop esi
+005CADDD - 81 c4 a0 07 00 00          - add esp,000007a0
+005CADE3 - c3                         - ret
+
+
+*****************************************************************************************************************************************************
+
+子函数A - 判断交易后城市兵粮是否超过兵粮上限
+
+[校验设施指针]
+005CA450 - 56                         - push esi
+005CA451 - 8b f1                      - mov esi,ecx                    esi = 设施指针
+005CA453 - 8b 06                      - mov eax,[esi]
+005CA455 - 50                         - push eax
+005CA456 - e8 d5 01 eb ff             - call 0047a630                  校验指针
+005CA45B - 83 c4 04                   - add esp,04
+005CA45E - 85 c0                      - test eax,eax
+005CA460 - 74 6e                      - je 005ca4d0
+005CA462 - 8b 0e                      - mov ecx,[esi]
+005CA464 - 6a 00                      - push 00
+005CA466 - e8 f5 c1 eb ff             - call 00486660                  判断设施是否是城市
+005CA46B - 85 c0                      - test eax,eax
+005CA46D - 74 61                      - je 005ca4d0
+[校验执行武将指针]
+005CA46F - 8b 4e 04                   - mov ecx,[esi+04]               ecx = 执行武将指针
+005CA472 - 51                         - push ecx
+005CA473 - e8 b8 01 eb ff             - call 0047a630                  校验指针
+005CA478 - 83 c4 04                   - add esp,04
+005CA47B - 85 c0                      - test eax,eax
+005CA47D - 74 51                      - je 005ca4d0
+[获取并校验城市指针]
+005CA47F - 8b 06                      - mov eax,[esi]
+005CA481 - 50                         - push eax
+005CA482 - b9 58 19 20 07             - mov ecx,07201958
+005CA487 - e8 e4 72 ec ff             - call 00491770                  根据设施指针获取设施ID
+005CA48C - 85 c0                      - test eax,eax
+005CA48E - 7c 05                      - jnge 005ca495
+005CA490 - 83 f8 29                   - cmp eax,29
+005CA493 - 7e 03                      - jle 005ca498
+005CA495 - 83 c8 ff                   - or eax,ff
+005CA498 - 57                         - push edi
+005CA499 - 50                         - push eax
+005CA49A - b9 58 19 20 07             - mov ecx,07201958
+005CA49F - e8 6c 65 ec ff             - call 00490a10                  根据城市ID获取城市指针
+005CA4A4 - 8b f8                      - mov edi,eax                    edi = 城市指针
+005CA4A6 - 57                         - push edi
+005CA4A7 - e8 84 01 eb ff             - call 0047a630                  校验指针
+005CA4AC - 83 c4 04                   - add esp,04
+005CA4AF - 85 c0                      - test eax,eax
+005CA4B1 - 75 03                      - jne 005ca4b6
+005CA4B3 - 5f                         - pop edi
+005CA4B4 - 5e                         - pop esi
+005CA4B5 - c3                         - ret
+[检查买卖军粮数]
+005CA4B6 - 8b 76 08                   - mov esi,[esi+08]
+005CA4B9 - 33 c0                      - xor eax,eax
+005CA4BB - 85 f6                      - test esi,esi
+005CA4BD - 74 f4                      - je 005ca4b3
+[判断交易后城市兵粮是否超过兵粮上限]
+005CA4BF - 8b 57 48                   - mov edx,[edi+48]               edx = 现有军粮
+005CA4C2 - 03 d6                      - add edx,esi                    edx = 现有军粮+买卖军粮
+005CA4C4 - 81 fa 40 42 0f 00          - cmp edx,000f4240               0x000f4240 = 1000000(城市兵粮上限)          【修改：城市兵粮上限】
+005CA4CA - 5f                         - pop edi
+005CA4CB - 0f 9e c0                   - setle al                       交易后城市兵粮低于城市兵粮上限则返回1，否则返回0
+005CA4CE - 5e                         - pop esi
+005CA4CF - c3                         - ret
+005CA4D0 - 33 c0                      - xor eax,eax
+005CA4D2 - 5e                         - pop esi
+005CA4D3 - c3                         - ret

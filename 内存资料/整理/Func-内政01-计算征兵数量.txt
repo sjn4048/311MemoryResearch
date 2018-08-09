@@ -1,0 +1,174 @@
+功能: 计算征兵数量
+参数表: [esp+04]=设施指针，[esp+08]=征兵武将数组指针
+备注：有两个入口调用这个函数：
+  1、执行征兵
+  005C3B8E - e8 7d fa ff ff             - call 005c3610
+  2、展现征兵界面
+  00604948 - e8 c3 ec fb ff             - call 005c3610
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+005C3610 - 83 ec 08                   - sub esp,08
+005C3613 - 56                         - push esi
+005C3614 - 8b 74 24 10                - mov esi,[esp+10]                   esi = 设施指针
+005C3618 - 56                         - push esi
+005C3619 - e8 12 70 eb ff             - call 0047a630                      校验指针
+005C361E - 83 c4 04                   - add esp,04
+005C3621 - 85 c0                      - test eax,eax
+005C3623 - 0f 84 55 01 00 00          - je 005c377e                        校验失败则跳转到返回0
+005C3629 - 8b 44 24 14                - mov eax,[esp+14]                   eax = 征兵武将数组指针
+005C362D - 8b 08                      - mov ecx,[eax]                      ecx = 首个征兵武将指针
+005C362F - 51                         - push ecx
+005C3630 - e8 fb 6f eb ff             - call 0047a630                      校验指针
+005C3635 - 83 c4 04                   - add esp,04
+005C3638 - 85 c0                      - test eax,eax
+005C363A - 0f 84 3e 01 00 00          - je 005c377e                        校验失败则跳转到返回0
+005C3640 - 55                         - push ebp
+005C3641 - 8b ce                      - mov ecx,esi
+005C3643 - e8 a8 30 ec ff             - call 004866f0                      根据设施指针获取城市指针
+005C3648 - 8b e8                      - mov ebp,eax
+005C364A - 55                         - push ebp
+005C364B - e8 e0 6f eb ff             - call 0047a630                      校验指针               
+005C3650 - 83 c4 04                   - add esp,04
+005C3653 - 85 c0                      - test eax,eax
+005C3655 - 75 06                      - jne 005c365d                       校验成功则跳转到征兵数量计算
+005C3657 - 5d                         - pop ebp
+005C3658 - 5e                         - pop esi
+005C3659 - 83 c4 08                   - add esp,08
+005C365C - c3                         - ret
+
+【获取武将魅力】
+005C365D - 53                         - push ebx
+005C365E - 57                         - push edi
+005C365F - 33 ff                      - xor edi,edi                        edi = 0
+005C3661 - c7 44 24 10 00 00 00 80    - mov [esp+10],80000000
+005C3669 - c7 44 24 14 0a 00 00 00    - mov [esp+14],0000000a              无名声则[esp+14] = 0x0a(10)
+005C3671 - 33 db                      - xor ebx,ebx                        ebx = 征兵武将计数器
+005C3673 - 8b 54 24 20                - mov edx,[esp+20]                   edx = 征兵武将数组指针
+005C3677 - 8b 34 9a                   - mov esi,[edx+ebx*4]                esi = 第ebx位征兵武将指针
+005C367A - 56                         - push esi
+005C367B - e8 b0 6f eb ff             - call 0047a630                      校验指针
+005C3680 - 83 c4 04                   - add esp,04
+005C3683 - 85 c0                      - test eax,eax
+005C3685 - 74 34                      - je 005c36bb                        校验失败则循环下一个
+005C3687 - 8b ce                      - mov ecx,esi
+005C3689 - e8 22 5a ec ff             - call 004890b0                      获取武将魅力
+005C368E - 8b 4c 24 10                - mov ecx,[esp+10]                   ecx = [esp+10]  
+005C3692 - 0f b6 c0                   - movzx eax,al
+005C3695 - 03 f8                      - add edi,eax                        edi = 征兵武将魅力和
+005C3697 - 0f b7 86 ae 00 00 00       - movzx eax,word ptr [esi+000000ae]  eax = 武将勋功
+005C369E - 3b c8                      - cmp ecx,eax                        比较勋功
+005C36A0 - 7d 04                      - jnl 005c36a6
+005C36A2 - 89 44 24 10                - mov [esp+10],eax                   武将勋功较大值置入[esp+10]
+005C36A6 - 6a 4f                      - push 4f                            0x4f = 名声
+005C36A8 - 8b ce                      - mov ecx,esi
+005C36AA - e8 41 5a ec ff             - call 004890f0                      判断武将是否拥有名声特技
+005C36AF - 85 c0                      - test eax,eax
+005C36B1 - 74 08                      - je 005c36bb
+005C36B3 - c7 44 24 14 0f 00 00 00    - mov [esp+14],0000000f              有名声则[esp+14] = 0x0f(15)                 【修改】名声倍率(每增加或减少1表示倍率上调或下降10%)
+005C36BB - 43                         - inc ebx
+005C36BC - 83 fb 03                   - cmp ebx,03                         循环3次
+005C36BF - 7c b2                      - jnge 005c3673
+
+【计算征兵数量】
+005C36C1 - 8a 9d 85 00 00 00          - mov bl,[ebp+00000085]              bl = 城市治安
+005C36C7 - 55                         - push ebp                           ebp = 城市指针
+005C36C8 - e8 83 fe ff ff             - call 005c3550                      获取城市剩余空兵舍等级相对应的征兵倍率(一级1.0，二级1.2，三级1.5)
+005C36CD - 0f b6 c3                   - movzx eax,bl                       eax = 城市治安
+005C36D0 - 83 c0 14                   - add eax,14
+005C36D3 - 0f af c7                   - imul eax,edi                       eax = (城市治安+20)*武将魅力和
+005C36D6 - 8d 0c 80                   - lea ecx,[eax+eax*4]                以下6句，ecx = eax*0.05
+005C36D9 - b8 1f 85 eb 51             - mov eax,51eb851f
+005C36DE - f7 e9                      - imul ecx
+005C36E0 - c1 fa 05                   - sar dl,05
+005C36E3 - 8b ca                      - mov ecx,edx
+005C36E5 - c1 e9 1f                   - shr ecx,1f
+005C36E8 - 8d 8c 0a e8 03 00 00       - lea ecx,[edx+ecx+000003e8]         ecx = 1000(基数)+ecx+edx(计算余数)
+005C36EF - 0f af 4c 24 18             - imul ecx,[esp+18]                  ecx = ecx*[esp+18](兵舍等级参数)
+005C36F4 - b8 67 66 66 66             - mov eax,66666667                   以下6句，eax = ecx*0.1
+005C36F9 - f7 e9                      - imul ecx
+005C36FB - c1 fa 02                   - sar dl,02
+005C36FE - 8b c2                      - mov eax,edx
+005C3700 - c1 e8 1f                   - shr eax,1f
+005C3703 - 03 c2                      - add eax,edx
+005C3705 - 89 44 24 18                - mov [esp+18],eax                   eax置入[esp+18]
+005C3709 - 83 c4 04                   - add esp,04
+005C370C - da 4c 24 14                - fimul [esp+14]                     eax = eax×[esp+14](有名声=15，无名声=10)
+005C3710 - e8 5f 43 14 00             - call 00707a74                      小数转整数置入eax
+005C3715 - 8b f0                      - mov esi,eax                        esi = 征兵值
+
+【超级难度电脑征兵数量翻倍】
+005C3717 - 83 3d 78 19 20 07 02       - cmp dword ptr [07201978],02        判断是否是超级难度
+005C371E - 75 0e                      - jne 005c372e
+005C3720 - 8b 55 00                   - mov edx,[ebp+00]                   ebp = 城市指针
+005C3723 - 8b cd                      - mov ecx,ebp
+005C3725 - ff 52 48                   - call dword ptr [edx+48]            判断城市是否属于电脑势力
+005C3728 - 85 c0                      - test eax,eax
+005C372A - 75 02                      - jne 005c372e
+005C372C - 03 f6                      - add esi,esi                        超级难度电脑征兵加倍
+
+【兵临城下时征兵数量减半】
+005C372E - 8b 7c 24 1c                - mov edi,[esp+1c]                   edi = 设施指针
+005C3732 - 57                         - push edi
+005C3733 - b9 5c 89 99 07             - mov ecx,0799895c
+005C3738 - e8 73 62 ef ff             - call 004b99b0                      判断城市、港关附近（城市3格，港关2格）是否有敌方部队
+005C373D - 85 c0                      - test eax,eax
+005C373F - 74 09                      - je 005c374a                        若不是兵临城下则跳过征兵值减半的计算
+                                                                                                                       【修改】jmp 005c374a  //兵临城下征兵数量正常
+005C3741 - 8b c6                      - mov eax,esi
+005C3743 - 99                         - cdq
+005C3744 - 2b c2                      - sub eax,edx
+005C3746 - d1 f8                      - sar eax,1
+005C3748 - 8b f0                      - mov esi,eax                        esi = 征兵值
+
+【城市兵力上限判定】
+005C374A - 8b 07                      - mov eax,[edi]                      edi = 设施指针
+005C374C - 8b cf                      - mov ecx,edi
+005C374E - ff 50 50                   - call dword ptr [eax+50]            获取设施兵力
+005C3751 - 8b d8                      - mov ebx,eax                        ebx = 设施原始兵力
+005C3753 - 8b cf                      - mov ecx,edi
+005C3755 - 03 de                      - add ebx,esi                        ebx = ebx+esi(原始兵力+征兵值)
+005C3757 - e8 64 34 ec ff             - call 00486bc0                      获取设施兵力上限
+005C375C - 3b c3                      - cmp eax,ebx
+005C375E - 7d 14                      - jnl 005c3774                       如征兵后的兵力不大于城市兵力上限则跳转
+005C3760 - 8b 17                      - mov edx,[edi]
+005C3762 - 8b cf                      - mov ecx,edi
+005C3764 - ff 52 50                   - call dword ptr [edx+50]            获取设施兵力
+005C3767 - 8b cf                      - mov ecx,edi
+005C3769 - 8b d8                      - mov ebx,eax
+005C376B - e8 50 34 ec ff             - call 00486bc0                      获取设施兵力上限
+005C3770 - 8b f0                      - mov esi,eax
+005C3772 - 2b f3                      - sub esi,ebx                        esi = 城市最大兵力与原始兵力之差
+
+005C3774 - 5f                         - pop edi
+005C3775 - 5b                         - pop ebx
+005C3776 - 5d                         - pop ebp
+005C3777 - 8b c6                      - mov eax,esi                        eax = esi(最终返回的征兵数量)
+005C3779 - 5e                         - pop esi
+005C377A - 83 c4 08                   - add esp,08
+005C377D - c3                         - ret
+005C377E - 33 c0                      - xor eax,eax
+005C3780 - 5e                         - pop esi
+005C3781 - 83 c4 08                   - add esp,08
+005C3784 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 大城市和普通城市征兵倍率可调整
+005C3710 - e9 73 66 2e 00             - jmp 008a9d88
+
+008A9D88 - e8 e7 dc e5 ff             - call 00707a74
+008A9D8D - 8b 95 86 00 00 00          - mov edx,[ebp+00000086]
+008A9D93 - 0f b7 8d 8a 00 00 00       - movzx ecx,word ptr [ebp+0000008a]
+008A9D9A - 01 d1                      - add ecx,edx                        ecx如果等于0，表示城市类型为大城市
+008A9D9C - 85 c9                      - test ecx,ecx
+008A9D9E - 75 05                      - jne 008a9da5
+008A9DA0 - 6b c0 64                   - imul eax,eax,32                    大城市征兵倍率(0x32表示100%，每增加或减少1表示倍率上调或下降2%)
+008A9DA3 - eb 03                      - jmp 008a9da8
+008A9DA5 - 6b c0 64                   - imul eax,eax,32                    普通城市征兵倍率(0x32表示100%，每增加或减少1表示倍率上调或下降2%)
+008A9DA8 - b9 32 00 00 00             - mov ecx,00000032                   这样最大允许的倍率为254％
+008A9DAD - 99                         - cdq
+008A9DAE - f7 f9                      - idiv ecx
+008A9DB0 - e9 60 99 d1 ff             - jmp 005c3715

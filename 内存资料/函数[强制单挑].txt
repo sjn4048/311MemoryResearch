@@ -1,0 +1,250 @@
+0058A420 - 83 ec 08                   - sub esp,08
+0058A423 - 56                         - push esi
+0058A424 - 8b 74 24 10                - mov esi,[esp+10]                   ESI是攻击部队指针
+0058A428 - 56                         - push esi
+0058A429 - e8 02 02 ef ff             - call 0047a630                      校验指针
+0058A42E - 83 c4 04                   - add esp,04
+0058A431 - 85 c0                      - test eax,eax
+0058A433 - 0f 84 9c 01 00 00          - je 0058a5d5
+0058A439 - 8b 44 24 14                - mov eax,[esp+14]                   EAX是被攻击部队指针
+0058A43D - 50                         - push eax
+0058A43E - e8 ed 01 ef ff             - call 0047a630                      校验指针
+0058A443 - 83 c4 04                   - add esp,04
+0058A446 - 85 c0                      - test eax,eax
+0058A448 - 0f 84 87 01 00 00          - je 0058a5d5
+0058A44E - 53                         - push ebx
+0058A44F - 6a 00                      - push 00
+0058A451 - 56                         - push esi
+0058A452 - e8 49 f8 ff ff             - call 00589ca0                      选定发起强制单挑的武将
+0058A457 - 8b d8                      - mov ebx,eax                        预定发起单挑武将地址置入EBX
+0058A459 - 53                         - push ebx
+0058A45A - e8 a1 01 ef ff             - call 0047a600                      校验武将指针
+0058A45F - 83 c4 0c                   - add esp,0c
+0058A462 - 85 c0                      - test eax,eax
+0058A464 - 75 06                      - jne 0058a46c
+0058A466 - 5b                         - pop ebx
+0058A467 - 5e                         - pop esi
+0058A468 - 83 c4 08                   - add esp,08
+0058A46B - c3                         - ret
+0058A46C - 55                         - push ebp
+0058A46D - 57                         - push edi
+0058A46E - 53                         - push ebx
+0058A46F - 33 f6                      - xor esi,esi                        ESI置0，用以存放强挑概率
+0058A471 - e8 8a 01 ef ff             - call 0047a600                      校验武将指针（这段实际没用）
+0058A476 - 83 c4 04                   - add esp,04
+0058A479 - 85 c0                      - test eax,eax
+0058A47B - 0f 84 3b 01 00 00          - je 0058a5bc
+0058A481 - 53                         - push ebx
+0058A482 - e8 79 01 ef ff             - call 0047a600                      校验武将指针（这段实际也没用）
+0058A487 - 83 c4 04                   - add esp,04
+0058A48A - 85 c0                      - test eax,eax
+0058A48C - 0f 84 fb 00 00 00          - je 0058a58d
+0058A492 - 0f b6 8b 28 01 00 00       - movzx ecx,byte ptr [ebx+00000128]  预定发起单挑武将体力
+0058A499 - 89 4c 24 10                - mov [esp+10],ecx                   置入[esp+10]
+0058A49D - 53                         - push ebx
+0058A49E - db 44 24 14                - fild dword ptr [esp+14]            由于上一句的PUSH，此时[esp+14]是预定单挑武将体力
+0058A4A2 - d9 5c 24 14                - fstp dword ptr [esp+14]
+0058A4A6 - e8 35 d5 f7 ff             - call 005079e0                      性格所决定的被强制单挑的体力阈值：小心＝80，冷静＝70，刚胆＝60，莽撞＝50
+0058A4AB - 89 44 24 18                - mov [esp+18],eax                   性格所决定的被强制单挑的体力阈值置入[esp+18]
+0058A4AF - db 44 24 18                - fild dword ptr [esp+18]
+0058A4B3 - 83 c4 04                   - add esp,04
+0058A4B6 - d8 5c 24 10                - fcomp dword ptr [esp+10]           比较两个实数
+0058A4BA - df e0                      - fnstsw ax                          比较结果的标志置入AX
+0058A4BC - f6 c4 41                   - test ah,41                         检查ZF和CF标志位，即判断预定武将体力是否小于阈值
+0058A4BF - 0f 8a c8 00 00 00          - jp 0058a58d                        低于体力阈值则不进行强制单挑
+0058A4C5 - 8b cb                      - mov ecx,ebx                        EBX是预定发起单挑武将地址
+0058A4C7 - e8 b4 eb ef ff             - call 00489080                      获取预定发起单挑武将武力
+0058A4CC - 53                         - push ebx
+0058A4CD - 0f b6 f8                   - movzx edi,al                       预定发起单挑武将武力置入EDI
+0058A4D0 - e8 8b 05 f7 ff             - call 004faa60                      计算预定单挑武将的宝物加成值
+0058A4D5 - 8b d7                      - mov edx,edi
+0058A4D7 - d9 44 24 14                - fld dword ptr [esp+14]             [esp+14]仍然是体力
+0058A4DB - 0f af d7                   - imul edx,edi                       EDX=EDI*EDI
+0058A4DE - d8 05 58 ad 83 00          - fadd dword ptr [0083ad58]          [esp+14]+200
+0058A4E4 - 89 54 24 18                - mov [esp+18],edx                   EDX置入[esp+18]
+0058A4E8 - 83 c4 04                   - add esp,04
+0058A4EB - d8 0d 90 9b 76 00          - fmul dword ptr [00769b90]          ×0.02
+0058A4F1 - 8b f0                      - mov esi,eax                        宝物加成值置入EAX
+0058A4F3 - da 4c 24 14                - fimul [esp+14]
+0058A4F7 - d8 0d e4 af 84 00          - fmul dword ptr [0084afe4]          ×-0.0025
+0058A4FD - e8 72 d5 17 00             - call 00707a74
+0058A502 - 2b f0                      - sub esi,eax                        因为EAX是负的，所以其实这句话是加上宝物加成值
+0058A504 - 83 fe 01                   - cmp esi,01                         如果ESI<1则ESI=1
+0058A507 - 7d 05                      - jnl 0058a50e
+0058A509 - be 01 00 00 00             - mov esi,00000001
+0058A50E - 8b cb                      - mov ecx,ebx
+0058A510 - e8 eb e6 ef ff             - call 00488c00                      判断预定发起单挑武将是否是君主
+0058A515 - 85 c0                      - test eax,eax
+0058A517 - 74 17                      - je 0058a530                        不是则跳转到0058A530
+0058A519 - 83 ff 5f                   - cmp edi,5f                         预定发起单挑武将武力是否大于95
+0058A51C - 7d 12                      - jnl 0058a530                       大于则跳转到0058A530
+0058A51E - 6a 14                      - push 14
+0058A520 - 56                         - push esi
+0058A521 - e8 ca 7b ee ff             - call 004720f0                      EAX＝ESI-20，若ESI<0，则EAX＝0
+0058A526 - 83 c4 08                   - add esp,08
+0058A529 - 83 f8 01                   - cmp eax,01                         EAX＝0则不可能单挑
+0058A52C - 7c 5f                      - jnge 0058a58d
+0058A52E - 8b f0                      - mov esi,eax                        EAX置入ESI
+0058A530 - 83 fe 46                   - cmp esi,46                         若ESI小于70
+0058A533 - 7c 58                      - jnge 0058a58d                      则不可能单挑
+0058A535 - 8b ab fc 00 00 00          - mov ebp,[ebx+000000fc]             预定单挑武将性格
+0058A53B - 85 ed                      - test ebp,ebp
+0058A53D - 74 4e                      - je 0058a58d                        性格是胆小者不可能发起强挑
+0058A53F - 8b 44 24 20                - mov eax,[esp+20]                   EAX是攻击方部队指针
+0058A543 - 6a 00                      - push 00
+0058A545 - 50                         - push eax
+0058A546 - e8 b5 fc ff ff             - call 0058a200                      计算部队的单挑指数
+0058A54B - 8b 4c 24 24                - mov ecx,[esp+24]                   ECX是被攻击方部队指针
+0058A54F - 8b f8                      - mov edi,eax                        
+0058A551 - 6a 00                      - push 00
+0058A553 - 51                         - push ecx
+0058A554 - 83 ef 1e                   - sub edi,1e                         EDI-30
+0058A557 - e8 a4 fc ff ff             - call 0058a200                      计算部队的单挑指数
+0058A55C - 83 c4 10                   - add esp,10
+0058A55F - 3b c7                      - cmp eax,edi                        比较攻击方全队的单挑指数和被攻击方全队的单挑指数
+0058A561 - 7c 2a                      - jnge 0058a58d                      如果攻击方全队的单挑指数比被攻击方全队的单挑指数大30以上才能进入强制单挑判定
+0058A563 - 8b 54 24 1c                - mov edx,[esp+1c]
+0058A567 - 52                         - push edx
+0058A568 - e8 23 f5 ff ff             - call 00589a90
+0058A56D - 8b f8                      - mov edi,eax                        攻击方兵力置入EDI
+0058A56F - 8b 44 24 24                - mov eax,[esp+24]
+0058A573 - 50                         - push eax
+0058A574 - e8 17 f5 ff ff             - call 00589a90
+0058A579 - 8d 0c 00                   - lea ecx,[eax+eax]                  被攻击方兵力的两倍置入ECX
+0058A57C - 83 c4 08                   - add esp,08
+0058A57F - 3b f9                      - cmp edi,ecx                        
+0058A581 - 7c 14                      - jnge 0058a597                      如攻击方兵力小于于被攻击方的两倍，则进入下一个判定
+0058A583 - 2b f8                      - sub edi,eax                        
+0058A585 - 81 ff c4 09 00 00          - cmp edi,000009c4                   攻击方兵力－被攻击方兵力，不超过2500则进入下一个判定
+0058A58B - 7c 0a                      - jnge 0058a597                      以上两个判定：当被攻击方兵力小于攻击方的一半或比攻击方兵力少2500人以上才能进入强制单挑判定
+0058A58D - 5f                         - pop edi
+0058A58E - 5d                         - pop ebp
+0058A58F - 5b                         - pop ebx
+0058A590 - 33 c0                      - xor eax,eax
+0058A592 - 5e                         - pop esi
+0058A593 - 83 c4 08                   - add esp,08
+0058A596 - c3                         - ret
+0058A597 - b8 67 66 66 66             - mov eax,66666667
+0058A59C - f7 ee                      - imul esi
+0058A59E - c1 fa 03                   - sar dl,03
+0058A5A1 - 8b f2                      - mov esi,edx
+0058A5A3 - c1 ee 1f                   - shr esi,1f
+0058A5A6 - 55                         - push ebp
+0058A5A7 - 03 f2                      - add esi,edx                        ESI=之前的值*0.05
+0058A5A9 - e8 22 dd ef ff             - call 004882d0                      校验武将性格值
+0058A5AE - 83 c4 04                   - add esp,04
+0058A5B1 - 85 c0                      - test eax,eax
+0058A5B3 - 74 07                      - je 0058a5bc
+0058A5B5 - 03 34 ad e8 af 84 00       - add esi,[ebp*4+0084afe8]           刚胆+1, 莽撞+3
+0058A5BC - 56                         - push esi
+0058A5BD - e8 0e 7c ee ff             - call 004721d0
+0058A5C2 - 83 c4 04                   - add esp,04
+0058A5C5 - 85 c0                      - test eax,eax
+0058A5C7 - 75 02                      - jne 0058a5cb
+0058A5C9 - 33 db                      - xor ebx,ebx
+0058A5CB - 5f                         - pop edi
+0058A5CC - 5d                         - pop ebp
+0058A5CD - 8b c3                      - mov eax,ebx                        返回发起强制单挑武将的指针
+0058A5CF - 5b                         - pop ebx
+0058A5D0 - 5e                         - pop esi
+0058A5D1 - 83 c4 08                   - add esp,08
+0058A5D4 - c3                         - ret
+0058A5D5 - 33 c0                      - xor eax,eax
+0058A5D7 - 5e                         - pop esi
+0058A5D8 - 83 c4 08                   - add esp,08
+0058A5DB - c3                         - ret
+
+
+计算部队的单挑指数
+0058A249 - 55                         - push ebp
+0058A24A - 57                         - push edi
+0058A24B - 56                         - push esi
+0058A24C - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+0058A251 - e8 ba 70 f0 ff             - call 00491310                      根据武将指针获得武将ID
+0058A256 - 33 ed                      - xor ebp,ebp
+0058A258 - 89 44 24 18                - mov [esp+18],eax                   
+0058A25C - 89 6c 24 10                - mov [esp+10],ebp                   EBP＝0
+0058A260 - 55                         - push ebp
+0058A261 - 8b cb                      - mov ecx,ebx
+0058A263 - e8 28 b0 f0 ff             - call 00495290                      获得第X位武将ID
+0058A268 - 50                         - push eax
+0058A269 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+0058A26E - e8 8d 68 f0 ff             - call 00490b00                      根据武将ID获得武将指针
+0058A273 - 8b f0                      - mov esi,eax
+0058A275 - 56                         - push esi
+0058A276 - e8 85 03 ef ff             - call 0047a600                      校验指针
+0058A27B - 83 c4 04                   - add esp,04
+0058A27E - 85 c0                      - test eax,eax
+0058A280 - 0f 84 d0 00 00 00          - je 0058a356
+0058A286 - 8b 44 24 18                - mov eax,[esp+18]                   取得武将ID
+0058A28A - 50                         - push eax
+0058A28B - 8b ce                      - mov ecx,esi
+0058A28D - e8 4e e7 ef ff             - call 004889e0
+0058A292 - 85 c0                      - test eax,eax
+0058A294 - 0f 85 bc 00 00 00          - jne 0058a356
+0058A29A - 56                         - push esi
+0058A29B - e8 60 03 ef ff             - call 0047a600
+0058A2A0 - 83 c4 04                   - add esp,04
+0058A2A3 - 85 c0                      - test eax,eax
+0058A2A5 - 0f 84 a5 00 00 00          - je 0058a350
+0058A2AB - 0f b6 8e 28 01 00 00       - movzx ecx,byte ptr [esi+00000128]  获得体力
+0058A2B2 - 89 4c 24 14                - mov [esp+14],ecx                   体力置入[esp+14]
+0058A2B6 - 56                         - push esi
+0058A2B7 - db 44 24 18                - fild dword ptr [esp+18]            载入体力
+0058A2BB - d9 5c 24 18                - fstp dword ptr [esp+18]
+0058A2BF - e8 1c d7 f7 ff             - call 005079e0                      性格所决定的被强制单挑的体力阈值：小心＝80，冷静＝70，刚胆＝60，莽撞＝50
+0058A2C4 - 89 44 24 20                - mov [esp+20],eax
+0058A2C8 - db 44 24 20                - fild dword ptr [esp+20]            载入性格所决定的体力
+0058A2CC - 83 c4 04                   - add esp,04
+0058A2CF - d8 5c 24 14                - fcomp dword ptr [esp+14]
+0058A2D3 - df e0                      - fnstsw ax
+0058A2D5 - f6 c4 41                   - test ah,41
+0058A2D8 - 7a 76                      - jp 0058a350                        如果体力不足则循环下一个
+0058A2DA - 8b ce                      - mov ecx,esi
+0058A2DC - e8 9f ed ef ff             - call 00489080                      获得武力
+0058A2E1 - 56                         - push esi
+0058A2E2 - 0f b6 d8                   - movzx ebx,al
+0058A2E5 - e8 76 07 f7 ff             - call 004faa60                      考虑宝物因素，
+0058A2EA - 8b d3                      - mov edx,ebx
+0058A2EC - d9 44 24 18                - fld dword ptr [esp+18]             载入体力
+0058A2F0 - 0f af d3                   - imul edx,ebx                       武力平方
+0058A2F3 - d8 05 58 ad 83 00          - fadd dword ptr [0083ad58] : [(float)200.0000]  ＋200
+0058A2F9 - 89 54 24 20                - mov [esp+20],edx                          武力平方置入[esp+20]
+0058A2FD - 83 c4 04                   - add esp,04
+0058A300 - d8 0d 90 9b 76 00          - fmul dword ptr [00769b90] : [3C888889]    ×0.02
+0058A306 - 8b f8                      - mov edi,eax                               宝物因素置入EDI
+0058A308 - da 4c 24 1c                - fimul [esp+1c]                            ×武力平方
+0058A30C - d8 0d e4 af 84 00          - fmul dword ptr [0084afe4] : [BB23D70A]    ×
+0058A312 - e8 5d d7 17 00             - call 00707a74
+0058A317 - 2b f8                      - sub edi,eax                        宝物因素－体力、武力因素
+0058A319 - 83 ff 01                   - cmp edi,01
+0058A31C - 7d 05                      - jnl 0058a323
+0058A31E - bf 01 00 00 00             - mov edi,00000001                   最小值是1
+0058A323 - 8b ce                      - mov ecx,esi
+0058A325 - e8 d6 e8 ef ff             - call 00488c00                      武将是君主则不进入下面的计算
+0058A32A - 85 c0                      - test eax,eax
+0058A32C - 74 1c                      - je 0058a34a
+0058A32E - 83 fb 5f                   - cmp ebx,5f                         武力》＝95则不进入下面的计算
+0058A331 - 7d 17                      - jnl 0058a34a                       
+0058A333 - 6a 14                      - push 14
+0058A335 - 57                         - push edi
+0058A336 - e8 b5 7d ee ff             - call 004720f0                      否则EDI值再减去20
+0058A33B - 83 c4 08                   - add esp,08
+0058A33E - 83 f8 01                   - cmp eax,01
+0058A341 - bf 01 00 00 00             - mov edi,00000001                   最小值是1
+0058A346 - 7c 02                      - jnge 0058a34a
+0058A348 - 8b f8                      - mov edi,eax
+0058A34A - 8b 5c 24 24                - mov ebx,[esp+24]
+0058A34E - eb 02                      - jmp 0058a352
+0058A350 - 33 ff                      - xor edi,edi
+0058A352 - 01 7c 24 10                - add [esp+10],edi
+0058A356 - 45                         - inc ebp
+0058A357 - 83 fd 03                   - cmp ebp,03                         循环3次
+0058A35A - 0f 8c 00 ff ff ff          - jl 0058a260
+0058A360 - 8b 44 24 10                - mov eax,[esp+10]
+0058A364 - 5f                         - pop edi
+0058A365 - 5d                         - pop ebp
+0058A366 - 5e                         - pop esi
+0058A367 - 5b                         - pop ebx
+0058A368 - 83 c4 10                   - add esp,10
+0058A36B - c3                         - ret

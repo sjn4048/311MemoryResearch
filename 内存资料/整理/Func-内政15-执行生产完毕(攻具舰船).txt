@@ -1,0 +1,157 @@
+功能: 执行生产完毕(攻具舰船)
+参数表: [esp+04]=武将指针，[esp+08]=城市指针，[esp+0c]=生产兵装类型
+
+*****************************************************************************************************************************************************
+
+【获取参数并校验】
+005C5E10 - 83 ec 14                   - sub esp,14
+005C5E13 - 53                         - push ebx
+005C5E14 - 55                         - push ebp
+005C5E15 - 56                         - push esi
+[校验武将指针]
+005C5E16 - 8b 74 24 24                - mov esi,[esp+24]                   esi = 武将指针
+005C5E1A - 56                         - push esi
+005C5E1B - e8 10 48 eb ff             - call 0047a630                      校验指针
+005C5E20 - 83 c4 04                   - add esp,04
+005C5E23 - 85 c0                      - test eax,eax
+005C5E25 - 0f 84 5c 01 00 00          - je 005c5f87                        校验失败则跳转到返回
+[校验武将指针]
+005C5E2B - 8b 5c 24 28                - mov ebx,[esp+28]                   ebx = 城市指针
+005C5E2F - 53                         - push ebx
+005C5E30 - e8 fb 47 eb ff             - call 0047a630                      校验指针
+005C5E35 - 83 c4 04                   - add esp,04
+005C5E38 - 85 c0                      - test eax,eax
+005C5E3A - 0f 84 47 01 00 00          - je 005c5f87                        校验失败则跳转到返回
+[校验生产兵装类型]
+005C5E40 - 8b 44 24 2c                - mov eax,[esp+2c]                   eax = 生产兵装类型
+005C5E44 - 33 ed                      - xor ebp,ebp
+005C5E46 - 3b c5                      - cmp eax,ebp
+005C5E48 - 0f 8c 39 01 00 00          - jl 005c5f87
+005C5E4E - 83 f8 0b                   - cmp eax,0b
+005C5E51 - 0f 8f 30 01 00 00          - jg 005c5f87                        生产兵装类型不在0～11之间则设置为跳转到返回
+[校验武将任务]
+005C5E57 - 83 be 3c 01 00 00 02       - cmp dword ptr [esi+0000013c],02    0x02 = 生产(任务ID)
+005C5E5E - 0f 85 23 01 00 00          - jne 005c5f87                       武将任务不是生产则跳转到返回
+
+【获得相同任务和任务对象的3名武将指针的数组】
+005C5E64 - 33 c0                      - xor eax,eax
+005C5E66 - 89 44 24 14                - mov [esp+14],eax
+005C5E6A - 57                         - push edi
+005C5E6B - 89 44 24 1c                - mov [esp+1c],eax
+005C5E6F - 6a 02                      - push 02                            取任务参数中的第三个参数
+005C5E71 - 8b ce                      - mov ecx,esi
+005C5E73 - 89 44 24 24                - mov [esp+24],eax
+005C5E77 - e8 34 39 ec ff             - call 004897b0                      获取武将第N个任务对象参数
+005C5E7C - 6a 03                      - push 03                            最多获取3个
+005C5E7E - 8d 4c 24 1c                - lea ecx,[esp+1c]
+005C5E82 - 51                         - push ecx                           ecx = 返回数组指针
+005C5E83 - 50                         - push eax                           任务对象
+005C5E84 - 6a 02                      - push 02                            0x02 = 生产(任务ID)
+005C5E86 - e8 c5 23 ff ff             - call 005b8250                      获得指定任务和任务对象的武将指针数组
+005C5E8B - bf 00 00 00 80             - mov edi,80000000
+005C5E90 - 83 c4 10                   - add esp,10
+005C5E93 - 89 6c 24 14                - mov [esp+14],ebp
+005C5E97 - 89 7c 24 10                - mov [esp+10],edi
+005C5E9B - eb 03                      - jmp 005c5ea0
+005C5E9D - 8d 49 00                   - lea ecx,[ecx+00]
+
+【增加武将经验和勋功】
+005C5EA0 - 8b 74 ac 18                - mov esi,[esp+ebp*4+18]             esi = 武将指针
+005C5EA4 - 56                         - push esi
+005C5EA5 - e8 86 47 eb ff             - call 0047a630                      校验指针
+005C5EAA - 83 c4 04                   - add esp,04
+005C5EAD - 85 c0                      - test eax,eax
+005C5EAF - 74 50                      - je 005c5f01                        校验失败则跳转循环下一个武将
+[获取执行武将中勋功和智力最高的武将用于消息演示]
+005C5EB1 - 0f b7 86 ae 00 00 00       - movzx eax,word ptr [esi+000000ae]  eax = 武将勋功
+005C5EB8 - 3b f8                      - cmp edi,eax
+005C5EBA - 7d 06                      - jnl 005c5ec2
+005C5EBC - 89 74 24 14                - mov [esp+14],esi
+005C5EC0 - 8b f8                      - mov edi,eax
+005C5EC2 - 8b ce                      - mov ecx,esi
+005C5EC4 - e8 c7 31 ec ff             - call 00489090                      获取武将智力
+005C5EC9 - 8b 4c 24 10                - mov ecx,[esp+10]
+005C5ECD - 0f b6 c0                   - movzx eax,al
+005C5ED0 - 3b c8                      - cmp ecx,eax
+005C5ED2 - 7d 04                      - jnl 005c5ed8
+005C5ED4 - 89 44 24 10                - mov [esp+10],eax                   [esp+10] = 三个武将中智力最高值
+[增加武将经验和勋功]
+005C5ED8 - 6a 01                      - push 01
+005C5EDA - 6a 04                      - push 04                            增加经验4点
+005C5EDC - 6a 02                      - push 02                            0x02 = 智力                                      【修改】push 03  //获取政治经验
+005C5EDE - 56                         - push esi
+005C5EDF - b9 5c 89 99 07             - mov ecx,0799895c
+005C5EE4 - e8 e7 11 ee ff             - call 004a70d0                      武将增加属性经验
+005C5EE9 - 6a 64                      - push 64                            增加勋功100点
+005C5EEB - 56                         - push esi
+005C5EEC - b9 5c 89 99 07             - mov ecx,0799895c
+005C5EF1 - e8 5a 0e ee ff             - call 004a6d50                      武将增加勋功
+005C5EF6 - 56                         - push esi
+005C5EF7 - b9 5c 89 99 07             - mov ecx,0799895c
+005C5EFC - e8 7f f8 ed ff             - call 004a5780                      清除武将任务
+005C5F01 - 45                         - inc ebp
+005C5F02 - 83 fd 03                   - cmp ebp,03                         最多循环3个武将
+005C5F05 - 7c 99                      - jnge 005c5ea0                      循环下一个武将
+
+【生产完毕处理】
+[城市攻具/舰船数量加1]
+005C5F07 - 8b 6c 24 30                - mov ebp,[esp+30]                   ebp = 生产兵装类型
+005C5F0B - 6a 01                      - push 01                            0x01 = 1
+005C5F0D - 55                         - push ebp
+005C5F0E - 53                         - push ebx                           ebx = 城市指针    
+005C5F0F - b9 5c 89 99 07             - mov ecx,0799895c
+005C5F14 - e8 27 e1 ee ff             - call 004b4040
+[城市空闲工房/船厂数量加1]
+005C5F19 - 6a 01                      - push 01                            0x01 = 1
+005C5F1B - 55                         - push ebp                           ebp = 生产兵装类型
+005C5F1C - 53                         - push ebx                           ebx = 城市指针
+005C5F1D - b9 5c 89 99 07             - mov ecx,0799895c
+005C5F22 - 8b f8                      - mov edi,eax
+005C5F24 - e8 b7 df ee ff             - call 004b3ee0                      城市空闲工房/船厂数量加减
+[势力技巧点增加]
+005C5F29 - 8b 13                      - mov edx,[ebx]                      ebx = 城市指针
+005C5F2B - 8b cb                      - mov ecx,ebx
+005C5F2D - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+005C5F30 - 50                         - push eax
+005C5F31 - b9 58 19 20 07             - mov ecx,07201958
+005C5F36 - e8 65 ab ec ff             - call 00490aa0                      根据势力ID获取势力指针
+005C5F3B - 8b f0                      - mov esi,eax
+005C5F3D - 56                         - push esi
+005C5F3E - e8 ed 46 eb ff             - call 0047a630                      校验指针
+005C5F43 - 83 c4 04                   - add esp,04
+005C5F46 - 85 c0                      - test eax,eax
+005C5F48 - 74 0e                      - je 005c5f58                        校验失败则跳过技巧点增加处理
+005C5F4A - 53                         - push ebx                           ebx = 城市指针
+005C5F4B - 6a 14                      - push 14                            增加技巧值20点
+005C5F4D - 56                         - push esi                           esi = 势力指针
+005C5F4E - b9 5c 89 99 07             - mov ecx,0799895c
+005C5F53 - e8 28 06 ef ff             - call 004b6580                      势力增加技巧值
+[军团相关处理一]
+005C5F58 - 8b cb                      - mov ecx,ebx                        ebx = 城市指针
+005C5F5A - e8 61 65 eb ff             - call 0047c4c0                      根据城市指针获取设施指针
+005C5F5F - 50                         - push eax
+005C5F60 - e8 1b 22 ff ff             - call 005b8180                      判断设施是否属于玩家势力第一军团
+005C5F65 - 83 c4 04                   - add esp,04
+005C5F68 - 85 c0                      - test eax,eax
+005C5F6A - 74 0e                      - je 005c5f7a
+005C5F6C - 8b 44 24 14                - mov eax,[esp+14]
+005C5F70 - 57                         - push edi
+005C5F71 - 50                         - push eax
+005C5F72 - 55                         - push ebp
+005C5F73 - 8b cb                      - mov ecx,ebx
+005C5F75 - e8 06 58 eb ff             - call 0047b780
+
+005C5F7A - 5f                         - pop edi
+005C5F7B - 5e                         - pop esi
+005C5F7C - 5d                         - pop ebp
+005C5F7D - b8 01 00 00 00             - mov eax,00000001
+005C5F82 - 5b                         - pop ebx
+005C5F83 - 83 c4 14                   - add esp,14
+005C5F86 - c3                         - ret
+
+005C5F87 - 5e                         - pop esi
+005C5F88 - 5d                         - pop ebp
+005C5F89 - 33 c0                      - xor eax,eax
+005C5F8B - 5b                         - pop ebx
+005C5F8C - 83 c4 14                   - add esp,14
+005C5F8F - c3                         - ret

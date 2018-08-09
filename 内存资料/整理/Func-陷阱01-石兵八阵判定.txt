@@ -1,0 +1,250 @@
+功能: 部队行动后的石兵八阵眩晕判定
+参数表: [esp+04]=部队ID，[esp+08]=某常量值
+
+*****************************************************************************************************************************************************
+
+005A07D0 - 81 ec bc 07 00 00          - sub esp,000007bc
+005A07D6 - 56                         - push esi
+005A07D7 - 57                         - push edi
+005A07D8 - 8b bc 24 c8 07 00 00       - mov edi,[esp+000007c8]             edi = 部队ID
+005A07DF - 57                         - push edi
+005A07E0 - b9 58 19 20 07             - mov ecx,07201958
+005A07E5 - e8 86 06 ef ff             - call 00490e70                      根据部队ID获取部队指针
+005A07EA - 8b f0                      - mov esi,eax                        esi = 部队指针
+005A07EC - 56                         - push esi
+005A07ED - e8 3e 9e ed ff             - call 0047a630                      校验指针
+005A07F2 - 83 c4 04                   - add esp,04
+005A07F5 - 85 c0                      - test eax,eax
+005A07F7 - 74 0f                      - je 005a0808
+005A07F9 - 8b ce                      - mov ecx,esi
+005A07FB - e8 c0 4a ef ff             - call 004952c0                      判断部队是否行动
+005A0800 - 85 c0                      - test eax,eax
+005A0802 - 0f 85 2d 02 00 00          - jne 005a0a35                       部队未行动则不进行石兵八阵判定
+
+005A0808 - 6a 01                      - push 01
+005A080A - 57                         - push edi
+005A080B - e8 60 ed ff ff             - call 0059f570
+005A0810 - 8b bc 24 d4 07 00 00       - mov edi,[esp+000007d4]
+005A0817 - 57                         - push edi
+005A0818 - e8 83 f6 ff ff             - call 0059fea0
+
+【获取部队坐标】
+005A081D - 56                         - push esi                           esi = 部队指针
+005A081E - e8 0d 9e ed ff             - call 0047a630                      校验指针
+005A0823 - 83 c4 10                   - add esp,10
+005A0826 - 85 c0                      - test eax,eax
+005A0828 - 0f 84 07 02 00 00          - je 005a0a35                        校验失败则不进行石兵八阵判定
+005A082E - 8b 06                      - mov eax,[esi]
+005A0830 - 8b ce                      - mov ecx,esi
+005A0832 - ff 50 3c                   - call dword ptr [eax+3c]            获取部队坐标地址指针
+005A0835 - 66 3b 38                   - cmp di,[eax]
+005A0838 - 75 12                      - jne 005a084c
+005A083A - 66 8b 8c 24 ce 07 00 00    - mov cx,[esp+000007ce]
+005A0842 - 66 3b 48 02                - cmp cx,[eax+02]
+005A0846 - 0f 84 e9 01 00 00          - je 005a0a35
+
+【获取部队半径内的所有坐标】
+005A084C - 8b 16                      - mov edx,[esi]
+005A084E - 53                         - push ebx
+005A084F - 55                         - push ebp
+005A0850 - 8b ce                      - mov ecx,esi
+005A0852 - ff 52 3c                   - call dword ptr [edx+3c]            获取部队坐标地址指针
+005A0855 - 8b 00                      - mov eax,[eax]                      eax = 部队坐标
+005A0857 - 50                         - push eax
+005A0858 - 6a 01                      - push 01                                                                        【修改】石兵八阵范围半径01
+005A085A - 8d 4c 24 1c                - lea ecx,[esp+1c]
+005A085E - 51                         - push ecx                           接受返回值的数组指针
+005A085F - b9 68 0e fb 06             - mov ecx,06fb0e68
+005A0864 - e8 17 34 ee ff             - call 00483c80                      获取距离坐标中心半径上的所有可进入坐标，返回坐标个数，坐标存放在数组指针中
+005A0869 - 8b e8                      - mov ebp,eax                        ebp = 坐标个数
+005A086B - 33 db                      - xor ebx,ebx                        ebx = 0
+005A086D - 85 ed                      - test ebp,ebp
+005A086F - 0f 8e be 01 00 00          - jng 005a0a33
+005A0875 - eb 09                      - jmp 005a0880
+
+【以下两句被跳过】
+005A0877 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+005A087E - 8b ff                      - mov edi,edi
+
+【获取坐标上的设施】
+005A0880 - 8b 44 9c 14                - mov eax,[esp+ebx*4+14]             eax为上个函数返回的第ebx个坐标值(x,y)
+005A0884 - 89 44 24 10                - mov [esp+10],eax
+005A0888 - 8b 54 24 10                - mov edx,[esp+10]
+005A088C - 0f bf c0                   - movsx eax,ax
+005A088F - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005A0895 - c1 fa 10                   - sar dl,10
+005A0898 - 03 c2                      - add eax,edx
+005A089A - 8d 0c 80                   - lea ecx,[eax+eax*4]
+005A089D - 8b 04 8d 68 0e fb 06       - mov eax,[ecx*4+06fb0e68]           eax = 地图格指针首字节的内容
+005A08A4 - 8d 0c 8d 68 0e fb 06       - lea ecx,[ecx*4+06fb0e68]           ecx = 地图格指针
+005A08AB - 24 03                      - and al,03
+005A08AD - 3c 02                      - cmp al,02                          判断eax是否为02(02代表上面有建筑)
+005A08AF - 0f 85 75 01 00 00          - jne 005a0a2a
+005A08B5 - e8 66 32 ee ff             - call 00483b20                      根据坐标指针取坐标上的设施指针
+005A08BA - 8b f8                      - mov edi,eax                        edi = 设施指针
+005A08BC - 57                         - push edi
+005A08BD - e8 6e 9d ed ff             - call 0047a630                      校验指针
+005A08C2 - 83 c4 04                   - add esp,04
+005A08C5 - 85 c0                      - test eax,eax
+005A08C7 - 0f 84 5d 01 00 00          - je 005a0a2a                        校验失败则循环下一个
+
+【石兵八阵眩晕判定】
+005A08CD - 83 7f 08 0d                - cmp dword ptr [edi+08],0d          设施类型是否是0x0d(石兵八阵)
+005A08D1 - 0f 85 53 01 00 00          - jne 005a0a2a                       不是石兵八阵则循环下一个
+005A08D7 - 8b 47 14                   - mov eax,[edi+14]                   设施是否建设完成
+005A08DA - 85 c0                      - test eax,eax
+005A08DC - 0f 84 48 01 00 00          - je 005a0a2a                        未建设完成则循环下一个
+005A08E2 - 57                         - push edi
+005A08E3 - 8b ce                      - mov ecx,esi
+005A08E5 - e8 66 53 ef ff             - call 00495c50                      判断设施指针和部队指针是否属于同一势力
+005A08EA - 85 c0                      - test eax,eax
+005A08EC - 0f 84 38 01 00 00          - je 005a0a2a                        同一势力则循环下一个
+005A08F2 - 8b ce                      - mov ecx,esi
+005A08F4 - e8 47 51 ef ff             - call 00495a40                      获取部队主将指针
+005A08F9 - 0f b6 8e c6 00 00 00       - movzx ecx,byte ptr [esi+000000c6]  ecx = 部队显示最高智
+005A0900 - 8b 90 fc 00 00 00          - mov edx,[eax+000000fc]             edx = 主将性格
+005A0906 - 89 4c 24 10                - mov [esp+10],ecx
+005A090A - db 44 24 10                - fild dword ptr [esp+10]
+005A090E - d9 c0                      - fld st(0)
+005A0910 - d8 c9                      - fmul st(0),st(1)
+005A0912 - d8 0d f0 e6 74 00          - fmul dword ptr [0074e6f0]
+005A0918 - d8 2d 18 e7 74 00          - fsubr dword ptr [0074e718]                                                     【修改】此处修改浮点型的基础概率
+005A091E - d8 0d b8 15 7f 00          - fmul dword ptr [007f15b8]
+005A0924 - da 04 95 cc b2 84 00       - fiadd [edx*4+0084b2cc]             性格修正参数：胆小=20，冷静=10，刚胆=5，莽撞=0
+005A092B - e8 44 71 16 00             - call 00707a74                      石兵八阵眩晕概率 = (1-部队智力平方×0.0001)×100+性格修正 
+005A0930 - dd d8                      - fstp st(0)
+005A0932 - 50                         - push eax
+005A0933 - e8 98 18 ed ff             - call 004721d0                      0～100随机函数
+005A0938 - 83 c4 04                   - add esp,04
+005A093B - 85 c0                      - test eax,eax
+005A093D - 0f 84 9b 00 00 00          - je 005a09de                        随机失败则跳过石兵八阵眩晕处理
+
+【石兵八阵眩晕处理】
+005A0943 - 57                         - push edi                           edi = 设施指针
+005A0944 - e8 b7 fd ff ff             - call 005a0700
+005A0949 - 83 c4 04                   - add esp,04
+005A094C - 85 c0                      - test eax,eax
+005A094E - 75 2b                      - jne 005a097b
+005A0950 - 8b 07                      - mov eax,[edi]
+005A0952 - 8b cf                      - mov ecx,edi
+005A0954 - ff 50 48                   - call dword ptr [eax+48]            判断是否是玩家设施
+005A0957 - 85 c0                      - test eax,eax
+005A0959 - 74 20                      - je 005a097b
+005A095B - 6a 7a                      - push 7a                            以下7句处理属于玩家设施的石兵八阵演示
+005A095D - b9 d8 59 6a 09             - mov ecx,096a59d8
+005A0962 - e8 b9 85 fe ff             - call 00588f20
+005A0967 - 68 dc 05 00 00             - push 000005dc
+005A096C - 68 80 00 00 00             - push 00000080
+005A0971 - b9 d8 59 6a 09             - mov ecx,096a59d8
+005A0976 - e8 05 8e fe ff             - call 00589780
+
+【处理段落A（石兵成功发动）】
+005A097B - 8b ce                      - mov ecx,esi                        esi = 部队指针
+005A097D - e8 be 50 ef ff             - call 00495a40                      获取主将指针
+005A0982 - 68 5c 19 00 00             - push 0000195c
+005A0987 - 8d 4c 24 30                - lea ecx,[esp+30]
+005A098B - 8b f8                      - mov edi,eax                        edi = 主将指针
+005A098D - e8 ce c1 ef ff             - call 0049cb60
+005A0992 - 57                         - push edi
+005A0993 - 6a 00                      - push 00
+005A0995 - 8d 4c 24 34                - lea ecx,[esp+34]
+005A0999 - e8 e2 c1 ef ff             - call 0049cb80
+005A099E - 6a 00                      - push 00
+005A09A0 - 8b ce                      - mov ecx,esi
+005A09A2 - e8 99 50 ef ff             - call 00495a40                      获取部队主将指针
+005A09A7 - 50                         - push eax
+005A09A8 - 8d 4c 24 34                - lea ecx,[esp+34]
+005A09AC - 51                         - push ecx
+005A09AD - e8 de a9 ef ff             - call 0049b390
+005A09B2 - 83 c4 04                   - add esp,04
+005A09B5 - 50                         - push eax
+005A09B6 - e8 d5 5c f5 ff             - call 004f6690
+005A09BB - 83 c4 0c                   - add esp,0c
+
+【计算眩晕回合数并设置部队状态】
+005A09BE - 6a 01                      - push 01
+005A09C0 - 6a 02                      - push 02                                                                        【修改】最大眩晕回合数2
+005A09C2 - e8 89 17 ed ff             - call 00472150                      0～1随机函数
+005A09C7 - 83 c4 04                   - add esp,04
+005A09CA - fe c0                      - inc al                             随机结果+1，即1～2随机
+005A09D1 - 50                         - push eax
+005A09D2 - 6a 01                      - push 01                                                                        【修改】0x01 = 眩晕, 0x02 = 伪报
+005A09D4 - 6a 00                      - push 00
+005A09D6 - 56                         - push esi
+005A09D7 - e8 94 e0 f0 ff             - call 004aea70                      设置部队异常状态
+005A09DC - eb 4c                      - jmp 005a0a2a
+
+【处理段落B（无论石兵成功发动还是不成功发动）】
+005A09DE - 8b ce                      - mov ecx,esi
+005A09E0 - e8 5b 50 ef ff             - call 00495a40                      获取主将指针
+005A09E5 - 68 67 19 00 00             - push 00001967
+005A09EA - 8d 8c 24 00 04 00 00       - lea ecx,[esp+00000400]
+005A09F1 - 8b f8                      - mov edi,eax                        edi = 主将指针
+005A09F3 - e8 68 c1 ef ff             - call 0049cb60
+005A09F8 - 57                         - push edi
+005A09F9 - 6a 00                      - push 00
+005A09FB - 8d 8c 24 04 04 00 00       - lea ecx,[esp+00000404]
+005A0A02 - e8 79 c1 ef ff             - call 0049cb80
+005A0A07 - 6a 00                      - push 00
+005A0A09 - 8b ce                      - mov ecx,esi
+005A0A0B - e8 30 50 ef ff             - call 00495a40                      获取部队主将指针
+005A0A10 - 50                         - push eax
+005A0A11 - 8d 94 24 04 04 00 00       - lea edx,[esp+00000404]
+005A0A18 - 52                         - push edx
+005A0A19 - e8 72 a9 ef ff             - call 0049b390
+005A0A1E - 83 c4 04                   - add esp,04
+005A0A21 - 50                         - push eax
+005A0A22 - e8 69 5c f5 ff             - call 004f6690
+005A0A27 - 83 c4 0c                   - add esp,0c
+
+【循环】
+005A0A2A - 43                         - inc ebx
+005A0A2B - 3b dd                      - cmp ebx,ebp
+005A0A2D - 0f 8c 4d fe ff ff          - jl 005a0880                        循环下一个
+
+005A0A33 - 5d                         - pop ebp
+005A0A34 - 5b                         - pop ebx
+005A0A35 - 5f                         - pop edi
+005A0A36 - 5e                         - pop esi
+005A0A37 - 81 c4 bc 07 00 00          - add esp,000007bc
+005A0A3D - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 石兵八阵范围判定
+005A085E - B9 00 86 8A 00             - mov ecx,008A8600                   原来是放到[esi+3c]以后的空间，但范围扩大后容易跳出，现在结果坐标存入新的内存区，防止跳出
+005A0863 - 51                         - push ecx
+005A0864 - e8 17 34 ee ff             - call 008aa5e8                      原函数是取半径上一圈的可进入坐标，现在改为取半径内的所有可进入坐标，以支持范围半径大于1的修改
+
+008AA5E8 - 53                         - push ebx
+008AA5E9 - 55                         - push ebp
+008AA5EA - 56                         - push esi
+008AA5EB - 57                         - push edi
+008AA5EC - 31 ff                      - xor edi,edi
+008AA5EE - 8b 5c 24 1c                - mov ebx,[esp+1c]                   中心坐标
+008AA5F2 - 8b 6c 24 18                - mov ebp,[esp+18]                   半径
+008AA5F6 - 8b 74 24 14                - mov esi,[esp+14]                   返回数组指针
+008AA5FA - 85 ed                      - test ebp,ebp
+008AA5FC - 7e 15                      - jle 008aa613
+008AA5FE - 53                         - push ebx
+008AA5FF - 55                         - push ebp
+008AA600 - 56                         - push esi
+008AA601 - b9 68 0e fb 06             - mov ecx,06fb0e68
+008AA606 - e8 75 96 bd ff             - call 00483c80                      获取距离坐标中心半径上的所有可进入坐标，返回坐标个数，坐标存放在数组指针中
+008AA60B - 01 c7                      - add edi,eax                        坐标个数增加
+008AA60D - 8d 34 86                   - lea esi,[esi+eax*4]                数组指针后移以存放下一次调用获取的坐标
+008AA610 - 4d                         - dec ebp                            半径减1
+008AA611 - eb e7                      - jmp 008aa5fa                       循环调用直到半径减为0
+008AA613 - 8b c7                      - mov eax,edi
+008AA615 - 5f                         - pop edi
+008AA616 - 5e                         - pop esi
+008AA617 - 5d                         - pop ebp
+008AA618 - 5b                         - pop ebx
+008AA619 - c2 0c 00                   - ret 000c
+
+005A0875 - EB 06                      - jmp 005A087D                       适应性修改
+005A0877 - 90 90 90 90 90 90          - nop * 6
+005A087D - 8B 04 9D 00 86 8A 00       - mov eax,[ebx*4+008A8600]           从新的内存区获取结果坐标
+
+005A0A2D - 0F 8C 4A FE FF FF          - jl 005A087D                        适应性修改

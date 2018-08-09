@@ -1,0 +1,186 @@
+功能: 计算生产耗时
+参数表: [esp+04]=生产武将数组指针，[esp+08]=生产兵装类型
+备注：有三个入口调用这个函数：
+  1、作用未明
+  005C6E74 - e8 27 fe ff ff             - call 005c6ca0
+  2、执行生产
+  005C704F - e8 4c fc ff ff             - call 005c6ca0
+  3、展现生产界面
+  006077F2 - e8 a9 f4 fb ff             - call 005c6ca0
+
+*****************************************************************************************************************************************************
+
+【兵装类型预处理】
+[校验兵装类型]
+005C6CA0 - 83 ec 08                   - sub esp,08
+005C6CA3 - 55                         - push ebp
+005C6CA4 - 8b 6c 24 14                - mov ebp,[esp+14]                   ebp = 生产兵装类型
+005C6CA8 - 57                         - push edi
+005C6CA9 - 33 ff                      - xor edi,edi                        edi = 0
+005C6CAB - 3b ef                      - cmp ebp,edi
+005C6CAD - 7c 05                      - jnge 005c6cb4
+005C6CAF - 83 fd 0b                   - cmp ebp,0b
+005C6CB2 - 7e 08                      - jle 005c6cbc                       生产兵装类型在0～11之间，则跳转到后续处理
+005C6CB4 - 5f                         - pop edi
+005C6CB5 - 33 c0                      - xor eax,eax                        生产兵装类型不在0～11之间，则返回0
+005C6CB7 - 5d                         - pop ebp
+005C6CB8 - 83 c4 08                   - add esp,08
+005C6CBB - c3                         - ret
+[设定相关生产特技]
+005C6CBC - 8d 45 fb                   - lea eax,[ebp-05]
+005C6CBF - 83 f8 06                   - cmp eax,06                         经过上段代码的校验，eax必然小于等于6
+005C6CC2 - 53                         - push ebx
+005C6CC3 - 56                         - push esi
+005C6CC4 - 89 7c 24 14                - mov [esp+14],edi
+005C6CC8 - 89 7c 24 20                - mov [esp+20],edi
+005C6CCC - 77 6e                      - ja 005c6d3c                        所以此处不会发生跳转
+005C6CCE - 0f b6 80 40 6e 5c 00       - movzx eax,byte ptr [eax+005c6e40]  取得0-6(实际是5-11)生产兵装类型对应的处理编码
+005C6CD5 - ff 24 85 34 6e 5c 00       - jmp dword ptr [eax*4+005c6e34]     根据处理编码取得跳转地址
+005C6CDC - c7 44 24 10 52 00 00 00    - mov [esp+10],00000052              0x52 = 发明
+005C6CE4 - eb 08                      - jmp 005c6cee
+005C6CE6 - c7 44 24 10 53 00 00 00    - mov [esp+10],00000053              0x53 = 造船
+
+【获取武将智力并判定有无相关特技】
+005C6CEE - 33 db                      - xor ebx,ebx                        ebx = 计数器
+005C6CF0 - 8b 4c 24 1c                - mov ecx,[esp+1c]                   eax = 生产武将数组指针
+005C6CF4 - 8b 34 99                   - mov esi,[ecx+ebx*4]                esi = 武将指针
+005C6CF7 - 56                         - push esi
+005C6CF8 - e8 33 39 eb ff             - call 0047a630                      校验指针
+005C6CFD - 83 c4 04                   - add esp,04
+005C6D00 - 85 c0                      - test eax,eax
+005C6D02 - 74 32                      - je 005c6d36                        校验失败则循环下一个
+005C6D04 - 8b ce                      - mov ecx,esi
+005C6D06 - e8 85 23 ec ff             - call 00489090                      获取武将智力                                      【修改】call 004890a0  //耗时由政治决定
+005C6D0B - 8b 54 24 20                - mov edx,[esp+20]
+005C6D0F - 0f b6 c0                   - movzx eax,al
+005C6D12 - 03 d0                      - add edx,eax                        edx = 智力和
+005C6D14 - 3b f8                      - cmp edi,eax
+005C6D16 - 89 54 24 20                - mov [esp+20],edx
+005C6D1A - 7d 02                      - jnl 005c6d1e
+005C6D1C - 8b f8                      - mov edi,eax                        edi = 3人中的最高智力值
+005C6D1E - 8b 54 24 10                - mov edx,[esp+10]                   edx = 相关特技(发明或造船)
+005C6D22 - 52                         - push edx
+005C6D23 - 8b ce                      - mov ecx,esi                        esi = 武将指针
+005C6D25 - e8 c6 23 ec ff             - call 004890f0                      判断武将是否持有指定特技
+005C6D2A - 85 c0                      - test eax,eax
+005C6D2C - 74 08                      - je 005c6d36
+005C6D2E - c7 44 24 14 01 00 00 00    - mov [esp+14],00000001              若武将持有相关特技，则[esp+14]置1
+005C6D36 - 43                         - inc ebx
+005C6D37 - 83 fb 03                   - cmp ebx,03                         循环3次
+005C6D3A - 7c b4                      - jnge 005c6cf0
+
+【计算生产耗时】
+005C6D3C - 33 f6                      - xor esi,esi                        esi(返回值) = 0
+005C6D3E - 83 fd 05                   - cmp ebp,05
+005C6D41 - 7c 05                      - jnge 005c6d48
+005C6D43 - 83 fd 08                   - cmp ebp,08
+005C6D46 - 7e 09                      - jle 005c6d51
+005C6D48 - 83 fd 09                   - cmp ebp,09
+005C6D4B - 0f 8c d9 00 00 00          - jl 005c6e2a                        若生产兵装类型不在5～11之间则跳转到返回
+[基础耗时计算]
+005C6D51 - 8b 44 24 20                - mov eax,[esp+20]                   eax = 智力和 
+005C6D55 - 8d bc 07 38 ff ff ff       - lea edi,[edi+eax-000000c8]         edi = 最高智力+智力和-200
+005C6D5C - 83 ff 18                   - cmp edi,18
+005C6D5F - b9 18 00 00 00             - mov ecx,00000018
+005C6D64 - 7c 02                      - jnge 005c6d68                      以上3句，设置edi的最小值为24
+005C6D66 - 8b cf                      - mov ecx,edi                        ecx = edi
+005C6D68 - b8 ab aa aa 2a             - mov eax,2aaaaaab
+005C6D6D - f7 e9                      - imul ecx
+005C6D6F - c1 fa 02                   - sar dl,02
+005C6D72 - 8b ca                      - mov ecx,edx
+005C6D74 - c1 e9 1f                   - shr ecx,1f
+005C6D77 - 03 ca                      - add ecx,edx
+005C6D79 - be 0a 00 00 00             - mov esi,0000000a                   耗时上限
+005C6D7E - 2b f1                      - sub esi,ecx                        以上8句，esi = 10 - ecx*0.04166
+005C6D80 - 83 fd 09                   - cmp ebp,09                         如果生产兵装类型是攻具则跳转到特技耗时减半处理
+005C6D83 - 0f 8c 90 00 00 00          - jl 005c6e19
+[针对生产舰船有练兵所时的耗时计算]
+005C6D89 - 8b 5c 24 1c                - mov ebx,[esp+1c]                   ebx = 生产武将数组指针
+005C6D8D - 8b 13                      - mov edx,[ebx]                      edx = 武将指针
+005C6D8F - 52                         - push edx
+005C6D90 - e8 9b 38 eb ff             - call 0047a630                      校验指针
+005C6D95 - 83 c4 04                   - add esp,04
+005C6D98 - 85 c0                      - test eax,eax
+005C6D9A - 74 7d                      - je 005c6e19                        校验失败则跳转到特技耗时减半处理
+005C6D9C - 8b 03                      - mov eax,[ebx]                      eax = 武将指针
+005C6D9E - 8b 80 98 00 00 00          - mov eax,[eax+00000098]             eax = 武将所属
+005C6DA4 - 50                         - push eax
+005C6DA5 - b9 58 19 20 07             - mov ecx,07201958
+005C6DAA - e8 51 9f ec ff             - call 00490d00                      根据设施ID获取设施指针
+005C6DAF - 50                         - push eax
+005C6DB0 - e8 7b 38 eb ff             - call 0047a630                      校验指针
+005C6DB5 - 83 c4 04                   - add esp,04
+005C6DB8 - 85 c0                      - test eax,eax
+005C6DBA - 74 5d                      - je 005c6e19                        校验失败则跳转到特技耗时减半处理
+005C6DBC - 8b 0b                      - mov ecx,[ebx]                      ecx = 武将指针
+005C6DBE - 8b 81 98 00 00 00          - mov eax,[ecx+00000098]             eax = 武将所属
+005C6DC4 - 50                         - push eax
+005C6DC5 - b9 58 19 20 07             - mov ecx,07201958
+005C6DCA - e8 31 9f ec ff             - call 00490d00                      根据设施ID获取设施指针
+005C6DCF - 8b c8                      - mov ecx,eax
+005C6DD1 - e8 1a f9 eb ff             - call 004866f0                      根据设施指针获取城市指针
+005C6DD6 - 6a 2d                      - push 2d                            0x2d = 练兵所
+005C6DD8 - 50                         - push eax                           eax = 城市指针
+005C6DD9 - b9 cc b3 80 07             - mov ecx,0780b3cc
+005C6DDE - e8 cd 6c ed ff             - call 0049dab0                      判断城市是否有指定设施
+005C6DE3 - 85 c0                      - test eax,eax
+005C6DE5 - 74 32                      - je 005c6e19
+005C6DE7 - 83 ff 18                   - cmp edi,18
+005C6DEA - b9 18 00 00 00             - mov ecx,00000018
+005C6DEF - 7c 02                      - jnge 005c6df3                      以上3句，设置edi的最小值为24
+005C6DF1 - 8b cf                      - mov ecx,edi                        ecx = edi
+005C6DF3 - b8 ab aa aa 2a             - mov eax,2aaaaaab
+005C6DF8 - f7 e9                      - imul ecx
+005C6DFA - c1 fa 02                   - sar dl,02
+005C6DFD - 8b c2                      - mov eax,edx
+005C6DFF - c1 e8 1f                   - shr eax,1f
+005C6E02 - 03 c2                      - add eax,edx
+005C6E04 - 8b c8                      - mov ecx,eax
+005C6E06 - b8 08 00 00 00             - mov eax,00000008                   有练兵所时耗时上限                                   【修改】冲销练兵所对造船的效果
+005C6E0B - 2b c1                      - sub eax,ecx                        以上8句，esi = 8 - ecx*0.04166
+005C6E0D - 83 f8 02                   - cmp eax,02                                                                              【修改】冲销练兵所对造船的效果
+005C6E10 - be 02 00 00 00             - mov esi,00000002                   有练兵所时耗时下限                                   【修改】冲销练兵所对造船的效果
+005C6E15 - 7c 02                      - jnge 005c6e19
+005C6E17 - 8b f0                      - mov esi,eax
+[特技耗时减半]
+005C6E19 - 8b 44 24 14                - mov eax,[esp+14]                   eax = 是否有制定特技
+005C6E1D - 85 c0                      - test eax,eax
+005C6E1F - 74 09                      - je 005c6e2a                        没有制定特技则跳转到返回
+005C6E21 - 8b c6                      - mov eax,esi
+005C6E23 - 99                         - cdq
+005C6E24 - 2b c2                      - sub eax,edx
+005C6E26 - d1 f8                      - sar eax,1                          以上4句，生产耗时减半
+005C6E28 - 8b f0                      - mov esi,eax
+
+005C6E2A - 8b c6                      - mov eax,esi
+005C6E2C - 5e                         - pop esi
+005C6E2D - 5b                         - pop ebx
+005C6E2E - 5f                         - pop edi
+005C6E2F - 5d                         - pop ebp
+005C6E30 - 83 c4 08                   - add esp,08
+005C6E33 - c3                         - ret
+
+数据区
+005C6E34 - DC 6C 5C 00 E6 6C 5C 00 3C 6D 5C 00 
+005C6E40 - 00 00 00 00 02 01 01
+
+
+=====================================================================================================================================================
+
+修改 - 自定义生产兵器舰船最大耗时和最短耗时
+005C6D79 - e9 c2 28 2e 00      - jmp 008a9640
+
+008A9640 - 83 fd 09            - cmp ebp,09
+008A9643 - 7c 05               - jnge 008a964a
+008A9645 - be 0a 00 00 00      - mov esi,0000000a                          舰船最大耗时
+008A964A - be 0a 00 00 00      - mov esi,0000000a                          兵器最大耗时
+008A964F - 0f af ce            - imul ecx,esi
+008A9652 - 8b c1               - mov eax,ecx
+008A9654 - b9 0a 00 00 00      - mov ecx,0000000a
+008A9659 - 99                  - cdq
+008A965A - f7 f9               - idiv ecx
+008A965C - 29 c6               - sub esi,eax
+008A965E - 83 fe 01            - cmp esi,01                                设定下限为1，避免负天数
+008A9661 - 7f 05               - jg 008a9668
+008A9663 - be 01 00 00 00      - mov esi,00000001
+008A9668 - e9 13 d7 d1 ff      - jmp 005c6d80

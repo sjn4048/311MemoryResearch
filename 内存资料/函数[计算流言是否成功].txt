@@ -1,0 +1,269 @@
+005D02A0 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+005D02A6 - 6a ff                      - push ff
+005D02A8 - 68 c8 4a 73 00             - push 00734ac8 : [892578B8]
+005D02AD - 50                         - push eax
+005D02AE - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+005D02B5 - 83 ec 34                   - sub esp,34
+005D02B8 - 56                         - push esi
+005D02B9 - 57                         - push edi
+005D02BA - 8b 7c 24 4c                - mov edi,[esp+4c]
+005D02BE - 57                         - push edi
+005D02BF - e8 6c a3 ea ff             - call 0047a630
+005D02C4 - 83 c4 04                   - add esp,04
+005D02C7 - 85 c0                      - test eax,eax
+005D02C9 - 0f 84 cb 02 00 00          - je 005d059a
+005D02CF - 8b 74 24 50                - mov esi,[esp+50]
+005D02D3 - 56                         - push esi
+005D02D4 - e8 57 a3 ea ff             - call 0047a630
+005D02D9 - 83 c4 04                   - add esp,04
+005D02DC - 85 c0                      - test eax,eax
+005D02DE - 0f 84 b6 02 00 00          - je 005d059a
+005D02E4 - 8b 06                      - mov eax,[esi]
+005D02E6 - 55                         - push ebp
+005D02E7 - 8b ce                      - mov ecx,esi
+005D02E9 - ff 50 40                   - call dword ptr [eax+40]
+005D02EC - 50                         - push eax
+005D02ED - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D02F2 - e8 a9 07 ec ff             - call 00490aa0
+005D02F7 - 8b e8                      - mov ebp,eax
+005D02F9 - 55                         - push ebp
+005D02FA - e8 31 a3 ea ff             - call 0047a630
+005D02FF - 83 c4 04                   - add esp,04
+005D0302 - 85 c0                      - test eax,eax
+005D0304 - 75 15                      - jne 005d031b
+005D0306 - 5d                         - pop ebp
+005D0307 - 5f                         - pop edi
+005D0308 - 83 c8 ff                   - or eax,ff
+005D030B - 5e                         - pop esi
+005D030C - 8b 4c 24 34                - mov ecx,[esp+34]
+005D0310 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+005D0317 - 83 c4 40                   - add esp,40
+005D031A - c3                         - ret
+005D031B - 8b 44 24 58                - mov eax,[esp+58]
+005D031F - 33 f6                      - xor esi,esi
+005D0321 - 3b c6                      - cmp eax,esi
+005D0323 - 7d 09                      - jnl 005d032e
+005D0325 - e8 d6 98 fe ff             - call 005b9c00
+005D032A - 89 44 24 58                - mov [esp+58],eax
+005D032E - 53                         - push ebx
+005D032F - 8b cf                      - mov ecx,edi
+005D0331 - e8 5a 8d eb ff             - call 00489090
+005D0336 - 8b 4d 08                   - mov ecx,[ebp+08]
+005D0339 - 83 cb ff                   - or ebx,ff
+005D033C - 0f b6 f8                   - movzx edi,al
+005D033F - 89 4c 24 20                - mov [esp+20],ecx
+005D0343 - 89 5c 24 10                - mov [esp+10],ebx
+005D0347 - 89 5c 24 1c                - mov [esp+1c],ebx
+005D034B - 89 74 24 30                - mov [esp+30],esi
+005D034F - 89 74 24 34                - mov [esp+34],esi
+005D0353 - 89 74 24 2c                - mov [esp+2c],esi
+005D0357 - 89 74 24 28                - mov [esp+28],esi
+005D035B - 89 74 24 38                - mov [esp+38],esi
+005D035F - c7 44 24 3c 0a 00 00 00    - mov [esp+3c],0000000a
+005D0367 - 89 74 24 40                - mov [esp+40],esi
+005D036B - c7 44 24 24 44 bf 79 00    - mov [esp+24],0079bf44 : [0047C0E0]
+005D0373 - 8b 54 24 58                - mov edx,[esp+58]
+005D0377 - 56                         - push esi
+005D0378 - 52                         - push edx
+005D0379 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D037E - 89 74 24 54                - mov [esp+54],esi
+005D0382 - e8 e9 13 ec ff             - call 00491770
+005D0387 - 50                         - push eax
+005D0388 - 68 c0 fc 5c 00             - push 005cfcc0 : [0824448B]
+005D038D - 8d 44 24 30                - lea eax,[esp+30]
+005D0391 - 50                         - push eax
+005D0392 - b9 08 98 99 07             - mov ecx,07999808 : [00000000]
+005D0397 - e8 f4 f1 ef ff             - call 004cf590
+005D039C - 8b 44 24 28                - mov eax,[esp+28]
+005D03A0 - 3b c6                      - cmp eax,esi
+005D03A2 - 89 44 24 14                - mov [esp+14],eax
+005D03A6 - 74 42                      - je 005d03ea
+005D03A8 - eb 06                      - jmp 005d03b0
+005D03AA - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+005D03B0 - 8d 4c 24 14                - lea ecx,[esp+14]
+005D03B4 - 51                         - push ecx
+005D03B5 - 8d 4c 24 28                - lea ecx,[esp+28]
+005D03B9 - e8 12 bb ea ff             - call 0047bed0
+005D03BE - 8b 00                      - mov eax,[eax]
+005D03C0 - 8b c8                      - mov ecx,eax
+005D03C2 - 89 44 24 18                - mov [esp+18],eax
+005D03C6 - e8 c5 8c eb ff             - call 00489090
+005D03CB - 0f b6 d0                   - movzx edx,al
+005D03CE - 3b 54 24 10                - cmp edx,[esp+10]
+005D03D2 - 7e 10                      - jle 005d03e4
+005D03D4 - 8b 4c 24 18                - mov ecx,[esp+18]
+005D03D8 - e8 b3 8c eb ff             - call 00489090
+005D03DD - 0f b6 c0                   - movzx eax,al
+005D03E0 - 89 44 24 10                - mov [esp+10],eax
+005D03E4 - 39 74 24 14                - cmp [esp+14],esi
+005D03E8 - 75 c6                      - jne 005d03b0
+005D03EA - 8b 45 08                   - mov eax,[ebp+08]
+005D03ED - 50                         - push eax
+005D03EE - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D03F3 - e8 08 07 ec ff             - call 00490b00
+005D03F8 - 50                         - push eax
+005D03F9 - e8 32 a2 ea ff             - call 0047a630
+005D03FE - 83 c4 04                   - add esp,04
+005D0401 - 85 c0                      - test eax,eax
+005D0403 - 74 1a                      - je 005d041f
+005D0405 - 8b 45 08                   - mov eax,[ebp+08]
+005D0408 - 50                         - push eax
+005D0409 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D040E - e8 ed 06 ec ff             - call 00490b00
+005D0413 - 8b c8                      - mov ecx,eax
+005D0415 - e8 76 8c eb ff             - call 00489090
+005D041A - 0f b6 c0                   - movzx eax,al
+005D041D - eb 04                      - jmp 005d0423
+005D041F - 8b 44 24 1c                - mov eax,[esp+1c]
+005D0423 - 8b 4c 24 10                - mov ecx,[esp+10]
+005D0427 - 83 f9 ff                   - cmp ecx,ff
+005D042A - 7e 10                      - jle 005d043c
+005D042C - 83 f8 ff                   - cmp eax,ff
+005D042F - 7e 14                      - jle 005d0445
+005D0431 - 03 c1                      - add eax,ecx
+005D0433 - 99                         - cdq
+005D0434 - 2b c2                      - sub eax,edx
+005D0436 - 8b d8                      - mov ebx,eax
+005D0438 - d1 fb                      - sar ebx,1
+005D043A - eb 42                      - jmp 005d047e
+005D043C - 83 f8 ff                   - cmp eax,ff
+005D043F - 7e 08                      - jle 005d0449
+005D0441 - 8b d8                      - mov ebx,eax
+005D0443 - eb 39                      - jmp 005d047e
+005D0445 - 8b d9                      - mov ebx,ecx
+005D0447 - eb 35                      - jmp 005d047e
+005D0449 - 8b 45 04                   - mov eax,[ebp+04]
+005D044C - 50                         - push eax
+005D044D - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D0452 - e8 a9 06 ec ff             - call 00490b00
+005D0457 - 50                         - push eax
+005D0458 - e8 d3 a1 ea ff             - call 0047a630
+005D045D - 83 c4 04                   - add esp,04
+005D0460 - 85 c0                      - test eax,eax
+005D0462 - 74 1a                      - je 005d047e
+005D0464 - 8b 6d 04                   - mov ebp,[ebp+04]
+005D0467 - 55                         - push ebp
+005D0468 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D046D - e8 8e 06 ec ff             - call 00490b00
+005D0472 - 8b c8                      - mov ecx,eax
+005D0474 - e8 17 8c eb ff             - call 00489090
+005D0479 - 0f b6 d8                   - movzx ebx,al
+005D047C - d1 eb                      - shr ebx,1
+005D047E - 8b 6c 24 54                - mov ebp,[esp+54]
+005D0482 - 8b 85 98 00 00 00          - mov eax,[ebp+00000098]
+005D0488 - 50                         - push eax
+005D0489 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D048E - be 0a 00 00 00             - mov esi,0000000a               基本参数10
+005D0493 - e8 68 08 ec ff             - call 00490d00
+005D0498 - 50                         - push eax
+005D0499 - e8 92 a1 ea ff             - call 0047a630
+005D049E - 83 c4 04                   - add esp,04
+005D04A1 - 85 c0                      - test eax,eax
+005D04A3 - 74 43                      - je 005d04e8
+005D04A5 - 8b 85 98 00 00 00          - mov eax,[ebp+00000098]
+005D04AB - 50                         - push eax
+005D04AC - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D04B1 - e8 4a 08 ec ff             - call 00490d00
+005D04B6 - 8b c8                      - mov ecx,eax
+005D04B8 - e8 33 62 eb ff             - call 004866f0
+005D04BD - 50                         - push eax
+005D04BE - 89 44 24 20                - mov [esp+20],eax
+005D04C2 - e8 69 a1 ea ff             - call 0047a630
+005D04C7 - 83 c4 04                   - add esp,04
+005D04CA - 85 c0                      - test eax,eax
+005D04CC - 74 1a                      - je 005d04e8
+005D04CE - 8b 4c 24 1c                - mov ecx,[esp+1c]
+005D04D2 - 6a 2c                      - push 2c                        2c=计略府
+005D04D4 - 51                         - push ecx
+005D04D5 - b9 cc b3 80 07             - mov ecx,0780b3cc : [00000000]
+005D04DA - e8 d1 d5 ec ff             - call 0049dab0
+005D04DF - 85 c0                      - test eax,eax
+005D04E1 - 74 05                      - je 005d04e8
+005D04E3 - be 0c 00 00 00             - mov esi,0000000c               计略府参数12
+005D04E8 - 8b 54 24 58                - mov edx,[esp+58]
+005D04EC - 8b ad 98 00 00 00          - mov ebp,[ebp+00000098]
+005D04F2 - 52                         - push edx
+005D04F3 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D04F8 - e8 73 12 ec ff             - call 00491770
+005D04FD - 8b 4c 24 54                - mov ecx,[esp+54]
+005D0501 - 6a 00                      - push 00
+005D0503 - 6a 00                      - push 00
+005D0505 - 89 44 24 24                - mov [esp+24],eax
+005D0509 - 8b 44 24 28                - mov eax,[esp+28]
+005D050D - 50                         - push eax
+005D050E - 55                         - push ebp
+005D050F - 51                         - push ecx
+005D0510 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005D0515 - e8 f6 0d ec ff             - call 00491310
+005D051A - 8b 54 24 6c                - mov edx,[esp+6c]
+005D051E - 50                         - push eax
+005D051F - 8b 44 24 30                - mov eax,[esp+30]
+005D0523 - 52                         - push edx
+005D0524 - 8d 0c bf                   - lea ecx,[edi+edi*4]
+005D0527 - 50                         - push eax
+005D0528 - c1 e1 02                   - shl ecx,02
+005D052B - 51                         - push ecx
+005D052C - e8 df 9e fe ff             - call 005ba410
+005D0531 - 0f af f7                   - imul esi,edi
+005D0534 - 8b c8                      - mov ecx,eax
+005D0536 - 0f af f7                   - imul esi,edi
+005D0539 - b8 67 66 66 66             - mov eax,66666667
+005D053E - f7 ee                      - imul esi
+005D0540 - c1 fa 02                   - sar dl,02
+005D0543 - 8b c2                      - mov eax,edx
+005D0545 - c1 e8 1f                   - shr eax,1f
+005D0548 - 03 c2                      - add eax,edx
+005D054A - 8b d3                      - mov edx,ebx
+005D054C - 0f af d3                   - imul edx,ebx
+005D054F - 2b c2                      - sub eax,edx
+005D0551 - 03 c8                      - add ecx,eax
+005D0553 - b8 67 66 66 66             - mov eax,66666667
+005D0558 - f7 e9                      - imul ecx
+005D055A - c1 fa 03                   - sar dl,03
+005D055D - 8b c2                      - mov eax,edx
+005D055F - c1 e8 1f                   - shr eax,1f
+005D0562 - 83 c4 20                   - add esp,20
+005D0565 - 03 c2                      - add eax,edx
+005D0567 - b9 00 00 00 00             - mov ecx,00000000
+005D056C - 0f 98 c1                   - sets cl
+005D056F - c7 44 24 4c ff ff ff ff    - mov [esp+4c],ffffffff
+005D0577 - 49                         - dec ecx
+005D0578 - 23 c8                      - and ecx,eax
+005D057A - 8b f1                      - mov esi,ecx
+005D057C - 8d 4c 24 24                - lea ecx,[esp+24]
+005D0580 - e8 7b bb ea ff             - call 0047c100
+005D0585 - 5b                         - pop ebx
+005D0586 - 5d                         - pop ebp
+005D0587 - 5f                         - pop edi
+005D0588 - 8b c6                      - mov eax,esi
+005D058A - 5e                         - pop esi
+005D058B - 8b 4c 24 34                - mov ecx,[esp+34]
+005D058F - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+005D0596 - 83 c4 40                   - add esp,40
+005D0599 - c3                         - ret
+005D059A - 8b 4c 24 3c                - mov ecx,[esp+3c]
+005D059E - 5f                         - pop edi
+005D059F - 83 c8 ff                   - or eax,ff
+005D05A2 - 5e                         - pop esi
+005D05A3 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+005D05AA - 83 c4 40                   - add esp,40
+005D05AD - c3                         - ret
+
+
+005D05B0  流言相关函数
+
+005D05F0  流言相关函数
+
+
+- 计算驱虎吞狼成功率  005b7750   可疑参数 - 005B7826
+相关函数：
+005b7960
+005b79a0
+
+- 计算二虎竞食成功率  005bf3e0
+  主要参数 - 005BF4FC
+  相应的 005BF520 要从 mov [esp+10],0000000a 改为 add [esp+10],0000000a
+
+相关函数：
+005bf610
+005bf650

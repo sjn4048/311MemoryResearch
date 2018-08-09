@@ -1,0 +1,1049 @@
+【未研究完 计略成功率计算】
+005AE980 - 8b 4c 24 14                - mov ecx,[esp+14]
+005AE984 - 8b 54 24 04                - mov edx,[esp+04]
+005AE988 - 33 c0                      - xor eax,eax
+005AE98A - 83 ec 0c                   - sub esp,0c
+005AE98D - 89 01                      - mov [ecx],eax
+005AE98F - 52                         - push edx
+005AE990 - 89 41 04                   - mov [ecx+04],eax
+005AE993 - e8 98 bc ec ff             - call 0047a630
+005AE998 - 83 c4 04                   - add esp,04
+005AE99B - 85 c0                      - test eax,eax
+005AE99D - 75 04                      - jne 005ae9a3
+005AE99F - 83 c4 0c                   - add esp,0c
+005AE9A2 - c3                         - ret
+005AE9A3 - 8b 44 24 10                - mov eax,[esp+10]                       [esp+10]是用计部队指针
+005AE9A7 - 0f bf 4c 24 1a             - movsx ecx,word ptr [esp+1a]            地图格Y坐标
+005AE9AC - 53                         - push ebx
+005AE9AD - 55                         - push ebp
+005AE9AE - 56                         - push esi                               {esp-0c}
+005AE9AF - 0f b6 b0 c6 00 00 00       - movzx esi,byte ptr [eax+000000c6]      ESI=用计部队智力
+005AE9B6 - 0f bf 44 24 24             - movsx eax,word ptr [esp+24]            地图格X坐标
+005AE9BB - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005AE9C1 - 03 c1                      - add eax,ecx                            地图格序号＝X*200+Y
+005AE9C3 - 8d 04 80                   - lea eax,[eax+eax*4]                    每个地图格20个字节
+005AE9C6 - 8b 14 85 68 0e fb 06       - mov edx,[eax*4+06fb0e68]               获得地图格首个32位数据
+005AE9CD - 8d 04 85 68 0e fb 06       - lea eax,[eax*4+06fb0e68]               获得地图格指针
+005AE9D4 - 57                         - push edi                               {esp-04}
+005AE9D5 - 33 db                      - xor ebx,ebx                            EBX置0
+005AE9D7 - 80 e2 03                   - and dl,03                              取EDX低2位
+005AE9DA - 33 ff                      - xor edi,edi                            EDI置0
+005AE9DC - 33 ed                      - xor ebp,ebp                            EBP置0
+005AE9DE - 80 fa 01                   - cmp dl,01                              判定EDX低2位是否是部队(1)
+005AE9E1 - 89 5c 24 10                - mov [esp+10],ebx                       [esp+10]置0
+005AE9E5 - 89 44 24 14                - mov [esp+14],eax                       地图格指针置入[esp+14]
+005AE9E9 - 75 2d                      - jne 005aea18                           EDX低2位若不是1则代表不是部队，直接跳转到计算成功率（此时EBX是0）
+【部队异常状态下被用计成功率＋10％】
+005AE9EB - 0f b7 40 08                - movzx eax,word ptr [eax+08]            [eax+08]里面存放了地图格中的部队ID
+005AE9EF - 50                         - push eax
+005AE9F0 - b9 58 19 20 07             - mov ecx,07201958
+005AE9F5 - e8 76 24 ee ff             - call 00490e70                          根据部队ID获得部队指针
+005AE9FA - 8b d8                      - mov ebx,eax                            被用计部队置入EBX
+005AE9FC - 8b 6b 24                   - mov ebp,[ebx+24]                       EBP=被用计部队状态
+005AE9FF - 0f b6 bb c6 00 00 00       - movzx edi,byte ptr [ebx+000000c6]      EDI=被用计部队智力
+005AEA06 - 8b 44 24 14                - mov eax,[esp+14]                       地图格指针置入EAX
+005AEA0A - 33 c9                      - xor ecx,ecx                            ECX(成功率)置0
+005AEA0C - 83 fd 01                   - cmp ebp,01                             检查被用计部队状态
+005AEA0F - 0f 95 c1                   - setnc cl
+005AEA12 - 49                         - dec ecx
+005AEA13 - 83 e1 0a                   - and ecx,0a                             被用计部队异常状态下成功率＋10%
+005AEA16 - 8b e9                      - mov ebp,ecx                            异常状态附加值置入EBP
+【开始计算成功率】
+005AEA18 - 8b 4c 24 2c                - mov ecx,[esp+2c]                       [esp+2c]中是计谋类型(0～8)
+005AEA1C - 83 f9 08                   - cmp ecx,08                             
+005AEA1F - 74 36                      - je 005aea57                            如果计谋是落雷(08)则跳过洞察判定
+005AEA21 - 85 db                      - test ebx,ebx
+005AEA23 - 74 29                      - je 005aea4e                            如果用计对象不是部队，则跳过洞察判定
+005AEA25 - 8b 54 24 20                - mov edx,[esp+20]
+005AEA29 - 52                         - push edx
+005AEA2A - 8b cb                      - mov ecx,ebx
+005AEA2C - e8 1f 72 ee ff             - call 00495c50
+005AEA31 - 85 c0                      - test eax,eax
+005AEA33 - 74 11                      - je 005aea46
+005AEA35 - 8b 03                      - mov eax,[ebx]                          判断被用计部队中是否有洞察
+005AEA37 - 6a 3d                      - push 3d                                3d=洞察
+005AEA39 - 8b cb                      - mov ecx,ebx
+005AEA3B - ff 50 58                   - call dword ptr [eax+58]                
+005AEA3E - 85 c0                      - test eax,eax
+005AEA40 - 0f 85 29 08 00 00          - jne 005af26f                           跳转到计谋识破处理
+005AEA46 - 8b 44 24 14                - mov eax,[esp+14]                   
+005AEA4A - 8b 4c 24 2c                - mov ecx,[esp+2c]                       [esp+2c]中是计谋类型(0～8)
+005AEA4E - 83 f9 08                   - cmp ecx,08                             [esp+2c]中应该是计谋类型(0～8)
+005AEA51 - 0f 87 10 0a 00 00          - ja 005af467                            大于8则直接结束返回
+005AEA57 - ff 24 8d c4 f4 5a 00       - jmp dword ptr [ecx*4+005af4c4]         跳转到相应类型计谋的地址
+【火计】
+005AEA5E - 8b 10                      - mov edx,[eax]                          获得地图格首个32位数据
+005AEA60 - 80 e2 03                   - and dl,03
+005AEA63 - 80 fa 02                   - cmp dl,02
+005AEA66 - 75 17                      - jne 005aea7f                           如果放火的地点不是建筑设施(02)则跳转
+005AEA68 - 8b 4c 24 14                - mov ecx,[esp+14]                       地图格指针置入EAX
+005AEA6C - e8 af 50 ed ff             - call 00483b20                          ？？猜测：根据地图格指针获得其上的建筑设施指针
+005AEA71 - 8b 40 08                   - mov eax,[eax+08]                       获得建筑设施类型
+005AEA74 - e8 67 f8 ff ff             - call 005ae2e0                          ？？猜测：获得建筑设施火计成功率，火陷阱为100％
+005AEA79 - 89 44 24 14                - mov [esp+14],eax                       ？？猜测：建筑设施火计成功率置入[esp+14]
+005AEA7D - eb 11                      - jmp 005aea90
+005AEA7F - 8b 40 04                   - mov eax,[eax+04]                       [eax+04]中是用计地点的地形
+005AEA82 - 83 e0 1f                   - and eax,1f                             保留低5位
+005AEA85 - 8b 0c 85 c0 b5 84 00       - mov ecx,[eax*4+0084b5c0]               取得地形火计成功率修正
+005AEA8C - 89 4c 24 14                - mov [esp+14],ecx                       地形火计成功率修正置入[esp+14]
+005AEA90 - 8b 4c 24 14                - mov ecx,[esp+14]                       [esp+14]置入ECX
+005AEA94 - b8 64 00 00 00             - mov eax,00000064
+005AEA99 - 3b c8                      - cmp ecx,eax                            如果ECX＝100代表被点物品是火种
+005AEA9B - 0f 84 9c 01 00 00          - je 005aec3d                            则成功率为100％，返回
+005AEAA1 - 85 db                      - test ebx,ebx
+005AEAA3 - 74 07                      - je 005aeaac
+005AEAA5 - 8b cb                      - mov ecx,ebx
+005AEAA7 - e8 94 6f ee ff             - call 00495a40                          如果被用计对象是部队，则获取被用计方主将地址（其实这句没用）
+005AEAAC - 8d 0c ff                   - lea ecx,[edi+edi*8]                    ECX=EDI*9（EDI为被用计方智力）
+005AEAAF - b8 67 66 66 66             - mov eax,66666667
+005AEAB4 - f7 e9                      - imul ecx
+005AEAB6 - c1 fa 02                   - sar dl,02
+005AEAB9 - 8b c2                      - mov eax,edx
+005AEABB - c1 e8 1f                   - shr eax,1f
+005AEABE - 03 c2                      - add eax,edx
+005AEAC0 - 8b c8                      - mov ecx,eax                            ECX=ECX*0.1
+005AEAC2 - b8 64 00 00 00             - mov eax,00000064
+005AEAC7 - 2b c1                      - sub eax,ecx
+005AEAC9 - 99                         - cdq
+005AEACA - 2b c2                      - sub eax,edx
+005AEACC - d1 f8                      - sar eax,1
+005AEACE - 0f af c6                   - imul eax,esi
+005AEAD1 - 0f af c6                   - imul eax,esi
+005AEAD4 - 6b c0 64                   - imul eax,eax,64                        EAX=ESI*ESI*(100-ECX)*100（ESI为用计方智力）
+005AEAD7 - 8b cf                      - mov ecx,edi
+005AEAD9 - 0f af cf                   - imul ecx,edi                           ECX=EDI*EDI（EDI为被用计方智力）  
+005AEADC - 8b d6                      - mov edx,esi
+005AEADE - 0f af d6                   - imul edx,esi                           EDX=ESI*ESI（ESI为用计方智力）
+005AEAE1 - 03 ca                      - add ecx,edx                            ECX=ECX+EDX
+005AEAE3 - 99                         - cdq
+005AEAE4 - f7 f9                      - idiv ecx
+005AEAE6 - 8b c8                      - mov ecx,eax                            ECX=EAX/ECX
+005AEAE8 - b8 95 20 4f 09             - mov eax,094f2095
+005AEAED - f7 e9                      - imul ecx
+005AEAEF - d1 fa                      - sar edx,1
+005AEAF1 - 8b c2                      - mov eax,edx
+005AEAF3 - c1 e8 1f                   - shr eax,1f
+005AEAF6 - 03 c2                      - add eax,edx                            EAX=ECX*1/55
+005AEAF8 - 89 44 24 10                - mov [esp+10],eax                       EAX置入[esp+10]
+005AEAFC - b9 64 00 00 00             - mov ecx,00000064
+005AEB01 - 2b ce                      - sub ecx,esi
+005AEB03 - b8 67 66 66 66             - mov eax,66666667
+005AEB08 - f7 e9                      - imul ecx
+005AEB0A - 8b 44 24 10                - mov eax,[esp+10]                       [esp+10]置入EAX
+005AEB0E - c1 fa 02                   - sar dl,02
+005AEB11 - 8b ca                      - mov ecx,edx
+005AEB13 - c1 e9 1f                   - shr ecx,1f
+005AEB16 - 03 ca                      - add ecx,edx                            ECX=(100-ESI)*0.1（ESI为用计方智力）
+005AEB18 - 2b c1                      - sub eax,ecx                            
+005AEB1A - 8b c8                      - mov ecx,eax                            ECX=EAX-ECX
+005AEB1C - 8b 44 24 14                - mov eax,[esp+14]                       地形火计成功率修正置入EAX
+005AEB20 - 99                         - cdq
+005AEB21 - 2b c2                      - sub eax,edx
+005AEB23 - d1 f8                      - sar eax,1                              EAX=地形火计成功率修正/2
+005AEB25 - 03 cd                      - add ecx,ebp
+005AEB27 - 3b f7                      - cmp esi,edi                            比较放火队智力和被放火队智力
+005AEB29 - 8d 4c 08 fb                - lea ecx,[eax+ecx-05]                   成功率=EAX+ECX-5
+005AEB2D - 89 4c 24 14                - mov [esp+14],ecx                       成功率置入[esp+14]
+005AEB31 - 7d 18                      - jnl 005aeb4b
+005AEB33 - 8b d7                      - mov edx,edi
+005AEB35 - 2b d6                      - sub edx,esi                            EDX=EDI-ESI
+005AEB37 - b8 56 55 55 55             - mov eax,55555556
+005AEB3C - f7 ea                      - imul edx
+005AEB3E - 8b c2                      - mov eax,edx
+005AEB40 - c1 e8 1f                   - shr eax,1f
+005AEB43 - 03 c2                      - add eax,edx                            EAX=(EDI-ESI)/3
+005AEB45 - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEB47 - 89 4c 24 14                - mov [esp+14],ecx                       成功率置入[esp+14]
+005AEB4B - 83 f9 01                   - cmp ecx,01
+005AEB4E - 7d 08                      - jnl 005aeb58
+005AEB50 - c7 44 24 14 01 00 00 00    - mov [esp+14],00000001
+005AEB58 - 8d 0c 76                   - lea ecx,[esi+esi*2]                    ECX=ESI*3（ESI为用计方智力）
+005AEB5B - b8 67 66 66 66             - mov eax,66666667
+005AEB60 - f7 e9                      - imul ecx
+005AEB62 - c1 fa 02                   - sar dl,02
+005AEB65 - 8b ca                      - mov ecx,edx
+005AEB67 - c1 e9 1f                   - shr ecx,1f
+005AEB6A - 03 ca                      - add ecx,edx                            ECX=ECX*0.1
+005AEB6C - b8 67 66 66 66             - mov eax,66666667
+005AEB71 - f7 ef                      - imul edi
+005AEB73 - d1 fa                      - sar edx,1
+005AEB75 - 8b c2                      - mov eax,edx
+005AEB77 - c1 e8 1f                   - shr eax,1f
+005AEB7A - 03 c2                      - add eax,edx                            EAX=EDI*0.2（EDI为被用计方智力）
+005AEB7C - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEB7E - 85 db                      - test ebx,ebx
+005AEB80 - 8d 6c 29 37                - lea ebp,[ecx+ebp+37]                   火计成功率基数(即智力1的部队放火的成功率) = 0x37(55)
+005AEB84 - 75 03                      - jne 005aeb89
+005AEB86 - 83 c5 0a                   - add ebp,0a                             火计对非部队对象成功率基数增加 = 0x0a(10)
+005AEB89 - 8b 44 24 14                - mov eax,[esp+14]
+005AEB8D - 3b e8                      - cmp ebp,eax
+005AEB8F - 7c 02                      - jnge 005aeb93
+005AEB91 - 8b e8                      - mov ebp,eax
+005AEB93 - 83 fd 63                   - cmp ebp,63
+005AEB96 - 89 6c 24 10                - mov [esp+10],ebp
+005AEB9A - 7c 08                      - jnge 005aeba4
+005AEB9C - c7 44 24 10 63 00 00 00    - mov [esp+10],00000063                  最高成功率99
+005AEBA4 - 85 db                      - test ebx,ebx
+005AEBA6 - 0f 84 c7 08 00 00          - je 005af473                            跳转到倾国判定
+005AEBAC - 8b 13                      - mov edx,[ebx]                          判断被用计部队中是否有火神
+005AEBAE - 6a 3e                      - push 3e                                3e=火神
+005AEBB0 - 8b cb                      - mov ecx,ebx
+005AEBB2 - ff 52 58                   - call dword ptr [edx+58]
+005AEBB5 - 85 c0                      - test eax,eax
+005AEBB7 - 74 15                      - je 005aebce                            没有火神则跳转到下一段代码继续计算
+005AEBB9 - 8b 44 24 30                - mov eax,[esp+30]                       （识破处理）识破标识地址置入EAX
+005AEBBD - 5f                         - pop edi
+005AEBBE - 5e                         - pop esi
+005AEBBF - 5d                         - pop ebp
+005AEBC0 - c7 40 04 01 00 00 00       - mov [eax+04],00000001                  识破标志置1
+005AEBC7 - 33 c0                      - xor eax,eax                            成功率置0
+005AEBC9 - 5b                         - pop ebx
+005AEBCA - 83 c4 0c                   - add esp,0c
+005AEBCD - c3                         - ret                                    计谋识破返回
+005AEBCE - 6a 02                      - push 02                                02=智力
+005AEBD0 - 6a 3c                      - push 3c                                3c=看破
+005AEBD2 - 8b cb                      - mov ecx,ebx
+005AEBD4 - e8 a7 6a ee ff             - call 00495680                          获得部队中有指定特技(3c=看破)的武将的某属性(02=智力)，置入EAX
+005AEBD9 - 3b c6                      - cmp eax,esi                            比较用计放智力
+005AEBDB - 0f 8f 8e 06 00 00          - jg 005af26f                            被用计方智力高则跳转到计谋识破处理
+005AEBE1 - 6a 02                      - push 02
+005AEBE3 - 6a 3f                      - push 3f                                3c=神算
+005AEBE5 - 8b cb                      - mov ecx,ebx
+005AEBE7 - e8 94 6a ee ff             - call 00495680
+005AEBEC - 3b c6                      - cmp eax,esi
+005AEBEE - 0f 8f 7b 06 00 00          - jg 005af26f                            用计方智力高则跳转到必中处理
+005AEBF4 - 8b 74 24 20                - mov esi,[esp+20]                       用计部队指针置入ESI
+005AEBF8 - 6a 02                      - push 02
+005AEBFA - 6a 35                      - push 35                                35=火攻
+005AEBFC - 8b ce                      - mov ecx,esi
+005AEBFE - e8 7d 6a ee ff             - call 00495680
+005AEC03 - 3b c7                      - cmp eax,edi
+005AEC05 - 7f 31                      - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEC07 - 6a 02                      - push 02
+005AEC09 - 6a 39                      - push 39                                39=虚实
+005AEC0B - 8b ce                      - mov ecx,esi
+005AEC0D - e8 6e 6a ee ff             - call 00495680
+005AEC12 - 3b c7                      - cmp eax,edi
+005AEC14 - 7f 22                      - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEC16 - 6a 02                      - push 02
+005AEC18 - 6a 3e                      - push 3e                                3e=火神
+005AEC1A - 8b ce                      - mov ecx,esi
+005AEC1C - e8 5f 6a ee ff             - call 00495680
+005AEC21 - 3b c7                      - cmp eax,edi
+005AEC23 - 7f 13                      - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEC25 - 6a 02                      - push 02
+005AEC27 - 6a 3f                      - push 3f                                3e=神算
+005AEC29 - 8b ce                      - mov ecx,esi
+005AEC2B - e8 50 6a ee ff             - call 00495680
+005AEC30 - 3b c7                      - cmp eax,edi
+005AEC32 - 0f 8e 3b 08 00 00          - jng 005af473                           没有上述特技效果则跳转到“倾国”处理
+005AEC38 - b8 64 00 00 00             - mov eax,00000064                       （必中处理）成功率置为100％
+005AEC3D - 5f                         - pop edi
+005AEC3E - 5e                         - pop esi
+005AEC3F - 5d                         - pop ebp
+005AEC40 - 5b                         - pop ebx
+005AEC41 - 83 c4 0c                   - add esp,0c
+005AEC44 - c3                         - ret                                    计谋必中返回
+【灭火】
+005AEC45 - 8b 74 24 20                - mov esi,[esp+20]
+005AEC49 - 6a 02                      - push 02
+005AEC4B - 6a 35                      - push 35
+005AEC4D - 8b ce                      - mov ecx,esi
+005AEC4F - e8 2c 6a ee ff             - call 00495680
+005AEC54 - 3b c7                      - cmp eax,edi
+005AEC56 - 7f e0                      - jg 005aec38
+005AEC58 - 6a 02                      - push 02
+005AEC5A - 6a 39                      - push 39
+005AEC5C - 8b ce                      - mov ecx,esi
+005AEC5E - e8 1d 6a ee ff             - call 00495680
+005AEC63 - 3b c7                      - cmp eax,edi
+005AEC65 - 7f d1                      - jg 005aec38
+005AEC67 - 6a 02                      - push 02
+005AEC69 - 6a 3e                      - push 3e
+005AEC6B - 8b ce                      - mov ecx,esi
+005AEC6D - e8 0e 6a ee ff             - call 00495680
+005AEC72 - 3b c7                      - cmp eax,edi
+005AEC74 - 7f c2                      - jg 005aec38
+005AEC76 - 6a 02                      - push 02
+005AEC78 - 6a 3f                      - push 3f
+005AEC7A - 8b ce                      - mov ecx,esi
+005AEC7C - e8 ff 69 ee ff             - call 00495680
+005AEC81 - 3b c7                      - cmp eax,edi
+005AEC83 - 7f b3                      - jg 005aec38
+005AEC85 - 0f b6 86 c6 00 00 00       - movzx eax,byte ptr [esi+000000c6]
+005AEC8C - bf 0a 00 00 00             - mov edi,0000000a
+005AEC91 - 8d 70 fb                   - lea esi,[eax-05]
+005AEC94 - 3b f7                      - cmp esi,edi
+005AEC96 - 89 7c 24 14                - mov [esp+14],edi
+005AEC9A - 7c 04                      - jnge 005aeca0
+005AEC9C - 89 74 24 14                - mov [esp+14],esi
+005AECA0 - db 44 24 14                - fild dword ptr [esp+14]
+005AECA4 - d9 fa                      - fsqrt
+005AECA6 - d8 0d 34 8d 83 00          - fmul dword ptr [00838d34] : [(float)11.0000]
+005AECAC - e8 c3 8d 15 00             - call 00707a74
+005AECB1 - 83 f8 63                   - cmp eax,63
+005AECB4 - 7e 0d                      - jle 005aecc3
+005AECB6 - c7 44 24 10 63 00 00 00    - mov [esp+10],00000063
+005AECBE - e9 b0 07 00 00             - jmp 005af473
+005AECC3 - 3b f7                      - cmp esi,edi
+005AECC5 - 89 7c 24 14                - mov [esp+14],edi
+005AECC9 - 7c 04                      - jnge 005aeccf
+005AECCB - 89 74 24 14                - mov [esp+14],esi
+005AECCF - db 44 24 14                - fild dword ptr [esp+14]
+005AECD3 - d9 fa                      - fsqrt
+005AECD5 - d8 0d 34 8d 83 00          - fmul dword ptr [00838d34] : [(float)11.0000]
+005AECDB - e8 94 8d 15 00             - call 00707a74
+005AECE0 - 89 44 24 10                - mov [esp+10],eax
+005AECE4 - e9 8a 07 00 00             - jmp 005af473                           跳转到倾国处理
+【伪报】
+005AECE9 - 53                         - push ebx                               校验EBX指针
+005AECEA - e8 41 b9 ec ff             - call 0047a630
+005AECEF - 83 c4 04                   - add esp,04
+005AECF2 - 85 c0                      - test eax,eax
+005AECF4 - 0f 84 80 05 00 00          - je 005af27a                            若校验失败，则成功率置0直接返回
+005AECFA - 85 db                      - test ebx,ebx
+005AECFC - 74 22                      - je 005aed20                            若被用计对象不是部队，则跳转（这两句其实没用）
+005AECFE - 8b 13                      - mov edx,[ebx]
+005AED00 - 6a 48                      - push 48                                48=规律
+005AED02 - 8b cb                      - mov ecx,ebx
+005AED04 - ff 52 58                   - call dword ptr [edx+58]
+005AED07 - 85 c0                      - test eax,eax
+005AED09 - 0f 85 60 05 00 00          - jne 005af26f                           跳转到计谋识破处理
+005AED0F - 8b 03                      - mov eax,[ebx]
+005AED11 - 6a 4a                      - push 4a                                4a=明镜
+005AED13 - 8b cb                      - mov ecx,ebx
+005AED15 - ff 50 58                   - call dword ptr [eax+58]
+005AED18 - 85 c0                      - test eax,eax
+005AED1A - 0f 85 4f 05 00 00          - jne 005af26f                           跳转到计谋识破处理
+005AED20 - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AED24 - 6a 02                      - push 02
+005AED26 - 6a 36                      - push 36                                36=言毒
+005AED28 - e8 53 69 ee ff             - call 00495680
+005AED2D - 3b c7                      - cmp eax,edi
+005AED2F - 0f 8f 03 ff ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AED35 - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AED39 - 6a 02                      - push 02
+005AED3B - 6a 39                      - push 39                                39=虚实
+005AED3D - e8 3e 69 ee ff             - call 00495680
+005AED42 - 3b c7                      - cmp eax,edi
+005AED44 - 0f 8f ee fe ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AED4A - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AED4E - 6a 02                      - push 02
+005AED50 - 6a 3f                      - push 3f                                3f=神算
+005AED52 - e8 29 69 ee ff             - call 00495680
+005AED57 - 3b c7                      - cmp eax,edi
+005AED59 - 0f 8f d9 fe ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AED5F - 85 db                      - test ebx,ebx                           若被用计对象不是部队，则跳转（这两句其实也没用）
+005AED61 - 74 26                      - je 005aed89
+005AED63 - 6a 02                      - push 02
+005AED65 - 6a 3c                      - push 3c                                3c=看破
+005AED67 - 8b cb                      - mov ecx,ebx
+005AED69 - e8 12 69 ee ff             - call 00495680
+005AED6E - 3b c6                      - cmp eax,esi
+005AED70 - 0f 8f 8d 01 00 00          - jg 005aef03                            被用计方智力高则跳转到计谋识破处理
+005AED76 - 6a 02                      - push 02
+005AED78 - 6a 3f                      - push 3f                                3f=神算
+005AED7A - 8b cb                      - mov ecx,ebx
+005AED7C - e8 ff 68 ee ff             - call 00495680
+005AED81 - 3b c6                      - cmp eax,esi
+005AED83 - 0f 8f 7a 01 00 00          - jg 005aef03                            被用计方智力高则跳转到计谋识破处理
+005AED89 - 8b cb                      - mov ecx,ebx                            被用计方部队指针置入ECX
+005AED8B - e8 b0 6c ee ff             - call 00495a40                          获取被用计方主将地址
+005AED90 - 8b 80 fc 00 00 00          - mov eax,[eax+000000fc]                 获取主将性格
+005AED96 - 8b 04 85 84 b6 84 00       - mov eax,[eax*4+0084b684]               获取性格相应的成功率修正值 [胆小3 冷静1 刚胆0 莽撞-2]
+005AED9D - 89 44 24 10                - mov [esp+10],eax                       修正值置入[esp+10]
+005AEDA1 - 8b 4c 24 20                - mov ecx,[esp+20]                       用计方部队指针置入ECX
+005AEDA5 - 0f b6 89 c8 00 00 00       - movzx ecx,byte ptr [ecx+000000c8]      ECX＝用计方部队魅力
+005AEDAC - b8 67 66 66 66             - mov eax,66666667
+005AEDB1 - f7 e9                      - imul ecx
+005AEDB3 - c1 fa 03                   - sar dl,03
+005AEDB6 - 8b c2                      - mov eax,edx
+005AEDB8 - c1 e8 1f                   - shr eax,1f
+005AEDBB - 03 c2                      - add eax,edx                            EAX=ECX*0.05
+005AEDBD - 89 44 24 14                - mov [esp+14],eax                       EAX置入[esp+14]
+005AEDC1 - 8d 0c 76                   - lea ecx,[esi+esi*2]                    ECX=ESI*3（ESI为用计方智力）
+005AEDC4 - b8 67 66 66 66             - mov eax,66666667
+005AEDC9 - f7 e9                      - imul ecx
+005AEDCB - c1 fa 02                   - sar dl,02
+005AEDCE - 8b c2                      - mov eax,edx
+005AEDD0 - c1 e8 1f                   - shr eax,1f
+005AEDD3 - 03 c2                      - add eax,edx
+005AEDD5 - 8b c8                      - mov ecx,eax                            ECX=ECX*0.1
+005AEDD7 - b8 67 66 66 66             - mov eax,66666667
+005AEDDC - f7 ef                      - imul edi
+005AEDDE - d1 fa                      - sar edx,1
+005AEDE0 - 8b c2                      - mov eax,edx
+005AEDE2 - c1 e8 1f                   - shr eax,1f
+005AEDE5 - 03 c2                      - add eax,edx                            EAX=EDI*0.2（EDI为被用计方智力）
+005AEDE7 - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEDE9 - 03 4c 24 14                - add ecx,[esp+14]                       ECX=ECX+魅力修正值
+005AEDED - 03 4c 24 10                - add ecx,[esp+10]                       ECX=ECX+被主将性格修正值
+005AEDF1 - 8d 4c 29 46                - lea ecx,[ecx+ebp+46]                   ECX=ECX+70+异常状态附加值(0或10)
+005AEDF5 - 89 4c 24 18                - mov [esp+18],ecx                       ECX置入[esp+18]
+005AEDF9 - 8d 0c ff                   - lea ecx,[edi+edi*8]                    ECX=EDI*9（EDI为被用计方智力）
+005AEDFC - b8 67 66 66 66             - mov eax,66666667
+005AEE01 - f7 e9                      - imul ecx
+005AEE03 - c1 fa 02                   - sar dl,02
+005AEE06 - 8b c2                      - mov eax,edx
+005AEE08 - c1 e8 1f                   - shr eax,1f
+005AEE0B - 03 c2                      - add eax,edx
+005AEE0D - 8b c8                      - mov ecx,eax                            ECX=ECX*0.1
+005AEE0F - b8 64 00 00 00             - mov eax,00000064
+005AEE14 - 2b c1                      - sub eax,ecx
+005AEE16 - 0f af c6                   - imul eax,esi
+005AEE19 - 0f af c6                   - imul eax,esi
+005AEE1C - 6b c0 64                   - imul eax,eax,64                        EAX=ESI*ESI*(100-ECX)*100（ESI为用计方智力）
+005AEE1F - 8b cf                      - mov ecx,edi
+005AEE21 - 0f af cf                   - imul ecx,edi                           ECX=EDI*EDI（EDI为被用计方智力）                   
+005AEE24 - 8b d6                      - mov edx,esi
+005AEE26 - 0f af d6                   - imul edx,esi                           EDX=ESI*ESI（ESI为用计方智力）
+005AEE29 - 03 ca                      - add ecx,edx                            ECX=ECX+EDX
+005AEE2B - 99                         - cdq
+005AEE2C - f7 f9                      - idiv ecx
+005AEE2E - 8b c8                      - mov ecx,eax                            ECX=EAX/ECX
+005AEE30 - b8 95 20 4f 09             - mov eax,094f2095
+005AEE35 - f7 e9                      - imul ecx
+005AEE37 - d1 fa                      - sar edx,1
+005AEE39 - 8b c2                      - mov eax,edx
+005AEE3B - c1 e8 1f                   - shr eax,1f
+005AEE3E - 03 c2                      - add eax,edx
+005AEE40 - 8b c8                      - mov ecx,eax                            ECX=ECX*1/55
+005AEE42 - ba 64 00 00 00             - mov edx,00000064
+005AEE47 - 2b d6                      - sub edx,esi
+005AEE49 - b8 67 66 66 66             - mov eax,66666667
+005AEE4E - f7 ea                      - imul edx
+005AEE50 - c1 fa 02                   - sar dl,02
+005AEE53 - 8b c2                      - mov eax,edx
+005AEE55 - c1 e8 1f                   - shr eax,1f
+005AEE58 - 03 c2                      - add eax,edx                            EAX=(100-ESI)*0.1（ESI为用计方智力）
+005AEE5A - 8b 54 24 14                - mov edx,[esp+14]
+005AEE5E - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEE60 - 8b 44 24 10                - mov eax,[esp+10]
+005AEE64 - 03 ca                      - add ecx,edx                            ECX=ECX+魅力修正值
+005AEE66 - e9 d7 04 00 00             - jmp 005af342                           跳转到公共处理部分
+【扰乱】
+005AEE6B - 53                         - push ebx                               校验EBX指针
+005AEE6C - e8 bf b7 ec ff             - call 0047a630
+005AEE71 - 83 c4 04                   - add esp,04
+005AEE74 - 85 c0                      - test eax,eax
+005AEE76 - 0f 84 fe 03 00 00          - je 005af27a                            若校验失败，则成功率置0直接返回
+005AEE7C - 85 db                      - test ebx,ebx
+005AEE7E - 74 22                      - je 005aeea2                            若被用计对象不是部队，则跳转（这两句其实没用）
+005AEE80 - 8b 13                      - mov edx,[ebx]
+005AEE82 - 6a 49                      - push 49                                49=沉着
+005AEE84 - 8b cb                      - mov ecx,ebx
+005AEE86 - ff 52 58                   - call dword ptr [edx+58]
+005AEE89 - 85 c0                      - test eax,eax
+005AEE8B - 0f 85 de 03 00 00          - jne 005af26f                           跳转到计谋识破处理
+005AEE91 - 8b 03                      - mov eax,[ebx]
+005AEE93 - 6a 4a                      - push 4a                                4a=明镜
+005AEE95 - 8b cb                      - mov ecx,ebx
+005AEE97 - ff 50 58                   - call dword ptr [eax+58]
+005AEE9A - 85 c0                      - test eax,eax
+005AEE9C - 0f 85 cd 03 00 00          - jne 005af26f                           跳转到计谋识破处理
+005AEEA2 - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AEEA6 - 6a 02                      - push 02
+005AEEA8 - 6a 37                      - push 37                                37=机智
+005AEEAA - e8 d1 67 ee ff             - call 00495680
+005AEEAF - 3b c7                      - cmp eax,edi
+005AEEB1 - 0f 8f 81 fd ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEEB7 - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AEEBB - 6a 02                      - push 02
+005AEEBD - 6a 39                      - push 39                                39=虚实
+005AEEBF - e8 bc 67 ee ff             - call 00495680
+005AEEC4 - 3b c7                      - cmp eax,edi
+005AEEC6 - 0f 8f 6c fd ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEECC - 8b 4c 24 20                - mov ecx,[esp+20]                       用计部队指针置入ECX
+005AEED0 - 6a 02                      - push 02
+005AEED2 - 6a 3f                      - push 3f                                3f=神算
+005AEED4 - e8 a7 67 ee ff             - call 00495680
+005AEED9 - 3b c7                      - cmp eax,edi
+005AEEDB - 0f 8f 57 fd ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AEEE1 - 85 db                      - test ebx,ebx                           若被用计对象不是部队，则跳转（这两句其实也没用）
+005AEEE3 - 74 33                      - je 005aef18
+005AEEE5 - 6a 02                      - push 02
+005AEEE7 - 6a 3c                      - push 3c                                3c=看破
+005AEEE9 - 8b cb                      - mov ecx,ebx
+005AEEEB - e8 90 67 ee ff             - call 00495680
+005AEEF0 - 3b c6                      - cmp eax,esi
+005AEEF2 - 7f 0f                      - jg 005aef03                            被用计方智力高则跳转到计谋识破处理
+005AEEF4 - 6a 02                      - push 02
+005AEEF6 - 6a 3f                      - push 3f                                3f=神算
+005AEEF8 - 8b cb                      - mov ecx,ebx
+005AEEFA - e8 81 67 ee ff             - call 00495680
+005AEEFF - 3b c6                      - cmp eax,esi
+005AEF01 - 7e 15                      - jle 005aef18                           被用计方智力较低则跳转到计算成功率，否则继续进行计谋识破处理
+005AEF03 - 8b 54 24 30                - mov edx,[esp+30]                       （识破处理）识破标识地址置入EAX
+005AEF07 - 5f                         - pop edi
+005AEF08 - 5e                         - pop esi
+005AEF09 - 5d                         - pop ebp
+005AEF0A - c7 42 04 01 00 00 00       - mov [edx+04],00000001                  识破标志置1
+005AEF11 - 33 c0                      - xor eax,eax                            成功率置0
+005AEF13 - 5b                         - pop ebx
+005AEF14 - 83 c4 0c                   - add esp,0c
+005AEF17 - c3                         - ret                                    计谋识破返回
+005AEF18 - 8b cb                      - mov ecx,ebx                            被用计方部队指针置入ECX
+005AEF1A - e8 21 6b ee ff             - call 00495a40                          获取被用计方主将地址
+005AEF1F - 8b 80 fc 00 00 00          - mov eax,[eax+000000fc]                 获取主将性格
+005AEF25 - 8b 04 85 74 b6 84 00       - mov eax,[eax*4+0084b674]               获取性格相应的成功率修正值 [胆小-2 冷静0 刚胆1 莽撞3]
+005AEF2C - 89 44 24 10                - mov [esp+10],eax                       修正值置入[esp+10]
+005AEF30 - 0f b6 8b ca 00 00 00       - movzx ecx,byte ptr [ebx+000000ca]      被用计方部队防御力置入ECX
+005AEF37 - b8 67 66 66 66             - mov eax,66666667
+005AEF3C - f7 e9                      - imul ecx
+005AEF3E - c1 fa 03                   - sar dl,03
+005AEF41 - 8b c2                      - mov eax,edx
+005AEF43 - c1 e8 1f                   - shr eax,1f
+005AEF46 - 03 c2                      - add eax,edx                            EAX=ECX*0.05
+005AEF48 - 89 44 24 14                - mov [esp+14],eax                       EAX置入[esp+14]
+005AEF4C - 8d 0c 76                   - lea ecx,[esi+esi*2]                    ECX=ESI*3（ESI为用计方智力）
+005AEF4F - b8 67 66 66 66             - mov eax,66666667
+005AEF54 - f7 e9                      - imul ecx
+005AEF56 - c1 fa 02                   - sar dl,02
+005AEF59 - 8b ca                      - mov ecx,edx
+005AEF5B - c1 e9 1f                   - shr ecx,1f
+005AEF5E - 03 ca                      - add ecx,edx                            ECX=ECX*0.1
+005AEF60 - b8 67 66 66 66             - mov eax,66666667
+005AEF65 - f7 ef                      - imul edi
+005AEF67 - d1 fa                      - sar edx,1
+005AEF69 - 8b c2                      - mov eax,edx
+005AEF6B - c1 e8 1f                   - shr eax,1f
+005AEF6E - 03 c2                      - add eax,edx                            EAX=EDI*0.2（EDI为被用计方智力）
+005AEF70 - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEF72 - 03 4c 24 14                - add ecx,[esp+14]                       ECX=ECX+防御修正值（被用计部队统率越高越容易混乱...）【add改为sub则防御越高被扰乱的概率越低】
+005AEF76 - 03 4c 24 10                - add ecx,[esp+10]                       ECX=ECX+被主将性格修正值
+005AEF7A - 8d 4c 29 46                - lea ecx,[ecx+ebp+46]                   ECX=ECX+70+异常状态附加值(0或10)
+005AEF7E - 89 4c 24 18                - mov [esp+18],ecx                       ECX置入[esp+18]
+005AEF82 - 8d 0c ff                   - lea ecx,[edi+edi*8]                    ECX=EDI*9（EDI为被用计方智力）
+005AEF85 - b8 67 66 66 66             - mov eax,66666667
+005AEF8A - f7 e9                      - imul ecx
+005AEF8C - c1 fa 02                   - sar dl,02
+005AEF8F - 8b c2                      - mov eax,edx
+005AEF91 - c1 e8 1f                   - shr eax,1f
+005AEF94 - 03 c2                      - add eax,edx
+005AEF96 - 8b c8                      - mov ecx,eax                            ECX=ECX*0.1
+005AEF98 - b8 64 00 00 00             - mov eax,00000064
+005AEF9D - 2b c1                      - sub eax,ecx
+005AEF9F - 0f af c6                   - imul eax,esi
+005AEFA2 - 0f af c6                   - imul eax,esi
+005AEFA5 - 6b c0 64                   - imul eax,eax,64                        EAX=ESI*ESI*(100-ECX)*100（ESI为用计方智力）
+005AEFA8 - 8b cf                      - mov ecx,edi
+005AEFAA - 0f af cf                   - imul ecx,edi                           ECX=EDI*EDI（EDI为被用计方智力） 
+005AEFAD - 8b d6                      - mov edx,esi
+005AEFAF - 0f af d6                   - imul edx,esi                           EDX=ESI*ESI（ESI为用计方智力）
+005AEFB2 - 03 ca                      - add ecx,edx                            ECX=ECX+EDX
+005AEFB4 - 99                         - cdq
+005AEFB5 - f7 f9                      - idiv ecx
+005AEFB7 - 8b c8                      - mov ecx,eax                            ECX=EAX/ECX
+005AEFB9 - b8 b7 60 0b b6             - mov eax,b60b60b7
+005AEFBE - f7 e9                      - imul ecx
+005AEFC0 - 03 d1                      - add edx,ecx
+005AEFC2 - c1 fa 05                   - sar dl,05
+005AEFC5 - 8b c2                      - mov eax,edx
+005AEFC7 - c1 e8 1f                   - shr eax,1f
+005AEFCA - 03 c2                      - add eax,edx
+005AEFCC - 8b c8                      - mov ecx,eax                            ECX=ECX*1/45
+005AEFCE - ba 64 00 00 00             - mov edx,00000064
+005AEFD3 - 2b d6                      - sub edx,esi
+005AEFD5 - b8 67 66 66 66             - mov eax,66666667
+005AEFDA - f7 ea                      - imul edx
+005AEFDC - c1 fa 02                   - sar dl,02
+005AEFDF - 8b c2                      - mov eax,edx
+005AEFE1 - c1 e8 1f                   - shr eax,1f
+005AEFE4 - 03 c2                      - add eax,edx                            EAX=(100-ESI)*0.1（ESI为用计方智力）
+005AEFE6 - 8b 54 24 14                - mov edx,[esp+14]
+005AEFEA - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AEFEC - 8b 44 24 10                - mov eax,[esp+10]
+005AEFF0 - 03 ca                      - add ecx,edx                            ECX=ECX+防御修正值      【add改为sub则防御越高被扰乱的概率越低】
+005AEFF2 - e9 4b 03 00 00             - jmp 005af342                           跳转到公共处理部分
+【镇静】
+005AEFF7 - 53                         - push ebx                               校验EBX指针
+005AEFF8 - e8 33 b6 ec ff             - call 0047a630
+005AEFFD - 83 c4 04                   - add esp,04
+005AF000 - 85 c0                      - test eax,eax
+005AF002 - 0f 84 72 02 00 00          - je 005af27a                            若校验失败，则成功率置0直接返回
+005AF008 - 8b 74 24 20                - mov esi,[esp+20]                       用计部队指针置入ESI
+005AF00C - 6a 02                      - push 02
+005AF00E - 6a 39                      - push 39                                39=虚实
+005AF010 - 8b ce                      - mov ecx,esi
+005AF012 - e8 69 66 ee ff             - call 00495680
+005AF017 - 3b c7                      - cmp eax,edi
+005AF019 - 0f 8f 19 fc ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AF01F - 6a 02                      - push 02
+005AF021 - 6a 3f                      - push 3f                                3f=神算
+005AF023 - 8b ce                      - mov ecx,esi
+005AF025 - e8 56 66 ee ff             - call 00495680
+005AF02A - 3b c7                      - cmp eax,edi
+005AF02C - 0f 8f 06 fc ff ff          - jg 005aec38                            用计方智力高则跳转到必中处理
+005AF032 - 8b cb                      - mov ecx,ebx                            被用计方部队指针置入ECX
+005AF034 - e8 07 6a ee ff             - call 00495a40                          获取被用计方主将地址
+005AF039 - 0f b6 8e c6 00 00 00       - movzx ecx,byte ptr [esi+000000c6]      ECX=用计方部队智力
+005AF040 - 8b 80 fc 00 00 00          - mov eax,[eax+000000fc]                 获取主将性格
+005AF046 - bf 0a 00 00 00             - mov edi,0000000a
+005AF04B - 8d 71 fb                   - lea esi,[ecx-05]                       ESI=用计方部队智力-5
+005AF04E - 3b f7                      - cmp esi,edi
+005AF050 - 89 7c 24 14                - mov [esp+14],edi
+005AF054 - 7c 04                      - jnge 005af05a
+005AF056 - 89 74 24 14                - mov [esp+14],esi                       将ESI置入[esp+14]，下限为10
+005AF05A - db 04 85 64 b6 84 00       - fild dword ptr [eax*4+0084b664]        获取性格相应的成功率修正值 [胆小-5 冷静5 刚胆0 莽撞-10]
+005AF061 - db 44 24 14                - fild dword ptr [esp+14]
+005AF065 - d9 fa                      - fsqrt
+005AF067 - d8 0d 34 8d 83 00          - fmul dword ptr [00838d34]              
+005AF06D - d8 c1                      - fadd st(0),st(1)
+005AF06F - e8 00 8a 15 00             - call 00707a74                          EAX=sqrt(ESI)*11+性格修正值
+005AF074 - 83 f8 63                   - cmp eax,63
+005AF077 - 7e 0f                      - jle 005af088                           如果成功率小于99则再算一遍（由于EAX已经被覆盖，所以必须再算一遍）
+005AF079 - dd d8                      - fstp st(0)
+005AF07B - c7 44 24 10 63 00 00 00    - mov [esp+10],00000063
+005AF083 - e9 eb 03 00 00             - jmp 005af473                           跳转到倾国判定
+005AF088 - 3b f7                      - cmp esi,edi
+005AF08A - 89 7c 24 14                - mov [esp+14],edi
+005AF08E - 7c 04                      - jnge 005af094
+005AF090 - 89 74 24 14                - mov [esp+14],esi
+005AF094 - db 44 24 14                - fild dword ptr [esp+14]
+005AF098 - d9 fa                      - fsqrt
+005AF09A - d8 0d 34 8d 83 00          - fmul dword ptr [00838d34] : [(float)11.0000]
+005AF0A0 - d8 c1                      - fadd st(0),st(1)
+005AF0A2 - e8 cd 89 15 00             - call 00707a74
+005AF0A7 - dd d8                      - fstp st(0)
+005AF0A9 - 89 44 24 10                - mov [esp+10],eax
+005AF0AD - e9 c1 03 00 00             - jmp 005af473                           跳转到倾国判定
+【伏兵】
+005AF0B2 - 53                         - push ebx
+005AF0B3 - e8 78 b5 ec ff             - call 0047a630
+005AF0B8 - 83 c4 04                   - add esp,04
+005AF0BB - 85 c0                      - test eax,eax
+005AF0BD - 0f 84 b7 01 00 00          - je 005af27a
+005AF0C3 - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF0C7 - 6a 02                      - push 02
+005AF0C9 - 6a 39                      - push 39
+005AF0CB - e8 b0 65 ee ff             - call 00495680
+005AF0D0 - 3b c7                      - cmp eax,edi
+005AF0D2 - 0f 8f 60 fb ff ff          - jg 005aec38
+005AF0D8 - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF0DC - 6a 02                      - push 02
+005AF0DE - 6a 3f                      - push 3f
+005AF0E0 - e8 9b 65 ee ff             - call 00495680
+005AF0E5 - 3b c7                      - cmp eax,edi
+005AF0E7 - 0f 8f 4b fb ff ff          - jg 005aec38
+005AF0ED - 85 db                      - test ebx,ebx
+005AF0EF - 74 26                      - je 005af117
+005AF0F1 - 6a 02                      - push 02
+005AF0F3 - 6a 3c                      - push 3c
+005AF0F5 - 8b cb                      - mov ecx,ebx
+005AF0F7 - e8 84 65 ee ff             - call 00495680
+005AF0FC - 3b c6                      - cmp eax,esi
+005AF0FE - 0f 8f 6b 01 00 00          - jg 005af26f
+005AF104 - 6a 02                      - push 02
+005AF106 - 6a 3f                      - push 3f
+005AF108 - 8b cb                      - mov ecx,ebx
+005AF10A - e8 71 65 ee ff             - call 00495680
+005AF10F - 3b c6                      - cmp eax,esi
+005AF111 - 0f 8f 58 01 00 00          - jg 005af26f
+005AF117 - 8b cb                      - mov ecx,ebx
+005AF119 - e8 22 69 ee ff             - call 00495a40                          获取被用计方主将地址
+005AF11E - 8b 88 fc 00 00 00          - mov ecx,[eax+000000fc]                 获取主将性格
+005AF124 - 8b 54 24 20                - mov edx,[esp+20]
+005AF128 - 0f b6 82 c9 00 00 00       - movzx eax,byte ptr [edx+000000c9]      EAX=用计部队攻击力      
+005AF12F - 0f b6 93 ca 00 00 00       - movzx edx,byte ptr [ebx+000000ca]      EDX=被用计部队防御力
+005AF136 - 2b c2                      - sub eax,edx
+005AF138 - 8b d0                      - mov edx,eax
+005AF13A - b8 67 66 66 66             - mov eax,66666667
+005AF13F - f7 ea                      - imul edx
+005AF141 - c1 fa 02                   - sar dl,02
+005AF144 - 8b c2                      - mov eax,edx
+005AF146 - c1 e8 1f                   - shr eax,1f
+005AF149 - 03 c2                      - add eax,edx
+005AF14B - 89 44 24 10                - mov [esp+10],eax                       (EAX-EDX)*0.1置入[esp+10]
+005AF14F - 8b 04 8d 54 b6 84 00       - mov eax,[ecx*4+0084b654]               获取性格相应的成功率修正值 [胆小3 冷静-2 刚胆0 莽撞1]
+005AF156 - 89 44 24 14                - mov [esp+14],eax
+005AF15A - 8d 0c 76                   - lea ecx,[esi+esi*2]
+005AF15D - b8 67 66 66 66             - mov eax,66666667
+005AF162 - f7 e9                      - imul ecx
+005AF164 - c1 fa 02                   - sar dl,02
+005AF167 - 8b ca                      - mov ecx,edx
+005AF169 - c1 e9 1f                   - shr ecx,1f
+005AF16C - 03 ca                      - add ecx,edx                            ECX=ESI*0.3（ESI为用计方智力）
+005AF16E - b8 56 55 55 55             - mov eax,55555556
+005AF173 - f7 ef                      - imul edi
+005AF175 - 8b c2                      - mov eax,edx
+005AF177 - c1 e8 1f                   - shr eax,1f
+005AF17A - 03 c2                      - add eax,edx                            EAX=EDI*1/3（EDI为被用计方智力）
+005AF17C - 2b c8                      - sub ecx,eax
+005AF17E - 03 4c 24 14                - add ecx,[esp+14]                       ECX=ECX+攻防差修正值
+005AF182 - 03 4c 24 10                - add ecx,[esp+10]                       ECX=ECX+被主将性格修正值
+005AF186 - 8d 4c 29 50                - lea ecx,[ecx+ebp+50]                   ECX=ECX+80+异常状态附加值(0或10)
+005AF18A - 89 4c 24 18                - mov [esp+18],ecx
+005AF18E - 8d 0c ff                   - lea ecx,[edi+edi*8]
+005AF191 - b8 67 66 66 66             - mov eax,66666667
+005AF196 - f7 e9                      - imul ecx
+005AF198 - c1 fa 02                   - sar dl,02
+005AF19B - 8b c2                      - mov eax,edx
+005AF19D - c1 e8 1f                   - shr eax,1f
+005AF1A0 - 03 c2                      - add eax,edx
+005AF1A2 - 8b c8                      - mov ecx,eax
+005AF1A4 - b8 64 00 00 00             - mov eax,00000064
+005AF1A9 - 2b c1                      - sub eax,ecx
+005AF1AB - 0f af c6                   - imul eax,esi
+005AF1AE - 0f af c6                   - imul eax,esi
+005AF1B1 - 6b c0 64                   - imul eax,eax,64
+005AF1B4 - 8b cf                      - mov ecx,edi
+005AF1B6 - 0f af cf                   - imul ecx,edi
+005AF1B9 - 8b d6                      - mov edx,esi
+005AF1BB - 0f af d6                   - imul edx,esi
+005AF1BE - 03 ca                      - add ecx,edx
+005AF1C0 - 99                         - cdq
+005AF1C1 - f7 f9                      - idiv ecx
+005AF1C3 - 8b c8                      - mov ecx,eax
+005AF1C5 - b8 1f 85 eb 51             - mov eax,51eb851f
+005AF1CA - f7 e9                      - imul ecx
+005AF1CC - c1 fa 04                   - sar dl,04
+005AF1CF - 8b c2                      - mov eax,edx
+005AF1D1 - c1 e8 1f                   - shr eax,1f
+005AF1D4 - 03 c2                      - add eax,edx
+005AF1D6 - 8b c8                      - mov ecx,eax                            ECX=ECX*1/50
+005AF1D8 - ba 64 00 00 00             - mov edx,00000064
+005AF1DD - 2b d6                      - sub edx,esi
+005AF1DF - b8 67 66 66 66             - mov eax,66666667
+005AF1E4 - f7 ea                      - imul edx
+005AF1E6 - c1 fa 02                   - sar dl,02
+005AF1E9 - 8b c2                      - mov eax,edx
+005AF1EB - c1 e8 1f                   - shr eax,1f
+005AF1EE - 03 c2                      - add eax,edx                            EAX=(100-ESI)*0.1（ESI为用计方智力）
+005AF1F0 - 8b 54 24 14                - mov edx,[esp+14]
+005AF1F4 - 2b c8                      - sub ecx,eax
+005AF1F6 - 8b 44 24 10                - mov eax,[esp+10]
+005AF1FA - 03 ca                      - add ecx,edx
+005AF1FC - e9 41 01 00 00             - jmp 005af342                           跳转到公共处理部分
+【内讧】
+005AF201 - 53                         - push ebx
+005AF202 - e8 29 b4 ec ff             - call 0047a630
+005AF207 - 83 c4 04                   - add esp,04
+005AF20A - 85 c0                      - test eax,eax
+005AF20C - 74 6c                      - je 005af27a
+005AF20E - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF212 - 6a 02                      - push 02
+005AF214 - 6a 38                      - push 38
+005AF216 - e8 65 64 ee ff             - call 00495680
+005AF21B - 3b c7                      - cmp eax,edi
+005AF21D - 0f 8f 15 fa ff ff          - jg 005aec38
+005AF223 - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF227 - 6a 02                      - push 02
+005AF229 - 6a 39                      - push 39
+005AF22B - e8 50 64 ee ff             - call 00495680
+005AF230 - 3b c7                      - cmp eax,edi
+005AF232 - 0f 8f 00 fa ff ff          - jg 005aec38
+005AF238 - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF23C - 6a 02                      - push 02
+005AF23E - 6a 3f                      - push 3f
+005AF240 - e8 3b 64 ee ff             - call 00495680
+005AF245 - 3b c7                      - cmp eax,edi
+005AF247 - 0f 8f eb f9 ff ff          - jg 005aec38
+005AF24D - 85 db                      - test ebx,ebx
+005AF24F - 74 33                      - je 005af284
+005AF251 - 6a 02                      - push 02
+005AF253 - 6a 3c                      - push 3c
+005AF255 - 8b cb                      - mov ecx,ebx
+005AF257 - e8 24 64 ee ff             - call 00495680
+005AF25C - 3b c6                      - cmp eax,esi
+005AF25E - 7f 0f                      - jg 005af26f
+005AF260 - 6a 02                      - push 02
+005AF262 - 6a 3f                      - push 3f
+005AF264 - 8b cb                      - mov ecx,ebx
+005AF266 - e8 15 64 ee ff             - call 00495680
+005AF26B - 3b c6                      - cmp eax,esi
+005AF26D - 7e 15                      - jle 005af284
+005AF26F - 8b 4c 24 30                - mov ecx,[esp+30]
+005AF273 - c7 41 04 01 00 00 00       - mov [ecx+04],00000001
+005AF27A - 5f                         - pop edi
+005AF27B - 5e                         - pop esi
+005AF27C - 5d                         - pop ebp
+005AF27D - 33 c0                      - xor eax,eax
+005AF27F - 5b                         - pop ebx
+005AF280 - 83 c4 0c                   - add esp,0c
+005AF283 - c3                         - ret
+005AF284 - 8b cb                      - mov ecx,ebx
+005AF286 - e8 b5 67 ee ff             - call 00495a40
+005AF28B - 8b 80 fc 00 00 00          - mov eax,[eax+000000fc]                 获取主将性格
+005AF291 - 8b 14 85 74 b6 84 00       - mov edx,[eax*4+0084b674]               获取性格相应的成功率修正值 [胆小-2 冷静0 刚胆1 莽撞3]
+005AF298 - 89 54 24 14                - mov [esp+14],edx
+005AF29C - 8d 0c 3f                   - lea ecx,[edi+edi]
+005AF29F - b8 67 66 66 66             - mov eax,66666667
+005AF2A4 - f7 e9                      - imul ecx
+005AF2A6 - d1 fa                      - sar edx,1
+005AF2A8 - 8b c2                      - mov eax,edx
+005AF2AA - c1 e8 1f                   - shr eax,1f
+005AF2AD - 03 c2                      - add eax,edx                            EAX=EDI*0.4（EDI为被用计方智力）
+005AF2AF - 89 44 24 18                - mov [esp+18],eax
+005AF2B3 - 8d 0c 76                   - lea ecx,[esi+esi*2]
+005AF2B6 - b8 67 66 66 66             - mov eax,66666667
+005AF2BB - f7 e9                      - imul ecx
+005AF2BD - 8b 44 24 18                - mov eax,[esp+18]
+005AF2C1 - c1 fa 02                   - sar dl,02
+005AF2C4 - 8b ca                      - mov ecx,edx
+005AF2C6 - c1 e9 1f                   - shr ecx,1f
+005AF2C9 - 03 ca                      - add ecx,edx                            ECX=ESI*0.3（ESI为用计方智力）
+005AF2CB - 8b 54 24 14                - mov edx,[esp+14]
+005AF2CF - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AF2D1 - 03 ca                      - add ecx,edx                            ECX=ECX+被主将性格修正值
+005AF2D3 - 8d 54 29 46                - lea edx,[ecx+ebp+46]                   EDX=ECX+70+异常状态附加值(0或10)
+005AF2D7 - 89 54 24 18                - mov [esp+18],edx                       EDX置入[esp+18]
+005AF2DB - 8d 0c ff                   - lea ecx,[edi+edi*8]
+005AF2DE - b8 67 66 66 66             - mov eax,66666667
+005AF2E3 - f7 e9                      - imul ecx
+005AF2E5 - c1 fa 02                   - sar dl,02
+005AF2E8 - 8b c2                      - mov eax,edx
+005AF2EA - c1 e8 1f                   - shr eax,1f
+005AF2ED - 03 c2                      - add eax,edx
+005AF2EF - 8b c8                      - mov ecx,eax
+005AF2F1 - b8 64 00 00 00             - mov eax,00000064
+005AF2F6 - 2b c1                      - sub eax,ecx
+005AF2F8 - 0f af c6                   - imul eax,esi
+005AF2FB - 0f af c6                   - imul eax,esi
+005AF2FE - 6b c0 64                   - imul eax,eax,64
+005AF301 - 8b cf                      - mov ecx,edi
+005AF303 - 0f af cf                   - imul ecx,edi
+005AF306 - 8b d6                      - mov edx,esi
+005AF308 - 0f af d6                   - imul edx,esi
+005AF30B - 03 ca                      - add ecx,edx
+005AF30D - 99                         - cdq
+005AF30E - f7 f9                      - idiv ecx
+005AF310 - 8b c8                      - mov ecx,eax
+005AF312 - b8 95 20 4f 09             - mov eax,094f2095
+005AF317 - f7 e9                      - imul ecx
+005AF319 - d1 fa                      - sar edx,1
+005AF31B - 8b c2                      - mov eax,edx
+005AF31D - c1 e8 1f                   - shr eax,1f
+005AF320 - 03 c2                      - add eax,edx
+005AF322 - 8b c8                      - mov ecx,eax                            ECX=ECX*1/55
+005AF324 - ba 64 00 00 00             - mov edx,00000064
+005AF329 - 2b d6                      - sub edx,esi
+005AF32B - b8 67 66 66 66             - mov eax,66666667
+005AF330 - f7 ea                      - imul edx
+005AF332 - c1 fa 02                   - sar dl,02
+005AF335 - 8b c2                      - mov eax,edx
+005AF337 - c1 e8 1f                   - shr eax,1f
+005AF33A - 03 c2                      - add eax,edx                            EAX=(100-ESI)*0.1（ESI为用计方智力）
+005AF33C - 2b c8                      - sub ecx,eax                            ECX=ECX-EAX
+005AF33E - 8b 44 24 14                - mov eax,[esp+14]
+【伪报、扰乱、伏兵、内讧公共处理部分】
+005AF342 - 03 c8                      - add ecx,eax                            ECX=ECX+性格修正值
+005AF344 - 03 cd                      - add ecx,ebp                            ECX=ECX+异常状态附加值(0或10)
+005AF346 - 3b f7                      - cmp esi,edi                            比较双方智力
+005AF348 - 7d 16                      - jnl 005af360
+005AF34A - 2b fe                      - sub edi,esi                            如果被用计方智力较高则进入附加计算
+005AF34C - b8 55 55 55 55             - mov eax,55555555
+005AF351 - f7 ef                      - imul edi
+005AF353 - 2b d7                      - sub edx,edi
+005AF355 - d1 fa                      - sar edx,1
+005AF357 - 8b c2                      - mov eax,edx
+005AF359 - c1 e8 1f                   - shr eax,1f
+005AF35C - 03 c2                      - add eax,edx
+005AF35E - 03 c8                      - add ecx,eax                            ECX=ECX-智力差*1/6
+005AF360 - 8b 44 24 18                - mov eax,[esp+18]                       如果用计方智力大于等于被用计方智力，则直接采用[esp+18]中的值
+005AF364 - 83 f8 63                   - cmp eax,63
+005AF367 - ba 63 00 00 00             - mov edx,00000063
+005AF36C - 7f 02                      - jg 005af370
+005AF36E - 8b d0                      - mov edx,eax                            以上四句设定成功率上限99%,置入EDX
+005AF370 - 83 f9 01                   - cmp ecx,01                             
+005AF373 - 89 54 24 10                - mov [esp+10],edx                       EDX置入[esp+10] 
+005AF377 - b8 01 00 00 00             - mov eax,00000001
+005AF37C - 7c 02                      - jnge 005af380
+005AF37E - 8b c1                      - mov eax,ecx                            以上四句，设定ECX下限1％，置入EAX
+005AF380 - 3b d0                      - cmp edx,eax                            比较EDX和EAX的值
+005AF382 - 0f 8c eb 00 00 00          - jl 005af473                            如果EDX小于EAX跳转到倾国判定
+005AF388 - 83 f9 01                   - cmp ecx,01
+005AF38B - 7d 0d                      - jnl 005af39a
+005AF38D - c7 44 24 10 01 00 00 00    - mov [esp+10],00000001                  成功率下限1％，置入[esp+10]
+005AF395 - e9 d9 00 00 00             - jmp 005af473                           跳转到倾国判定
+005AF39A - 89 4c 24 10                - mov [esp+10],ecx                       ecx置入[esp+10]
+005AF39E - e9 d0 00 00 00             - jmp 005af473                           跳转到倾国判定
+【妖术】
+005AF3A3 - 53                         - push ebx
+005AF3A4 - e8 87 b2 ec ff             - call 0047a630
+005AF3A9 - 83 c4 04                   - add esp,04
+005AF3AC - 85 c0                      - test eax,eax
+005AF3AE - 0f 84 c6 fe ff ff          - je 005af27a
+005AF3B4 - 8b cb                      - mov ecx,ebx
+005AF3B6 - e8 85 66 ee ff             - call 00495a40                          获取被用计方主将地址
+005AF3BB - 8b 98 fc 00 00 00          - mov ebx,[eax+000000fc]                 获取主将性格
+005AF3C1 - 8d 0c ff                   - lea ecx,[edi+edi*8]
+005AF3C4 - b8 67 66 66 66             - mov eax,66666667
+005AF3C9 - f7 e9                      - imul ecx
+005AF3CB - 8b 1c 9d 74 b6 84 00       - mov ebx,[ebx*4+0084b674]               获取性格相应的成功率修正值 [胆小-2 冷静0 刚胆1 莽撞3]
+005AF3D2 - c1 fa 02                   - sar dl,02
+005AF3D5 - 8b ca                      - mov ecx,edx
+005AF3D7 - c1 e9 1f                   - shr ecx,1f
+005AF3DA - 03 d1                      - add edx,ecx
+005AF3DC - b9 64 00 00 00             - mov ecx,00000064
+005AF3E1 - 2b ca                      - sub ecx,edx                            ECX=100-EDI*0.9（EDI为被用计方智力）
+005AF3E3 - b8 67 66 66 66             - mov eax,66666667
+005AF3E8 - f7 ee                      - imul esi
+005AF3EA - c1 fa 02                   - sar dl,02
+005AF3ED - 8b c2                      - mov eax,edx
+005AF3EF - c1 e8 1f                   - shr eax,1f
+005AF3F2 - 03 c2                      - add eax,edx                            EAX=ESI*0.1（ESI为用计方智力）
+005AF3F4 - 03 c3                      - add eax,ebx                            EAX=EAX+被主将性格修正值
+005AF3F6 - 03 c1                      - add eax,ecx                            EAX=EAX+ECX
+005AF3F8 - 03 c5                      - add eax,ebp                            EAX=EAX+异常状态附加值
+005AF3FA - 3b f7                      - cmp esi,edi                            比较用计方和被用计方智力
+005AF3FC - 7d 20                      - jnl 005af41e
+005AF3FE - ba 64 00 00 00             - mov edx,00000064                       如果被用计方智力比较高
+005AF403 - 2b d6                      - sub edx,esi
+005AF405 - b8 67 66 66 66             - mov eax,66666667
+005AF40A - f7 ea                      - imul edx
+005AF40C - c1 fa 02                   - sar dl,02
+005AF40F - 8b c2                      - mov eax,edx
+005AF411 - c1 e8 1f                   - shr eax,1f
+005AF414 - 03 c2                      - add eax,edx                            EAX=(100-ESI)*0.1（ESI为用计方智力）
+005AF416 - 2b d8                      - sub ebx,eax
+005AF418 - 03 d9                      - add ebx,ecx
+005AF41A - 8d 44 2b fb                - lea eax,[ebx+ebp-05]
+005AF41E - 83 f8 01                   - cmp eax,01
+005AF421 - 7d 2b                      - jnl 005af44e
+005AF423 - 5f                         - pop edi
+005AF424 - 5e                         - pop esi
+005AF425 - c7 44 24 08 01 00 00 00    - mov [esp+08],00000001
+005AF42D - 8b 44 24 08                - mov eax,[esp+08]
+005AF431 - 5d                         - pop ebp
+005AF432 - 5b                         - pop ebx
+005AF433 - 83 c4 0c                   - add esp,0c
+005AF436 - c3                         - ret                                    妖术直接返回
+
+【落雷】
+005AF437 - 8d 0c 76                   - lea ecx,[esi+esi*2]
+005AF43A - b8 67 66 66 66             - mov eax,66666667
+005AF43F - f7 e9                      - imul ecx
+005AF441 - d1 fa                      - sar edx,1
+005AF443 - 8b ca                      - mov ecx,edx
+005AF445 - c1 e9 1f                   - shr ecx,1f
+005AF448 - 03 ca                      - add ecx,edx                            ECX=0.6*ESI（ESI为用计方智力）
+005AF44A - 8d 44 29 0f                - lea eax,[ecx+ebp+0f]                   ECX=ECX+15+异常状态附加值(0或10)
+005AF44E - 83 f8 63                   - cmp eax,63
+005AF451 - 7e 56                      - jle 005af4a9
+005AF453 - 5f                         - pop edi
+005AF454 - 5e                         - pop esi
+005AF455 - c7 44 24 08 63 00 00 00    - mov [esp+08],00000063
+005AF45D - 8b 44 24 08                - mov eax,[esp+08]
+005AF461 - 5d                         - pop ebp
+005AF462 - 5b                         - pop ebx
+005AF463 - 83 c4 0c                   - add esp,0c
+005AF466 - c3                         - ret                                    落雷直接返回
+
+005AF467 - 83 f9 07                   - cmp ecx,07
+005AF46A - 74 4c                      - je 005af4b8
+005AF46C - 83 7c 24 2c 08             - cmp dword ptr [esp+2c],08
+005AF471 - 74 45                      - je 005af4b8
+005AF473 - 8b 4c 24 20                - mov ecx,[esp+20]
+005AF477 - 8b 11                      - mov edx,[ecx]
+005AF479 - 6a 45                      - push 45                                倾国判定
+005AF47B - ff 52 58                   - call dword ptr [edx+58]
+005AF47E - 85 c0                      - test eax,eax
+005AF480 - 74 2b                      - je 005af4ad
+005AF482 - 53                         - push ebx
+005AF483 - e8 a8 b1 ec ff             - call 0047a630
+005AF488 - 83 c4 04                   - add esp,04
+005AF48B - 85 c0                      - test eax,eax
+005AF48D - 74 1e                      - je 005af4ad
+005AF48F - 8b cb                      - mov ecx,ebx
+005AF491 - e8 da 69 ee ff             - call 00495e70
+005AF496 - 85 c0                      - test eax,eax
+005AF498 - 75 00                      - jne 005af49a
+005AF49A - 8b 44 24 10                - mov eax,[esp+10]
+005AF49E - 03 c0                      - add eax,eax
+005AF4A0 - 83 f8 64                   - cmp eax,64
+005AF4A3 - 0f 8d 8f f7 ff ff          - jnl 005aec38
+005AF4A9 - 89 44 24 10                - mov [esp+10],eax
+005AF4AD - 83 7c 24 10 64             - cmp dword ptr [esp+10],64
+005AF4B2 - 0f 8d 80 f7 ff ff          - jnl 005aec38
+005AF4B8 - 8b 44 24 10                - mov eax,[esp+10]
+005AF4BC - 5f                         - pop edi
+005AF4BD - 5e                         - pop esi
+005AF4BE - 5d                         - pop ebp
+005AF4BF - 5b                         - pop ebx
+005AF4C0 - 83 c4 0c                   - add esp,0c
+005AF4C3 - c3                         - ret
+
+1、火计：
+注：对火陷阱施放火计必成功
+V1 = (A智*0.3-B智*0.2) + 55 + [C] + [G] 
+V2 = (A智*A智*(100-B智*0.9)*100/(A智*A智 + B智*B智)) * 1/55 - (100-A智)*0.1 + [F] - [D] + [C] - 5
+成功率 = MIN(V1,V2)
+然后再进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[D]：如果被用计方智力高于用计方则为 = (B智-A智)/3，否则为0
+[F]：不同地形的修正值，草地=20 土=20 沙地=20 湿地=5 毒泉=5 森林=25 荒地=17 主径=15 栈道=7 渡所=10 浅滩=5 小径=5 其它地形(川、河、海、岸、崖、港、关、城市)=0
+[G]：如果放火对象不是部队则为10，否则为0
+
+2、灭火：
+成功率 = sqrt[A智-5]*11
+*sqrt意为开根号
+[A智-5]：该值如果小于10，则取10
+
+3、伪报：
+V1 = (A智*0.3-B智*0.2) + A魅*0.05 + [E] + 70 + [C] 
+V2 = (A智*A智*(100-B智*0.9)*100/(A智*A智 + B智*B智)) * 1/55 - (100-A智)*0.1 + A魅*0.05 + [E] - [D] + [C]
+成功率 = MIN(V1,V2)
+然后再进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[D]：如果被用计方智力高于用计方则为 = (B智-A智)/6，否则为0
+[E]：根据被用计部队的主将性格，胆小=3 冷静=1 刚胆=0 莽撞=-2
+
+
+4、扰乱
+V1 = (A智*0.3-B智*0.2) + B防*0.05 + [E] + 70 + [C] 
+V2 = [A智*A智*(100-B智*0.9)*100/(A智*A智 + B智*B智)] * 1/45 - (100-A智)*0.1 + B防*0.05 + [E] - [D] + [C]
+成功率 = MIN(V1,V2)
+然后再进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[D]：如果被用计方智力高于用计方则为 (B智-A智)/6，否则为0
+[E]：根据被用计部队的主将性格，胆小=-2 冷静=0 刚胆=1 莽撞=3
+
+
+5、镇静
+成功率 = sqrt[A智-5]*11 + [E]
+然后再进入倾国判定
+
+[A智-5]：该值如果小于10，则取10
+[E]：根据被用计部队的主将性格，胆小=-5 冷静=5 刚胆=0 莽撞=-10
+
+
+6、伏兵
+V1 = (A智*0.3-B智*1/3) + (A攻-B防)*0.1 + [E] + 80 + [C] 
+V2 = [A智*A智*(100-B智*0.9)*100/(A智*A智 + B智*B智)] * 1/50 - (100-A智)*0.1 + (A攻-B防)*0.1 + [E] - [D] + [C]
+成功率 = MIN(V1,V2)
+然后再进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[D]：如果被用计方智力高于用计方则为 (B智-A智)/6，否则为0
+[E]：根据被用计部队的主将性格，胆小=3 冷静=-2 刚胆=0 莽撞=1
+
+
+7、内讧
+V1 = (A智*0.3-B智*0.4) + [E] + 80 + [C] 
+V2 = [A智*A智*(100-B智*0.9)*100/(A智*A智 + B智*B智)] * 1/55 - (100-A智)*0.1 + [E] - [D] + [C]
+成功率 = MIN(V1,V2)
+然后再进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[D]：如果被用计方智力高于用计方则为 (B智-A智)/6，否则为0
+[E]：根据被用计部队的主将性格，胆小=-2 冷静=0 刚胆=1 莽撞=3
+
+
+8、妖术
+V1 = (100-B智*0.9) + A智*0.1 + [E] + [C]
+V2 = (100-B智*0.9) + (100-A智)*0.1 - 5 + [E] + [C]
+成功率 = (A智>=B智) ? V1 : V2  （即在A智不低于B智的情况下用V1，否则用V2）
+*妖术不会进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0
+[E]：根据被用计部队的主将性格，胆小=-2 冷静=0 刚胆=1 莽撞=3
+
+
+9、落雷
+成功率 = A智*0.6 + 15 + [C]
+*落雷不会进入倾国判定
+
+[C]：如果被用计部队是异常状态则为10，否则为0

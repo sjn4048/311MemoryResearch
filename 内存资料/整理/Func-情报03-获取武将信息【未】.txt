@@ -1,0 +1,996 @@
+功能: 获取武将信息
+参数表: [esp+04]=武将指针，[esp+08]=命令编号
+
+*****************************************************************************************************************************************************
+
+004C8720 - 57                         - push edi
+004C8721 - 8b 7c 24 08                - mov edi,[esp+08]                   edi = 武将指针
+004C8725 - 57                         - push edi
+004C8726 - e8 d5 1e fb ff             - call 0047a600                      校验指针
+004C872B - 83 c4 04                   - add esp,04
+004C872E - 85 c0                      - test eax,eax
+004C8730 - 75 05                      - jne 004c8737                       校验成功则跳转到后续处理
+004C8732 - 83 c8 ff                   - or eax,ff                          返回-1
+004C8735 - 5f                         - pop edi
+004C8736 - c3                         - ret
+004C8737 - 8b 44 24 0c                - mov eax,[esp+0c]                   eax = 命令编号
+004C873B - 53                         - push ebx
+004C873C - 56                         - push esi
+004C873D - 83 ce ff                   - or esi,ff                          esi = -1(返回值)
+
+【命令编号106～110：返回亲善武将ID】
+004C8740 - 83 f8 6a                   - cmp eax,6a
+004C8743 - 7c 16                      - jnge 004c875b
+004C8745 - 83 f8 6e                   - cmp eax,6e
+004C8748 - 7f 11                      - jg 004c875b                        如果命令编号在106～110之间则进行下面的处理
+004C874A - 83 c0 96                   - add eax,96                         eax在0～4之间
+004C874D - 50                         - push eax
+004C874E - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C8750 - e8 3b 01 fc ff             - call 00488890                      获取亲善武将ID
+004C8755 - 8b f0                      - mov esi,eax                        返回亲善武将ID
+004C8757 - 5e                         - pop esi
+004C8758 - 5b                         - pop ebx
+004C8759 - 5f                         - pop edi
+004C875A - c3                         - ret
+
+【命令编号111～115：返回厌恶武将ID】
+004C875B - 83 f8 6f                   - cmp eax,6f
+004C875E - 7c 16                      - jnge 004c8776
+004C8760 - 83 f8 73                   - cmp eax,73
+004C8763 - 7f 11                      - jg 004c8776                        如果命令编号在111～115之间则进行下面的处理
+004C8765 - 83 c0 91                   - add eax,91                         eax在0～4之间
+004C8768 - 50                         - push eax
+004C8769 - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C876B - e8 e0 01 fc ff             - call 00488950                      获取厌恶武将ID
+004C8770 - 8b f0                      - mov esi,eax                        返回厌恶武将ID
+004C8772 - 5e                         - pop esi
+004C8773 - 5b                         - pop ebx
+004C8774 - 5f                         - pop edi
+004C8775 - c3                         - ret
+
+【命令编号116～121：返回武将指定适性】
+004C8776 - 83 f8 74                   - cmp eax,74
+004C8779 - 7c 16                      - jnge 004c8791
+004C877B - 83 f8 79                   - cmp eax,79
+004C877E - 7f 11                      - jg 004c8791                        如果命令编号在116～121之间则进行下面的处理
+004C8780 - 83 c0 8c                   - add eax,8c                         eax在0～5之间
+004C8783 - 50                         - push eax
+004C8784 - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C8786 - e8 b5 05 fc ff             - call 00488d40                      获取武将指定适性
+004C878B - 8b f0                      - mov esi,eax                        返回武将指定适性
+004C878D - 5e                         - pop esi
+004C878E - 5b                         - pop ebx
+004C878F - 5f                         - pop edi
+004C8790 - c3                         - ret
+【命令编号122～127：返回武将指定适性经验】
+004C8791 - 83 f8 7a                   - cmp eax,7a
+004C8794 - 7c 19                      - jnge 004c87af
+004C8796 - 83 f8 7f                   - cmp eax,7f
+004C8799 - 7f 14                      - jg 004c87af                        如果命令编号在122～127之间则进行下面的处理
+004C879B - 83 c0 86                   - add eax,86                         eax在0～5之间
+004C879E - 50                         - push eax
+004C879F - 8b cf                      - mov ecx,edi
+004C87A1 - e8 ba 05 fc ff             - call 00488d60                      获取武将指定适性经验
+004C87A6 - 0f b6 f0                   - movzx esi,al
+004C87A9 - 8b c6                      - mov eax,esi                        返回武将指定适性经验
+004C87AB - 5e                         - pop esi
+004C87AC - 5b                         - pop ebx
+004C87AD - 5f                         - pop edi
+004C87AE - c3                         - ret
+【命令编号128～135：？？？？？？？？？？？？？？】
+004C87AF - 3d 80 00 00 00             - cmp eax,00000080
+004C87B4 - 7c 18                      - jnge 004c87ce
+004C87B6 - 3d 87 00 00 00             - cmp eax,00000087
+004C87BB - 7f 11                      - jg 004c87ce                        如果命令编号在128～135之间则进行下面的处理
+004C87BD - 83 c0 80                   - add eax,80                         eax在0～7之间
+004C87C0 - 50                         - push eax
+004C87C1 - 8b cf                      - mov ecx,edi
+004C87C3 - e8 58 1d fc ff             - call 0048a520
+004C87C8 - 8b f0                      - mov esi,eax
+004C87CA - 5e                         - pop esi
+004C87CB - 5b                         - pop ebx
+004C87CC - 5f                         - pop edi
+004C87CD - c3                         - ret
+【命令编号136～140：？？？？？？？？？？？？？？】
+004C87CE - 3d 88 00 00 00             - cmp eax,00000088
+004C87D3 - 7c 1a                      - jnge 004c87ef
+004C87D5 - 3d 8c 00 00 00             - cmp eax,0000008c
+004C87DA - 7f 13                      - jg 004c87ef                        如果命令编号在136～140之间则进行下面的处理
+004C87DC - 05 78 ff ff ff             - add eax,ffffff78                   eax在0～4之间
+004C87E1 - 50                         - push eax
+004C87E2 - 8b cf                      - mov ecx,edi
+004C87E4 - e8 97 0f fc ff             - call 00489780
+004C87E9 - 8b f0                      - mov esi,eax
+004C87EB - 5e                         - pop esi
+004C87EC - 5b                         - pop ebx
+004C87ED - 5f                         - pop edi
+004C87EE - c3                         - ret
+【命令编号141～240：返回武将是否持有指定特技】
+004C87EF - 3d 8d 00 00 00             - cmp eax,0000008d
+004C87F4 - 7c 22                      - jnge 004c8818
+004C87F6 - 3d f0 00 00 00             - cmp eax,000000f0
+004C87FB - 7f 1b                      - jg 004c8818                        如果命令编号在141～240之间则进行下面的处理
+004C87FD - 05 73 ff ff ff             - add eax,ffffff73                   eax在0～63之间
+004C8802 - 50                         - push eax
+004C8803 - 8b cf                      - mov ecx,edi
+004C8805 - e8 e6 08 fc ff             - call 004890f0                      判断武将是否持有指定特技
+004C880A - 8b f0                      - mov esi,eax
+004C880C - f7 de                      - neg esi
+004C880E - 1b f6                      - sbb esi,esi
+004C8810 - f7 de                      - neg esi
+004C8812 - 8b c6                      - mov eax,esi                        返回武将是否持有指定特技
+004C8814 - 5e                         - pop esi
+004C8815 - 5b                         - pop ebx
+004C8816 - 5f                         - pop edi
+004C8817 - c3                         - ret
+【命令编号264～269：返回武将指定适性】
+004C8818 - 3d 08 01 00 00             - cmp eax,00000108
+004C881D - 7c 1a                      - jnge 004c8839
+004C881F - 3d 0d 01 00 00             - cmp eax,0000010d
+004C8824 - 7f 13                      - jg 004c8839                        如果命令编号在264～269之间则进行下面的处理
+004C8826 - 05 f8 fe ff ff             - add eax,fffffef8                   eax在0～5之间
+004C882B - 50                         - push eax
+004C882C - 8b cf                      - mov ecx,edi
+004C882E - e8 0d 05 fc ff             - call 00488d40                      获取武将指定适性
+004C8833 - 8b f0                      - mov esi,eax                        返回武将指定适性
+004C8835 - 5e                         - pop esi
+004C8836 - 5b                         - pop ebx
+004C8837 - 5f                         - pop edi
+004C8838 - c3                         - ret
+
+【其他命令处理】
+004C8839 - 3d 07 01 00 00             - cmp eax,00000107
+004C883E - 0f 87 2e 06 00 00          - ja 004c8e72                        如果命令编号大于263则直接跳转到结束
+004C8844 - 0f b6 88 d8 8f 4c 00       - movzx ecx,byte ptr [eax+004c8fd8]  取得0号-263号命令编码对应的处理编码
+004C884B - ff 24 8d 88 8e 4c 00       - jmp dword ptr [ecx*4+004c8e88]     根据处理编码取得跳转地址
+[命令编号为3、247：返回武将所属]
+004C8852 - 8b b7 98 00 00 00          - mov esi,[edi+00000098]             esi = 所属
+004C8858 - 8b c6                      - mov eax,esi                        返回武将所属
+004C885A - 5e                         - pop esi
+004C885B - 5b                         - pop ebx
+004C885C - 5f                         - pop edi
+004C885D - c3                         - ret
+[命令编号为4、248：返回武将所在]
+004C885E - 8b b7 9c 00 00 00          - mov esi,[edi+0000009c]             esi = 所在
+004C8864 - 8b c6                      - mov eax,esi                        返回武将所在
+004C8866 - 5e                         - pop esi
+004C8867 - 5b                         - pop ebx
+004C8868 - 5f                         - pop edi
+004C8869 - c3                         - ret
+[命令编号为5：]
+004C886A - 8b cf                      - mov ecx,edi
+004C886C - e8 df 1b fc ff             - call 0048a450                  ？？
+004C8871 - 8b f0                      - mov esi,eax
+004C8873 - 5e                         - pop esi
+004C8874 - 5b                         - pop ebx
+004C8875 - 5f                         - pop edi
+004C8876 - c3                         - ret
+[命令编号为6：返回武将性别]
+004C8877 - 8b 77 40                   - mov esi,[edi+40]                   esi = 性别
+004C887A - 8b c6                      - mov eax,esi                        返回武将性别
+004C887C - 5e                         - pop esi
+004C887D - 5b                         - pop ebx
+004C887E - 5f                         - pop edi
+004C887F - c3                         - ret
+[命令编号为11：返回武将血缘]
+004C8880 - 8b 77 54                   - mov esi,[edi+54]                   esi = 血缘
+004C8883 - 8b c6                      - mov eax,esi                        返回武将血缘
+004C8885 - 5e                         - pop esi
+004C8886 - 5b                         - pop ebx
+004C8887 - 5f                         - pop edi
+004C8888 - c3                         - ret
+[命令编号为12：返回武将父亲ID]
+004C8889 - 8b 77 58                   - mov esi,[edi+58]                   esi = 父亲ID
+004C888C - 8b c6                      - mov eax,esi                        返回武将父亲ID
+004C888E - 5e                         - pop esi
+004C888F - 5b                         - pop ebx
+004C8890 - 5f                         - pop edi
+004C8891 - c3                         - ret
+[命令编号为13：返回武将母亲ID]
+004C8892 - 8b 77 5c                   - mov esi,[edi+5c]                   esi = 母亲ID
+004C8895 - 8b c6                      - mov eax,esi                        返回武将母亲ID
+004C8897 - 5e                         - pop esi
+004C8898 - 5b                         - pop ebx
+004C8899 - 5f                         - pop edi
+004C889A - c3                         - ret
+[命令编号为15：返回武将夫/妻ID]
+004C889B - 8b 77 60                   - mov esi,[edi+60]                   esi = 夫/妻ID
+004C889E - 8b c6                      - mov eax,esi                        返回武将夫/妻ID
+004C88A0 - 5e                         - pop esi
+004C88A1 - 5b                         - pop ebx
+004C88A2 - 5f                         - pop edi
+004C88A3 - c3                         - ret
+[命令编号为16：返回武将义兄弟ID]
+004C88A4 - 8b 47 64                   - mov eax,[edi+64]                   esi = 义兄弟ID
+004C88A7 - 50                         - push eax
+004C88A8 - b9 58 19 20 07             - mov ecx,07201958
+004C88AD - e8 4e 82 fc ff             - call 00490b00                      根据武将ID获取武将指针
+004C88B2 - 50                         - push eax
+004C88B3 - e8 78 1d fb ff             - call 0047a630                      校验指针
+004C88B8 - 83 c4 04                   - add esp,04
+004C88BB - 85 c0                      - test eax,eax
+004C88BD - 0f 84 bc 05 00 00          - je 004c8e7f                        校验失败则跳转到返回，返回值为esi = -1
+004C88C3 - 8b 77 64                   - mov esi,[edi+64]                   esi = 义兄弟ID
+004C88C6 - 8b c6                      - mov eax,esi                        返回武将义兄弟ID
+004C88C8 - 5e                         - pop esi
+004C88C9 - 5b                         - pop ebx
+004C88CA - 5f                         - pop edi
+004C88CB - c3                         - ret
+[命令编号为18：返回武将口调]
+004C88CC - 8b b7 04 01 00 00          - mov esi,[edi+00000104]             esi = 口调
+004C88D2 - 8b c6                      - mov eax,esi                        返回武将口调
+004C88D4 - 5e                         - pop esi
+004C88D5 - 5b                         - pop ebx
+004C88D6 - 5f                         - pop edi
+004C88D7 - c3                         - ret
+[命令编号为19：返回武将所属军团ID]
+004C88D8 - 8b 17                      - mov edx,[edi]                      edi = 武将指针
+004C88DA - 8b cf                      - mov ecx,edi
+004C88DC - ff 52 44                   - call dword ptr [edx+44]            获取所属军团ID
+004C88DF - 8b f0                      - mov esi,eax                        返回武将所属军团ID
+004C88E1 - 5e                         - pop esi
+004C88E2 - 5b                         - pop ebx
+004C88E3 - 5f                         - pop edi
+004C88E4 - c3                         - ret
+[命令编号为76、92：返回武将所属军团番号]
+004C88E5 - 8b 07                      - mov eax,[edi]                      edi = 武将指针
+004C88E7 - 8b cf                      - mov ecx,edi
+004C88E9 - ff 50 44                   - call dword ptr [eax+44]            获取所属军团ID
+004C88EC - 50                         - push eax
+004C88ED - b9 58 19 20 07             - mov ecx,07201958
+004C88F2 - e8 d9 81 fc ff             - call 00490ad0                      根据军团ID获取军团指针
+004C88F7 - 8b f0                      - mov esi,eax                        esi = 军团指针
+004C88F9 - 56                         - push esi
+004C88FA - e8 31 1d fb ff             - call 0047a630                      校验指针
+004C88FF - 83 c4 04                   - add esp,04
+004C8902 - 85 c0                      - test eax,eax
+004C8904 - 74 07                      - je 004c890d                        校验失败则跳转到返回，返回值为esi = -1
+004C8906 - 8b 46 08                   - mov eax,[esi+08]                   eax = 军团番号
+004C8909 - 5e                         - pop esi
+004C890A - 5b                         - pop ebx
+004C890B - 5f                         - pop edi
+004C890C - c3                         - ret
+004C890D - 5e                         - pop esi
+004C890E - 5b                         - pop ebx
+004C890F - 33 c0                      - xor eax,eax
+004C8911 - 5f                         - pop edi
+004C8912 - c3                         - ret
+[命令编号为10：返回武将死因]
+004C8913 - 8b 77 50                   - mov esi,[edi+50]                   esi = 死因
+004C8916 - 8b c6                      - mov eax,esi                        返回武将死因
+004C8918 - 5e                         - pop esi
+004C8919 - 5b                         - pop ebx
+004C891A - 5f                         - pop edi
+004C891B - c3                         - ret
+[命令编号为20、103、249：返回武将身份]
+004C891C - 8b b7 a0 00 00 00          - mov esi,[edi+000000a0]             esi = 身份
+004C8922 - 8b c6                      - mov eax,esi                        返回武将身份
+004C8924 - 5e                         - pop esi
+004C8925 - 5b                         - pop ebx
+004C8926 - 5f                         - pop edi
+004C8927 - c3                         - ret
+[命令编号为21：返回武将官职]
+004C8928 - 8b b7 a4 00 00 00          - mov esi,[edi+000000a4]             esi = 官职
+004C892E - 8b c6                      - mov eax,esi                        返回武将官职
+004C8930 - 5e                         - pop esi
+004C8931 - 5b                         - pop ebx
+004C8932 - 5f                         - pop edi
+004C8933 - c3                         - ret
+[命令编号为22：返回武将登场预定君主]
+004C8934 - 8b b7 a8 00 00 00          - mov esi,[edi+000000a8]             esi = 登场预定君主
+004C893A - 8b c6                      - mov eax,esi                        返回武将登场预定君主
+004C893C - 5e                         - pop esi
+004C893D - 5b                         - pop ebx
+004C893E - 5f                         - pop edi
+004C893F - c3                         - ret
+[命令编号为35～39：返回武将指定属性变动类型]
+004C8940 - 83 c0 dd                   - add eax,dd                         eax在0～4之间
+004C8943 - 50                         - push eax
+004C8944 - 8b cf                      - mov ecx,edi
+004C8946 - e8 55 08 fc ff             - call 004891a0                      获取武将指定属性变动类型
+004C894B - 8b f0                      - mov esi,eax                        返回武将指定属性变动类型
+004C894D - 5e                         - pop esi
+004C894E - 5b                         - pop ebx
+004C894F - 5f                         - pop edi
+004C8950 - c3                         - ret
+[命令编号为41：返回武将出身]
+004C8951 - 8b b7 e4 00 00 00          - mov esi,[edi+000000e4]             esi = 出身
+004C8957 - 8b c6                      - mov eax,esi                        返回武将出身
+004C8959 - 5e                         - pop esi
+004C895A - 5b                         - pop ebx
+004C895B - 5f                         - pop edi
+004C895C - c3                         - ret
+[命令编号为42、258：返回武将特技ID]
+004C895D - 8b b7 e8 00 00 00          - mov esi,[edi+000000e8]             esi = 特技ID
+004C8963 - 8b c6                      - mov eax,esi                        返回武将特技ID
+004C8965 - 5e                         - pop esi
+004C8966 - 5b                         - pop ebx
+004C8967 - 5f                         - pop edi
+004C8968 - c3                         - ret
+[命令编号为43：返回武将舌战得意话题]
+004C8969 - 8b b7 ec 00 00 00          - mov esi,[edi+000000ec]             esi = 舌战得意话题
+004C896F - 8b c6                      - mov eax,esi                        返回武将舌战得意话题
+004C8971 - 5e                         - pop esi
+004C8972 - 5b                         - pop ebx
+004C8973 - 5f                         - pop edi
+004C8974 - c3                         - ret
+[命令编号为44：返回武将义理]
+004C8975 - 8b b7 f0 00 00 00          - mov esi,[edi+000000f0]             esi = 义理
+004C897B - 8b c6                      - mov eax,esi                        返回武将义理
+004C897D - 5e                         - pop esi
+004C897E - 5b                         - pop ebx
+004C897F - 5f                         - pop edi
+004C8980 - c3                         - ret
+[命令编号为45：返回武将野望]
+004C8981 - 8b b7 f4 00 00 00          - mov esi,[edi+000000f4]             esi = 野望
+004C8987 - 8b c6                      - mov eax,esi                        返回武将野望
+004C8989 - 5e                         - pop esi
+004C898A - 5b                         - pop ebx
+004C898B - 5f                         - pop edi
+004C898C - c3                         - ret
+[命令编号为46：返回武将启用]
+004C898D - 8b b7 f8 00 00 00          - mov esi,[edi+000000f8]             esi = 启用
+004C8993 - 8b c6                      - mov eax,esi                        返回武将启用
+004C8995 - 5e                         - pop esi
+004C8996 - 5b                         - pop ebx
+004C8997 - 5f                         - pop edi
+004C8998 - c3                         - ret
+[命令编号为47：返回武将性格]
+004C8999 - 8b b7 fc 00 00 00          - mov esi,[edi+000000fc]             esi = 性格
+004C899F - 8b c6                      - mov eax,esi                        返回武将性格
+004C89A1 - 5e                         - pop esi
+004C89A2 - 5b                         - pop ebx
+004C89A3 - 5f                         - pop edi
+004C89A4 - c3                         - ret
+[命令编号为48：返回武将声音]
+004C89A5 - 8b b7 00 01 00 00          - mov esi,[edi+00000100]             esi = 声音
+004C89AB - 8b c6                      - mov eax,esi                        返回武将声音
+004C89AD - 5e                         - pop esi
+004C89AE - 5b                         - pop ebx
+004C89AF - 5f                         - pop edi
+004C89B0 - c3                         - ret
+[命令编号为49：返回武将汉室重视]
+004C89B1 - 8b b7 08 01 00 00          - mov esi,[edi+00000108]             esi = 汉室重视
+004C89B7 - 8b c6                      - mov eax,esi                        返回武将汉室重视
+004C89B9 - 5e                         - pop esi
+004C89BA - 5b                         - pop ebx
+004C89BB - 5f                         - pop edi
+004C89BC - c3                         - ret
+[命令编号为50：返回武将战略倾向]
+004C89BD - 8b b7 0c 01 00 00          - mov esi,[edi+0000010c]             esi = 战略倾向
+004C89C3 - 8b c6                      - mov eax,esi                        返回武将战略倾向
+004C89C5 - 5e                         - pop esi
+004C89C6 - 5b                         - pop ebx
+004C89C7 - 5f                         - pop edi
+004C89C8 - c3                         - ret
+[命令编号为51：返回武将地元执着]
+004C89C9 - 8b b7 10 01 00 00          - mov esi,[edi+00000110]             esi = 地元执着
+004C89CF - 8b c6                      - mov eax,esi                        返回武将地元执着
+004C89D1 - 5e                         - pop esi
+004C89D2 - 5b                         - pop ebx
+004C89D3 - 5f                         - pop edi
+004C89D4 - c3                         - ret
+[命令编号为53、260：返回武将是否已行动]
+004C89D5 - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C89D7 - e8 44 07 fc ff             - call 00489120                      判断武将是否已行动
+004C89DC - 8b f0                      - mov esi,eax                        返回武将是否已行动
+004C89DE - 5e                         - pop esi
+004C89DF - 5b                         - pop ebx
+004C89E0 - 5f                         - pop edi
+004C89E1 - c3                         - ret
+[命令编号为54：]
+004C89E2 - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C89E4 - e8 57 07 fc ff             - call 00489140                      ？？？？？？？？？？？？？？
+004C89E9 - 8b f0                      - mov esi,eax
+004C89EB - 5e                         - pop esi
+004C89EC - 5b                         - pop ebx
+004C89ED - 5f                         - pop edi
+004C89EE - c3                         - ret
+[命令编号为55：返回武将是否已预定死亡]
+004C89EF - 8b cf                      - mov ecx,edi                        edi = 武将指针
+004C89F1 - e8 6a 07 fc ff             - call 00489160                      判断武将是否已预定死亡
+004C89F6 - 8b f0                      - mov esi,eax                        返回武将是否已预定死亡
+004C89F8 - 5e                         - pop esi
+004C89F9 - 5b                         - pop ebx
+004C89FA - 5f                         - pop edi
+004C89FB - c3                         - ret
+[命令编号为56：返回武将留守计数]
+004C89FC - 0f b6 b7 58 01 00 00       - movzx esi,byte ptr [edi+00000158]  esi = 留守计数
+004C8A03 - 8b c6                      - mov eax,esi                        返回武将留守计数
+004C8A05 - 5e                         - pop esi
+004C8A06 - 5b                         - pop ebx
+004C8A07 - 5f                         - pop edi
+004C8A08 - c3                         - ret
+[命令编号为57、250：返回武将健康程度]
+004C8A09 - 8b b7 5c 01 00 00          - mov esi,[edi+0000015c]             esi = 健康程度
+004C8A0F - 8b c6                      - mov eax,esi                        返回武将健康程度
+004C8A11 - 5e                         - pop esi
+004C8A12 - 5b                         - pop ebx
+004C8A13 - 5f                         - pop edi
+004C8A14 - c3                         - ret
+[命令编号为58：返回武将禁止仕官君主]
+004C8A15 - 8b b7 64 01 00 00          - mov esi,[edi+00000164]             esi = 禁止仕官君主
+004C8A1B - 8b c6                      - mov eax,esi                        返回武将禁止仕官君主
+004C8A1D - 5e                         - pop esi
+004C8A1E - 5b                         - pop ebx
+004C8A1F - 5f                         - pop edi
+004C8A20 - c3                         - ret
+[命令编号为59：返回武将禁止仕官月数]
+004C8A21 - 0f b6 b7 68 01 00 00       - movzx esi,byte ptr [edi+00000168]  esi = 禁止仕官月数
+004C8A28 - 8b c6                      - mov eax,esi                        返回武将禁止仕官月数
+004C8A2A - 5e                         - pop esi
+004C8A2B - 5b                         - pop ebx
+004C8A2C - 5f                         - pop edi
+004C8A2D - c3                         - ret
+[命令编号为87：]
+004C8A2E - 8b 8f 9c 00 00 00          - mov ecx,[edi+0000009c]             ecx = 所在
+004C8A34 - 51                         - push ecx
+004C8A35 - e8 b6 f8 fb ff             - call 004882f0                      ？？？？？？？？？？？？？？
+004C8A3A - 83 c4 04                   - add esp,04
+004C8A3D - 8b f0                      - mov esi,eax
+004C8A3F - f7 de                      - neg esi
+004C8A41 - 1b f6                      - sbb esi,esi
+004C8A43 - f7 de                      - neg esi
+004C8A45 - 8b c6                      - mov eax,esi
+004C8A47 - 5e                         - pop esi
+004C8A48 - 5b                         - pop ebx
+004C8A49 - 5f                         - pop edi
+004C8A4A - c3                         - ret
+[命令编号为61：返回武将俘虏月数]
+004C8A4B - 0f b6 b7 69 01 00 00       - movzx esi,byte ptr [edi+00000169]  esi = 俘虏月数
+004C8A52 - 8b c6                      - mov eax,esi                        返回武将俘虏月数
+004C8A54 - 5e                         - pop esi
+004C8A55 - 5b                         - pop ebx
+004C8A56 - 5f                         - pop edi
+004C8A57 - c3                         - ret
+[命令编号为7：返回武将登场年]
+004C8A58 - 8b 77 44                   - mov esi,[edi+44]                   esi = 登场年
+004C8A5B - 8b c6                      - mov eax,esi                        返回武将登场年
+004C8A5D - 5e                         - pop esi
+004C8A5E - 5b                         - pop ebx
+004C8A5F - 5f                         - pop edi
+004C8A60 - c3                         - ret
+[命令编号为8：返回武将出生年]
+004C8A61 - 8b 77 48                   - mov esi,[edi+48]                   esi = 出生年
+004C8A64 - 8b c6                      - mov eax,esi                        返回武将出生年
+004C8A66 - 5e                         - pop esi 
+004C8A67 - 5b                         - pop ebx
+004C8A68 - 5f                         - pop edi
+004C8A69 - c3                         - ret
+[命令编号为14：返回武将世代]
+004C8A6A - 0f b6 77 68                - movzx esi,byte ptr [edi+68]        esi = 世代
+004C8A6E - 8b c6                      - mov eax,esi                        返回武将世代
+004C8A70 - 5e                         - pop esi
+004C8A71 - 5b                         - pop ebx
+004C8A72 - 5f                         - pop edi
+004C8A73 - c3                         - ret
+[命令编号为17：返回武将相性]
+004C8A74 - 0f b6 77 69                - movzx esi,byte ptr [edi+69]        esi = 相性
+004C8A78 - 8b c6                      - mov eax,esi                        返回武将相性
+004C8A7A - 5e                         - pop esi
+004C8A7B - 5b                         - pop ebx
+004C8A7C - 5f                         - pop edi
+004C8A7D - c3                         - ret
+[命令编号为9：]
+004C8A7E - 8b cf                      - mov ecx,edi
+004C8A80 - e8 7b 15 fc ff             - call 0048a000
+004C8A85 - 8b f0                      - mov esi,eax
+004C8A87 - 5e                         - pop esi
+004C8A88 - 5b                         - pop ebx
+004C8A89 - 5f                         - pop edi
+004C8A8A - c3                         - ret
+[命令编号为23：返回武将忠诚度]
+004C8A8B - 0f b6 b7 ac 00 00 00       - movzx esi,byte ptr [edi+000000ac]  esi = 忠诚度
+004C8A92 - 83 fe 64                   - cmp esi,64
+004C8A95 - 0f 8c e4 03 00 00          - jl 004c8e7f
+004C8A9B - be 64 00 00 00             - mov esi,00000064
+004C8AA0 - 8b c6                      - mov eax,esi                        返回武将忠诚度
+004C8AA2 - 5e                         - pop esi
+004C8AA3 - 5b                         - pop ebx
+004C8AA4 - 5f                         - pop edi
+004C8AA5 - c3                         - ret
+[命令编号为24：返回武将功勋]
+004C8AA6 - 0f b7 b7 ae 00 00 00       - movzx esi,word ptr [edi+000000ae]  esi = 功勋
+004C8AAD - 8b c6                      - mov eax,esi                        返回武将功勋
+004C8AAF - 5e                         - pop esi
+004C8AB0 - 5b                         - pop ebx
+004C8AB1 - 5f                         - pop edi
+004C8AB2 - c3                         - ret
+[命令编号为30～34：返回武将指定属性考虑能力成长后的剩余经验]
+004C8AB3 - 83 c0 e2                   - add eax,e2                         eax在0～4之间
+004C8AB6 - 50                         - push eax
+004C8AB7 - 8b cf                      - mov ecx,edi
+004C8AB9 - e8 c2 06 fc ff             - call 00489180                      获取武将属性经验
+004C8ABE - 0f b7 c0                   - movzx eax,ax
+004C8AC1 - 3d b8 0b 00 00             - cmp eax,00000bb8                   0x0bb8 = 3000(属性经验上限)             【修改：属性经验上限】
+004C8AC6 - 7d d3                      - jnl 004c8a9b
+004C8AC8 - 99                         - cdq
+004C8AC9 - b9 64 00 00 00             - mov ecx,00000064
+004C8ACE - f7 f9                      - idiv ecx                           ecx = 能力经验/100(成长能力)
+004C8AD0 - 8b f2                      - mov esi,edx                        edx = 考虑能力成长后的剩余经验
+004C8AD2 - 8b c6                      - mov eax,esi                        返回武将指定属性考虑能力成长后的剩余经验
+004C8AD4 - 5e                         - pop esi
+004C8AD5 - 5b                         - pop ebx
+004C8AD6 - 5f                         - pop edi
+004C8AD7 - c3                         - ret
+[命令编号为40、256：返回武将体力]
+004C8AD8 - 0f b6 b7 28 01 00 00       - movzx esi,byte ptr [edi+00000128]  esi = 体力
+004C8ADF - 8b c6                      - mov eax,esi                        返回武将体力
+004C8AE1 - 5e                         - pop esi
+004C8AE2 - 5b                         - pop ebx
+004C8AE3 - 5f                         - pop edi
+004C8AE4 - c3                         - ret
+[命令编号为62：]
+004C8AE5 - 0f b7 b7 6a 01 00 00       - movzx esi,word ptr [edi+0000016a]  esi = ？？
+004C8AEC - 8b c6                      - mov eax,esi
+004C8AEE - 5e                         - pop esi
+004C8AEF - 5b                         - pop ebx
+004C8AF0 - 5f                         - pop edi
+004C8AF1 - c3                         - ret
+[命令编号为25～29：返回武将指定基础属性]
+004C8AF2 - 83 c0 e7                   - add eax,e7                         eax在0～4之间
+004C8AF5 - 50                         - push eax
+004C8AF6 - 8b cf                      - mov ecx,edi
+004C8AF8 - e8 83 02 fc ff             - call 00488d80                      获取武将指定基础属性
+004C8AFD - 0f b6 f0                   - movzx esi,al
+004C8B00 - 8b c6                      - mov eax,esi                        返回武将指定基础属性
+004C8B02 - 5e                         - pop esi
+004C8B03 - 5b                         - pop ebx
+004C8B04 - 5f                         - pop edi
+004C8B05 - c3                         - ret
+[命令编号为68～72：返回武将指定受伤病影响的显示属性]
+004C8B06 - 83 c0 bc                   - add eax,bc                         eax在0～4之间
+004C8B09 - 50                         - push eax
+004C8B0A - 8b cf                      - mov ecx,edi
+004C8B0C - e8 1f 05 fc ff             - call 00489030                      获取武将指定受伤病影响的显示属性
+004C8B11 - 0f b6 f0                   - movzx esi,al
+004C8B14 - 8b c6                      - mov eax,esi                        返回武将指定受伤病影响的显示属性
+004C8B16 - 5e                         - pop esi
+004C8B17 - 5b                         - pop ebx
+004C8B18 - 5f                         - pop edi
+004C8B19 - c3                         - ret
+[命令编号为251～255：返回武将指定受伤病影响的显示属性]
+004C8B1A - 05 05 ff ff ff             - add eax,ffffff05                   eax在0～4之间
+004C8B1F - 50                         - push eax
+004C8B20 - 8b cf                      - mov ecx,edi
+004C8B22 - e8 09 05 fc ff             - call 00489030                      获取武将指定受伤病影响的显示属性
+004C8B27 - 0f b6 f0                   - movzx esi,al
+004C8B2A - 8b c6                      - mov eax,esi                        返回武将指定受伤病影响的显示属性
+004C8B2C - 5e                         - pop esi
+004C8B2D - 5b                         - pop ebx
+004C8B2E - 5f                         - pop edi
+004C8B2F - c3                         - ret
+[命令编号为63～67：返回武将指定属性相对基础值的增加量]
+004C8B30 - 83 c0 c1                   - add eax,c1                         eax在0～4之间
+004C8B33 - 50                         - push eax
+004C8B34 - 8b cf                      - mov ecx,edi
+004C8B36 - e8 85 05 fc ff             - call 004890c0                      获取武将指定属性相对基础值的增加量
+004C8B3B - 0f be f0                   - movsx esi,al
+004C8B3E - 8b c6                      - mov eax,esi                        返回武将指定属性相对基础值的增加量
+004C8B40 - 5e                         - pop esi
+004C8B41 - 5b                         - pop ebx
+004C8B42 - 5f                         - pop edi
+004C8B43 - c3                         - ret
+[命令编号为73、263：]
+004C8B44 - 8b cf                      - mov ecx,edi
+004C8B46 - e8 d5 fe fb ff             - call 00488a20
+004C8B4B - 8b f0                      - mov esi,eax
+004C8B4D - 5e                         - pop esi
+004C8B4E - 5b                         - pop ebx
+004C8B4F - 5f                         - pop edi
+004C8B50 - c3                         - ret
+[命令编号为74、261：]
+004C8B51 - 8b cf                      - mov ecx,edi
+004C8B53 - e8 98 19 fc ff             - call 0048a4f0
+004C8B58 - 0f b7 f0                   - movzx esi,ax
+004C8B5B - 8b c6                      - mov eax,esi
+004C8B5D - 5e                         - pop esi
+004C8B5E - 5b                         - pop ebx
+004C8B5F - 5f                         - pop edi
+004C8B60 - c3                         - ret
+[命令编号为77：]
+004C8B61 - 8b cf                      - mov ecx,edi
+004C8B63 - e8 98 19 fc ff             - call 0048a500
+004C8B68 - 8b f0                      - mov esi,eax
+004C8B6A - 5e                         - pop esi
+004C8B6B - 5b                         - pop ebx
+004C8B6C - 5f                         - pop edi
+004C8B6D - c3                         - ret
+[命令编号为78：]
+004C8B6E - 8b cf                      - mov ecx,edi
+004C8B70 - e8 fb 19 fc ff             - call 0048a570
+004C8B75 - 8b f0                      - mov esi,eax
+004C8B77 - 5e                         - pop esi
+004C8B78 - 5b                         - pop ebx
+004C8B79 - 5f                         - pop edi
+004C8B7A - c3                         - ret
+[命令编号为79：]
+004C8B7B - 8b cf                      - mov ecx,edi
+004C8B7D - e8 0e 1a fc ff             - call 0048a590
+004C8B82 - 8b f0                      - mov esi,eax
+004C8B84 - 5e                         - pop esi
+004C8B85 - 5b                         - pop ebx
+004C8B86 - 5f                         - pop edi
+004C8B87 - c3                         - ret
+[命令编号为80：]
+004C8B88 - 8b cf                      - mov ecx,edi
+004C8B8A - e8 c1 19 fc ff             - call 0048a550
+004C8B8F - 8b f0                      - mov esi,eax
+004C8B91 - 5e                         - pop esi
+004C8B92 - 5b                         - pop ebx
+004C8B93 - 5f                         - pop edi
+004C8B94 - c3                         - ret
+[命令编号为81：]
+004C8B95 - 8b b7 3c 01 00 00          - mov esi,[edi+0000013c]
+004C8B9B - 8b c6                      - mov eax,esi
+004C8B9D - 5e                         - pop esi
+004C8B9E - 5b                         - pop ebx
+004C8B9F - 5f                         - pop edi
+004C8BA0 - c3                         - ret
+[命令编号为82：]
+004C8BA1 - 8b 8f 3c 01 00 00          - mov ecx,[edi+0000013c]
+004C8BA7 - 33 c0                      - xor eax,eax
+004C8BA9 - 83 f9 02                   - cmp ecx,02
+004C8BAC - 75 05                      - jne 004c8bb3
+004C8BAE - b8 01 00 00 00             - mov eax,00000001
+004C8BB3 - 50                         - push eax
+004C8BB4 - 8b cf                      - mov ecx,edi
+004C8BB6 - e8 f5 0b fc ff             - call 004897b0
+004C8BBB - 8b f0                      - mov esi,eax
+004C8BBD - 5e                         - pop esi
+004C8BBE - 5b                         - pop ebx
+004C8BBF - 5f                         - pop edi
+004C8BC0 - c3                         - ret
+[命令编号为83：]
+004C8BC1 - 8b 87 3c 01 00 00          - mov eax,[edi+0000013c]
+004C8BC7 - 50                         - push eax
+004C8BC8 - e8 93 98 fb ff             - call 00482460
+004C8BCD - 83 c4 04                   - add esp,04
+004C8BD0 - 85 c0                      - test eax,eax
+004C8BD2 - 0f 84 a7 02 00 00          - je 004c8e7f
+004C8BD8 - 57                         - push edi
+004C8BD9 - b9 cc b3 80 07             - mov ecx,0780b3cc
+004C8BDE - e8 cd 61 fd ff             - call 0049edb0
+004C8BE3 - 8d 34 80                   - lea esi,[eax+eax*4]
+004C8BE6 - d1 e6                      - shl esi,1
+004C8BE8 - 8b c6                      - mov eax,esi
+004C8BEA - 5e                         - pop esi
+004C8BEB - 5b                         - pop ebx
+004C8BEC - 5f                         - pop edi
+004C8BED - c3                         - ret
+[命令编号为84、257：返回武将持有宝物数量]
+004C8BEE - 55                         - push ebp
+004C8BEF - 57                         - push edi                           edi = 武将指针
+004C8BF0 - b9 58 19 20 07             - mov ecx,07201958
+004C8BF5 - 33 f6                      - xor esi,esi                        esi = 0
+004C8BF7 - e8 14 87 fc ff             - call 00491310                      根据武将指针获取武将ID
+004C8BFC - 8b e8                      - mov ebp,eax                        ebp = 武将ID
+004C8BFE - 33 ff                      - xor edi,edi                        edi = 宝物ID
+004C8C00 - 57                         - push edi
+004C8C01 - b9 58 19 20 07             - mov ecx,07201958
+004C8C06 - e8 25 7f fc ff             - call 00490b30                      根据宝物ID获取宝物指针
+004C8C0B - 8b d8                      - mov ebx,eax
+004C8C0D - 53                         - push ebx
+004C8C0E - e8 1d 1a fb ff             - call 0047a630                      校验指针
+004C8C13 - 83 c4 04                   - add esp,04
+004C8C16 - 85 c0                      - test eax,eax
+004C8C18 - 74 06                      - je 004c8c20                        校验失败则跳转到循环下一个宝物
+004C8C1A - 3b 6b 40                   - cmp ebp,[ebx+40]                   判断宝物拥有者是否是当前武将
+004C8C1D - 75 01                      - jne 004c8c20
+004C8C1F - 46                         - inc esi                            持有宝物数+1
+004C8C20 - 47                         - inc edi
+004C8C21 - 83 ff 64                   - cmp edi,64
+004C8C24 - 7c da                      - jnge 004c8c00                      循环下一个宝物
+004C8C26 - 5d                         - pop ebp
+004C8C27 - 8b c6                      - mov eax,esi                        返回武将持有宝物数量
+004C8C29 - 5e                         - pop esi
+004C8C2A - 5b                         - pop ebx
+004C8C2B - 5f                         - pop edi
+004C8C2C - c3                         - ret
+[命令编号为85：]
+004C8C2D - 8b 87 98 00 00 00          - mov eax,[edi+00000098]
+004C8C33 - 50                         - push eax
+004C8C34 - b9 58 19 20 07             - mov ecx,07201958
+004C8C39 - e8 c2 80 fc ff             - call 00490d00
+004C8C3E - 8b f0                      - mov esi,eax
+004C8C40 - 56                         - push esi
+004C8C41 - e8 ea 19 fb ff             - call 0047a630
+004C8C46 - 83 c4 04                   - add esp,04
+004C8C49 - 85 c0                      - test eax,eax
+004C8C4B - 0f 84 99 01 00 00          - je 004c8dea
+004C8C51 - 57                         - push edi
+004C8C52 - b9 58 19 20 07             - mov ecx,07201958
+004C8C57 - e8 b4 86 fc ff             - call 00491310
+004C8C5C - 8b ce                      - mov ecx,esi
+004C8C5E - 8b f8                      - mov edi,eax
+004C8C60 - e8 2b dc fb ff             - call 00486890                      获取城市、港、关太守ID
+004C8C65 - 3b c7                      - cmp eax,edi
+004C8C67 - 0f 85 7d 01 00 00          - jne 004c8dea
+004C8C6D - be 01 00 00 00             - mov esi,00000001
+004C8C72 - 8b c6                      - mov eax,esi
+004C8C74 - 5e                         - pop esi
+004C8C75 - 5b                         - pop ebx
+004C8C76 - 5f                         - pop edi
+004C8C77 - c3                         - ret
+[命令编号为60：返回武将旧势力]
+004C8C78 - 8b b7 60 01 00 00          - mov esi,[edi+00000160]             esi = 旧势力
+004C8C7E - 8b c6                      - mov eax,esi                        返回武将旧势力
+004C8C80 - 5e                         - pop esi
+004C8C81 - 5b                         - pop ebx
+004C8C82 - 5f                         - pop edi
+004C8C83 - c3                         - ret
+[命令编号为86、262：]
+004C8C84 - 8b cf                      - mov ecx,edi
+004C8C86 - 33 f6                      - xor esi,esi
+004C8C88 - e8 43 00 fc ff             - call 00488cd0                      判断武将是否是都督、太守或一般武将
+004C8C8D - 85 c0                      - test eax,eax
+004C8C8F - 0f 84 ea 01 00 00          - je 004c8e7f
+004C8C95 - 8b bf a4 00 00 00          - mov edi,[edi+000000a4]
+004C8C9B - 57                         - push edi
+004C8C9C - b9 58 19 20 07             - mov ecx,07201958
+004C8CA1 - e8 6a 7f fc ff             - call 00490c10                      根据官职ID获取官职指针
+004C8CA6 - 8b f8                      - mov edi,eax
+004C8CA8 - 57                         - push edi
+004C8CA9 - e8 82 19 fb ff             - call 0047a630
+004C8CAE - 83 c4 04                   - add esp,04
+004C8CB1 - 85 c0                      - test eax,eax
+004C8CB3 - 0f 84 c6 01 00 00          - je 004c8e7f
+004C8CB9 - 0f b6 77 35                - movzx esi,byte ptr [edi+35]
+004C8CBD - 8b c6                      - mov eax,esi
+004C8CBF - 5e                         - pop esi
+004C8CC0 - 5b                         - pop ebx
+004C8CC1 - 5f                         - pop edi
+004C8CC2 - c3                         - ret
+[命令编号为88：返回武将亲善武将数量]
+004C8CC3 - 8b cf                      - mov ecx,edi
+004C8CC5 - e8 e6 fb fb ff             - call 004888b0                      获取亲善武将数量
+004C8CCA - 8b f0                      - mov esi,eax                        返回武将亲善武将数量
+004C8CCC - 5e                         - pop esi
+004C8CCD - 5b                         - pop ebx
+004C8CCE - 5f                         - pop edi
+004C8CCF - c3                         - ret
+[命令编号为89：返回武将厌恶武将数量]
+004C8CD0 - 8b cf                      - mov ecx,edi
+004C8CD2 - e8 99 fc fb ff             - call 00488970                      获取厌恶武将数量
+004C8CD7 - 8b f0                      - mov esi,eax                        返回武将厌恶武将数量
+004C8CD9 - 5e                         - pop esi
+004C8CDA - 5b                         - pop ebx
+004C8CDB - 5f                         - pop edi
+004C8CDC - c3                         - ret
+[命令编号为90：]
+004C8CDD - 8b cf                      - mov ecx,edi
+004C8CDF - 83 ce ff                   - or esi,ff
+004C8CE2 - e8 89 ff fb ff             - call 00488c70                      判断武将是否是俘虏
+004C8CE7 - 85 c0                      - test eax,eax
+004C8CE9 - 0f 84 90 01 00 00          - je 004c8e7f
+004C8CEF - 8b bf 98 00 00 00          - mov edi,[edi+00000098]
+004C8CF5 - 57                         - push edi
+004C8CF6 - b9 58 19 20 07             - mov ecx,07201958
+004C8CFB - e8 00 80 fc ff             - call 00490d00
+004C8D00 - 8b f8                      - mov edi,eax
+004C8D02 - 57                         - push edi
+004C8D03 - e8 28 19 fb ff             - call 0047a630
+004C8D08 - 83 c4 04                   - add esp,04
+004C8D0B - 85 c0                      - test eax,eax
+004C8D0D - 0f 84 6c 01 00 00          - je 004c8e7f
+[命令编号为75：返回武将所属势力ID]
+004C8D13 - 8b 17                      - mov edx,[edi]                      edi = 武将指针
+004C8D15 - 8b cf                      - mov ecx,edi
+004C8D17 - ff 52 40                   - call dword ptr [edx+40]            获取所属势力ID
+004C8D1A - 8b f0                      - mov esi,eax                        返回所属势力ID
+004C8D1C - 5e                         - pop esi
+004C8D1D - 5b                         - pop ebx
+004C8D1E - 5f                         - pop edi
+004C8D1F - c3                         - ret
+[命令编号为91：]
+004C8D20 - 8b 07                      - mov eax,[edi]
+004C8D22 - 8b cf                      - mov ecx,edi
+004C8D24 - 33 f6                      - xor esi,esi
+004C8D26 - ff 50 40                   - call dword ptr [eax+40]
+004C8D29 - 50                         - push eax
+004C8D2A - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004C8D2F - e8 6c 7d fc ff             - call 00490aa0
+004C8D34 - 8b d8                      - mov ebx,eax
+004C8D36 - 53                         - push ebx
+004C8D37 - e8 f4 18 fb ff             - call 0047a630
+004C8D3C - 83 c4 04                   - add esp,04
+004C8D3F - 85 c0                      - test eax,eax
+004C8D41 - 0f 84 38 01 00 00          - je 004c8e7f
+004C8D47 - 8b 5b 08                   - mov ebx,[ebx+08]
+004C8D4A - 57                         - push edi
+004C8D4B - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+004C8D50 - e8 bb 85 fc ff             - call 00491310
+004C8D55 - 3b d8                      - cmp ebx,eax
+004C8D57 - 0f 85 22 01 00 00          - jne 004c8e7f
+004C8D5D - be 01 00 00 00             - mov esi,00000001
+004C8D62 - 8b c6                      - mov eax,esi
+004C8D64 - 5e                         - pop esi
+004C8D65 - 5b                         - pop ebx
+004C8D66 - 5f                         - pop edi
+004C8D67 - c3                         - ret
+[命令编号为94：]
+004C8D68 - 8b 87 80 01 00 00          - mov eax,[edi+00000180]
+004C8D6E - 33 c9                      - xor ecx,ecx
+004C8D70 - 85 c0                      - test eax,eax
+004C8D72 - 0f 95 c1                   - setnc cl
+004C8D75 - 8b f1                      - mov esi,ecx
+004C8D77 - 8b c6                      - mov eax,esi
+004C8D79 - 5e                         - pop esi
+004C8D7A - 5b                         - pop ebx
+004C8D7B - 5f                         - pop edi
+004C8D7C - c3                         - ret
+[命令编号为95：]
+004C8D7D - 8b b7 84 01 00 00          - mov esi,[edi+00000184]
+004C8D83 - 8b c6                      - mov eax,esi
+004C8D85 - 5e                         - pop esi
+004C8D86 - 5b                         - pop ebx
+004C8D87 - 5f                         - pop edi
+004C8D88 - c3                         - ret
+[命令编号为96：]
+004C8D89 - 8b 17                      - mov edx,[edi]
+004C8D8B - 8b cf                      - mov ecx,edi
+004C8D8D - ff 52 28                   - call dword ptr [edx+28]
+004C8D90 - 8b f0                      - mov esi,eax
+004C8D92 - 5e                         - pop esi
+004C8D93 - 5b                         - pop ebx
+004C8D94 - 5f                         - pop edi
+004C8D95 - c3                         - ret
+[命令编号为97：]
+004C8D96 - 57                         - push edi
+004C8D97 - e8 a4 98 1b 00             - call 00682640
+004C8D9C - 83 c4 04                   - add esp,04
+004C8D9F - 8b f0                      - mov esi,eax
+004C8DA1 - 5e                         - pop esi
+004C8DA2 - 5b                         - pop ebx
+004C8DA3 - 5f                         - pop edi
+004C8DA4 - c3                         - ret
+[命令编号为98：]
+004C8DA5 - 57                         - push edi
+004C8DA6 - e8 d5 98 1b 00             - call 00682680
+004C8DAB - 83 c4 04                   - add esp,04
+004C8DAE - 8b f0                      - mov esi,eax
+004C8DB0 - 5e                         - pop esi
+004C8DB1 - 5b                         - pop ebx
+004C8DB2 - 5f                         - pop edi
+004C8DB3 - c3                         - ret
+[命令编号为99：]
+004C8DB4 - 8b b7 88 01 00 00          - mov esi,[edi+00000188]
+004C8DBA - 8b c6                      - mov eax,esi
+004C8DBC - 5e                         - pop esi
+004C8DBD - 5b                         - pop ebx
+004C8DBE - 5f                         - pop edi
+004C8DBF - c3                         - ret
+[命令编号为100：]
+004C8DC0 - 8b cf                      - mov ecx,edi
+004C8DC2 - e8 29 18 fc ff             - call 0048a5f0
+004C8DC7 - 8b f0                      - mov esi,eax
+004C8DC9 - 5e                         - pop esi
+004C8DCA - 5b                         - pop ebx
+004C8DCB - 5f                         - pop edi
+004C8DCC - c3                         - ret
+[命令编号为101：]
+004C8DCD - 57                         - push edi
+004C8DCE - b9 58 19 20 07             - mov ecx,07201958
+004C8DD3 - e8 38 85 fc ff             - call 00491310
+004C8DD8 - 3d 52 03 00 00             - cmp eax,00000352
+004C8DDD - 7c 0b                      - jnge 004c8dea
+004C8DDF - 3d e7 03 00 00             - cmp eax,000003e7
+004C8DE4 - 0f 8e 73 ff ff ff          - jng 004c8d5d
+004C8DEA - 33 f6                      - xor esi,esi
+004C8DEC - 8b c6                      - mov eax,esi
+004C8DEE - 5e                         - pop esi
+004C8DEF - 5b                         - pop ebx
+004C8DF0 - 5f                         - pop edi
+004C8DF1 - c3                         - ret
+[命令编号为102：]
+004C8DF2 - 57                         - push edi
+004C8DF3 - b9 58 19 20 07             - mov ecx,07201958
+004C8DF8 - e8 13 85 fc ff             - call 00491310
+004C8DFD - 3d 20 03 00 00             - cmp eax,00000320
+004C8E02 - 7c 21                      - jnge 004c8e25
+004C8E04 - 3d e7 03 00 00             - cmp eax,000003e7
+004C8E09 - 7f 1a                      - jg 004c8e25
+004C8E0B - 68 ff 00 00 00             - push 000000ff
+004C8E10 - 8b cf                      - mov ecx,edi
+004C8E12 - e8 c9 11 fc ff             - call 00489fe0                      判断武将身份是否是包含在武将身份标志位
+004C8E17 - 8b f0                      - mov esi,eax
+004C8E19 - f7 de                      - neg esi
+004C8E1B - 1b f6                      - sbb esi,esi
+004C8E1D - f7 de                      - neg esi
+004C8E1F - 8b c6                      - mov eax,esi
+004C8E21 - 5e                         - pop esi
+004C8E22 - 5b                         - pop ebx
+004C8E23 - 5f                         - pop edi
+004C8E24 - c3                         - ret
+004C8E25 - 83 ce ff                   - or esi,ff
+004C8E28 - 8b c6                      - mov eax,esi
+004C8E2A - 5e                         - pop esi
+004C8E2B - 5b                         - pop ebx
+004C8E2C - 5f                         - pop edi
+004C8E2D - c3                         - ret
+[命令编号为105：]
+004C8E2E - 8b cf                      - mov ecx,edi
+004C8E30 - e8 4b 0e fc ff             - call 00489c80
+004C8E35 - 8b f0                      - mov esi,eax
+004C8E37 - f7 de                      - neg esi
+004C8E39 - 1b f6                      - sbb esi,esi
+004C8E3B - f7 de                      - neg esi
+004C8E3D - 8b c6                      - mov eax,esi
+004C8E3F - 5e                         - pop esi
+004C8E40 - 5b                         - pop ebx
+004C8E41 - 5f                         - pop edi
+004C8E42 - c3                         - ret
+[命令编号为241～245：]
+004C8E43 - 05 0f ff ff ff             - add eax,ffffff0f
+004C8E48 - 50                         - push eax
+004C8E49 - 8b cf                      - mov ecx,edi
+004C8E4B - e8 40 15 fc ff             - call 0048a390
+004C8E50 - 0f b6 f0                   - movzx esi,al
+004C8E53 - 8b c6                      - mov eax,esi
+004C8E55 - 5e                         - pop esi
+004C8E56 - 5b                         - pop ebx
+004C8E57 - 5f                         - pop edi
+004C8E58 - c3                         - ret
+[命令编号为246：]
+004C8E59 - a1 78 19 20 07             - mov eax,[07201978]                 eax = 游戏难度
+004C8E5E - 33 f6                      - xor esi,esi
+004C8E60 - 83 f8 02                   - cmp eax,02
+004C8E63 - 74 1a                      - je 004c8e7f
+004C8E65 - 0f be b7 8c 01 00 00       - movsx esi,byte ptr [edi+0000018c]
+004C8E6C - 8b c6                      - mov eax,esi
+004C8E6E - 5e                         - pop esi
+004C8E6F - 5b                         - pop ebx
+004C8E70 - 5f                         - pop edi
+004C8E71 - c3                         - ret
+[命令编号为0、2、52：返回武将ID]
+004C8E72 - b9 58 19 20 07             - mov ecx,07201958
+004C8E77 - 57                         - push edi                           edi = 武将指针
+004C8E78 - e8 93 84 fc ff             - call 00491310                      根据武将指针获取武将ID
+004C8E7D - 8b f0                      - mov esi,eax
+[命令编号为1、93、104、259：返回-1]
+004C8E7F - 8b c6                      - mov eax,esi                        返回esi
+004C8E81 - 5e                         - pop esi
+004C8E82 - 5b                         - pop ebx
+004C8E83 - 5f                         - pop edi
+004C8E84 - c3                         - ret
+
+数据区：
+72 8E 4C 00 7F 8E 4C 00 52 88 4C 00 5E 88 4C 00 
+6A 88 4C 00 77 88 4C 00 58 8A 4C 00 61 8A 4C 00 
+7E 8A 4C 00 13 89 4C 00 80 88 4C 00 89 88 4C 00 
+92 88 4C 00 6A 8A 4C 00 9B 88 4C 00 A4 88 4C 00 
+74 8A 4C 00 CC 88 4C 00 D8 88 4C 00 1C 89 4C 00 
+28 89 4C 00 34 89 4C 00 8B 8A 4C 00 A6 8A 4C 00 
+F2 8A 4C 00 B3 8A 4C 00 40 89 4C 00 D8 8A 4C 00 
+51 89 4C 00 5D 89 4C 00 69 89 4C 00 75 89 4C 00 
+81 89 4C 00 8D 89 4C 00 99 89 4C 00 A5 89 4C 00 
+B1 89 4C 00 BD 89 4C 00 C9 89 4C 00 D5 89 4C 00 
+E2 89 4C 00 EF 89 4C 00 FC 89 4C 00 09 8A 4C 00 
+15 8A 4C 00 21 8A 4C 00 78 8C 4C 00 4B 8A 4C 00 
+E5 8A 4C 00 30 8B 4C 00 06 8B 4C 00 44 8B 4C 00 
+51 8B 4C 00 13 8D 4C 00 E5 88 4C 00 61 8B 4C 00 
+6E 8B 4C 00 7B 8B 4C 00 88 8B 4C 00 95 8B 4C 00 
+A1 8B 4C 00 C1 8B 4C 00 EE 8B 4C 00 2D 8C 4C 00
+84 8C 4C 00 2E 8A 4C 00 C3 8C 4C 00 D0 8C 4C 00 
+DD 8C 4C 00 20 8D 4C 00 68 8D 4C 00 7D 8D 4C 00 
+89 8D 4C 00 96 8D 4C 00 A5 8D 4C 00 B4 8D 4C 00 
+C0 8D 4C 00 CD 8D 4C 00 F2 8D 4C 00 2E 8E 4C 00 
+43 8E 4C 00 59 8E 4C 00 1A 8B 4C 00 72 8E 4C 00 
+
+00 01 53 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 
+0F 10 11 12 13 14 15 16 17 18 18 18 18 18 19 19 
+19 19 19 1A 1A 1A 1A 1A 1B 1C 1D 1E 1F 20 21 22 
+23 24 25 26 53 27 28 29 2A 2B 2C 2D 2E 2F 30 31
+31 31 31 31 32 32 32 32 32 33 34 35 36 37 38 39 
+3A 3B 3C 3D 3E 3F 40 41 42 43 44 45 36 01 46 47 
+48 49 4A 4B 4C 4D 4E 13 01 4F 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 53 
+53 50 50 50 50 50 51 02 03 13 2B 52 52 52 52 52 
+1B 3E 1D 01 27 34 40 33

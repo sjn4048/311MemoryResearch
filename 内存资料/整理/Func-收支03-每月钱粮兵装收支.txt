@@ -1,0 +1,703 @@
+功能: 每月收获钱粮和特产兵装，支出金钱，同时调用治安下降函数
+参数表: 无
+备注：自动兵装产量公式：
+      产量值 = (太守政治/2+60)*3*产量倍率
+      产量值上限为1500
+      
+*****************************************************************************************************************************************************
+
+00590490 - 55                         - push ebp
+00590491 - 8b ec                      - mov ebp,esp
+00590493 - 83 e4 f8                   - and esp,f8
+00590496 - 6a ff                      - push ff
+00590498 - 68 5c 39 73 00             - push 0073395c
+0059049D - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+005904A3 - 50                         - push eax
+005904A4 - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+005904AB - 51                         - push ecx
+005904AC - b8 40 17 00 00             - mov eax,00001740
+005904B1 - e8 8a 78 17 00             - call 00707d40
+005904B6 - 53                         - push ebx
+005904B7 - 55                         - push ebp
+005904B8 - 56                         - push esi
+005904B9 - 57                         - push edi
+005904BA - 89 4c 24 28                - mov [esp+28],ecx               [esp+28] = 返回数组指针
+
+【钱粮收入-城市循环】
+[获取城市指针并校验]
+005904BE - c7 44 24 20 00 00 00 00    - mov [esp+20],00000000
+005904C6 - 8b 44 24 20                - mov eax,[esp+20]               eax = 设施ID(城市)
+005904CA - 50                         - push eax
+005904CB - b9 58 19 20 07             - mov ecx,07201958
+005904D0 - e8 2b 08 f0 ff             - call 00490d00                  根据设施ID获取设施指针
+005904D5 - 8b d8                      - mov ebx,eax                    ebx = 设施指针(城市)
+005904D7 - 53                         - push ebx
+005904D8 - 89 5c 24 1c                - mov [esp+1c],ebx
+005904DC - e8 4f a1 ee ff             - call 0047a630                  校验指针
+005904E1 - 83 c4 04                   - add esp,04
+005904E4 - 85 c0                      - test eax,eax
+005904E6 - 0f 84 9c 02 00 00          - je 00590788                    校验失败则跳转到循环下一个城市
+005904EC - 8b 13                      - mov edx,[ebx]
+005904EE - 8b cb                      - mov ecx,ebx
+005904F0 - ff 52 40                   - call dword ptr [edx+40]        获取设施所属势力
+005904F3 - 85 c0                      - test eax,eax
+005904F5 - 0f 8c 8d 02 00 00          - jl 00590788
+005904FB - 83 f8 2e                   - cmp eax,2e                     
+005904FE - 0f 8f 84 02 00 00          - jg 00590788                    以上四句确保势力ID在0～46之间，否则跳转到循环下一个城市
+00590504 - 8b cb                      - mov ecx,ebx
+00590506 - e8 e5 61 ef ff             - call 004866f0                  根据设施指针获取城市指针
+0059050B - 50                         - push eax
+0059050C - 89 44 24 30                - mov [esp+30],eax               [esp+30](实际是[esp+2c]) = 城市指针
+00590510 - e8 1b a1 ee ff             - call 0047a630                  校验指针
+00590515 - 83 c4 04                   - add esp,04
+00590518 - 85 c0                      - test eax,eax
+0059051A - 0f 84 68 02 00 00          - je 00590788                    校验失败跳转到循环下一个城市
+[相关特技判定准备]
+00590520 - 6a 00                      - push 00
+00590522 - 53                         - push ebx                       ebx = 设施指针(城市)
+00590523 - 8d 4c 24 58                - lea ecx,[esp+58]               ecx = 返回特技数组指针
+00590527 - e8 b4 e5 f3 ff             - call 004ceae0                  获取设施武将所拥有的特技数组，返回数组会将index为设施所拥有的特技id的值设置为1
+
+【城市收钱】
+[基础收钱]
+0059052C - 8b 74 24 2c                - mov esi,[esp+2c]               esi = 城市指针
+00590530 - 56                         - push esi
+00590531 - b9 cc b3 80 07             - mov ecx,0780b3cc
+00590536 - e8 55 e0 f0 ff             - call 0049e590                  计算城市收钱
+0059053B - 8b e8                      - mov ebp,eax                    ebp = 城市收钱
+[征税处理]
+0059053D - 8b 84 24 b4 01 00 00       - mov eax,[esp+000001b4]         [esp+000001b4]中存放了城市是否有征税特技武将
+00590544 - 85 c0                      - test eax,eax
+00590546 - 74 09                      - je 00590551                    没有征税跳转到基本收入
+00590548 - 8b c5                      - mov eax,ebp
+0059054A - 99                         - cdq
+0059054B - 2b c2                      - sub eax,edx
+0059054D - d1 f8                      - sar eax,1                      以上4句收入除以2
+0059054F - 8b e8                      - mov ebp,eax                    ebp = 城市收钱
+[基本收入]
+00590551 - 55                         - push ebp
+00590552 - 53                         - push ebx                       ebx = 设施指针(城市)
+00590553 - b9 5c 89 99 07             - mov ecx,0799895c
+00590558 - e8 43 dd f1 ff             - call 004ae2a0                  设施收钱(有征税50%，无征税100%)
+[富豪处理]
+0059055D - 8b 84 24 ac 01 00 00       - mov eax,[esp+000001ac]         [esp+000001ac]中存放了城市是否有富豪特技武将
+00590564 - 85 c0                      - test eax,eax
+00590566 - 74 36                      - je 0059059e                    没有富豪则跳过额外收入
+00590568 - 8b c5                      - mov eax,ebp                    eax = 城市收钱
+0059056A - 99                         - cdq
+0059056B - 2b c2                      - sub eax,edx
+0059056D - d1 f8                      - sar eax,1                      以上4句收入除以2
+[富豪额外收入]
+0059056F - 50                         - push eax
+00590570 - 53                         - push ebx                       ebx = 设施指针(城市)
+00590571 - b9 5c 89 99 07             - mov ecx,0799895c
+00590576 - e8 25 dd f1 ff             - call 004ae2a0                  设施收钱(富豪的额外50%)
+0059057B - 53                         - push ebx
+0059057C - b9 58 19 20 07             - mov ecx,07201958
+00590581 - 8b f8                      - mov edi,eax                    edi = 富豪额外收钱
+00590583 - e8 e8 11 f0 ff             - call 00491770                  根据设施指针获取设施ID
+00590588 - 85 c0                      - test eax,eax
+0059058A - 7c 12                      - jnge 0059059e
+0059058C - 83 f8 57                   - cmp eax,57
+0059058F - 7d 0d                      - jnl 0059059e                   以上四句保证设施ID在0-87之间
+00590591 - 8b 4c 24 28                - mov ecx,[esp+28]               ecx = 返回数组指针
+00590595 - c1 e0 04                   - shl eax,04
+00590598 - 8d 44 08 5c                - lea eax,[eax+ecx+5c]
+0059059C - 01 38                      - add [eax],edi                  城市富豪额外收钱置入结果数组
+
+【城市收粮】
+[季初与征收判定]
+0059059E - 8b 84 24 b8 01 00 00       - mov eax,[esp+000001b8]         [esp+000001b8]中存放了城市是否有征收特技武将
+005905A5 - 33 ff                      - xor edi,edi                    edi = 0
+005905A7 - 85 c0                      - test eax,eax
+005905A9 - 75 17                      - jne 005905c2                   有征收则直接跳过下面的是否季度判断
+005905AB - b9 58 19 20 07             - mov ecx,07201958
+005905B0 - e8 1b 24 ef ff             - call 004829d0                  判断是否是季度初
+005905B5 - 85 c0                      - test eax,eax
+005905B7 - 75 09                      - jne 005905c2                   如果是季度初则跳转到收粮处理
+005905B9 - 89 44 24 24                - mov [esp+24],eax               无征收非季度初，收粮为0，置入[esp+24]
+005905BD - e9 86 00 00 00             - jmp 00590648                   跳过收粮处理
+[基础收粮]
+005905C2 - 56                         - push esi                       esi = 城市指针
+005905C3 - b9 cc b3 80 07             - mov ecx,0780b3cc
+005905C8 - c7 44 24 28 01 00 00 00    - mov [esp+28],00000001          [esp+28](实际是[esp+2c]) = 1
+005905D0 - e8 3b e2 f0 ff             - call 0049e810                  计算城市收粮
+005905D5 - 6a 02                      - push 02                        0x02 = 丰作
+005905D7 - 8b ce                      - mov ecx,esi                    ecx = 城市指针
+005905D9 - 8b f8                      - mov edi,eax                    edi = 城市收粮
+005905DB - e8 e0 ad ee ff             - call 0047b3c0                  判断城市是否处于丰收状态
+005905E0 - 85 c0                      - test eax,eax
+005905E2 - 74 0a                      - je 005905ee                    非丰收状态则跳转到征收处理
+005905E4 - 8d 04 7f                   - lea eax,[edi+edi*2]
+005905E7 - 99                         - cdq
+005905E8 - 2b c2                      - sub eax,edx
+005905EA - d1 f8                      - sar eax,1                      以上4句收粮数*1.5
+005905EC - 8b f8                      - mov edi,eax                    edi = 城市收粮
+[征收处理]
+005905EE - 8b 84 24 b8 01 00 00       - mov eax,[esp+000001b8]         [esp+000001b8]中存放了城市是否有征收特技武将
+005905F5 - 85 c0                      - test eax,eax
+005905F7 - 74 09                      - je 00590602                    没有征收跳转到基本收入
+005905F9 - 8b c7                      - mov eax,edi
+005905FB - 99                         - cdq
+005905FC - 2b c2                      - sub eax,edx
+005905FE - d1 f8                      - sar eax,1                      以上4句收入除以2
+00590600 - 8b f8                      - mov edi,eax                    edi = 城市收粮
+[基本收入]
+00590602 - 57                         - push edi
+00590603 - 53                         - push ebx                       ebx = 设施指针(城市)
+00590604 - b9 5c 89 99 07             - mov ecx,0799895c
+00590609 - e8 f2 dc f1 ff             - call 004ae300                  设施收粮(有征收50%，无征收100%，丰作*1.5)
+[非季初因征收引发的收粮不叠加米道效果]
+0059060E - b9 58 19 20 07             - mov ecx,07201958
+00590613 - e8 b8 23 ef ff             - call 004829d0                  判断是否是季度初
+00590618 - 85 c0                      - test eax,eax
+0059061A - 74 2c                      - je 00590648                    非季初因征收引发的收粮跳过米道处理
+[米道处理]
+0059061C - 8b 84 24 b0 01 00 00       - mov eax,[esp+000001b0]         [esp+000001b0]中存放了城市是否有米道特技武将
+00590623 - 85 c0                      - test eax,eax
+00590625 - 74 21                      - je 00590648                    没有米道则跳过额外收入
+00590627 - 8b c7                      - mov eax,edi
+00590629 - 99                         - cdq
+0059062A - 2b c2                      - sub eax,edx
+0059062C - d1 f8                      - sar eax,1                      以上4句收入除以2
+[米道额外收入]
+0059062E - 50                         - push eax
+0059062F - 53                         - push ebx                       ebx = 设施指针(城市)
+00590630 - b9 5c 89 99 07             - mov ecx,0799895c
+00590635 - e8 c6 dc f1 ff             - call 004ae300                  设施收粮(米道的额外50%)
+0059063A - 8b 4c 24 28                - mov ecx,[esp+28]               ecx = 返回数组指针
+0059063E - 50                         - push eax
+0059063F - 53                         - push ebx                       ebx = 设施指针(城市)
+00590640 - 83 c1 58                   - add ecx,58
+00590643 - e8 e8 bd ff ff             - call 0058c430                  城市米道额外收钱置入结果数组
+
+【治安下降】
+00590648 - b9 58 19 20 07             - mov ecx,07201958
+0059064D - e8 9e 1e ef ff             - call 004824f0                  获取当前月
+00590652 - e8 79 d0 ff ff             - call 0058d6d0                  治安下降(函数中会判断当前月是否是1、4、7、10四个月份，且本函数本身就是月初调用，因此实际上是每季度执行一次)
+
+【港关基础钱粮收入计算】
+00590657 - b8 67 66 66 66             - mov eax,66666667
+0059065C - f7 ed                      - imul ebp                       ebp = 城市收钱(有征税50%，无征税100%)
+0059065E - d1 fa                      - sar edx,1
+00590660 - 8b ea                      - mov ebp,edx
+00590662 - c1 ed 1f                   - shr ebp,1f                     港关收钱是城市收钱的20%
+00590665 - 03 ea                      - add ebp,edx                    ebp = 港关收钱
+00590667 - b8 67 66 66 66             - mov eax,66666667
+0059066C - f7 ef                      - imul edi                       edi = 城市收粮(有征收50%，无征收100%，丰作*1.5)
+0059066E - d1 fa                      - sar edx,1
+00590670 - 8b f2                      - mov esi,edx
+00590672 - c1 ee 1f                   - shr esi,1f                     港关收粮是城市收粮的20%
+00590675 - 03 f2                      - add esi,edx                    esi = 港关收粮
+
+【钱粮收入-港关循环】
+[获取港关的设施指针]
+00590677 - c7 44 24 1c 00 00 00 00    - mov [esp+1c],00000000          [esp+1c]中存放港关顺序=0
+0059067F - 90                         - nop                            下一句开始循环一个城市的所属港关
+00590680 - 8b 54 24 1c                - mov edx,[esp+1c]               edx = 港关顺序
+00590684 - 8b 4c 24 2c                - mov ecx,[esp+2c]               ecx = 城市指针
+00590688 - 52                         - push edx
+00590689 - e8 c2 b5 ee ff             - call 0047bc50                  获取城市所属第N个港关的ID
+0059068E - 50                         - push eax                       
+0059068F - b9 58 19 20 07             - mov ecx,07201958
+00590694 - e8 67 06 f0 ff             - call 00490d00                  根据设施ID获取设施指针
+00590699 - 8b f8                      - mov edi,eax                    edi = 设施指针(港关)
+0059069B - 57                         - push edi
+0059069C - e8 8f 9f ee ff             - call 0047a630                  校验指针
+005906A1 - 83 c4 04                   - add esp,04
+005906A4 - 85 c0                      - test eax,eax
+005906A6 - 0f 84 ca 00 00 00          - je 00590776                    校验失败则跳转到循环下一个港关
+[判断港关与城市是否属于同一势力]
+005906AC - 8b 07                      - mov eax,[edi]
+005906AE - 8b cf                      - mov ecx,edi
+005906B0 - ff 50 40                   - call dword ptr [eax+40]        获取港关所属势力  
+005906B3 - 8b 13                      - mov edx,[ebx]                  ebx = 设施指针(城市)
+005906B5 - 8b cb                      - mov ecx,ebx
+005906B7 - 89 44 24 14                - mov [esp+14],eax
+005906BB - ff 52 40                   - call dword ptr [edx+40]        获取城市所属势力
+005906BE - 8b 4c 24 14                - mov ecx,[esp+14]
+005906C2 - 3b c8                      - cmp ecx,eax                    比较港关所属势力是否相同
+005906C4 - 0f 85 a8 00 00 00          - jne 00590772                   不相同则跳转(即没有收入)                         【修改】jne 005906ca  //非占领城之港关也有收入
+
+【港关收钱】
+[基本收入]
+005906CA - 55                         - push ebp                       ebp = 港关收钱
+005906CB - 57                         - push edi                       edi = 设施指针(港关)
+005906CC - b9 5c 89 99 07             - mov ecx,0799895c
+005906D1 - e8 ca db f1 ff             - call 004ae2a0                  设施收钱(城市基础收钱的20%)
+[富豪处理]
+005906D6 - 8b 84 24 ac 01 00 00       - mov eax,[esp+000001ac]         [esp+000001ac]中存放了城市是否有富豪特技武将
+005906DD - 85 c0                      - test eax,eax
+005906DF - 74 36                      - je 00590717
+005906E1 - 8b c5                      - mov eax,ebp
+005906E3 - 99                         - cdq
+005906E4 - 2b c2                      - sub eax,edx
+005906E6 - d1 f8                      - sar eax,1                      以上4句收入除以2
+005906E8 - 50                         - push eax
+005906E9 - 57                         - push edi                       edi = 设施指针(港关)
+005906EA - b9 5c 89 99 07             - mov ecx,0799895c
+005906EF - e8 ac db f1 ff             - call 004ae2a0                  设施收钱(富豪的额外50%)
+005906F4 - 57                         - push edi
+005906F5 - b9 58 19 20 07             - mov ecx,07201958
+005906FA - 8b d8                      - mov ebx,eax                    ebx = 富豪额外收钱
+005906FC - e8 6f 10 f0 ff             - call 00491770                  根据设施指针获取设施ID
+00590701 - 85 c0                      - test eax,eax
+00590703 - 7c 12                      - jnge 00590717
+00590705 - 83 f8 57                   - cmp eax,57                     以上四句保证设施ID在0-87之间
+00590708 - 7d 0d                      - jnl 00590717
+0059070A - 8b 4c 24 28                - mov ecx,[esp+28]
+0059070E - c1 e0 04                   - shl eax,04
+00590711 - 8d 44 08 5c                - lea eax,[eax+ecx+5c]
+00590715 - 01 18                      - add [eax],ebx                  设施富豪额外收钱置入结果数组
+
+【港关收粮】
+[基本收入]
+00590717 - 8b 44 24 24                - mov eax,[esp+24]               eax = 城市收粮
+0059071B - 85 c0                      - test eax,eax                   
+0059071D - 74 53                      - je 00590772                    判断城市收粮是否为0(无征收非季度初)，是则跳过港关收粮处理
+0059071F - 56                         - push esi                       esi = 港关收粮
+00590720 - 57                         - push edi                       edi = 设施指针(港关)
+00590721 - b9 5c 89 99 07             - mov ecx,0799895c
+00590726 - e8 d5 db f1 ff             - call 004ae300                  设施收粮(城市基础收粮的20%)
+[米道处理]
+0059072B - 8b 84 24 b0 01 00 00       - mov eax,[esp+000001b0]         [esp+000001b0]中存放了城市是否有米道特技武将
+00590732 - 85 c0                      - test eax,eax
+00590734 - 74 3c                      - je 00590772
+00590736 - 8b c6                      - mov eax,esi
+00590738 - 99                         - cdq
+00590739 - 2b c2                      - sub eax,edx
+0059073B - d1 f8                      - sar eax,1                      以上4句收入除以2
+0059073D - 50                         - push eax
+0059073E - 57                         - push edi                       edi = 设施指针(港关)
+0059073F - b9 5c 89 99 07             - mov ecx,0799895c
+00590744 - e8 b7 db f1 ff             - call 004ae300                  设施收粮(米道的额外50%)
+00590749 - 57                         - push edi
+0059074A - b9 58 19 20 07             - mov ecx,07201958
+0059074F - 8b d8                      - mov ebx,eax                    ebx = 米道额外收粮
+00590751 - e8 1a 10 f0 ff             - call 00491770                  根据设施指针获取设施ID
+00590756 - 85 c0                      - test eax,eax
+00590758 - 7c 18                      - jnge 00590772
+0059075A - 83 f8 57                   - cmp eax,57                     以上四句保证设施ID在0-87之间
+0059075D - 7d 13                      - jnl 00590772
+0059075F - 8b 54 24 28                - mov edx,[esp+28]
+00590763 - c1 e0 04                   - shl eax,04
+00590766 - 8b 4c 10 64                - mov ecx,[eax+edx+64]
+0059076A - 8d 44 10 64                - lea eax,[eax+edx+64]
+0059076E - 03 cb                      - add ecx,ebx
+00590770 - 89 08                      - mov [eax],ecx                  设施米道额外收粮置入结果数组
+
+【钱粮收入-港关和城市循环】
+00590772 - 8b 5c 24 18                - mov ebx,[esp+18]               ebx = 设施指针
+00590776 - 8b 44 24 1c                - mov eax,[esp+1c]               eax = 港关顺序
+0059077A - 40                         - inc eax
+0059077B - 83 f8 05                   - cmp eax,05                     一个城市最多只有5个港、关
+0059077E - 89 44 24 1c                - mov [esp+1c],eax
+00590782 - 0f 8c f8 fe ff ff          - jl 00590680                    循环下一个港、关
+00590788 - 8b 44 24 20                - mov eax,[esp+20]               eax = 设施ID(城市)
+0059078C - 40                         - inc eax
+0059078D - 83 f8 29                   - cmp eax,29                     城市最多42个
+00590790 - 89 44 24 20                - mov [esp+20],eax
+00590794 - 0f 8e 2c fd ff ff          - jng 005904c6                   循环下一个城市
+
+【以下一系列处理未明，猜测是为了下一步准备数组】
+0059079A - 33 d2                      - xor edx,edx
+0059079C - 83 c8 ff                   - or eax,ff
+0059079F - b9 57 00 00 00             - mov ecx,00000057
+005907A4 - 8d bc 24 a4 04 00 00       - lea edi,[esp+000004a4]
+005907AB - f3 ab                      - repe stosd
+005907AD - b9 4c 04 00 00             - mov ecx,0000044c
+005907B2 - 33 c0                      - xor eax,eax
+005907B4 - 8d bc 24 20 06 00 00       - lea edi,[esp+00000620]
+005907BB - c7 84 24 a0 04 00 00 9c b0 84 00 - mov [esp+000004a0],0084b09c
+005907C6 - 89 94 24 0c 06 00 00       - mov [esp+0000060c],edx
+005907CD - 89 94 24 10 06 00 00       - mov [esp+00000610],edx
+005907D4 - 89 94 24 08 06 00 00       - mov [esp+00000608],edx
+005907DB - 89 94 24 04 06 00 00       - mov [esp+00000604],edx
+005907E2 - 89 94 24 14 06 00 00       - mov [esp+00000614],edx
+005907E9 - c7 84 24 18 06 00 00 0a 00 00 00 - mov [esp+00000618],0000000a
+005907F4 - 89 94 24 1c 06 00 00       - mov [esp+0000061c],edx
+005907FB - c7 84 24 00 06 00 00 44 bf 79 00 - mov [esp+00000600],0079bf44
+00590806 - f3 ab                      - repe stosd
+00590808 - 83 c8 ff                   - or eax,ff
+0059080B - b9 57 00 00 00             - mov ecx,00000057
+00590810 - 8d bc 24 e4 01 00 00       - lea edi,[esp+000001e4]
+00590817 - f3 ab                      - repe stosd
+00590819 - 33 c0                      - xor eax,eax
+0059081B - b9 57 00 00 00             - mov ecx,00000057
+00590820 - 8d bc 24 40 03 00 00       - lea edi,[esp+00000340]
+00590827 - c7 84 24 e0 01 00 00 9c b0 84 00 - mov [esp+000001e0],0084b09c
+00590832 - 33 db                      - xor ebx,ebx
+00590834 - 89 94 24 5c 17 00 00       - mov [esp+0000175c],edx
+0059083B - f3 ab                      - repe stosd
+0059083D - 33 f6                      - xor esi,esi
+0059083F - 90                         - nop
+
+【金钱支出-设施循环】
+[获取设施指针并校验]
+00590840 - 53                         - push ebx
+00590841 - b9 58 19 20 07             - mov ecx,07201958
+00590846 - e8 b5 04 f0 ff             - call 00490d00                      根据设施ID获取设施指针
+0059084B - 8b e8                      - mov ebp,eax                        ebp = 设施指针
+0059084D - 55                         - push ebp
+0059084E - e8 dd 9d ee ff             - call 0047a630                      校验指针
+00590853 - 83 c4 04                   - add esp,04
+00590856 - 85 c0                      - test eax,eax
+00590858 - 0f 84 ac 01 00 00          - je 00590a0a                        校验失败则跳转到循环下一个设施
+[获取势力指针并校验]
+0059085E - 8b 45 00                   - mov eax,[ebp+00]
+00590861 - 8b cd                      - mov ecx,ebp
+00590863 - ff 50 40                   - call dword ptr [eax+40]            获取所属势力ID
+00590866 - 50                         - push eax
+00590867 - b9 58 19 20 07             - mov ecx,07201958
+0059086C - e8 2f 02 f0 ff             - call 00490aa0                      根据势力ID获取势力指针
+00590871 - 50                         - push eax
+00590872 - e8 b9 9d ee ff             - call 0047a630                      校验指针
+00590877 - 83 c4 04                   - add esp,04
+0059087A - 85 c0                      - test eax,eax
+0059087C - 0f 84 88 01 00 00          - je 00590a0a                        校验失败则跳转到循环下一个设施
+[获取设施现有金钱]
+00590882 - 8b cd                      - mov ecx,ebp
+00590884 - e8 f7 63 ef ff             - call 00486c80                      获取城市、港、关金钱
+00590889 - 8b f8                      - mov edi,eax                        edi = 现有金钱
+
+【城市、港、关ID校验】
+0059088B - 89 74 24 3c                - mov [esp+3c],esi
+0059088F - 89 74 24 40                - mov [esp+40],esi
+00590893 - 89 74 24 38                - mov [esp+38],esi
+00590897 - 89 74 24 34                - mov [esp+34],esi
+0059089B - 89 74 24 44                - mov [esp+44],esi
+0059089F - c7 44 24 48 0a 00 00 00    - mov [esp+48],0000000a
+005908A7 - 89 74 24 4c                - mov [esp+4c],esi
+005908AB - c7 44 24 30 44 bf 79 00    - mov [esp+30],0079bf44
+[城市]
+005908B3 - 3b de                      - cmp ebx,esi
+005908B5 - c6 84 24 5c 17 00 00 01    - mov byte ptr [esp+0000175c],01
+005908BD - 7c 09                      - jnge 005908c8
+005908BF - 83 fb 29                   - cmp ebx,29
+005908C2 - 7f 04                      - jg 005908c8                        确保城市ID在0～41之间
+005908C4 - 8b c3                      - mov eax,ebx                        eax = 设施ID
+005908C6 - eb 38                      - jmp 00590900
+[关隘]
+005908C8 - 83 fb 2a                   - cmp ebx,2a
+005908CB - 7c 16                      - jnge 005908e3
+005908CD - 83 fb 33                   - cmp ebx,33
+005908D0 - 7f 11                      - jg 005908e3
+005908D2 - 8d 43 d6                   - lea eax,[ebx-2a]                   eax = 关隘ID
+005908D5 - 3b c6                      - cmp eax,esi
+005908D7 - 7c 24                      - jnge 005908fd
+005908D9 - 83 f8 09                   - cmp eax,09
+005908DC - 7f 1f                      - jg 005908fd                        确保关隘ID在0～9之间
+005908DE - 83 c0 2a                   - add eax,2a                         eax = 设施ID
+005908E1 - eb 1d                      - jmp 00590900
+[港口]
+005908E3 - 83 fb 34                   - cmp ebx,34
+005908E6 - 7c 15                      - jnge 005908fd
+005908E8 - 83 fb 56                   - cmp ebx,56
+005908EB - 7f 10                      - jg 005908fd
+005908ED - 8d 43 cc                   - lea eax,[ebx-34]                   eax = 港口ID
+005908F0 - 3b c6                      - cmp eax,esi
+005908F2 - 7c 09                      - jnge 005908fd
+005908F4 - 83 f8 22                   - cmp eax,22
+005908F7 - 7f 04                      - jg 005908fd                        确保港口ID在0～34之间
+005908F9 - 8b c3                      - mov eax,ebx
+005908FB - eb 03                      - jmp 00590900
+[其他]
+005908FD - 83 c8 ff                   - or eax,ff                          eax = -1(不是城市、港、关)
+
+【俘虏支出】
+[计算俘虏金钱支出]
+00590900 - 6a 20                      - push 20                            0x20 = 00100000b(俘虏)
+00590902 - 50                         - push eax                           eax = 设施ID
+00590903 - 8d 4c 24 38                - lea ecx,[esp+38]                   ecx = 输入及返回参数列表指针
+00590907 - 51                         - push ecx
+00590908 - b9 08 98 99 07             - mov ecx,07999808
+0059090D - e8 de e9 f3 ff             - call 004cf2f0                      获取指定所在指定状态武将的个数
+00590912 - 85 c0                      - test eax,eax
+00590914 - 7e 6d                      - jle 00590983                       如果俘虏数量为0则跳转到现役武将俸禄支出计算
+00590916 - b8 1f 85 eb 51             - mov eax,51eb851f
+0059091B - f7 ef                      - imul edi
+0059091D - c1 fa 04                   - sar dl,04
+00590920 - 8b c2                      - mov eax,edx
+00590922 - c1 e8 1f                   - shr eax,1f
+00590925 - 03 c2                      - add eax,edx                        eax = 现有金钱*0.02(即可支付俘虏数量)
+00590927 - 8b 54 24 3c                - mov edx,[esp+3c]                   edx = 俘虏数量
+0059092B - 3b d0                      - cmp edx,eax
+0059092D - 7d 02                      - jnl 00590931                       如果俘虏数量大于设施最大可以支付的俘虏数量，则取可支付俘虏数量进行计算
+0059092F - 8b c2                      - mov eax,edx                        eax = 俘虏数量
+00590931 - 8b c8                      - mov ecx,eax
+00590933 - 6b c9 32                   - imul ecx,ecx,32                    0x32 = 50(俘虏金钱支出)                       【修改】imul ecx,ecx,00  //俘虏不耗费金钱
+00590936 - 2b d0                      - sub edx,eax
+00590938 - 8b f2                      - mov esi,edx                        esi = 俘虏数量-可支付俘虏数量
+0059093A - 2b f9                      - sub edi,ecx                        edi = 现有金钱-俘虏支出
+0059093C - 85 f6                      - test esi,esi
+0059093E - 7e 41                      - jle 00590981                       如果金钱足够则跳过俘虏逃走准备                【修改】jmp 00590981  //金钱不足俘虏也不会逃走
+[金钱为0俘虏逃走准备]
+00590940 - 6a 00                      - push 00
+00590942 - 6a 00                      - push 00
+00590944 - 68 20 c3 58 00             - push 0058c320
+00590949 - 6a 01                      - push 01
+0059094B - 8d 4c 24 40                - lea ecx,[esp+40]
+0059094F - e8 ac 98 f1 ff             - call 004aa200
+00590954 - 3b 74 24 3c                - cmp esi,[esp+3c]
+00590958 - 7d 15                      - jnl 0059096f
+0059095A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+00590960 - 8d 4c 24 30                - lea ecx,[esp+30]
+00590964 - e8 a7 84 f1 ff             - call 004a8e10
+00590969 - 3b 74 24 3c                - cmp esi,[esp+3c]
+0059096D - 7c f1                      - jnge 00590960
+0059096F - 8d 54 24 30                - lea edx,[esp+30]
+00590973 - 52                         - push edx
+00590974 - 55                         - push ebp
+00590975 - 8d 8c 24 a8 04 00 00       - lea ecx,[esp+000004a8]
+0059097C - e8 4f c8 ff ff             - call 0058d1d0
+
+【现役武将俸禄支出】
+00590981 - 33 f6                      - xor esi,esi
+00590983 - 6a 0f                      - push 0f                            0x0f = 00001111b(君主、都督、太守、一般)
+00590985 - 55                         - push ebp                           ebp = 设施指针
+00590986 - 8d 44 24 38                - lea eax,[esp+38]                   ecx = 输入及返回参数列表指针
+0059098A - 50                         - push eax
+0059098B - b9 08 98 99 07             - mov ecx,07999808
+00590990 - e8 cb e9 f3 ff             - call 004cf360                      获取指定设施指定状态的武将列表
+00590995 - 85 c0                      - test eax,eax
+00590997 - 7e 29                      - jle 005909c2                       如果现役数量为0则跳过俸禄计算
+00590999 - 8d 4c 24 30                - lea ecx,[esp+30]                   ecx = 输入及返回参数列表指针
+0059099D - 51                         - push ecx
+0059099E - b9 cc b3 80 07             - mov ecx,0780b3cc
+005909A3 - e8 f8 e8 f0 ff             - call 0049f2a0                      获取武将列表的俸禄和
+005909A8 - 3b c7                      - cmp eax,edi
+005909AA - 7f 04                      - jg 005909b0                        若俸禄和大于考虑俘虏支出后的现有金钱则跳转到武将掉忠准备
+005909AC - 2b f8                      - sub edi,eax                        edi = 现有金钱-俘虏支出-现役武将俸禄支出
+005909AE - eb 12                      - jmp 005909c2                       跳转到城市、港、关金钱支出处理
+[金钱为0武将掉忠准备]
+005909B0 - 8d 54 24 30                - lea edx,[esp+30]
+005909B4 - 52                         - push edx
+005909B5 - 55                         - push ebp
+005909B6 - 8d 8c 24 e8 01 00 00       - lea ecx,[esp+000001e8]
+005909BD - e8 1e cc ff ff             - call 0058d5e0
+[城市、港、关金钱支出]
+005909C2 - 33 c0                      - xor eax,eax
+005909C4 - 3b fe                      - cmp edi,esi
+005909C6 - 0f 9c c0                   - setl al
+005909C9 - b9 5c 89 99 07             - mov ecx,0799895c
+005909CE - 48                         - dec eax
+005909CF - 23 c7                      - and eax,edi                        以上五句，如果支出后金钱小于0则按0处理
+005909D1 - 50                         - push eax
+005909D2 - 55                         - push ebp                           ebp = 设施指针
+005909D3 - e8 78 c5 f1 ff             - call 004acf50                      设置城市、港、关金钱
+[以下一系列处理未明，猜测是数组使用完后的清理]
+005909D8 - c7 44 24 30 34 bf 79 00    - mov [esp+30],0079bf34
+005909E0 - 8d 4c 24 30                - lea ecx,[esp+30]
+005909E4 - c6 84 24 5c 17 00 00 02    - mov byte ptr [esp+0000175c],02
+005909EC - e8 5f b4 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+005909F1 - 8d 4c 24 30                - lea ecx,[esp+30]
+005909F5 - c6 84 24 5c 17 00 00 00    - mov byte ptr [esp+0000175c],00
+005909FD - c7 44 24 30 14 bf 79 00    - mov [esp+30],0079bf14
+00590A05 - e8 46 b4 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+
+【金钱支出-设施循环】
+00590A0A - 43                         - inc ebx
+00590A0B - 83 fb 57                   - cmp ebx,57
+00590A0E - 0f 8c 2c fe ff ff          - jl 00590840
+
+【金钱为0实际处理】
+[俘虏逃走处理]
+00590A14 - 8d 8c 24 a0 04 00 00       - lea ecx,[esp+000004a0]
+00590A1B - e8 10 ca ff ff             - call 0058d430
+[忠诚下降处理]
+00590A20 - 8d 8c 24 e0 01 00 00       - lea ecx,[esp+000001e0]
+00590A27 - e8 64 b7 ff ff             - call 0058c190
+
+【自动生产-城市循环】
+[获取指针并校验]
+00590A2C - 89 74 24 1c                - mov [esp+1c],esi                   esi = 0
+00590A30 - 8b 44 24 1c                - mov eax,[esp+1c]
+00590A34 - 50                         - push eax
+00590A35 - b9 58 19 20 07             - mov ecx,07201958
+00590A3A - e8 d1 ff ef ff             - call 00490a10                      根据城市ID获取城市指针
+00590A3F - 8b 10                      - mov edx,[eax]
+00590A41 - 8b c8                      - mov ecx,eax
+00590A43 - 89 44 24 20                - mov [esp+20],eax                   [esp+20] = 城市指针
+00590A47 - ff 52 54                   - call dword ptr [edx+54]            获取城市太守ID
+00590A4A - 50                         - push eax
+00590A4B - b9 58 19 20 07             - mov ecx,07201958
+00590A50 - e8 ab 00 f0 ff             - call 00490b00                      根据武将ID获取武将指针
+00590A55 - 50                         - push eax
+00590A56 - 89 44 24 30                - mov [esp+30],eax                   [esp+30](实际是[esp+28]) = 武将指针(太守)
+00590A5A - e8 d1 9b ee ff             - call 0047a630                      校验指针
+00590A5F - 83 c4 04                   - add esp,04
+00590A62 - 85 c0                      - test eax,eax
+00590A64 - 0f 84 47 01 00 00          - je 00590bb1                        校验失败则跳转到
+[循环兵种]
+00590A6A - be 01 00 00 00             - mov esi,00000001                   0x01 = 枪
+00590A6F - 90                         - nop
+00590A70 - 56                         - push esi
+00590A71 - e8 0a e2 ee ff             - call 0047ec80                      根据兵种(0～11)获取兵科类型(0～5)
+[城市特产判定]
+00590A76 - 8b 4c 24 24                - mov ecx,[esp+24]                   ecx = 城市指针
+00590A7A - 83 c4 04                   - add esp,04
+00590A7D - 50                         - push eax                           eax = 指定兵科类型(0～5)
+00590A7E - e8 1d a9 ee ff             - call 0047b3a0                      判断城市特产是否是指定值
+00590A83 - 84 c0                      - test al,al
+00590A85 - 0f 86 1c 01 00 00          - jbe 00590ba7                       如果城市特产不是指定值则循环下一个兵种
+[获得特产相关的内政设施类型ID]
+00590A8B - 56                         - push esi
+00590A8C - b9 cc b3 80 07             - mov ecx,0780b3cc
+00590A91 - e8 ba c4 f0 ff             - call 0049cf50                      根据兵种(0～11)返回相应内政设施类型ID(剑=-1,枪戟弩=34,骑=35,攻具=36,舰船=37)
+[获得特产相关的内政设施个数]
+00590A96 - 8b 7c 24 20                - mov edi,[esp+20]                   edi = 城市指针
+00590A9A - 33 ed                      - xor ebp,ebp
+00590A9C - 81 c7 f4 00 00 00          - add edi,000000f4                   edi = 城市指针+f4
+00590AA2 - c7 44 24 24 1e 00 00 00    - mov [esp+24],0000001e              0x1e = 30(城市最大内政设施数量)
+00590AAA - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+00590AB0 - 8b 1f                      - mov ebx,[edi]                      ebx = 内政设施指针
+00590AB2 - 53                         - push ebx
+00590AB3 - e8 78 9b ee ff             - call 0047a630                      校验指针
+00590AB8 - 83 c4 04                   - add esp,04
+00590ABB - 85 c0                      - test eax,eax
+00590ABD - 74 11                      - je 00590ad0                        校验失败则循环下一个内政设施
+00590ABF - 53                         - push ebx                           ebx = 内政设施指针                    
+00590AC0 - 56                         - push esi                           esi = 兵种
+00590AC1 - b9 cc b3 80 07             - mov ecx,0780b3cc
+00590AC6 - e8 e5 c4 f0 ff             - call 0049cfb0                      判断内政设施是否与兵种相对应且已建设完毕
+00590ACB - 85 c0                      - test eax,eax
+00590ACD - 74 01                      - je 00590ad0
+00590ACF - 45                         - inc ebp                            ebp = 特产相关的内政设施个数
+00590AD0 - 8b 44 24 24                - mov eax,[esp+24]
+00590AD4 - 83 c7 08                   - add edi,08
+00590AD7 - 48                         - dec eax
+00590AD8 - 89 44 24 24                - mov [esp+24],eax
+00590ADC - 75 d2                      - jne 00590ab0
+[计算产量倍率]
+00590ADE - 85 ed                      - test ebp,ebp
+00590AE0 - 0f 8e c1 00 00 00          - jng 00590ba7                       如果特产相关的内政设施个数为0则跳转到循环下一个兵种
+00590AE6 - 83 fd 01                   - cmp ebp,01
+00590AE9 - 75 0a                      - jne 00590af5
+00590AEB - c7 44 24 18 00 00 80 3f    - mov [esp+18],3f800000              0x3f800000 = 1.0f(正常产量倍率)
+00590AF3 - eb 55                      - jmp 00590b4a
+00590AF5 - 83 fd 03                   - cmp ebp,03
+00590AF8 - 7f 17                      - jg 00590b11
+00590AFA - 4d                         - dec ebp
+00590AFB - 89 6c 24 14                - mov [esp+14],ebp
+00590AFF - db 44 24 14                - fild dword ptr [esp+14]
+00590B03 - d8 0d c8 e9 74 00          - fmul dword ptr [0074e9c8]          [0074e9c8] = 0.5f
+00590B09 - d8 05 18 e7 74 00          - fadd dword ptr [0074e718]          [0074e718] = 1.0f
+00590B0F - eb 35                      - jmp 00590b46                       2～3个内政设施，产量倍率 = 1+设施数*0.5
+00590B11 - 83 fd 07                   - cmp ebp,07
+00590B14 - 7f 19                      - jg 00590b2f
+00590B16 - 83 c5 fd                   - add ebp,fd
+00590B19 - 89 6c 24 14                - mov [esp+14],ebp
+00590B1D - db 44 24 14                - fild dword ptr [esp+14]
+00590B21 - d8 0d 5c aa 77 00          - fmul dword ptr [0077aa5c]          [0077aa5c] = 0.25f
+00590B27 - d8 05 38 b3 77 00          - fadd dword ptr [0077b338]          [0074e718] = 2.0f
+00590B2D - eb 17                      - jmp 00590b46                       4～7个内政设施，产量倍率 = 2+设施数*0.25
+00590B2F - 83 c5 f9                   - add ebp,f9
+00590B32 - 89 6c 24 14                - mov [esp+14],ebp
+00590B36 - db 44 24 14                - fild dword ptr [esp+14]
+00590B3A - d8 0d 88 cc 79 00          - fmul dword ptr [0079cc88]          [0079cc88] = 0.1f
+00590B40 - d8 05 ec 4f 79 00          - fadd dword ptr [00794fec]          [00794fec] = 3.0f
+00590B46 - d9 5c 24 18                - fstp dword ptr [esp+18]            8个以上内政设施，产量倍率 = 3+设施数*0.1
+[计算产量]
+00590B4A - 8b 4c 24 2c                - mov ecx,[esp+2c]                   ecx = 武将指针(太守)
+00590B4E - e8 4d 85 ef ff             - call 004890a0                      获取武将政治
+00590B53 - 0f b6 c0                   - movzx eax,al                       eax = 武将政治(太守)
+00590B56 - d1 e8                      - shr eax,1
+00590B58 - 83 c0 3c                   - add eax,3c
+00590B5B - 89 44 24 14                - mov [esp+14],eax                   eax = 政治/2+60
+00590B5F - db 44 24 14                - fild dword ptr [esp+14]
+00590B63 - d8 4c 24 18                - fmul dword ptr [esp+18]
+00590B67 - d8 0d ec 4f 79 00          - fmul dword ptr [00794fec]          [00794fec] = 3.0f
+00590B6D - e8 02 6f 17 00             - call 00707a74                      浮点计算结果转整数置入eax
+[产量上限判定]
+00590B72 - 3d dc 05 00 00             - cmp eax,000005dc
+00590B77 - 7e 05                      - jle 00590b7e
+00590B79 - b8 dc 05 00 00             - mov eax,000005dc                   0x05dc = 1500(产量上限)
+[城市兵装增加]
+00590B7E - 8b 7c 24 20                - mov edi,[esp+20]                   edi = 城市指针
+00590B82 - 50                         - push eax                           eax = 特产兵装产量
+00590B83 - 56                         - push esi                           esi = 兵种
+00590B84 - 8b cf                      - mov ecx,edi
+00590B86 - e8 35 b9 ee ff             - call 0047c4c0                      根据城市指针获取设施指针
+00590B8B - 50                         - push eax
+00590B8C - b9 5c 89 99 07             - mov ecx,0799895c
+00590B91 - e8 9a d8 f1 ff             - call 004ae430
+[城市兵装增加演示]
+00590B96 - 6a 00                      - push 00
+00590B98 - 57                         - push edi
+00590B99 - 8d 4e 07                   - lea ecx,[esi+07]
+00590B9C - 51                         - push ecx
+00590B9D - 8b 4c 24 34                - mov ecx,[esp+34]
+00590BA1 - 50                         - push eax
+00590BA2 - e8 a9 7f ff ff             - call 00588b50
+[循环兵种]
+00590BA7 - 46                         - inc esi
+00590BA8 - 83 fe 04                   - cmp esi,04                         产量自动增加的兵种是1～4(枪戟弩骑)
+00590BAB - 0f 8e bf fe ff ff          - jng 00590a70                       循环下一个兵种
+
+【自动生产-城市循环】
+00590BB1 - 8b 44 24 1c                - mov eax,[esp+1c]
+00590BB5 - 40                         - inc eax
+00590BB6 - 83 f8 2a                   - cmp eax,2a
+00590BB9 - 89 44 24 1c                - mov [esp+1c],eax
+00590BBD - 0f 8c 6d fe ff ff          - jl 00590a30
+
+【以下一系列处理未明，猜测是数组使用完后的清理】
+00590BC3 - 8d 94 24 00 06 00 00       - lea edx,[esp+00000600]
+00590BCA - 89 54 24 14                - mov [esp+14],edx
+00590BCE - c7 84 24 00 06 00 00 34 bf 79 00 - mov [esp+00000600],0079bf34
+00590BD9 - 8b ca                      - mov ecx,edx
+00590BDB - c7 84 24 5c 17 00 00 03 00 00 00 - mov [esp+0000175c],00000003
+00590BE6 - e8 65 b2 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+00590BEB - 8d 8c 24 00 06 00 00       - lea ecx,[esp+00000600]
+00590BF2 - c7 84 24 5c 17 00 00 ff ff ff ff - mov [esp+0000175c],ffffffff
+00590BFD - c7 84 24 00 06 00 00 14 bf 79 00 - mov [esp+00000600],0079bf14
+00590C08 - e8 43 b2 ee ff             - call 0047be50                      作用未明，应该是重置列表数组
+00590C0D - 8b 8c 24 54 17 00 00       - mov ecx,[esp+00001754]
+00590C14 - 5f                         - pop edi
+
+00590C15 - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+00590C1C - 5e                         - pop esi
+00590C1D - 5d                         - pop ebp
+00590C1E - 5b                         - pop ebx
+00590C1F - 8b e5                      - mov esp,ebp
+00590C21 - 5d                         - pop ebp
+00590C22 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改1 - 兵临城下无收入
+005904FE - e9 ed 9f 31 00             - jmp 008aa4f0
+00590503 - 90                         - nop
+
+008AA4F0 - 7f 14                      - jg 008aa506
+008AA4F2 - 53                         - push ebx                       ebx = 设施指针(城市)
+008AA4F3 - b9 5c 89 99 07             - mov ecx,0799895c
+008AA4F8 - e8 b3 f4 c0 ff             - call 004b99b0                  判断城市、港关附近（城市3格，港关2格）是否有敌方部队
+008AA4FD - 85 c0                      - test eax,eax
+008AA4FF - 75 05                      - jne 008aa506
+008AA501 - e9 fe 5f ce ff             - jmp 00590504
+008AA506 - e9 7d 62 ce ff             - jmp 00590788
+
+
+=====================================================================================================================================================
+
+修改2 - 富豪米道效果自定义
+0059056A - e8 61 9f 31 00             - call 008aa4d0                  富豪实收(城市)
+00590629 - e8 b2 9e 31 00             - call 008aa4e0                  米道实收(城市)
+005906E3 - e8 e8 9d 31 00             - call 008aa4d0                  富豪实收(港关)
+00590738 - e8 a3 9d 31 00             - call 008aa4e0                  米道实收(港关)
+
+008AA4D0 - 69 c0 32 00 00 00          - imul eax,eax,00000032          富豪效果倍率(0x32表示50%，每增加或减少1表示倍率上调或下降1%)
+008AA4D6 - b9 64 00 00 00             - mov ecx,00000064
+008AA4DB - 99                         - cdq
+008AA4DC - f7 f9                      - idiv ecx
+008AA4DE - c3                         - ret
+008AA4DF - cc                         - int 3
+
+008AA4E0 - 69 c0 32 00 00 00          - imul eax,eax,00000032          米道效果倍率(0x32表示50%，每增加或减少1表示倍率上调或下降1%)
+008AA4E6 - b9 64 00 00 00             - mov ecx,00000064
+008AA4EB - 99                         - cdq
+008AA4EC - f7 f9                      - idiv ecx
+008AA4EE - c3                         - ret
+008AA4EF - cc                         - int 3

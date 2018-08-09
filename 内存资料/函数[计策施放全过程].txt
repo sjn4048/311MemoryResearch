@@ -1,0 +1,265 @@
+00589290函数  CALL 00593620    单一的CALL计略【00598C20调用00589290函数，该函数貌似会SCAN全地图的落石】
+005892E0函数  CALL 00593620    好像CALL了好多
+
+00593620
+0059367C调用本函数，之后是连环和反计的处理
+0059369C - 6a 42                      - push 42                            连环
+005939DE - 6a 44                      - push 44                            反计
+00593A75再次调用本函数，是连环和反计所用到的
+
+005933A0 - 83 ec 0c                   - sub esp,0c
+005933A3 - 53                         - push ebx
+005933A4 - 55                         - push ebp
+005933A5 - 56                         - push esi
+005933A6 - 8b 74 24 1c                - mov esi,[esp+1c]
+005933AA - 8b 46 04                   - mov eax,[esi+04]
+005933AD - 57                         - push edi
+005933AE - 89 4c 24 10                - mov [esp+10],ecx
+005933B2 - 50                         - push eax
+005933B3 - b9 58 19 20 07             - mov ecx,07201958
+005933B8 - e8 b3 da ef ff             - call 00490e70                      根据部队ID获得部队指针
+005933BD - 8b f8                      - mov edi,eax                        EDI是用计部队指针
+005933BF - 8b 46 08                   - mov eax,[esi+08]
+005933C2 - 89 44 24 20                - mov [esp+20],eax
+005933C6 - 8b 4c 24 20                - mov ecx,[esp+20]
+005933CA - 0f bf c0                   - movsx eax,ax
+005933CD - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005933D3 - c1 f9 10                   - sar cl,10
+005933D6 - 03 c1                      - add eax,ecx
+005933D8 - 8d 0c 80                   - lea ecx,[eax+eax*4]
+005933DB - 8d 0c 8d 68 0e fb 06       - lea ecx,[ecx*4+06fb0e68]
+005933E2 - e8 59 07 ef ff             - call 00483b40                      根据地图格指针获得部队指针
+005933E7 - 8b 17                      - mov edx,[edi]
+005933E9 - 8b cf                      - mov ecx,edi
+005933EB - 89 44 24 20                - mov [esp+20],eax
+005933EF - ff 52 3c                   - call dword ptr [edx+3c]            获得坐标地址
+005933F2 - 8b 16                      - mov edx,[esi]
+005933F4 - 8d 4c 24 14                - lea ecx,[esp+14]
+005933F8 - 51                         - push ecx
+005933F9 - 8b 4e 08                   - mov ecx,[esi+08]
+005933FC - 52                         - push edx
+005933FD - 8b 10                      - mov edx,[eax]
+005933FF - 51                         - push ecx
+00593400 - 52                         - push edx
+00593401 - 57                         - push edi
+00593402 - e8 e9 c0 01 00             - call 005af4f0                      计算计策成功
+00593407 - 8b e8                      - mov ebp,eax
+00593409 - 83 c4 14                   - add esp,14
+0059340C - 33 db                      - xor ebx,ebx
+0059340E - 85 ed                      - test ebp,ebp
+00593410 - 74 1c                      - je 0059342e                        不成功则跳转
+00593412 - 8b 07                      - mov eax,[edi]
+00593414 - 8b cf                      - mov ecx,edi
+00593416 - ff 50 3c                   - call dword ptr [eax+3c]            获得坐标地址
+00593419 - 8b 0e                      - mov ecx,[esi]
+0059341B - 8b 56 08                   - mov edx,[esi+08]
+0059341E - 8b 00                      - mov eax,[eax]
+00593420 - 51                         - push ecx
+00593421 - 52                         - push edx
+00593422 - 50                         - push eax
+00593423 - 57                         - push edi
+00593424 - e8 f7 c3 01 00             - call 005af820                      计算是否爆击
+00593429 - 83 c4 10                   - add esp,10
+0059342C - 8b d8                      - mov ebx,eax                        爆击标志位置入EBX
+
+【施放部队耗气】
+0059342E - 8b 44 24 24                - mov eax,[esp+24]
+00593432 - 85 c0                      - test eax,eax                       ？？计略不耗气则跳转，[esp+24]不知是什么参数
+00593434 - 75 18                      - jne 0059344e
+00593436 - 8b 0e                      - mov ecx,[esi]
+00593438 - 51                         - push ecx
+00593439 - 8b cf                      - mov ecx,edi
+0059343B - e8 30 1d f0 ff             - call 00495170                      计算计略实际耗气（有百出OR无百出）
+00593440 - f7 d8                      - neg eax
+00593442 - 50                         - push eax
+00593443 - 8b cf                      - mov ecx,edi
+00593445 - e8 a6 30 f0 ff             - call 004964f0                      释放部队减气
+0059344A - 8b 44 24 24                - mov eax,[esp+24]
+
+【用计实际处理】
+0059344E - 8b 0e                      - mov ecx,[esi]                      [esi]中是用计的种类
+00593450 - 83 f9 08                   - cmp ecx,08
+00593453 - 0f 87 ef 00 00 00          - ja 00593548
+00593459 - ff 24 8d fc 35 59 00       - jmp dword ptr [ecx*4+005935fc]     根据不同用计种类跳转
+[火计]
+00593460 - 8b 54 24 18                - mov edx,[esp+18]
+00593464 - 8b 4c 24 28                - mov ecx,[esp+28]
+00593468 - 52                         - push edx
+00593469 - 51                         - push ecx
+0059346A - 8b 4c 24 18                - mov ecx,[esp+18]
+0059346E - 50                         - push eax
+0059346F - 53                         - push ebx
+00593470 - 55                         - push ebp
+00593471 - 56                         - push esi
+00593472 - e8 f9 dd ff ff             - call 00591270                      火计演示与处理
+00593477 - e9 cc 00 00 00             - jmp 00593548
+[灭火]
+0059347C - 8b 54 24 18                - mov edx,[esp+18]
+00593480 - 8b 4c 24 28                - mov ecx,[esp+28]
+00593484 - 52                         - push edx
+00593485 - 51                         - push ecx
+00593486 - 8b 4c 24 18                - mov ecx,[esp+18]
+0059348A - 50                         - push eax
+0059348B - 53                         - push ebx
+0059348C - 55                         - push ebp
+0059348D - 56                         - push esi
+0059348E - e8 4d e1 ff ff             - call 005915e0                      灭火演示与处理
+00593493 - e9 b0 00 00 00             - jmp 00593548
+[伪报]
+00593498 - 8b 54 24 18                - mov edx,[esp+18]
+0059349C - 8b 4c 24 28                - mov ecx,[esp+28]
+005934A0 - 52                         - push edx
+005934A1 - 51                         - push ecx
+005934A2 - 8b 4c 24 18                - mov ecx,[esp+18]
+005934A6 - 50                         - push eax
+005934A7 - 53                         - push ebx
+005934A8 - 55                         - push ebp
+005934A9 - 56                         - push esi
+005934AA - e8 21 e3 ff ff             - call 005917d0                      伪报演示与处理
+005934AF - e9 94 00 00 00             - jmp 00593548
+[扰乱]
+005934B4 - 8b 54 24 18                - mov edx,[esp+18]
+005934B8 - 8b 4c 24 28                - mov ecx,[esp+28]
+005934BC - 52                         - push edx
+005934BD - 51                         - push ecx
+005934BE - 8b 4c 24 18                - mov ecx,[esp+18]
+005934C2 - 50                         - push eax
+005934C3 - 53                         - push ebx
+005934C4 - 55                         - push ebp
+005934C5 - 56                         - push esi
+005934C6 - e8 55 e5 ff ff             - call 00591a20                      扰乱演示与处理
+005934CB - eb 7b                      - jmp 00593548
+[镇静]
+005934CD - 8b 54 24 18                - mov edx,[esp+18]
+005934D1 - 8b 4c 24 28                - mov ecx,[esp+28]
+005934D5 - 52                         - push edx
+005934D6 - 51                         - push ecx
+005934D7 - 8b 4c 24 18                - mov ecx,[esp+18]
+005934DB - 50                         - push eax
+005934DC - 53                         - push ebx
+005934DD - 55                         - push ebp
+005934DE - 56                         - push esi
+005934DF - e8 8c e7 ff ff             - call 00591c70                      镇静演示与处理
+005934E4 - eb 62                      - jmp 00593548
+[伏兵]
+005934E6 - 8b 54 24 18                - mov edx,[esp+18]
+005934EA - 8b 4c 24 28                - mov ecx,[esp+28]
+005934EE - 52                         - push edx
+005934EF - 51                         - push ecx
+005934F0 - 8b 4c 24 18                - mov ecx,[esp+18]
+005934F4 - 50                         - push eax
+005934F5 - 53                         - push ebx
+005934F6 - 55                         - push ebp
+005934F7 - 56                         - push esi
+005934F8 - e8 43 f2 ff ff             - call 00592740                      伏兵演示与处理
+005934FD - eb 49                      - jmp 00593548
+[内讧]
+005934FF - 8b 54 24 18                - mov edx,[esp+18]
+00593503 - 8b 4c 24 28                - mov ecx,[esp+28]
+00593507 - 52                         - push edx
+00593508 - 51                         - push ecx
+00593509 - 8b 4c 24 18                - mov ecx,[esp+18]
+0059350D - 50                         - push eax
+0059350E - 53                         - push ebx
+0059350F - 55                         - push ebp
+00593510 - 56                         - push esi
+00593511 - e8 6a f5 ff ff             - call 00592a80                      内讧演示与处理
+00593516 - eb 30                      - jmp 00593548
+[妖术]
+00593518 - 8b 54 24 18                - mov edx,[esp+18]
+0059351C - 8b 4c 24 28                - mov ecx,[esp+28]
+00593520 - 52                         - push edx
+00593521 - 51                         - push ecx
+00593522 - 8b 4c 24 18                - mov ecx,[esp+18]
+00593526 - 50                         - push eax
+00593527 - 53                         - push ebx
+00593528 - 55                         - push ebp
+00593529 - 56                         - push esi
+0059352A - e8 21 eb ff ff             - call 00592050                      妖术演示与处理
+0059352F - eb 17                      - jmp 00593548
+[落雷]
+00593531 - 8b 54 24 18                - mov edx,[esp+18]
+00593535 - 8b 4c 24 28                - mov ecx,[esp+28]
+00593539 - 52                         - push edx
+0059353A - 51                         - push ecx
+0059353B - 8b 4c 24 18                - mov ecx,[esp+18]
+0059353F - 50                         - push eax
+00593540 - 53                         - push ebx
+00593541 - 55                         - push ebp
+00593542 - 56                         - push esi
+00593543 - e8 88 f9 ff ff             - call 00592ed0                      落雷演示与处理
+
+
+00593548 - 8b 44 24 18                - mov eax,[esp+18]
+0059354C - 85 c0                      - test eax,eax
+0059354E - 0f 84 8e 00 00 00          - je 005935e2
+00593554 - 8b 74 24 20                - mov esi,[esp+20]
+00593558 - 56                         - push esi
+00593559 - e8 d2 70 ee ff             - call 0047a630
+0059355E - 83 c4 04                   - add esp,04
+00593561 - 85 c0                      - test eax,eax
+00593563 - 74 7d                      - je 005935e2
+00593565 - 8b 5c 24 10                - mov ebx,[esp+10]
+00593569 - 6a 00                      - push 00
+0059356B - 56                         - push esi
+0059356C - 6a 54                      - push 54
+0059356E - 8b cb                      - mov ecx,ebx
+00593570 - e8 4b 64 ff ff             - call 005899c0
+00593575 - 56                         - push esi
+00593576 - 6a 5f                      - push 5f
+00593578 - 8b cb                      - mov ecx,ebx
+0059357A - e8 01 64 ff ff             - call 00589980
+0059357F - 85 f6                      - test esi,esi
+00593581 - 74 11                      - je 00593594
+00593583 - 8b 3e                      - mov edi,[esi]
+00593585 - e8 d6 58 ed ff             - call 00468e60                      eax＝11
+0059358A - 50                         - push eax
+0059358B - 8b ce                      - mov ecx,esi
+0059358D - ff 57 2c                   - call dword ptr [edi+2c]            在EAX＝11的情况下返回1，EDI是用计部队指针
+00593590 - 85 c0                      - test eax,eax
+00593592 - 75 02                      - jne 00593596
+00593594 - 33 f6                      - xor esi,esi                        ESI置0
+00593596 - 56                         - push esi                           ESI是？？部队指针
+00593597 - e8 94 70 ee ff             - call 0047a630
+0059359C - 83 c4 04                   - add esp,04
+0059359F - 85 c0                      - test eax,eax
+005935A1 - 74 43                      - je 005935e6                        校验失败跳转
+005935A3 - 8b ce                      - mov ecx,esi
+005935A5 - e8 96 24 f0 ff             - call 00495a40                      获取部队主将地址
+005935AA - 56                         - push esi
+005935AB - 8b f8                      - mov edi,eax
+005935AD - e8 4e d1 00 00             - call 005a0700
+005935B2 - 83 c4 04                   - add esp,04
+005935B5 - 85 c0                      - test eax,eax
+005935B7 - 75 2d                      - jne 005935e6
+005935B9 - 85 ff                      - test edi,edi
+005935BB - 74 29                      - je 005935e6
+005935BD - 68 00 00 80 bf             - push bf800000
+005935C2 - 57                         - push edi
+005935C3 - 6a 45                      - push 45
+005935C5 - b9 10 98 11 09             - mov ecx,09119810
+005935CA - e8 01 e4 f3 ff             - call 004d19d0
+005935CF - 8b cb                      - mov ecx,ebx
+005935D1 - e8 fa af fe ff             - call 0057e5d0
+005935D6 - 5f                         - pop edi
+005935D7 - 5e                         - pop esi
+005935D8 - 8b c5                      - mov eax,ebp
+005935DA - 5d                         - pop ebp
+005935DB - 5b                         - pop ebx
+005935DC - 83 c4 0c                   - add esp,0c
+005935DF - c2 0c 00                   - ret 000c
+005935E2 - 8b 5c 24 10                - mov ebx,[esp+10]
+005935E6 - 8b cb                      - mov ecx,ebx
+005935E8 - e8 e3 af fe ff             - call 0057e5d0
+005935ED - 5f                         - pop edi
+005935EE - 5e                         - pop esi
+005935EF - 8b c5                      - mov eax,ebp
+005935F1 - 5d                         - pop ebp
+005935F2 - 5b                         - pop ebx
+005935F3 - 83 c4 0c                   - add esp,0c
+005935F6 - c2 0c 00                   - ret 000c
+
+数据区
+005935FC - 60 34 59 00 7C 34 59 00 98 34 59 00 B4 34 59 00 
+           CD 34 59 00 E6 34 59 00 FF 34 59 00 18 35 59 00 
+           31 35 59 00

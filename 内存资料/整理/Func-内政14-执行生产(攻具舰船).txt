@@ -1,0 +1,236 @@
+功能: 执行生产(攻具舰船)
+参数表: [esp+04]=存放执行生产系列参数的数组指针
+
+*****************************************************************************************************************************************************
+
+005C6EB0 - 55                         - push ebp
+005C6EB1 - 8b ec                      - mov ebp,esp
+005C6EB3 - 83 e4 f8                   - and esp,f8
+005C6EB6 - 81 ec cc 07 00 00          - sub esp,000007cc
+005C6EBC - 53                         - push ebx
+005C6EBD - 56                         - push esi
+005C6EBE - 57                         - push edi
+
+【获取指针并校验】
+[获取城市指针]
+005C6EBF - 8b 7d 08                   - mov edi,[ebp+08]
+005C6EC2 - 8b 07                      - mov eax,[edi]                      eax = 设施指针
+005C6EC4 - 50                         - push eax
+005C6EC5 - b9 58 19 20 07             - mov ecx,07201958
+005C6ECA - e8 a1 a8 ec ff             - call 00491770                      根据设施指针获取设施ID
+005C6ECF - 85 c0                      - test eax,eax
+005C6ED1 - 7c 05                      - jnge 005c6ed8
+005C6ED3 - 83 f8 29                   - cmp eax,29
+005C6ED6 - 7e 03                      - jle 005c6edb
+005C6ED8 - 83 c8 ff                   - or eax,ff                          设施ID不在0～41之间则设置为-1
+005C6EDB - 50                         - push eax                           eax = 设施ID(0～41)
+005C6EDC - b9 58 19 20 07             - mov ecx,07201958
+005C6EE1 - e8 2a 9b ec ff             - call 00490a10                      根据城市ID获取城市指针
+005C6EE6 - 8b f0                      - mov esi,eax                        esi = 城市指针
+005C6EE8 - 56                         - push esi
+005C6EE9 - 89 74 24 28                - mov [esp+28],esi
+005C6EED - e8 3e 37 eb ff             - call 0047a630                      校验指针
+005C6EF2 - 83 c4 04                   - add esp,04
+005C6EF5 - 85 c0                      - test eax,eax
+005C6EF7 - 0f 84 b8 00 00 00          - je 005c6fb5                        校验失败则跳转到返回
+[获取城市君主指针]
+005C6EFD - 8b ce                      - mov ecx,esi                        esi = 城市指针
+005C6EFF - e8 ac 46 eb ff             - call 0047b5b0                      获取城市君主ID
+005C6F04 - 50                         - push eax
+005C6F05 - b9 58 19 20 07             - mov ecx,07201958
+005C6F0A - e8 f1 9b ec ff             - call 00490b00                      根据武将ID获取武将指针
+005C6F0F - 50                         - push eax
+005C6F10 - 89 44 24 20                - mov [esp+20],eax
+005C6F14 - e8 17 37 eb ff             - call 0047a630                      校验指针
+005C6F19 - 83 c4 04                   - add esp,04
+005C6F1C - 85 c0                      - test eax,eax
+005C6F1E - 0f 84 91 00 00 00          - je 005c6fb5                        校验失败则跳转到返回
+[获取兵装指针]
+005C6F24 - 8b 5f 10                   - mov ebx,[edi+10]                   eax = 生产兵装类型ID
+005C6F27 - 53                         - push ebx
+005C6F28 - b9 58 19 20 07             - mov ecx,07201958
+005C6F2D - 89 5c 24 1c                - mov [esp+1c],ebx
+005C6F31 - e8 8a 9c ec ff             - call 00490bc0                      根据兵装ID获取兵装指针
+005C6F36 - 50                         - push eax
+005C6F37 - 89 44 24 24                - mov [esp+24],eax
+005C6F3B - e8 f0 36 eb ff             - call 0047a630                      校验指针
+005C6F40 - 83 c4 04                   - add esp,04
+005C6F43 - 85 c0                      - test eax,eax
+005C6F45 - 74 6e                      - je 005c6fb5                        校验失败则跳转到返回
+
+【获取执行武将中勋功最高的武将用于消息演示】
+005C6F47 - 8d 47 04                   - lea eax,[edi+04]
+005C6F4A - c7 44 24 0c 00 00 00 00    - mov [esp+0c],00000000
+005C6F52 - c7 44 24 28 00 00 00 80    - mov [esp+28],80000000
+005C6F5A - 89 44 24 14                - mov [esp+14],eax
+005C6F5E - c7 44 24 10 03 00 00 00    - mov [esp+10],00000003
+005C6F66 - 8b 44 24 14                - mov eax,[esp+14]
+005C6F6A - 8b 30                      - mov esi,[eax]                      esi = 武将指针
+005C6F6C - 56                         - push esi
+005C6F6D - e8 be 36 eb ff             - call 0047a630                      校验指针
+005C6F72 - 83 c4 04                   - add esp,04
+005C6F75 - 85 c0                      - test eax,eax
+005C6F77 - 74 15                      - je 005c6f8e                        校验失败则跳转循环下一个武将
+005C6F79 - 0f b7 86 ae 00 00 00       - movzx eax,word ptr [esi+000000ae]  eax = 武将勋功
+005C6F80 - 39 44 24 28                - cmp [esp+28],eax
+005C6F84 - 7d 08                      - jnl 005c6f8e
+005C6F86 - 89 74 24 0c                - mov [esp+0c],esi
+005C6F8A - 89 44 24 28                - mov [esp+28],eax
+005C6F8E - 8b 4c 24 14                - mov ecx,[esp+14]
+005C6F92 - 8b 44 24 10                - mov eax,[esp+10]
+005C6F96 - 83 c1 04                   - add ecx,04
+005C6F99 - 48                         - dec eax
+005C6F9A - 89 4c 24 14                - mov [esp+14],ecx
+005C6F9E - 89 44 24 10                - mov [esp+10],eax
+005C6FA2 - 75 c2                      - jne 005c6f66                       循环下一个武将
+005C6FA4 - 8b 4c 24 0c                - mov ecx,[esp+0c]                   ecx = 武将指针(勋功最高)
+005C6FA8 - 51                         - push ecx
+005C6FA9 - e8 82 36 eb ff             - call 0047a630                      校验指针
+005C6FAE - 83 c4 04                   - add esp,04
+005C6FB1 - 85 c0                      - test eax,eax
+005C6FB3 - 75 09                      - jne 005c6fbe                       校验成功则跳转到后续处理
+
+【校验失败返回】
+005C6FB5 - 33 c0                      - xor eax,eax
+005C6FB7 - 5f                         - pop edi
+005C6FB8 - 5e                         - pop esi
+005C6FB9 - 5b                         - pop ebx
+005C6FBA - 8b e5                      - mov esp,ebp
+005C6FBC - 5d                         - pop ebp
+005C6FBD - c3                         - ret
+
+【显示执行消息和武将语言】
+005C6FBE - 8b 17                      - mov edx,[edi]                      edx = 设施指针
+005C6FC0 - 52                         - push edx
+005C6FC1 - e8 ba 11 ff ff             - call 005b8180                      判断设施是否属于玩家势力第一军团
+005C6FC6 - 83 c4 04                   - add esp,04
+005C6FC9 - 85 c0                      - test eax,eax
+005C6FCB - 74 63                      - je 005c7030
+005C6FCD - 8d 49 00                   - lea ecx,[ecx+00]
+005C6FD0 - 6a 03                      - push 03
+005C6FD2 - e8 79 b1 ea ff             - call 00472150
+005C6FD7 - 0f b7 c0                   - movzx eax,ax
+005C6FDA - 8b 5c 87 04                - mov ebx,[edi+eax*4+04]
+005C6FDE - 83 c4 04                   - add esp,04
+005C6FE1 - 85 db                      - test ebx,ebx
+005C6FE3 - 74 eb                      - je 005c6fd0
+005C6FE5 - 8b 4c 24 20                - mov ecx,[esp+20]
+005C6FE9 - 8b 54 24 24                - mov edx,[esp+24]
+005C6FED - 8b 44 24 1c                - mov eax,[esp+1c]
+005C6FF1 - 51                         - push ecx
+005C6FF2 - 52                         - push edx
+005C6FF3 - 50                         - push eax
+005C6FF4 - 53                         - push ebx
+005C6FF5 - 68 57 14 00 00             - push 00001457
+005C6FFA - 8d 8c 24 1c 04 00 00       - lea ecx,[esp+0000041c]
+005C7001 - e8 1a c7 ee ff             - call 004b3720
+005C7006 - 8b f0                      - mov esi,eax
+005C7008 - b9 f4 00 00 00             - mov ecx,000000f4
+005C700D - 8d 7c 24 38                - lea edi,[esp+38]
+005C7011 - f3 a5                      - repe movsd
+005C7013 - 8d 4c 24 38                - lea ecx,[esp+38]
+005C7017 - 51                         - push ecx
+005C7018 - e8 73 43 ed ff             - call 0049b390
+005C701D - 6a 00                      - push 00
+005C701F - 53                         - push ebx
+005C7020 - 50                         - push eax
+005C7021 - e8 6a f6 f2 ff             - call 004f6690
+005C7026 - 8b 7d 08                   - mov edi,[ebp+08]
+005C7029 - 8b 5c 24 28                - mov ebx,[esp+28]
+005C702D - 83 c4 10                   - add esp,10
+
+【生产处理】
+[计算生产耗时]
+005C7030 - 8d 77 04                   - lea esi,[edi+04]
+005C7033 - 8b d6                      - mov edx,esi
+005C7035 - 8b 02                      - mov eax,[edx]
+005C7037 - 8b 4a 04                   - mov ecx,[edx+04]
+005C703A - 8b 52 08                   - mov edx,[edx+08]
+005C703D - 89 44 24 2c                - mov [esp+2c],eax
+005C7041 - 8d 44 24 2c                - lea eax,[esp+2c]
+005C7045 - 53                         - push ebx                           ebx = 生产兵装类型
+005C7046 - 50                         - push eax                           eax = 生产武将数组指针
+005C7047 - 89 4c 24 38                - mov [esp+38],ecx
+005C704B - 89 54 24 3c                - mov [esp+3c],edx
+005C704F - e8 4c fc ff ff             - call 005c6ca0                      计算生产耗时
+[设定生产武将留守计数、任务和已行动]
+005C7054 - 8b 4c 24 14                - mov ecx,[esp+14]                   ecx = 武将指针(勋功最高)
+005C7058 - 83 c4 08                   - add esp,08
+005C705B - 51                         - push ecx
+005C705C - b9 58 19 20 07             - mov ecx,07201958
+005C7061 - 89 44 24 20                - mov [esp+20],eax
+005C7065 - e8 a6 a2 ec ff             - call 00491310                      根据武将指针获取武将ID
+005C706A - 89 44 24 18                - mov [esp+18],eax                   [esp+18] = 武将ID(勋功最高)
+005C706E - 89 74 24 0c                - mov [esp+0c],esi
+005C7072 - c7 44 24 10 03 00 00 00    - mov [esp+10],00000003
+005C707A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+005C7080 - 8b 54 24 0c                - mov edx,[esp+0c]
+005C7084 - 8b 32                      - mov esi,[edx]                      esi = 武将指针
+005C7086 - 56                         - push esi
+005C7087 - e8 a4 35 eb ff             - call 0047a630                      校验指针
+005C708C - 83 c4 04                   - add esp,04
+005C708F - 85 c0                      - test eax,eax
+005C7091 - 74 42                      - je 005c70d5                        校验失败则跳转循环下一个武将
+005C7093 - 8b 4c 24 18                - mov ecx,[esp+18]
+005C7097 - 8b 07                      - mov eax,[edi]                      eax = 设施指针
+005C7099 - 6a 00                      - push 00
+005C709B - 6a 00                      - push 00
+005C709D - 51                         - push ecx                           ecx = 任务序列号
+005C709E - 53                         - push ebx                           ebx = 生产兵装类型
+005C709F - 50                         - push eax
+005C70A0 - b9 58 19 20 07             - mov ecx,07201958
+005C70A5 - e8 c6 a6 ec ff             - call 00491770                      根据设施指针获取设施ID
+005C70AA - 50                         - push eax                           eax = 设施ID
+005C70AB - 6a 02                      - push 02                            0x02 = 生产(任务ID)
+005C70AD - 56                         - push esi                           esi = 武将指针
+005C70AE - b9 5c 89 99 07             - mov ecx,0799895c
+005C70B3 - e8 58 03 ee ff             - call 004a7410                      设置武将任务与任务对象
+005C70B8 - 8b 54 24 1c                - mov edx,[esp+1c]                   edx = 留守计时
+005C70BC - 52                         - push edx
+005C70BD - 56                         - push esi                           esi = 武将指针
+005C70BE - b9 5c 89 99 07             - mov ecx,0799895c
+005C70C3 - e8 98 e5 ed ff             - call 004a5660
+005C70C8 - 6a 01                      - push 01                            0x01 = 已行动
+005C70CA - 56                         - push esi                           esi = 武将指针
+005C70CB - b9 5c 89 99 07             - mov ecx,0799895c
+005C70D0 - e8 2b e5 ed ff             - call 004a5600                      设置武将状态是否为已行动
+005C70D5 - 8b 4c 24 0c                - mov ecx,[esp+0c]
+005C70D9 - 8b 44 24 10                - mov eax,[esp+10]
+005C70DD - 83 c1 04                   - add ecx,04
+005C70E0 - 48                         - dec eax
+005C70E1 - 89 4c 24 0c                - mov [esp+0c],ecx
+005C70E5 - 89 44 24 10                - mov [esp+10],eax
+005C70E9 - 75 95                      - jne 005c7080                       循环下一个武将
+[城市空闲工房/船厂数量减1]
+005C70EB - 8b 74 24 24                - mov esi,[esp+24]                   esi = 城市指针
+005C70EF - 6a ff                      - push ff                            0xff = -1
+005C70F1 - 53                         - push ebx                           ebx = 生产兵装类型
+005C70F2 - 56                         - push esi
+005C70F3 - b9 5c 89 99 07             - mov ecx,0799895c
+005C70F8 - e8 e3 cd ee ff             - call 004b3ee0                      城市空闲工房/船厂数量加减
+[城市扣除生产费用]
+005C70FD - 8b 44 24 20                - mov eax,[esp+20]                   eax = 兵装类型指针
+005C7101 - 50                         - push eax
+005C7102 - 56                         - push esi                           esi = 城市指针
+005C7103 - e8 48 f2 ff ff             - call 005c6350                      计算生产价格
+005C7108 - 83 c4 08                   - add esp,08
+005C710B - f7 d8                      - neg eax
+005C710D - 50                         - push eax                           eax = 生产费用
+005C710E - 56                         - push esi                           esi = 城市指针
+005C710F - b9 5c 89 99 07             - mov ecx,0799895c
+005C7114 - e8 87 ca ee ff             - call 004b3ba0                      城市金钱增减
+[扣除军团行动力]
+005C7119 - 8b 0f                      - mov ecx,[edi]                      ecx = 设施指针
+005C711B - 6a 14                      - push 14                            0x14 = 20(扣除的行动力)
+005C711D - 6a 02                      - push 02
+005C711F - 51                         - push ecx
+005C7120 - b9 90 15 77 09             - mov ecx,09771590
+005C7125 - e8 16 22 ff ff             - call 005b9340                      扣除军团行动力
+
+005C712A - 5f                         - pop edi
+005C712B - 5e                         - pop esi
+005C712C - b8 01 00 00 00             - mov eax,00000001
+005C7131 - 5b                         - pop ebx
+005C7132 - 8b e5                      - mov esp,ebp
+005C7134 - 5d                         - pop ebp
+005C7135 - c3                         - ret

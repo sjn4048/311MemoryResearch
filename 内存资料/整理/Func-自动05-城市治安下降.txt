@@ -1,0 +1,157 @@
+功能: 季初城市治安下降
+参数表: eax=当前月份，esi=城市指针
+备注：治安下降公式：
+      下降值 = (90-太守魅力)*0.1+浮动值(0～2)
+      太守魅力89及以上者，按89进行计算
+
+*****************************************************************************************************************************************************
+
+0058D6D0 - 57                         - push edi
+0058D6D1 - 56                         - push esi                       esi = 城市指针
+0058D6D2 - 8b f8                      - mov edi,eax                    edi = 当前月份
+0058D6D4 - e8 57 cf ee ff             - call 0047a630                  检查指针
+0058D6D9 - 83 c4 04                   - add esp,04
+0058D6DC - 85 c0                      - test eax,eax
+0058D6DE - 0f 84 2d 01 00 00          - je 0058d811                    校验失败则跳转到直接返回(治安不下降)
+0058D6E4 - 6a 00                      - push 00
+0058D6E6 - 57                         - push edi
+0058D6E7 - 56                         - push esi
+0058D6E8 - b9 5c 89 99 07             - mov ecx,0799895c
+0058D6ED - e8 6e 65 f2 ff             - call 004b3c60
+0058D6F2 - b9 80 3e c4 09             - mov ecx,09c43e80
+0058D6F7 - e8 54 20 0f 00             - call 0067f750
+0058D6FC - 85 c0                      - test eax,eax
+0058D6FE - 74 17                      - je 0058d717
+0058D700 - a1 80 3e c4 09             - mov eax,[09c43e80]
+0058D705 - 6a 15                      - push 15
+0058D707 - b9 80 3e c4 09             - mov ecx,09c43e80
+0058D70C - ff 50 04                   - call dword ptr [eax+04]        
+0058D70F - 85 c0                      - test eax,eax
+0058D711 - 0f 85 fa 00 00 00          - jne 0058d811
+
+【季初判定】
+0058D717 - 83 ff 01                   - cmp edi,01                     0x01 = 1月
+0058D71A - 74 13                      - je 0058d72f
+0058D71C - 83 ff 04                   - cmp edi,04                     0x04 = 4月
+0058D71F - 74 0e                      - je 0058d72f
+0058D721 - 83 ff 07                   - cmp edi,07                     0x07 = 7月
+0058D724 - 74 09                      - je 0058d72f
+0058D726 - 83 ff 0a                   - cmp edi,0a                     0x10 = 10月
+0058D729 - 0f 85 e2 00 00 00          - jne 0058d811                   不是季初则跳转到直接返回(治安不下降)
+
+【获得势力指针并校验】
+0058D72F - 8b 16                      - mov edx,[esi]                  esi = 城市指针
+0058D731 - 8b ce                      - mov ecx,esi
+0058D733 - ff 52 40                   - call dword ptr [edx+40]        获取所属势力ID
+0058D736 - 85 c0                      - test eax,eax
+0058D738 - 0f 8c d3 00 00 00          - jl 0058d811
+0058D73E - 83 f8 2e                   - cmp eax,2e
+0058D741 - 0f 8f ca 00 00 00          - jg 0058d811                    势力ID若不在0～46之间则跳转到直接返回(治安不下降)
+0058D747 - 8b 06                      - mov eax,[esi]                  esi = 城市指针
+0058D749 - 8b ce                      - mov ecx,esi
+0058D74B - ff 50 40                   - call dword ptr [eax+40]        获取所属势力ID
+0058D74E - 50                         - push eax
+0058D74F - b9 58 19 20 07             - mov ecx,07201958
+0058D754 - e8 47 33 f0 ff             - call 00490aa0                  根据势力ID获取势力指针
+0058D759 - 8b f8                      - mov edi,eax
+0058D75B - 57                         - push edi
+0058D75C - e8 cf ce ee ff             - call 0047a630                  校验指针
+0058D761 - 83 c4 04                   - add esp,04
+0058D764 - 85 c0                      - test eax,eax
+0058D766 - 74 1f                      - je 0058d787                    校验失败则跳过整备政令判定
+
+【整备政令判定】
+0058D768 - 6a 22                      - push 22                        0x22 = 整备政令
+0058D76A - 8b cf                      - mov ecx,edi
+0058D76C - e8 6f 3a ef ff             - call 004811e0                  判断势力是否拥有整备政令科技
+0058D771 - 85 c0                      - test eax,eax
+0058D773 - 74 12                      - je 0058d787                    势力没有整备政令科技则跳过整备政令处理
+0058D775 - 6a 32                      - push 32                        0x32 = 50%(治安不下降概率)                         【修改】整备政令治安不下降概率
+0058D777 - e8 54 4a ee ff             - call 004721d0                  0～100随机函数
+0058D77C - 83 c4 04                   - add esp,04
+0058D77F - 85 c0                      - test eax,eax
+0058D781 - 0f 85 8a 00 00 00          - jne 0058d811                   随机函数结果为1则跳转到直接返回(治安不下降)
+
+【治安下降值计算】
+[获取太守指针]
+0058D787 - 8b 16                      - mov edx,[esi]                  esi = 城市指针
+0058D789 - 53                         - push ebx
+0058D78A - 8b ce                      - mov ecx,esi
+0058D78C - 33 db                      - xor ebx,ebx
+0058D78E - ff 52 54                   - call dword ptr [edx+54]        获取城市太守ID
+0058D791 - 50                         - push eax
+0058D792 - b9 58 19 20 07             - mov ecx,07201958
+0058D797 - e8 64 33 f0 ff             - call 00490b00                  根据武将ID获取武将指针
+0058D79C - 8b f8                      - mov edi,eax                    edi = 武将指针
+0058D79E - 57                         - push edi
+0058D79F - e8 8c ce ee ff             - call 0047a630                  校验指针
+0058D7A4 - 83 c4 04                   - add esp,04
+0058D7A7 - 85 c0                      - test eax,eax
+0058D7A9 - 74 0a                      - je 0058d7b5                    校验失败则跳过获取太守魅力
+[获取太守魅力]
+0058D7AB - 8b cf                      - mov ecx,edi
+0058D7AD - e8 fe b8 ef ff             - call 004890b0                  获取武将魅力
+0058D7B2 - 0f b6 d8                   - movzx ebx,al                   太守魅力置入EBX
+[获取城市治安下降基本参数]
+0058D7B5 - b8 5a 00 00 00             - mov eax,0000005a               阈值90，
+0058D7BA - 2b c3                      - sub eax,ebx
+0058D7BC - 83 f8 01                   - cmp eax,01
+0058D7BF - 5b                         - pop ebx
+0058D7C0 - bf 01 00 00 00             - mov edi,00000001               魅力为90以上，城市治安下降基本参数为1
+0058D7C5 - 7c 02                      - jnge 0058d7c9
+0058D7C7 - 8b f8                      - mov edi,eax                    魅力为90以下，城市治安下降基本参数为90-太守魅力
+[计算治安下降值]
+0058D7C9 - 6a 03                      - push 03
+0058D7CB - e8 80 49 ee ff             - call 00472150                  0～2随机函数
+0058D7D0 - 0f b7 c8                   - movzx ecx,ax
+0058D7D3 - b8 67 66 66 66             - mov eax,66666667
+0058D7D8 - f7 ef                      - imul edi
+0058D7DA - c1 fa 02                   - sar dl,02
+0058D7DD - 8b c2                      - mov eax,edx
+0058D7DF - c1 e8 1f                   - shr eax,1f                     
+0058D7E2 - 03 ca                      - add ecx,edx
+0058D7E4 - 03 c1                      - add eax,ecx                    eax = 治安下降值
+0058D7E6 - 83 c4 04                   - add esp,04
+0058D7E9 - 83 f8 05                   - cmp eax,05                     
+0058D7EC - 7e 05                      - jle 0058d7f3
+0058D7EE - b8 05 00 00 00             - mov eax,00000005               0x05 = 5(治安下降上限)                             【修改】治安下降上限
+
+【治安下降】
+0058D7F3 - f7 d8                      - neg eax
+0058D7F5 - 50                         - push eax
+0058D7F6 - 56                         - push esi
+0058D7F7 - b9 5c 89 99 07             - mov ecx,0799895c
+0058D7FC - e8 cf 66 f2 ff             - call 004b3ed0                  增减城市治安
+0058D801 - 6a 00                      - push 00
+0058D803 - 56                         - push esi
+0058D804 - 6a 06                      - push 06
+0058D806 - 50                         - push eax
+0058D807 - b9 d8 59 6a 09             - mov ecx,096a59d8
+0058D80C - e8 3f b3 ff ff             - call 00588b50                  治安下将演示
+
+0058D811 - 5f                         - pop edi
+0058D812 - c3                         - ret
+
+
+=====================================================================================================================================================
+
+修改 - 有“法治”特技则换季不掉治安
+005C3C1D - e9 a8 cb 34 00             - jmp 009107ca
+
+009107DB - 01 c8                      - add eax,ecx
+009107DD - 8b ce                      - mov ecx,esi
+009107DF - e8 cc ff ff ff             - call 009107b0                  调用法治判定公共函数
+009107E4 - 83 c4 04                   - add esp,04
+009107E7 - e9 fd cf c7 ff             - jmp 0058d7e9
+
+009107B0 - 50                         - push eax                       原治安下将值
+009107B1 - e8 0a bd b6 ff             - call 0047c4c0                  根据城市指针获取设施指针
+009107B6 - 8b c8                      - mov ecx,eax
+009107B8 - 8b 01                      - mov eax,[ecx]
+009107BA - 68 8c 00 00 00             - push 0000008c                  0x8c = 法治
+009107BF - ff 50 58                   - call dword ptr [eax+58]        判断城市中是否有持有法治特技的武将
+009107C2 - 85 c0                      - test eax,eax
+009107C4 - 58                         - pop eax
+009107C5 - 74 02                      - je 009107c9
+009107C7 - 31 c0                      - xor eax,eax                    如有持有法治特技的武将则治安下将值设置为0
+009107C9 - c3                         - ret

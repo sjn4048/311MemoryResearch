@@ -1,0 +1,695 @@
+判定未发现或在野  0058C000
+0058C000 - 56                         - push esi                       esi是武将指针
+0058C001 - e8 2a e6 ee ff             - call 0047a630                  校验指针
+0058C006 - 83 c4 04                   - add esp,04
+0058C009 - 85 c0                      - test eax,eax
+0058C00B - 74 43                      - je 0058c050                    校验失败则返回false
+0058C00D - 8b ce                      - mov ecx,esi
+0058C00F - e8 ec cb ef ff             - call 00488c00                  判定是否是君主
+0058C014 - 85 c0                      - test eax,eax
+0058C016 - 75 38                      - jne 0058c050                   是君主则返回false
+0058C018 - 8b 86 9c 00 00 00          - mov eax,[esi+0000009c]         eax＝所在
+0058C01E - 85 c0                      - test eax,eax
+0058C020 - 7c 05                      - jnge 0058c027
+0058C022 - 83 f8 56                   - cmp eax,56
+0058C025 - 7e 03                      - jle 0058c02a
+0058C027 - 83 c8 ff                   - or eax,ff                      如果所在<0或大于86，则所在等于-1
+0058C02A - 3b 86 98 00 00 00          - cmp eax,[esi+00000098]         判断所在是否与所属相同
+0058C030 - 75 1e                      - jne 0058c050                   不相同则返回false
+0058C032 - 8b ce                      - mov ecx,esi
+0058C034 - e8 37 d2 ef ff             - call 00489270                  eax＝留守计数
+0058C039 - 85 c0                      - test eax,eax
+0058C03B - 75 13                      - jne 0058c050                   留守计数不为0则跳转
+0058C03D - 8b cb                      - mov ecx,ebx                    ebx＝武将指针（应该是发起推荐的武将）
+0058C03F - e8 7c c3 ef ff             - call 004883c0                  根据武将指针获得武将ID
+0058C044 - 50                         - push eax
+0058C045 - 8b ce                      - mov ecx,esi
+0058C047 - e8 94 c9 ef ff             - call 004889e0                  判定A（esi）是否厌恶B（ebx）
+0058C04C - 85 c0                      - test eax,eax
+0058C04E - 74 03                      - je 0058c053                    如果厌恶则返回false，否则继续处理
+0058C050 - 33 c0                      - xor eax,eax                    返回false
+0058C052 - c3                         - ret
+
+0058C053 - 57                         - push edi
+0058C054 - 68 90 00 00 00             - push 00000090                  武将状态是否是未发现或在野
+0058C059 - 8b ce                      - mov ecx,esi
+0058C05B - e8 80 df ef ff             - call 00489fe0                  判定武将状态是否是未发现或在野
+0058C060 - 85 c0                      - test eax,eax
+0058C062 - 0f 84 a8 00 00 00          - je 0058c110                    不是未发现或在野则跳转返回0
+0058C068 - 8b 46 64                   - mov eax,[esi+64]               eax＝义兄弟ID
+0058C06B - 50                         - push eax
+0058C06C - b9 58 19 20 07             - mov ecx,07201958
+0058C071 - e8 8a 4a f0 ff             - call 00490b00                  根据武将ID获得武将指针
+0058C076 - 8b f8                      - mov edi,eax                    edi＝武将指针
+0058C078 - 57                         - push edi
+0058C079 - e8 b2 e5 ee ff             - call 0047a630                  校验指针
+0058C07E - 83 c4 04                   - add esp,04
+0058C081 - 85 c0                      - test eax,eax
+0058C083 - 74 28                      - je 0058c0ad                    校验不通过跳转到下一个处理
+0058C085 - 8b 07                      - mov eax,[edi]
+0058C087 - 8b cf                      - mov ecx,edi
+0058C089 - ff 50 40                   - call dword ptr [eax+40]        获取义兄弟势力ID
+0058C08C - 50                         - push eax
+0058C08D - e8 1e 63 e8 ff             - call 004123b0                  校验势力ID
+0058C092 - 83 c4 04                   - add esp,04
+0058C095 - 85 c0                      - test eax,eax
+0058C097 - 74 14                      - je 0058c0ad                    校验不通过跳转到下一个处理
+0058C099 - 8b 17                      - mov edx,[edi]
+0058C09B - 8b cf                      - mov ecx,edi
+0058C09D - ff 52 40                   - call dword ptr [edx+40]        获取义兄弟势力ID
+0058C0A0 - 8b f8                      - mov edi,eax
+0058C0A2 - 8b 03                      - mov eax,[ebx]
+0058C0A4 - 8b cb                      - mov ecx,ebx
+0058C0A6 - ff 50 40                   - call dword ptr [eax+40]        获取推荐人所在势力
+0058C0A9 - 3b f8                      - cmp edi,eax                    是否势力相同
+0058C0AB - 75 63                      - jne 0058c110                   不相同则返回false
+
+0058C0AD - 8b 46 60                   - mov eax,[esi+60]               以下一段为配偶处理，与义兄弟一段一样
+0058C0B0 - 50                         - push eax
+0058C0B1 - b9 58 19 20 07             - mov ecx,07201958
+0058C0B6 - e8 45 4a f0 ff             - call 00490b00
+0058C0BB - 8b f8                      - mov edi,eax
+0058C0BD - 57                         - push edi
+0058C0BE - e8 6d e5 ee ff             - call 0047a630
+0058C0C3 - 83 c4 04                   - add esp,04
+0058C0C6 - 85 c0                      - test eax,eax
+0058C0C8 - 74 28                      - je 0058c0f2
+0058C0CA - 8b 17                      - mov edx,[edi]
+0058C0CC - 8b cf                      - mov ecx,edi
+0058C0CE - ff 52 40                   - call dword ptr [edx+40]
+0058C0D1 - 50                         - push eax
+0058C0D2 - e8 d9 62 e8 ff             - call 004123b0
+0058C0D7 - 83 c4 04                   - add esp,04
+0058C0DA - 85 c0                      - test eax,eax
+0058C0DC - 74 14                      - je 0058c0f2
+0058C0DE - 8b 07                      - mov eax,[edi]
+0058C0E0 - 8b cf                      - mov ecx,edi
+0058C0E2 - ff 50 40                   - call dword ptr [eax+40]
+0058C0E5 - 8b 13                      - mov edx,[ebx]
+0058C0E7 - 8b cb                      - mov ecx,ebx
+0058C0E9 - 8b f8                      - mov edi,eax
+0058C0EB - ff 52 40                   - call dword ptr [edx+40]
+0058C0EE - 3b f8                      - cmp edi,eax
+0058C0F0 - 75 1e                      - jne 0058c110
+
+0058C0F2 - 53                         - push ebx                       ebx＝武将指针（应该是发起推荐的武将）
+0058C0F3 - b9 58 19 20 07             - mov ecx,07201958
+0058C0F8 - e8 13 52 f0 ff             - call 00491310                  根据武将指针获得武将ID
+0058C0FD - 50                         - push eax
+0058C0FE - 8b ce                      - mov ecx,esi
+0058C100 - e8 7b de ef ff             - call 00489f80                  计算两人的相性差
+0058C105 - 3c 14                      - cmp al,14                      相性差大于20则返回false
+0058C107 - 77 07                      - ja 0058c110
+0058C109 - b8 01 00 00 00             - mov eax,00000001               返回True
+0058C10E - 5f                         - pop edi
+0058C10F - c3                         - ret
+0058C110 - 33 c0                      - xor eax,eax
+0058C112 - 5f                         - pop edi
+0058C113 - c3                         - ret
+
+
+
+
+0058FC90 - 55                         - push ebp
+0058FC91 - 8b ec                      - mov ebp,esp
+0058FC93 - 83 e4 f8                   - and esp,f8
+0058FC96 - 6a ff                      - push ff
+0058FC98 - 68 1d 39 73 00             - push 0073391d : [8911F8B8]
+0058FC9D - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+0058FCA3 - 50                         - push eax
+0058FCA4 - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+0058FCAB - 81 ec 34 0b 00 00          - sub esp,00000b34
+0058FCB1 - 53                         - push ebx
+0058FCB2 - 55                         - push ebp
+0058FCB3 - 56                         - push esi
+0058FCB4 - 57                         - push edi
+0058FCB5 - b9 58 19 20 07             - mov ecx,07201958
+0058FCBA - e8 b1 28 ef ff             - call 00482570                  获取从开始时间到当前旬为止过去的年数
+0058FCBF - 83 f8 01                   - cmp eax,01
+0058FCC2 - 0f 82 ab 07 00 00          - jb 00590473                    ？？当前旬小于一定值则返回...
+0058FCC8 - b9 58 19 20 07             - mov ecx,07201958
+0058FCCD - e8 fe 2c ef ff             - call 004829d0                  判断是否是季度初
+0058FCD2 - 85 c0                      - test eax,eax
+0058FCD4 - 0f 85 99 07 00 00          - jne 00590473                   是季度初则返回（季度初不可能发生推荐）
+0058FCDA - b9 58 19 20 07             - mov ecx,07201958
+0058FCDF - e8 8c 28 ef ff             - call 00482570
+0058FCE4 - 8b c8                      - mov ecx,eax
+0058FCE6 - b8 ab aa aa aa             - mov eax,aaaaaaab
+0058FCEB - f7 e1                      - mul ecx
+0058FCED - d1 ea                      - shr edx,1
+0058FCEF - 83 c2 03                   - add edx,03                     最小触发概率是3％
+0058FCF2 - 83 fa 08                   - cmp edx,08
+0058FCF5 - 72 05                      - jb 0058fcfc
+0058FCF7 - ba 08 00 00 00             - mov edx,00000008               最大触发概率是8％
+0058FCFC - 52                         - push edx
+0058FCFD - e8 ce 24 ee ff             - call 004721d0
+0058FD02 - 83 c4 04                   - add esp,04
+0058FD05 - 85 c0                      - test eax,eax
+0058FD07 - 0f 84 66 07 00 00          - je 00590473                    随机不到则返回
+0058FD0D - b9 58 19 20 07             - mov ecx,07201958
+0058FD12 - e8 a9 12 f0 ff             - call 00490fc0                  ？？返回玩家控制的势力指针
+0058FD17 - 85 c0                      - test eax,eax
+0058FD19 - 0f 84 54 07 00 00          - je 00590473                    不是玩家控制则返回
+0058FD1F - 68 50 c0 47 00             - push 0047c050
+0058FD24 - 68 a0 d1 58 00             - push 0058d1a0
+0058FD29 - 6a 2a                      - push 2a
+0058FD2B - 6a 20                      - push 20
+0058FD2D - 8d 94 24 40 02 00 00       - lea edx,[esp+00000240]
+0058FD34 - 52                         - push edx
+0058FD35 - e8 ac 7e 17 00             - call 00707be6
+
+0058FD3A - 33 ed                      - xor ebp,ebp                    EBP=0
+0058FD3C - 89 ac 24 4c 0b 00 00       - mov [esp+00000b4c],ebp
+0058FD43 - 89 6c 24 54                - mov [esp+54],ebp
+0058FD47 - 89 6c 24 58                - mov [esp+58],ebp
+0058FD4B - 89 6c 24 50                - mov [esp+50],ebp
+0058FD4F - 89 6c 24 4c                - mov [esp+4c],ebp
+0058FD53 - 89 6c 24 5c                - mov [esp+5c],ebp
+0058FD57 - c7 44 24 60 0a 00 00 00    - mov [esp+60],0000000a
+0058FD5F - 89 6c 24 64                - mov [esp+64],ebp
+0058FD63 - c7 44 24 48 44 bf 79 00    - mov [esp+48],0079bf44
+0058FD6B - 68 90 00 00 00             - push 00000090                  90＝未发现＋在野
+0058FD70 - 8d 44 24 4c                - lea eax,[esp+4c]
+0058FD74 - 50                         - push eax
+0058FD75 - b9 08 98 99 07             - mov ecx,07999808
+0058FD7A - c6 84 24 54 0b 00 00 01    - mov byte ptr [esp+00000b54],01
+0058FD82 - e8 e9 f4 f3 ff             - call 004cf270                  
+0058FD87 - 39 6c 24 54                - cmp [esp+54],ebp
+0058FD8B - 75 09                      - jne 0058fd96
+0058FD8D - 8d 4c 24 48                - lea ecx,[esp+48]
+0058FD91 - e9 cc 03 00 00             - jmp 00590162
+
+0058FD96 - 8b 44 24 4c                - mov eax,[esp+4c]
+0058FD9A - 3b c5                      - cmp eax,ebp
+0058FD9C - 89 44 24 14                - mov [esp+14],eax
+0058FDA0 - 0f 84 9f 00 00 00          - je 0058fe45
+0058FDA6 - 8d 54 24 14                - lea edx,[esp+14]
+0058FDAA - 52                         - push edx
+0058FDAB - 8d 4c 24 4c                - lea ecx,[esp+4c]
+0058FDAF - e8 1c c1 ee ff             - call 0047bed0                    列表数组指针后移一个单元
+0058FDB4 - 8b 30                      - mov esi,[eax]
+0058FDB6 - 8b 86 98 00 00 00          - mov eax,[esi+00000098]
+0058FDBC - 3b c5                      - cmp eax,ebp
+0058FDBE - 7c 09                      - jnge 0058fdc9
+0058FDC0 - 83 f8 29                   - cmp eax,29
+0058FDC3 - 7f 04                      - jg 0058fdc9
+0058FDC5 - 8b d8                      - mov ebx,eax
+0058FDC7 - eb 03                      - jmp 0058fdcc
+0058FDC9 - 83 cb ff                   - or ebx,ff
+0058FDCC - 53                         - push ebx
+0058FDCD - b9 58 19 20 07             - mov ecx,07201958
+0058FDD2 - e8 39 0c f0 ff             - call 00490a10
+0058FDD7 - 8b f8                      - mov edi,eax
+0058FDD9 - 57                         - push edi
+0058FDDA - e8 51 a8 ee ff             - call 0047a630
+0058FDDF - 83 c4 04                   - add esp,04
+0058FDE2 - 85 c0                      - test eax,eax
+0058FDE4 - 74 55                      - je 0058fe3b
+0058FDE6 - 8b 07                      - mov eax,[edi]
+0058FDE8 - 8b cf                      - mov ecx,edi
+0058FDEA - ff 50 40                   - call dword ptr [eax+40]
+0058FDED - 83 f8 ff                   - cmp eax,ff
+0058FDF0 - 75 49                      - jne 0058fe3b
+0058FDF2 - 8b ce                      - mov ecx,esi
+0058FDF4 - e8 27 8c ef ff             - call 00488a20
+0058FDF9 - 83 f8 19                   - cmp eax,19
+0058FDFC - 7c 3d                      - jnge 0058fe3b
+0058FDFE - 8b 46 64                   - mov eax,[esi+64]
+0058FE01 - 50                         - push eax
+0058FE02 - b9 58 19 20 07             - mov ecx,07201958
+0058FE07 - e8 f4 0c f0 ff             - call 00490b00
+0058FE0C - 8b f8                      - mov edi,eax
+0058FE0E - 57                         - push edi
+0058FE0F - e8 1c a8 ee ff             - call 0047a630
+0058FE14 - 83 c4 04                   - add esp,04
+0058FE17 - 85 c0                      - test eax,eax
+0058FE19 - 74 04                      - je 0058fe1f
+0058FE1B - 3b f7                      - cmp esi,edi
+0058FE1D - 75 1c                      - jne 0058fe3b
+0058FE1F - e8 9c c0 ff ff             - call 0058bec0
+0058FE24 - 3d ff ff ff 7f             - cmp eax,7fffffff
+0058FE29 - 74 10                      - je 0058fe3b
+0058FE2B - c1 e3 05                   - shl ebx,05
+0058FE2E - 56                         - push esi
+0058FE2F - 8d 8c 1c 34 02 00 00       - lea ecx,[esp+ebx+00000234]
+0058FE36 - e8 75 c3 ee ff             - call 0047c1b0                      列表数组指针前移一个单元并将值置入列表
+0058FE3B - 39 6c 24 14                - cmp [esp+14],ebp 
+0058FE3F - 0f 85 61 ff ff ff          - jne 0058fda6
+0058FE45 - 8d 4c 24 48                - lea ecx,[esp+48]
+0058FE49 - c6 84 24 4c 0b 00 00 00    - mov byte ptr [esp+00000b4c],00
+0058FE51 - e8 aa c2 ee ff             - call 0047c100
+0058FE56 - 33 c0                      - xor eax,eax
+0058FE58 - b9 2a 00 00 00             - mov ecx,0000002a
+0058FE5D - 8d bc 24 a8 00 00 00       - lea edi,[esp+000000a8]
+0058FE64 - f3 ab                      - repe stosd
+0058FE66 - a1 d0 b4 3f 07             - mov eax,[073fb4d0] : [070763CC]
+0058FE6B - 3b c5                      - cmp eax,ebp
+0058FE6D - 89 44 24 14                - mov [esp+14],eax
+0058FE71 - bf 01 00 00 00             - mov edi,00000001
+0058FE76 - 74 53                      - je 0058fecb
+0058FE78 - eb 06                      - jmp 0058fe80
+0058FE7A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+0058FE80 - 8d 4c 24 14                - lea ecx,[esp+14]
+0058FE84 - 51                         - push ecx
+0058FE85 - b9 cc b4 3f 07             - mov ecx,073fb4cc : [0079C8EC]
+0058FE8A - e8 31 24 f0 ff             - call 004922c0
+0058FE8F - 8b 30                      - mov esi,[eax]
+0058FE91 - 56                         - push esi
+0058FE92 - e8 99 a7 ee ff             - call 0047a630
+0058FE97 - 83 c4 04                   - add esp,04
+0058FE9A - 85 c0                      - test eax,eax
+0058FE9C - 74 27                      - je 0058fec5
+0058FE9E - 8b 16                      - mov edx,[esi]
+0058FEA0 - 8b ce                      - mov ecx,esi
+0058FEA2 - ff 52 40                   - call dword ptr [edx+40]
+0058FEA5 - 3b c5                      - cmp eax,ebp
+0058FEA7 - 7c 05                      - jnge 0058feae
+0058FEA9 - 83 f8 29                   - cmp eax,29
+0058FEAC - 7e 17                      - jle 0058fec5
+0058FEAE - 8b ce                      - mov ecx,esi
+0058FEB0 - e8 fb aa ee ff             - call 0047a9b0
+0058FEB5 - 3b c5                      - cmp eax,ebp
+0058FEB7 - 7c 0c                      - jnge 0058fec5
+0058FEB9 - 83 f8 2a                   - cmp eax,2a
+0058FEBC - 7d 07                      - jnl 0058fec5
+0058FEBE - 89 bc 84 a8 00 00 00       - mov [esp+eax*4+000000a8],edi
+0058FEC5 - 39 6c 24 14                - cmp [esp+14],ebp
+0058FEC9 - 75 b5                      - jne 0058fe80
+0058FECB - a1 f0 b4 3f 07             - mov eax,[073fb4f0] : [0713CE94]
+0058FED0 - 3b c5                      - cmp eax,ebp
+0058FED2 - 89 44 24 14                - mov [esp+14],eax
+0058FED6 - 74 60                      - je 0058ff38
+0058FED8 - eb 06                      - jmp 0058fee0
+0058FEDA - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+0058FEE0 - 8d 44 24 14                - lea eax,[esp+14]
+0058FEE4 - 50                         - push eax
+0058FEE5 - b9 ec b4 3f 07             - mov ecx,073fb4ec : [0079C8FC]
+0058FEEA - e8 d1 23 f0 ff             - call 004922c0
+0058FEEF - 8b 30                      - mov esi,[eax]
+0058FEF1 - 56                         - push esi
+0058FEF2 - e8 39 a7 ee ff             - call 0047a630
+0058FEF7 - 83 c4 04                   - add esp,04
+0058FEFA - 85 c0                      - test eax,eax
+0058FEFC - 74 34                      - je 0058ff32
+0058FEFE - 8b 16                      - mov edx,[esi]
+0058FF00 - 8b ce                      - mov ecx,esi
+0058FF02 - ff 52 40                   - call dword ptr [edx+40]
+0058FF05 - 83 f8 2e                   - cmp eax,2e
+0058FF08 - 74 11                      - je 0058ff1b
+0058FF0A - 8b 06                      - mov eax,[esi]
+0058FF0C - 8b ce                      - mov ecx,esi
+0058FF0E - ff 50 40                   - call dword ptr [eax+40]
+0058FF11 - 83 f8 2a                   - cmp eax,2a
+0058FF14 - 7c 1c                      - jnge 0058ff32
+0058FF16 - 83 f8 2d                   - cmp eax,2d
+0058FF19 - 7f 17                      - jg 0058ff32
+0058FF1B - 8b ce                      - mov ecx,esi
+0058FF1D - e8 8e aa ee ff             - call 0047a9b0
+0058FF22 - 3b c5                      - cmp eax,ebp
+0058FF24 - 7c 0c                      - jnge 0058ff32
+0058FF26 - 83 f8 2a                   - cmp eax,2a
+0058FF29 - 7d 07                      - jnl 0058ff32
+0058FF2B - 89 bc 84 a8 00 00 00       - mov [esp+eax*4+000000a8],edi
+0058FF32 - 39 6c 24 14                - cmp [esp+14],ebp
+0058FF36 - 75 a8                      - jne 0058fee0
+0058FF38 - 8d 8c 24 34 02 00 00       - lea ecx,[esp+00000234]
+0058FF3F - c7 44 24 14 ff ff ff ff    - mov [esp+14],ffffffff
+0058FF47 - 33 db                      - xor ebx,ebx
+0058FF49 - c7 44 24 20 ff ff ff 7f    - mov [esp+20],7fffffff
+0058FF51 - 89 6c 24 24                - mov [esp+24],ebp
+0058FF55 - 89 4c 24 1c                - mov [esp+1c],ecx
+0058FF59 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+0058FF60 - 8b 84 ac a8 00 00 00       - mov eax,[esp+ebp*4+000000a8]
+0058FF67 - 85 c0                      - test eax,eax
+0058FF69 - 0f 85 c1 00 00 00          - jne 00590030
+0058FF6F - 83 79 08 01                - cmp dword ptr [ecx+08],01
+0058FF73 - 0f 8c b7 00 00 00          - jl 00590030
+0058FF79 - 8b 01                      - mov eax,[ecx]
+0058FF7B - 85 c0                      - test eax,eax
+0058FF7D - 89 44 24 18                - mov [esp+18],eax
+0058FF81 - 0f 84 a9 00 00 00          - je 00590030
+0058FF87 - 8d 54 24 18                - lea edx,[esp+18]
+0058FF8B - 52                         - push edx
+0058FF8C - 83 c1 fc                   - add ecx,fc
+0058FF8F - e8 3c bf ee ff             - call 0047bed0
+0058FF94 - 8b 30                      - mov esi,[eax]
+0058FF96 - e8 25 bf ff ff             - call 0058bec0
+0058FF9B - 53                         - push ebx
+0058FF9C - 8b f8                      - mov edi,eax
+0058FF9E - e8 8d a6 ee ff             - call 0047a630
+0058FFA3 - 83 c4 04                   - add esp,04
+0058FFA6 - 85 c0                      - test eax,eax
+0058FFA8 - 74 64                      - je 0059000e
+0058FFAA - 8b ce                      - mov ecx,esi
+0058FFAC - e8 cf 87 ef ff             - call 00488780
+0058FFB1 - 85 c0                      - test eax,eax
+0058FFB3 - 74 0b                      - je 0058ffc0
+0058FFB5 - 8b cb                      - mov ecx,ebx
+0058FFB7 - e8 c4 87 ef ff             - call 00488780
+0058FFBC - 85 c0                      - test eax,eax
+0058FFBE - 74 4e                      - je 0059000e
+0058FFC0 - 8b 44 24 20                - mov eax,[esp+20]
+0058FFC4 - 3b f8                      - cmp edi,eax
+0058FFC6 - 7c 46                      - jnge 0059000e
+0058FFC8 - 75 52                      - jne 0059001c
+0058FFCA - 8b ce                      - mov ecx,esi
+0058FFCC - e8 4f 8a ef ff             - call 00488a20
+0058FFD1 - 8b cb                      - mov ecx,ebx
+0058FFD3 - 8b e8                      - mov ebp,eax
+0058FFD5 - e8 46 8a ef ff             - call 00488a20
+0058FFDA - 3b e8                      - cmp ebp,eax
+0058FFDC - 7f 30                      - jg 0059000e
+0058FFDE - 8b ce                      - mov ecx,esi
+0058FFE0 - e8 3b 8a ef ff             - call 00488a20
+0058FFE5 - 8b cb                      - mov ecx,ebx
+0058FFE7 - 8b e8                      - mov ebp,eax
+0058FFE9 - e8 32 8a ef ff             - call 00488a20
+0058FFEE - 3b e8                      - cmp ebp,eax
+0058FFF0 - 75 2a                      - jne 0059001c
+0058FFF2 - 53                         - push ebx
+0058FFF3 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+0058FFF8 - e8 13 13 f0 ff             - call 00491310
+0058FFFD - 56                         - push esi
+0058FFFE - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+00590003 - 8b e8                      - mov ebp,eax
+00590005 - e8 06 13 f0 ff             - call 00491310
+0059000A - 3b c5                      - cmp eax,ebp
+0059000C - 7d 0e                      - jnl 0059001c
+0059000E - 8b 44 24 24                - mov eax,[esp+24]
+00590012 - 89 7c 24 20                - mov [esp+20],edi
+00590016 - 89 44 24 14                - mov [esp+14],eax
+0059001A - 8b de                      - mov ebx,esi
+0059001C - 8b 44 24 18                - mov eax,[esp+18]
+00590020 - 85 c0                      - test eax,eax
+00590022 - 8b 4c 24 1c                - mov ecx,[esp+1c]
+00590026 - 0f 85 5b ff ff ff          - jne 0058ff87
+0059002C - 8b 6c 24 24                - mov ebp,[esp+24]
+00590030 - 45                         - inc ebp
+00590031 - 83 c1 20                   - add ecx,20
+00590034 - 83 fd 2a                   - cmp ebp,2a
+00590037 - 89 6c 24 24                - mov [esp+24],ebp
+0059003B - 89 4c 24 1c                - mov [esp+1c],ecx
+0059003F - 0f 8c 1b ff ff ff          - jl 0058ff60
+00590045 - 8b 7c 24 14                - mov edi,[esp+14]
+00590049 - 57                         - push edi
+0059004A - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+0059004F - e8 bc 09 f0 ff             - call 00490a10
+00590054 - 8b e8                      - mov ebp,eax
+00590056 - 55                         - push ebp
+00590057 - e8 d4 a5 ee ff             - call 0047a630
+0059005C - 83 c4 04                   - add esp,04
+0059005F - 85 c0                      - test eax,eax
+00590061 - 0f 84 08 01 00 00          - je 0059016f
+00590067 - 33 f6                      - xor esi,esi
+00590069 - 89 74 24 34                - mov [esp+34],esi
+0059006D - 89 74 24 38                - mov [esp+38],esi
+00590071 - 89 74 24 30                - mov [esp+30],esi
+00590075 - 89 74 24 2c                - mov [esp+2c],esi
+00590079 - 89 74 24 3c                - mov [esp+3c],esi
+0059007D - c7 44 24 40 0a 00 00 00    - mov [esp+40],0000000a
+00590085 - 89 74 24 44                - mov [esp+44],esi
+00590089 - c7 44 24 28 44 bf 79 00    - mov [esp+28],0079bf44 : [0047C0E0]
+00590091 - c1 e7 05                   - shl edi,05
+00590094 - 8d 94 3c 30 02 00 00       - lea edx,[esp+edi+00000230]
+0059009B - 52                         - push edx
+0059009C - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005900A0 - c6 84 24 50 0b 00 00 02    - mov byte ptr [esp+00000b50],02
+005900A8 - e8 73 f7 f0 ff             - call 0049f820
+005900AD - 56                         - push esi
+005900AE - 53                         - push ebx
+005900AF - 8d 4c 24 30                - lea ecx,[esp+30]
+005900B3 - e8 38 2a ef ff             - call 00482af0
+005900B8 - 3b c6                      - cmp eax,esi
+005900BA - 74 0a                      - je 005900c6
+005900BC - 50                         - push eax
+005900BD - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005900C1 - e8 fa 2e ef ff             - call 00482fc0
+005900C6 - 53                         - push ebx
+005900C7 - e8 64 a5 ee ff             - call 0047a630
+005900CC - 83 c4 04                   - add esp,04
+005900CF - 85 c0                      - test eax,eax
+005900D1 - 0f 84 6a 03 00 00          - je 00590441
+005900D7 - 6a 05                      - push 05
+005900D9 - 6a 08                      - push 08
+005900DB - 6a 04                      - push 04
+005900DD - e8 ce 55 f6 ff             - call 004f56b0
+005900E2 - 83 c4 0c                   - add esp,0c
+005900E5 - 6a 01                      - push 01
+005900E7 - 56                         - push esi
+005900E8 - 56                         - push esi
+005900E9 - 55                         - push ebp
+005900EA - 53                         - push ebx
+005900EB - 68 9b 17 00 00             - push 0000179b
+005900F0 - 8d 8c 24 88 07 00 00       - lea ecx,[esp+00000788]
+005900F7 - e8 44 19 03 00             - call 005c1a40
+005900FC - 50                         - push eax
+005900FD - e8 8e b2 f0 ff             - call 0049b390
+00590102 - 83 c4 04                   - add esp,04
+00590105 - 50                         - push eax
+00590106 - e8 45 53 f6 ff             - call 004f5450
+0059010B - 83 c4 10                   - add esp,10
+0059010E - 6a 01                      - push 01
+00590110 - 53                         - push ebx
+00590111 - 55                         - push ebp
+00590112 - 53                         - push ebx
+00590113 - 68 9c 17 00 00             - push 0000179c
+00590118 - 8d 8c 24 84 07 00 00       - lea ecx,[esp+00000784]
+0059011F - e8 1c 19 03 00             - call 005c1a40
+00590124 - 50                         - push eax
+00590125 - e8 66 b2 f0 ff             - call 0049b390
+0059012A - 83 c4 04                   - add esp,04
+0059012D - 50                         - push eax
+0059012E - e8 0d 55 f6 ff             - call 004f5640
+00590133 - 83 c4 0c                   - add esp,0c
+00590136 - e8 95 55 f6 ff             - call 004f56d0
+0059013B - 56                         - push esi
+0059013C - 6a 09                      - push 09
+0059013E - 6a ff                      - push ff
+00590140 - 6a ff                      - push ff
+00590142 - 53                         - push ebx
+00590143 - b9 5c 89 99 07             - mov ecx,0799895c : [00000000]
+00590148 - e8 b3 71 f2 ff             - call 004b7300
+0059014D - 50                         - push eax
+0059014E - 89 44 24 24                - mov [esp+24],eax
+00590152 - e8 d9 a4 ee ff             - call 0047a630
+00590157 - 83 c4 04                   - add esp,04
+0059015A - 85 c0                      - test eax,eax
+0059015C - 75 27                      - jne 00590185
+0059015E - 8d 4c 24 28                - lea ecx,[esp+28]
+
+00590162 - c6 84 24 4c 0b 00 00 00    - mov byte ptr [esp+00000b4c],00
+0059016A - e8 91 bf ee ff             - call 0047c100
+0059016F - 68 50 c0 47 00             - push 0047c050 : [BF1401C7]
+00590174 - 6a 2a                      - push 2a
+00590176 - 6a 20                      - push 20
+00590178 - 8d 8c 24 3c 02 00 00       - lea ecx,[esp+0000023c]
+0059017F - 51                         - push ecx
+00590180 - e9 de 02 00 00             - jmp 00590463
+00590185 - 8d 8c 24 50 01 00 00       - lea ecx,[esp+00000150]
+0059018C - e8 3f ed ff ff             - call 0058eed0
+00590191 - c6 84 24 4c 0b 00 00 03    - mov byte ptr [esp+00000b4c],03
+00590199 - 8d a4 24 00 00 00 00       - lea esp,[esp+00000000]
+005901A0 - 56                         - push esi
+005901A1 - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+005901A6 - e8 55 09 f0 ff             - call 00490b00
+005901AB - 8b f8                      - mov edi,eax
+005901AD - 57                         - push edi
+005901AE - e8 7d a4 ee ff             - call 0047a630
+005901B3 - 83 c4 04                   - add esp,04
+005901B6 - 85 c0                      - test eax,eax
+005901B8 - 74 30                      - je 005901ea
+005901BA - e8 61 bd ff ff             - call 0058bf20
+005901BF - 85 c0                      - test eax,eax
+005901C1 - 74 27                      - je 005901ea
+005901C3 - 6a 00                      - push 00
+005901C5 - 57                         - push edi
+005901C6 - 8d 4c 24 30                - lea ecx,[esp+30]
+005901CA - e8 21 29 ef ff             - call 00482af0
+005901CF - 85 c0                      - test eax,eax
+005901D1 - 75 17                      - jne 005901ea
+005901D3 - 57                         - push edi
+005901D4 - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005901D8 - e8 d3 bf ee ff             - call 0047c1b0
+005901DD - 57                         - push edi
+005901DE - 8d 8c 24 54 01 00 00       - lea ecx,[esp+00000154]
+005901E5 - e8 26 cf ff ff             - call 0058d110
+005901EA - 46                         - inc esi
+005901EB - 81 fe 4c 04 00 00          - cmp esi,0000044c
+005901F1 - 7c ad                      - jnge 005901a0
+005901F3 - 33 ff                      - xor edi,edi
+005901F5 - 89 7c 24 74                - mov [esp+74],edi
+005901F9 - 89 7c 24 78                - mov [esp+78],edi
+005901FD - 89 7c 24 70                - mov [esp+70],edi
+00590201 - 89 7c 24 6c                - mov [esp+6c],edi
+00590205 - 89 7c 24 7c                - mov [esp+7c],edi
+00590209 - c7 84 24 80 00 00 00 0a 00 00 00 - mov [esp+00000080],0000000a
+00590214 - 89 bc 24 84 00 00 00       - mov [esp+00000084],edi
+0059021B - c7 44 24 68 44 bf 79 00    - mov [esp+68],0079bf44
+00590223 - c6 84 24 4c 0b 00 00 04    - mov byte ptr [esp+00000b4c],04
+0059022B - 89 7c 24 1c                - mov [esp+1c],edi
+0059022F - 90                         - nop
+00590230 - 8b 54 24 1c                - mov edx,[esp+1c]
+00590234 - 52                         - push edx
+00590235 - 8b cd                      - mov ecx,ebp
+00590237 - e8 f4 b9 ee ff             - call 0047bc30
+0059023C - 50                         - push eax
+0059023D - b9 58 19 20 07             - mov ecx,07201958 : [0079C134]
+00590242 - e8 c9 07 f0 ff             - call 00490a10
+00590247 - 8b f0                      - mov esi,eax
+00590249 - 56                         - push esi
+0059024A - e8 e1 a3 ee ff             - call 0047a630
+0059024F - 83 c4 04                   - add esp,04
+00590252 - 85 c0                      - test eax,eax
+00590254 - 0f 84 dd 00 00 00          - je 00590337
+0059025A - 89 bc 24 94 00 00 00       - mov [esp+00000094],edi
+00590261 - 89 bc 24 98 00 00 00       - mov [esp+00000098],edi
+00590268 - 89 bc 24 90 00 00 00       - mov [esp+00000090],edi
+0059026F - 89 bc 24 8c 00 00 00       - mov [esp+0000008c],edi
+00590276 - 89 bc 24 9c 00 00 00       - mov [esp+0000009c],edi
+0059027D - c7 84 24 a0 00 00 00 0a 00 00 00 - mov [esp+000000a0],0000000a
+00590288 - 89 bc 24 a4 00 00 00       - mov [esp+000000a4],edi
+0059028F - c7 84 24 88 00 00 00 44 bf 79 00 - mov [esp+00000088],0079bf44 : [0047C0E0]
+0059029A - 68 9e 00 00 00             - push 0000009e
+0059029F - 8b ce                      - mov ecx,esi
+005902A1 - c6 84 24 50 0b 00 00 05    - mov byte ptr [esp+00000b50],05
+005902A9 - e8 12 c2 ee ff             - call 0047c4c0
+005902AE - 50                         - push eax
+005902AF - 8d 84 24 90 00 00 00       - lea eax,[esp+00000090]
+005902B6 - 50                         - push eax
+005902B7 - b9 08 98 99 07             - mov ecx,07999808 : [00000000]
+005902BC - e8 9f f0 f3 ff             - call 004cf360
+005902C1 - 8b 84 24 8c 00 00 00       - mov eax,[esp+0000008c]
+005902C8 - 3b c7                      - cmp eax,edi
+005902CA - 89 44 24 18                - mov [esp+18],eax
+005902CE - 74 51                      - je 00590321
+005902D0 - 8b 7c 24 14                - mov edi,[esp+14]
+005902D4 - 8d 4c 24 18                - lea ecx,[esp+18]
+005902D8 - 51                         - push ecx
+005902D9 - 8d 8c 24 8c 00 00 00       - lea ecx,[esp+0000008c]
+005902E0 - e8 eb bb ee ff             - call 0047bed0
+005902E5 - 8b 30                      - mov esi,[eax]
+005902E7 - 8b 86 98 00 00 00          - mov eax,[esi+00000098]
+005902ED - 85 c0                      - test eax,eax
+005902EF - 7c 28                      - jnge 00590319
+005902F1 - 83 f8 29                   - cmp eax,29
+005902F4 - 7f 23                      - jg 00590319
+005902F6 - 3b c7                      - cmp eax,edi
+005902F8 - 74 0c                      - je 00590306
+005902FA - 50                         - push eax
+005902FB - 8b cd                      - mov ecx,ebp
+005902FD - e8 2e af ee ff             - call 0047b230
+00590302 - 85 c0                      - test eax,eax
+00590304 - 74 13                      - je 00590319
+00590306 - e8 f5 bc ff ff             - call 0058c000
+0059030B - 85 c0                      - test eax,eax
+0059030D - 74 0a                      - je 00590319
+0059030F - 56                         - push esi
+00590310 - 8d 4c 24 6c                - lea ecx,[esp+6c]
+00590314 - e8 97 be ee ff             - call 0047c1b0
+00590319 - 8b 44 24 18                - mov eax,[esp+18]
+0059031D - 85 c0                      - test eax,eax
+0059031F - 75 b3                      - jne 005902d4
+00590321 - 8d 8c 24 88 00 00 00       - lea ecx,[esp+00000088]
+00590328 - c6 84 24 4c 0b 00 00 04    - mov byte ptr [esp+00000b4c],04
+00590330 - e8 cb bd ee ff             - call 0047c100
+00590335 - 33 ff                      - xor edi,edi
+00590337 - 8b 44 24 1c                - mov eax,[esp+1c]
+0059033B - 40                         - inc eax
+0059033C - 83 f8 06                   - cmp eax,06
+0059033F - 89 44 24 1c                - mov [esp+1c],eax
+00590343 - 0f 8c e7 fe ff ff          - jl 00590230
+00590349 - 6a 04                      - push 04
+0059034B - e8 00 1e ee ff             - call 00472150
+00590350 - 0f b7 e8                   - movzx ebp,ax
+00590353 - 8d 54 24 6c                - lea edx,[esp+6c]
+00590357 - 52                         - push edx
+00590358 - 83 c5 03                   - add ebp,03
+0059035B - e8 e0 eb ff ff             - call 0058ef40
+00590360 - 8b 44 24 74                - mov eax,[esp+74]
+00590364 - 83 c4 08                   - add esp,08
+00590367 - 3b c7                      - cmp eax,edi
+00590369 - 89 44 24 18                - mov [esp+18],eax
+0059036D - 74 42                      - je 005903b1
+0059036F - 90                         - nop
+00590370 - 3b ef                      - cmp ebp,edi
+00590372 - 7e 3d                      - jle 005903b1
+00590374 - 8d 44 24 18                - lea eax,[esp+18]
+00590378 - 50                         - push eax
+00590379 - 8d 4c 24 6c                - lea ecx,[esp+6c]
+0059037D - e8 4e bb ee ff             - call 0047bed0
+00590382 - 8b 30                      - mov esi,[eax]
+00590384 - 57                         - push edi
+00590385 - 56                         - push esi
+00590386 - 8d 4c 24 30                - lea ecx,[esp+30]
+0059038A - e8 61 27 ef ff             - call 00482af0
+0059038F - 85 c0                      - test eax,eax
+00590391 - 75 18                      - jne 005903ab
+00590393 - 56                         - push esi
+00590394 - 8d 4c 24 2c                - lea ecx,[esp+2c]
+00590398 - e8 13 be ee ff             - call 0047c1b0
+0059039D - 56                         - push esi
+0059039E - 8d 8c 24 54 01 00 00       - lea ecx,[esp+00000154]
+005903A5 - e8 66 cd ff ff             - call 0058d110
+005903AA - 4d                         - dec ebp
+005903AB - 39 7c 24 18                - cmp [esp+18],edi
+005903AF - 75 bf                      - jne 00590370
+005903B1 - 8d 4c 24 68                - lea ecx,[esp+68]
+005903B5 - c6 84 24 4c 0b 00 00 03    - mov byte ptr [esp+00000b4c],03
+005903BD - e8 3e bd ee ff             - call 0047c100
+005903C2 - 8b 44 24 2c                - mov eax,[esp+2c]
+005903C6 - 3b c7                      - cmp eax,edi
+005903C8 - 89 44 24 18                - mov [esp+18],eax
+005903CC - 74 48                      - je 00590416
+005903CE - 8b 6c 24 20                - mov ebp,[esp+20]
+005903D2 - 8d 4c 24 18                - lea ecx,[esp+18]
+005903D6 - 51                         - push ecx
+005903D7 - 8d 4c 24 2c                - lea ecx,[esp+2c]
+005903DB - e8 f0 ba ee ff             - call 0047bed0
+005903E0 - 8b 30                      - mov esi,[eax]
+005903E2 - 6a 03                      - push 03
+005903E4 - 53                         - push ebx
+005903E5 - 55                         - push ebp
+005903E6 - 56                         - push esi
+005903E7 - b9 5c 89 99 07             - mov ecx,0799895c : [00000000]
+005903EC - e8 0f ac f1 ff             - call 004ab000
+005903F1 - 57                         - push edi
+005903F2 - 55                         - push ebp
+005903F3 - 56                         - push esi
+005903F4 - b9 5c 89 99 07             - mov ecx,0799895c : [00000000]
+005903F9 - e8 a2 71 f1 ff             - call 004a75a0
+005903FE - 80 be ac 00 00 00 55       - cmp byte ptr [esi+000000ac],55
+00590405 - 73 09                      - jae 00590410
+00590407 - 6a 55                      - push 55
+00590409 - 8b ce                      - mov ecx,esi
+0059040B - e8 60 a3 ef ff             - call 0048a770
+00590410 - 39 7c 24 18                - cmp [esp+18],edi
+00590414 - 75 bc                      - jne 005903d2
+00590416 - 53                         - push ebx
+00590417 - 8d 8c 24 54 01 00 00       - lea ecx,[esp+00000154]
+0059041E - e8 0d f7 ff ff             - call 0058fb30
+00590423 - 68 80 c2 47 00             - push 0047c280 : [FFFE7BE9]
+00590428 - 6a 06                      - push 06
+0059042A - 6a 20                      - push 20
+0059042C - 8d 94 24 5c 01 00 00       - lea edx,[esp+0000015c]
+00590433 - 52                         - push edx
+00590434 - c6 84 24 5c 0b 00 00 02    - mov byte ptr [esp+00000b5c],02
+0059043C - e8 45 77 17 00             - call 00707b86
+00590441 - 8d 4c 24 28                - lea ecx,[esp+28]
+00590445 - c6 84 24 4c 0b 00 00 00    - mov byte ptr [esp+00000b4c],00
+0059044D - e8 ae bc ee ff             - call 0047c100
+00590452 - 68 50 c0 47 00             - push 0047c050 : [BF1401C7]
+00590457 - 6a 2a                      - push 2a
+00590459 - 8d 84 24 38 02 00 00       - lea eax,[esp+00000238]
+00590460 - 6a 20                      - push 20
+00590462 - 50                         - push eax
+00590463 - c7 84 24 5c 0b 00 00 ff ff ff ff - mov [esp+00000b5c],ffffffff
+0059046E - e8 13 77 17 00             - call 00707b86
+00590473 - 8b 8c 24 44 0b 00 00       - mov ecx,[esp+00000b44]
+0059047A - 5f                         - pop edi
+0059047B - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+00590482 - 5e                         - pop esi
+00590483 - 5d                         - pop ebp
+00590484 - 5b                         - pop ebx
+00590485 - 8b e5                      - mov esp,ebp
+00590487 - 5d                         - pop ebp
+00590488 - c3                         - ret

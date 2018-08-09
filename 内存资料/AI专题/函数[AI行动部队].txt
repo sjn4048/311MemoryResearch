@@ -1,0 +1,377 @@
+005AD980 - 53                         - push ebx
+005AD981 - 8b 5c 24 08                - mov ebx,[esp+08]                   ebx=部队指针
+005AD985 - 56                         - push esi
+005AD986 - 53                         - push ebx
+005AD987 - 8b f1                      - mov esi,ecx
+005AD989 - e8 a2 cc ec ff             - call 0047a630
+005AD98E - 83 c4 04                   - add esp,04
+005AD991 - 85 c0                      - test eax,eax
+005AD993 - 0f 84 52 01 00 00          - je 005adaeb
+005AD999 - 8b cb                      - mov ecx,ebx
+005AD99B - e8 20 79 ee ff             - call 004952c0
+005AD9A0 - 85 c0                      - test eax,eax
+005AD9A2 - 0f 85 43 01 00 00          - jne 005adaeb
+005AD9A8 - 8b 43 24                   - mov eax,[ebx+24]                   eax=部队状态
+005AD9AB - 85 c0                      - test eax,eax
+005AD9AD - 0f 85 38 01 00 00          - jne 005adaeb                       异常状态则直接结束
+005AD9B3 - 55                         - push ebp
+005AD9B4 - 57                         - push edi
+005AD9B5 - 53                         - push ebx
+005AD9B6 - 8b ce                      - mov ecx,esi
+005AD9B8 - e8 93 a9 ff ff             - call 005a8350
+005AD9BD - 8b 0e                      - mov ecx,[esi]
+005AD9BF - 8d 44 24 14                - lea eax,[esp+14]
+005AD9C3 - 50                         - push eax
+005AD9C4 - e8 67 02 fc ff             - call 0056dc30
+005AD9C9 - 8b 4c 24 14                - mov ecx,[esp+14]
+005AD9CD - 51                         - push ecx
+005AD9CE - e8 fd 87 ff ff             - call 005a61d0
+005AD9D3 - 8b e8                      - mov ebp,eax
+005AD9D5 - 8b 43 2c                   - mov eax,[ebx+2c]                   eax=部队任务(0＝无任务)
+005AD9D8 - 83 c4 04                   - add esp,04
+005AD9DB - 33 ff                      - xor edi,edi
+005AD9DD - 48                         - dec eax                            eax=部队任务-1
+005AD9DE - 83 f8 0a                   - cmp eax,0a                         一共11种任务(0到10)：目前知道的有：征服、退却、移动、补给、修补、攻击、追击
+005AD9E1 - 77 6c                      - ja 005ada4f
+005AD9E3 - ff 24 85 f4 da 5a 00       - jmp dword ptr [eax*4+005adaf4]     跳转到相应的任务处理
+[任务1]
+005AD9EA - 8b ce                      - mov ecx,esi
+005AD9EC - e8 2f fe ff ff             - call 005ad820
+005AD9F1 - 8b f8                      - mov edi,eax
+005AD9F3 - eb 5a                      - jmp 005ada4f
+[任务3]
+005AD9F5 - 8b ce                      - mov ecx,esi
+005AD9F7 - e8 e4 fa ff ff             - call 005ad4e0
+005AD9FC - 8b f8                      - mov edi,eax
+005AD9FE - eb 4f                      - jmp 005ada4f
+[任务2]
+005ADA00 - 8b ce                      - mov ecx,esi
+005ADA02 - e8 19 f1 ff ff             - call 005acb20
+005ADA07 - 8b f8                      - mov edi,eax
+005ADA09 - eb 44                      - jmp 005ada4f
+[任务8]
+005ADA0B - 8b ce                      - mov ecx,esi
+005ADA0D - e8 ce eb ff ff             - call 005ac5e0
+005ADA12 - 8b f8                      - mov edi,eax
+005ADA14 - eb 39                      - jmp 005ada4f
+[任务4]
+005ADA16 - 8b ce                      - mov ecx,esi
+005ADA18 - e8 13 f3 ff ff             - call 005acd30
+005ADA1D - 8b f8                      - mov edi,eax
+005ADA1F - eb 2e                      - jmp 005ada4f
+[任务5]
+005ADA21 - 8b ce                      - mov ecx,esi
+005ADA23 - e8 f8 f3 ff ff             - call 005ace20
+005ADA28 - 8b f8                      - mov edi,eax
+005ADA2A - eb 23                      - jmp 005ada4f
+[任务9]
+005ADA2C - 8b ce                      - mov ecx,esi
+005ADA2E - e8 ed f6 ff ff             - call 005ad120
+005ADA33 - 8b f8                      - mov edi,eax
+005ADA35 - eb 18                      - jmp 005ada4f
+[任务10]
+005ADA37 - 8b ce                      - mov ecx,esi
+005ADA39 - e8 42 fe ff ff             - call 005ad880
+005ADA3E - 8b f8                      - mov edi,eax
+005ADA40 - eb 0d                      - jmp 005ada4f
+[任务11]
+005ADA42 - 8b ce                      - mov ecx,esi
+005ADA44 - e8 07 f8 ff ff             - call 005ad250
+005ADA49 - 8b f8                      - mov edi,eax
+005ADA4B - eb 02                      - jmp 005ada4f
+[任务7]
+005ADA4D - 33 ff                      - xor edi,edi
+[任务6]以及所有任务结束跳转到此
+005ADA4F - b9 f8 65 6a 09             - mov ecx,096a65f8 : [00000000]
+005ADA54 - c7 06 00 00 00 00          - mov [esi],00000000
+005ADA5A - e8 a1 6e ff ff             - call 005a4900
+005ADA5F - 85 ff                      - test edi,edi                       ？？应该是部队经过行动后是否还续存
+005ADA61 - 74 7f                      - je 005adae2                        直接结束返回0
+005ADA63 - 53                         - push ebx
+005ADA64 - b9 58 19 20 07             - mov ecx,07201958
+005ADA69 - e8 52 3d ee ff             - call 004917c0                      根据部队指针获得部队ID
+005ADA6E - 8b 54 24 14                - mov edx,[esp+14]
+005ADA72 - 52                         - push edx
+005ADA73 - 50                         - push eax
+005ADA74 - e8 57 2d ff ff             - call 005a07d0                      ？？？？？
+005ADA79 - a1 70 5a 8a 00             - mov eax,[008a5a70]                 部队行动调试标志位，若值不为0代表部队可一直行动
+005ADA7E - 83 c4 08                   - add esp,08
+005ADA81 - 85 c0                      - test eax,eax
+005ADA83 - 74 16                      - je 005ada9b
+005ADA85 - 6a 00                      - push 00
+005ADA87 - 53                         - push ebx
+005ADA88 - b9 58 19 20 07             - mov ecx,07201958
+005ADA8D - e8 2e 3d ee ff             - call 004917c0                      根据部队指针获得部队ID
+005ADA92 - 50                         - push eax
+005ADA93 - e8 d8 1a ff ff             - call 0059f570                      设置部队行动位
+005ADA98 - 83 c4 08                   - add esp,08
+005ADA9B - 85 ed                      - test ebp,ebp                       ？？
+005ADA9D - 74 43                      - je 005adae2                        直接结束
+005ADA9F - 8b 03                      - mov eax,[ebx]
+005ADAA1 - 8b cb                      - mov ecx,ebx
+005ADAA3 - ff 50 48                   - call dword ptr [eax+48]            部队是否属于玩家势力
+005ADAA6 - 85 c0                      - test eax,eax
+005ADAA8 - 74 38                      - je 005adae2                        不属于则直接结束
+005ADAAA - 8b cb                      - mov ecx,ebx
+005ADAAC - e8 1f cc ec ff             - call 0047a6d0                      ！！应该是获得军团号之类的
+005ADAB1 - 85 c0                      - test eax,eax
+005ADAB3 - 75 2d                      - jne 005adae2                       不是第一军团则直接结束
+005ADAB5 - 8b 4c 24 14                - mov ecx,[esp+14]                   ！！应该是一个坐标
+005ADAB9 - 51                         - push ecx
+005ADABA - e8 71 34 fe ff             - call 00590f30                      ！！获得坐标对应地图格指针
+005ADABF - 83 c4 04                   - add esp,04
+005ADAC2 - 8b c8                      - mov ecx,eax
+005ADAC4 - e8 57 60 ed ff             - call 00483b20                      ！！获得地图格上所对应的对象指针
+005ADAC9 - 8b f0                      - mov esi,eax
+005ADACB - 56                         - push esi
+005ADACC - e8 5f cb ec ff             - call 0047a630                      校验该指针
+005ADAD1 - 83 c4 04                   - add esp,04
+005ADAD4 - 85 c0                      - test eax,eax
+005ADAD6 - 74 0a                      - je 005adae2
+005ADAD8 - 56                         - push esi
+005ADAD9 - 53                         - push ebx
+005ADADA - e8 61 da 02 00             - call 005db540                      ？？？？？？？？？？？？
+005ADADF - 83 c4 08                   - add esp,08
+
+005ADAE2 - 8b c7                      - mov eax,edi
+005ADAE4 - 5f                         - pop edi
+005ADAE5 - 5d                         - pop ebp
+005ADAE6 - 5e                         - pop esi
+005ADAE7 - 5b                         - pop ebx
+005ADAE8 - c2 04 00                   - ret 0004
+005ADAEB - 5e                         - pop esi
+005ADAEC - 33 c0                      - xor eax,eax
+005ADAEE - 5b                         - pop ebx
+005ADAEF - c2 04 00                   - ret 0004
+
+数据区
+005ADAF4 - EA D9 5A 00 00 DA 5A 00 F5 D9 5A 00 16 DA 5A 00 
+           21 DA 5A 00 4F DA 5A 00 4D DA 5A 00 0B DA 5A 00 
+           2C DA 5A 00 37 DA 5A 00 42 DA 5A 00
+
+
+电脑循环部队的处理（这里应该是玩家点击“委任部队行动”后的情况）
+005746A0 - 57                         - push edi
+005746A1 - b9 58 19 20 07             - mov ecx,07201958
+005746A6 - e8 c5 c7 f1 ff             - call 00490e70
+005746AB - 8b f0                      - mov esi,eax
+005746AD - 56                         - push esi
+005746AE - e8 dd e1 ff ff             - call 00572890                      判断部队的很多状态，比如是否有任务、是否已行动、部队势力是否当前玩家势力等
+005746B3 - 83 c4 04                   - add esp,04
+005746B6 - 85 c0                      - test eax,eax
+005746B8 - 74 0b                      - je 005746c5
+005746BA - 56                         - push esi
+005746BB - b9 50 93 6a 09             - mov ecx,096a9350
+005746C0 - e8 bb 92 03 00             - call 005ad980                      部队行动 (插入一句JMP 008A9EE8，实现委任军团2动)
+005746C5 - 47                         - inc edi
+005746C6 - 81 ff e8 03 00 00          - cmp edi,000003e8
+005746CC - 7c d2                      - jnge 005746a0
+
+008A9EE8 - e8 93 3a d0 ff             - call 005ad980
+008A9EED - 85 c0                      - test eax,eax
+008A9EEF - 0f 85 ab a7 cc ff          - jne 005746a0
+008A9EF5 - e9 cb a7 cc ff             - jmp 005746c5
+
+【Sergi】call 005ec370=AI部队行动流程??? (push 目前轮到的军团代号, ecx=099c78a8)
+005EC370 - 6a ff                      - push ff
+005EC372 - 68 c8 55 73 00             - push 007355c8
+005EC377 - 64 a1 00 00 00 00          - mov eax,fs:[00000000]
+005EC37D - 50                         - push eax
+005EC37E - 64 89 25 00 00 00 00       - mov fs:[00000000],esp
+005EC385 - 83 ec 20                   - sub esp,20
+005EC388 - 53                         - push ebx
+005EC389 - 55                         - push ebp
+005EC38A - 33 ed                      - xor ebp,ebp                        ebp=0
+005EC38C - 56                         - push esi
+005EC38D - 57                         - push edi
+005EC38E - 8b f9                      - mov edi,ecx                        edi=099c78a8
+005EC390 - 89 6c 24 1c                - mov [esp+1c],ebp
+005EC394 - 89 6c 24 20                - mov [esp+20],ebp
+005EC398 - 89 6c 24 18                - mov [esp+18],ebp
+005EC39C - 89 6c 24 14                - mov [esp+14],ebp
+005EC3A0 - 89 6c 24 24                - mov [esp+24],ebp
+005EC3A4 - c7 44 24 28 0a 00 00 00    - mov [esp+28],0000000a
+005EC3AC - 89 6c 24 2c                - mov [esp+2c],ebp
+005EC3B0 - c7 44 24 10 ec c8 79 00    - mov [esp+10],0079c8ec
+005EC3B8 - 89 6c 24 38                - mov [esp+38],ebp
+005EC3BC - e8 2f 92 ff ff             - call 005e55f0
+005EC3C1 - 8b cf                      - mov ecx,edi
+005EC3C3 - e8 58 4a ff ff             - call 005e0e20
+005EC3C8 - 8d 4c 24 10                - lea ecx,[esp+10]
+005EC3CC - e8 1f 5c ea ff             - call 00491ff0
+005EC3D1 - 33 db                      - xor ebx,ebx                        ebx=部队代号0-999
+005EC3D3 - 53                         - push ebx                           开始loop部队
+005EC3D4 - b9 58 19 20 07             - mov ecx,07201958 
+005EC3D9 - e8 92 4a ea ff             - call 00490e70
+005EC3DE - 8b f0                      - mov esi,eax                        esi=部队地址
+005EC3E0 - 56                         - push esi
+005EC3E1 - e8 4a e2 e8 ff             - call 0047a630
+005EC3E6 - 83 c4 04                   - add esp,04
+005EC3E9 - 85 c0                      - test eax,eax
+005EC3EB - 74 52                      - je 005ec43f
+005EC3ED - 8b 06                      - mov eax,[esi]
+005EC3EF - 8b ce                      - mov ecx,esi
+005EC3F1 - ff 50 44                   - call dword ptr [eax+44]
+005EC3F4 - 3b 44 24 40                - cmp eax,[esp+40]                   [esp+40]= 目前轮到的军团代号
+005EC3F8 - 75 45                      - jne 005ec43f                       此部队所属军团非目前轮到的军团则跳下
+005EC3FA - 8b ce                      - mov ecx,esi
+005EC3FC - e8 bf 8e ea ff             - call 004952c0                      判断是否已行动
+005EC401 - 85 c0                      - test eax,eax
+005EC403 - 75 3a                      - jne 005ec43f
+005EC405 - b9 d8 59 6a 09             - mov ecx,096a59d8
+005EC40A - e8 51 20 f9 ff             - call 0057e460                      判断[096a5af8]的标志位是否是2 是1否0
+005EC40F - 85 c0                      - test eax,eax
+005EC411 - 0f 85 a1 01 00 00          - jne 005ec5b8
+005EC417 - b9 d8 59 6a 09             - mov ecx,096a59d8
+005EC41C - e8 4f 20 f9 ff             - call 0057e470                      判断[096a5a14]的标志位是否是0 是1否0
+005EC421 - 85 c0                      - test eax,eax
+005EC423 - 0f 85 8f 01 00 00          - jne 005ec5b8
+005EC429 - 56                         - push esi                           esi=部队地址
+005EC42A - 8b cf                      - mov ecx,edi                        edi=099c78a8
+005EC42C - e8 5f 2b ff ff             - call 005def90                      部队任务方针判断与改写
+005EC431 - 39 2f                      - cmp [edi],ebp
+005EC433 - 8d 4c 24 10                - lea ecx,[esp+10]
+005EC437 - 75 2a                      - jne 005ec463
+005EC439 - 56                         - push esi
+005EC43A - e8 11 5b ea ff             - call 00491f50                      加入预选部队list
+005EC43F - 43                         - inc ebx
+005EC440 - 81 fb e8 03 00 00          - cmp ebx,000003e8
+005EC446 - 7c 8b                      - jnge 005ec3d3                      跳上loop下一部队
+005EC448 - 39 6c 24 1c                - cmp [esp+1c],ebp
+005EC44C - 75 39                      - jne 005ec487
+005EC44E - c7 44 24 10 cc c8 79 00    - mov [esp+10],0079c8cc
+005EC456 - c7 44 24 38 01 00 00 00    - mov [esp+38],00000001
+005EC45E - e9 d0 00 00 00             - jmp 005ec533
+005EC463 - c7 44 24 38 ff ff ff ff    - mov [esp+38],ffffffff
+005EC46B - e8 80 5a ea ff             - call 00491ef0
+005EC470 - 5f                         - pop edi
+005EC471 - 5e                         - pop esi
+005EC472 - 5d                         - pop ebp
+005EC473 - 33 c0                      - xor eax,eax
+005EC475 - 5b                         - pop ebx
+005EC476 - 8b 4c 24 20                - mov ecx,[esp+20]
+005EC47A - 64 89 0d 00 00 00 00       - mov fs:[00000000],ecx
+005EC481 - 83 c4 2c                   - add esp,2c
+005EC484 - c2 04 00                   - ret 0004
+005EC487 - 55                         - push ebp
+005EC488 - 55                         - push ebp
+005EC489 - 68 40 da 5d 00             - push 005dda40
+005EC48E - 6a 01                      - push 01
+005EC490 - 8d 4c 24 20                - lea ecx,[esp+20]
+005EC494 - e8 d7 c1 ff ff             - call 005e8670
+005EC499 - 85 c0                      - test eax,eax
+005EC49B - 75 15                      - jne 005ec4b2
+005EC49D - c7 44 24 10 cc c8 79 00    - mov [esp+10],0079c8cc
+005EC4A5 - c7 44 24 38 02 00 00 00    - mov [esp+38],00000002
+005EC4AD - e9 81 00 00 00             - jmp 005ec533
+005EC4B2 - 8b 44 24 14                - mov eax,[esp+14]
+005EC4B6 - 3b c5                      - cmp eax,ebp
+005EC4B8 - 89 44 24 40                - mov [esp+40],eax
+005EC4BC - 74 65                      - je 005ec523
+005EC4BE - 8b ff                      - mov edi,edi
+005EC4C0 - 50                         - push eax                           开始loop
+005EC4C1 - 8d 4c 24 14                - lea ecx,[esp+14]
+005EC4C5 - e8 46 22 ff ff             - call 005de710                      逐一取出预选部队
+005EC4CA - 8b 30                      - mov esi,[eax]                      esi=部队地址
+005EC4CC - 56                         - push esi
+005EC4CD - e8 5e e1 e8 ff             - call 0047a630
+005EC4D2 - 83 c4 04                   - add esp,04
+005EC4D5 - 85 c0                      - test eax,eax
+005EC4D7 - 74 34                      - je 005ec50d
+005EC4D9 - b9 d8 59 6a 09             - mov ecx,096a59d8
+005EC4DE - e8 7d 1f f9 ff             - call 0057e460                      判断[096a5af8]的标志位是否是2 是1否0
+005EC4E3 - 85 c0                      - test eax,eax
+005EC4E5 - 0f 85 84 00 00 00          - jne 005ec56f
+005EC4EB - b9 d8 59 6a 09             - mov ecx,096a59d8
+005EC4F0 - e8 7b 1f f9 ff             - call 0057e470                      判断[096a5a14]的标志位是否是0 是1否0
+005EC4F5 - 85 c0                      - test eax,eax
+005EC4F7 - 0f 85 bb 00 00 00          - jne 005ec5b8
+005EC4FD - 56                         - push esi
+005EC4FE - 8b cf                      - mov ecx,edi
+005EC500 - e8 eb 17 ff ff             - call 005ddcf0                      部队行动决定函数，里面调用005ad980
+
+  005DDCF0 - b9 80 3e c4 09             - mov ecx,09c43e80
+  005DDCF5 - e8 56 1a 0a 00             - call 0067f750
+  005DDCFA - 85 c0                      - test eax,eax
+  005DDCFC - 74 1b                      - je 005ddd19
+  005DDCFE - a1 80 3e c4 09             - mov eax,[09c43e80]
+  005DDD03 - 6a 09                      - push 09
+  005DDD05 - b9 80 3e c4 09             - mov ecx,09c43e80
+  005DDD0A - ff 50 04                   - call dword ptr [eax+04]
+  005DDD0D - 85 c0                      - test eax,eax
+  005DDD0F - 74 08                      - je 005ddd19
+  005DDD11 - b8 01 00 00 00             - mov eax,00000001
+  005DDD16 - c2 04 00                   - ret 0004
+  005DDD19 - 56                         - push esi
+  005DDD1A - 8b 74 24 08                - mov esi,[esp+08]
+  005DDD1E - 56                         - push esi
+  005DDD1F - b9 50 93 6a 09             - mov ecx,096a9350
+  005DDD24 - e8 57 fc fc ff             - call 005ad980                    电脑部队行动的关键函数
+  005DDD29 - 85 c0                      - test eax,eax
+  005DDD2B - 75 48                      - jne 005ddd75                     跳转到005DDD1E（75 f1），配合行动标志位的修改，实现电脑部队2动
+  005DDD2D - 8b ce                      - mov ecx,esi
+  005DDD2F - e8 8c 75 eb ff             - call 004952c0
+  005DDD34 - 85 c0                      - test eax,eax
+  005DDD36 - 75 3d                      - jne 005ddd75
+  005DDD38 - 83 7e 2c ff                - cmp dword ptr [esi+2c],ff
+  005DDD3C - 75 37                      - jne 005ddd75
+  005DDD3E - 8b ce                      - mov ecx,esi
+  005DDD40 - e8 8b c9 e9 ff             - call 0047a6d0
+  005DDD45 - 85 c0                      - test eax,eax
+  005DDD47 - 75 2c                      - jne 005ddd75
+  005DDD49 - 8b 4e 44                   - mov ecx,[esi+44]
+  005DDD4C - 51                         - push ecx
+  005DDD4D - e8 5e 46 e3 ff             - call 004123b0
+  005DDD52 - 83 c4 04                   - add esp,04
+  005DDD55 - 85 c0                      - test eax,eax
+  005DDD57 - 75 1c                      - jne 005ddd75
+  005DDD59 - 56                         - push esi
+  005DDD5A - e8 d1 fe ff ff             - call 005ddc30
+  005DDD5F - 83 c4 04                   - add esp,04
+  005DDD62 - 85 c0                      - test eax,eax
+  005DDD64 - 74 0f                      - je 005ddd75
+  005DDD66 - 56                         - push esi
+  005DDD67 - b9 50 93 6a 09             - mov ecx,096a9350 : [00000000]
+  005DDD6C - e8 0f fc fc ff             - call 005ad980
+  005DDD71 - 5e                         - pop esi
+  005DDD72 - c2 04 00                   - ret 0004
+  005DDD75 - b8 01 00 00 00             - mov eax,00000001
+  005DDD7A - 5e                         - pop esi
+  005DDD7B - c2 04 00                   - ret 0004
+
+005EC505 - 39 2f                      - cmp [edi],ebp                      ebp=0
+005EC507 - 0f 85 ab 00 00 00          - jne 005ec5b8
+005EC50D - 8d 4c 24 40                - lea ecx,[esp+40]
+005EC511 - 51                         - push ecx
+005EC512 - 8d 4c 24 14                - lea ecx,[esp+14]
+005EC516 - e8 a5 5d ea ff             - call 004922c0                      取下一支部队
+005EC51B - 8b 44 24 40                - mov eax,[esp+40]
+005EC51F - 3b c5                      - cmp eax,ebp                        ebp=0
+005EC521 - 75 9d                      - jne 005ec4c0                       loop下一部队
+
+
+
+00900000 - e8 eb dc cd ff             - call 005ddcf0
+00900005 - 81 7e 0c 9b 01 00 00       - cmp [esi+0c],0000019b
+0090000C - 0f 85 f3 c4 ce ff          - jne 005ec505
+00900012 - e9 ee c4 ce ff             - jmp 005ec505
+
+
+
+
+0057FCF0  这里是循环消除伪报与扰乱状态的
+005831EE
+
+
+
+008a5a34  AI关闭(0)或开启(1)的标志位
+00580469 - a1 34 5a 8a 00             - mov eax,[008a5a34] : [00000001]
+0058046E - 85 c0                      - test eax,eax
+00580470 - 74 0f                      - je 00580481
+00580472 - 8b 4c 24 10                - mov ecx,[esp+10]
+00580476 - 51                         - push ecx
+00580477 - b9 a8 78 9c 09             - mov ecx,099c78a8 : [00000000]
+0058047C - e8 1f 58 07 00             - call 005f5ca0
+00580481 - 57                         - push edi
+
+

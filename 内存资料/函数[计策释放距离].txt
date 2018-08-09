@@ -1,0 +1,264 @@
+005A3CD0 - 51                         - push ecx
+005A3CD1 - 8b 44 24 18                - mov eax,[esp+18]                   [esp+18]=eax=用计部队指针
+005A3CD5 - 85 c0                      - test eax,eax
+005A3CD7 - 75 04                      - jne 005a3cdd
+005A3CD9 - 33 c0                      - xor eax,eax
+005A3CDB - 59                         - pop ecx
+005A3CDC - c3                         - ret
+005A3CDD - 8b 03                      - mov eax,[ebx]
+005A3CDF - 55                         - push ebp
+005A3CE0 - 56                         - push esi
+005A3CE1 - 57                         - push edi
+005A3CE2 - 8b cb                      - mov ecx,ebx
+005A3CE4 - c7 44 24 0c 00 00 00 00    - mov [esp+0c],00000000              [esp+0c]存放了是否可以用计的标志位，先置为空
+005A3CEC - ff 50 40                   - call dword ptr [eax+40]
+005A3CEF - 50                         - push eax
+005A3CF0 - b9 58 19 20 07             - mov ecx,07201958
+005A3CF5 - e8 a6 cd ee ff             - call 00490aa0
+005A3CFA - 0f bf 4c 24 1e             - movsx ecx,word ptr [esp+1e]
+005A3CFF - 8b 13                      - mov edx,[ebx]
+005A3D01 - 8b f8                      - mov edi,eax
+005A3D03 - 0f bf 44 24 1c             - movsx eax,word ptr [esp+1c]
+005A3D08 - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005A3D0E - 03 c1                      - add eax,ecx
+005A3D10 - 8d 34 80                   - lea esi,[eax+eax*4]
+
+005A3D13 - 6a 41                      - push 41                            鬼谋判定
+005A3D15 - 8b cb                      - mov ecx,ebx
+005A3D17 - 8d 34 b5 68 0e fb 06       - lea esi,[esi*4+06fb0e68]
+005A3D1E - ff 52 58                   - call dword ptr [edx+58]
+005A3D21 - 8b e8                      - mov ebp,eax
+005A3D23 - 8a 44 24 24                - mov al,[esp+24]                    [esp+24]中是计略ID
+005A3D27 - 83 fd 00                   - cmp ebp,00
+005A3D2A - 74 01                      - je 005a3d2d
+005A3D2C - 45                         - inc ebp
+
+005A3D2D - a8 01                      - test al,01                         00000001b＝火计
+005A3D2F - 74 6c                      - je 005a3d9d
+005A3D31 - 6a 1d                      - push 1d                            神火计判定
+005A3D33 - 8b cf                      - mov ecx,edi
+005A3D35 - e8 a6 d4 ed ff             - call 004811e0
+005A3D3A - 8b 4c 24 20                - mov ecx,[esp+20]                   [esp+20]中是限定最大距离
+005A3D3E - 8b 7c 24 18                - mov edi,[esp+18]
+005A3D42 - f7 d8                      - neg eax
+005A3D44 - 1b c0                      - sbb eax,eax
+005A3D46 - 83 e0 02                   - and eax,02                         神火计距离2
+005A3D49 - 40                         - inc eax                            火计距离1
+*换一种写法
+*005A3D42 - 6b c0 02                   - imul eax,eax,02                   神火计距离2
+*005A3D45 - 83 c0 01                   - add eax,01                        火计距离1
+*005A3D48 - 90 90                      - nop nop 
+005A3D4A - 03 c5                      - add eax,ebp
+005A3D4C - 3b c8                      - cmp ecx,eax
+005A3D4E - 7f 51                      - jg 005a3da1
+005A3D50 - 57                         - push edi
+005A3D51 - e8 da 68 ed ff             - call 0047a630
+005A3D56 - 83 c4 04                   - add esp,04
+005A3D59 - 85 c0                      - test eax,eax
+005A3D5B - 74 23                      - je 005a3d80
+005A3D5D - 57                         - push edi
+005A3D5E - 8b cb                      - mov ecx,ebx
+005A3D60 - e8 5b 2f ef ff             - call 00496cc0
+005A3D65 - 85 c0                      - test eax,eax
+005A3D67 - 74 38                      - je 005a3da1
+005A3D69 - 57                         - push edi
+005A3D6A - e8 71 be 00 00             - call 005afbe0
+005A3D6F - 83 c4 04                   - add esp,04
+005A3D72 - 85 c0                      - test eax,eax
+005A3D74 - 75 2b                      - jne 005a3da1
+005A3D76 - c7 44 24 0c 01 00 00 00    - mov [esp+0c],00000001              [esp+0c]将第1位（火计）置为1
+005A3D7E - eb 21                      - jmp 005a3da1
+005A3D80 - 8b 46 04                   - mov eax,[esi+04]
+005A3D83 - 83 e0 1f                   - and eax,1f
+005A3D86 - 50                         - push eax
+005A3D87 - e8 54 fc ed ff             - call 004839e0
+005A3D8C - 83 c4 04                   - add esp,04
+005A3D8F - 85 c0                      - test eax,eax
+005A3D91 - 74 0e                      - je 005a3da1
+005A3D93 - c7 44 24 0c 01 00 00 00    - mov [esp+0c],00000001
+005A3D9B - eb 04                      - jmp 005a3da1
+005A3D9D - 8b 7c 24 18                - mov edi,[esp+18]
+
+005A3DA1 - f6 44 24 24 02             - test byte ptr [esp+24],02          00000010b＝灭火
+005A3DA6 - 74 31                      - je 005a3dd9
+005A3DA8 - 8b 44 24 20                - mov eax,[esp+20]
+005A3DAC - 8d 4d 02                   - lea ecx,[ebp+02]                   灭火距离2
+005A3DAF - 3b c1                      - cmp eax,ecx
+005A3DB1 - 7f 26                      - jg 005a3dd9
+005A3DB3 - f7 06 00 00 80 03          - test [esi],3800000
+005A3DB9 - 76 1e                      - jna 005a3dd9
+005A3DBB - 57                         - push edi
+005A3DBC - e8 6f 68 ed ff             - call 0047a630
+005A3DC1 - 83 c4 04                   - add esp,04
+005A3DC4 - 85 c0                      - test eax,eax
+005A3DC6 - 74 0c                      - je 005a3dd4
+005A3DC8 - 57                         - push edi
+005A3DC9 - 8b cb                      - mov ecx,ebx
+005A3DCB - e8 80 2e ef ff             - call 00496c50
+005A3DD0 - 85 c0                      - test eax,eax
+005A3DD2 - 75 05                      - jne 005a3dd9
+005A3DD4 - 83 4c 24 0c 02             - or dword ptr [esp+0c],02           [esp+0c]第2位（灭火）置为1
+
+005A3DD9 - f6 44 24 24 04             - test byte ptr [esp+24],04          00000100b＝伪报
+005A3DDE - 74 1f                      - je 005a3dff
+005A3DE0 - 8b 44 24 20                - mov eax,[esp+20]
+005A3DE4 - 8d 55 02                   - lea edx,[ebp+02]                   伪报距离2
+005A3DE7 - 3b c2                      - cmp eax,edx
+005A3DE9 - 7f 14                      - jg 005a3dff
+005A3DEB - 53                         - push ebx
+005A3DEC - 8b f7                      - mov esi,edi
+005A3DEE - e8 2d fe ff ff             - call 005a3c20
+005A3DF3 - 83 c4 04                   - add esp,04
+005A3DF6 - 85 c0                      - test eax,eax
+005A3DF8 - 74 05                      - je 005a3dff
+005A3DFA - 83 4c 24 0c 04             - or dword ptr [esp+0c],04           [esp+0c]第3位（伪报）置为1
+
+005A3DFF - f6 44 24 24 08             - test byte ptr [esp+24],08          00001000b＝扰乱
+005A3E04 - 74 1f                      - je 005a3e25
+005A3E06 - 8b 4c 24 20                - mov ecx,[esp+20]
+005A3E0A - 8d 45 02                   - lea eax,[ebp+02]                   扰乱距离2
+005A3E0D - 3b c8                      - cmp ecx,eax
+005A3E0F - 7f 14                      - jg 005a3e25
+005A3E11 - 53                         - push ebx
+005A3E12 - 8b f7                      - mov esi,edi
+005A3E14 - e8 07 fe ff ff             - call 005a3c20
+005A3E19 - 83 c4 04                   - add esp,04
+005A3E1C - 85 c0                      - test eax,eax
+005A3E1E - 74 05                      - je 005a3e25
+005A3E20 - 83 4c 24 0c 08             - or dword ptr [esp+0c],08           [esp+0c]第4位（扰乱）置为1
+
+005A3E25 - f6 44 24 24 10             - test byte ptr [esp+24],10          00010000b＝镇静
+005A3E2A - 74 4f                      - je 005a3e7b
+005A3E2C - 8b 44 24 20                - mov eax,[esp+20]
+005A3E30 - 8d 4d 02                   - lea ecx,[ebp+02]                   镇静距离2
+005A3E33 - 3b c1                      - cmp eax,ecx
+005A3E35 - 7f 44                      - jg 005a3e7b
+005A3E37 - 57                         - push edi
+005A3E38 - e8 f3 67 ed ff             - call 0047a630
+005A3E3D - 83 c4 04                   - add esp,04
+005A3E40 - 85 c0                      - test eax,eax
+005A3E42 - 74 37                      - je 005a3e7b
+005A3E44 - 8b 17                      - mov edx,[edi]
+005A3E46 - 6a 0b                      - push 0b
+005A3E48 - 8b cf                      - mov ecx,edi
+005A3E4A - ff 52 2c                   - call dword ptr [edx+2c]
+005A3E4D - 85 c0                      - test eax,eax
+005A3E4F - 74 2a                      - je 005a3e7b
+005A3E51 - 57                         - push edi
+005A3E52 - e8 89 21 ef ff             - call 00495fe0
+005A3E57 - 83 c4 04                   - add esp,04
+005A3E5A - 50                         - push eax
+005A3E5B - 8b cb                      - mov ecx,ebx
+005A3E5D - e8 be 1d ef ff             - call 00495c20
+005A3E62 - 85 c0                      - test eax,eax
+005A3E64 - 74 15                      - je 005a3e7b
+005A3E66 - 57                         - push edi
+005A3E67 - e8 74 21 ef ff             - call 00495fe0
+005A3E6C - 8b 48 24                   - mov ecx,[eax+24]
+005A3E6F - 83 c4 04                   - add esp,04
+005A3E72 - 85 c9                      - test ecx,ecx
+005A3E74 - 74 05                      - je 005a3e7b
+005A3E76 - 83 4c 24 0c 10             - or dword ptr [esp+0c],10           [esp+0c]第5位（镇静）置为1
+
+005A3E7B - f6 44 24 24 40             - test byte ptr [esp+24],40          01000000b＝内讧
+005A3E80 - 74 67                      - je 005a3ee9
+005A3E82 - 8b 4c 24 20                - mov ecx,[esp+20]
+005A3E86 - 8d 45 01                   - lea eax,[ebp+01]                   内讧距离1
+005A3E89 - 3b c8                      - cmp ecx,eax
+005A3E8B - 7f 5c                      - jg 005a3ee9
+005A3E8D - 53                         - push ebx
+005A3E8E - e8 dd fd ff ff             - call 005a3c70                      判断部队是否是兵器部队，【里面将005A3CB6 - 7c 05(jnge 005a3cbd)改为 eb 05(jmp 005a3cbd)，则内讧可对兵器部队施展】
+005A3E93 - 83 c4 04                   - add esp,04
+005A3E96 - 85 c0                      - test eax,eax
+005A3E98 - 74 4b                      - je 005a3ee5
+005A3E9A - 8b 4c 24 18                - mov ecx,[esp+18]
+005A3E9E - 51                         - push ecx
+005A3E9F - e8 3c 21 ef ff             - call 00495fe0
+005A3EA4 - 53                         - push ebx
+005A3EA5 - 8b f8                      - mov edi,eax
+005A3EA7 - e8 84 d0 07 00             - call 00620f30
+005A3EAC - 8b 17                      - mov edx,[edi]
+005A3EAE - 83 c4 08                   - add esp,08
+005A3EB1 - 8b cf                      - mov ecx,edi
+005A3EB3 - 8b f0                      - mov esi,eax
+005A3EB5 - ff 52 3c                   - call dword ptr [edx+3c]
+005A3EB8 - 6a 00                      - push 00
+005A3EBA - 56                         - push esi
+005A3EBB - b9 58 19 20 07             - mov ecx,07201958
+005A3EC0 - 8b f8                      - mov edi,eax
+005A3EC2 - e8 f9 d8 ee ff             - call 004917c0
+005A3EC7 - 50                         - push eax
+005A3EC8 - 8b 07                      - mov eax,[edi]
+005A3ECA - 68 f0 31 5a 00             - push 005a31f0                      005a31f0就是条件函数，【里面将005A322D - 7f 04(jg 005a3233)改为 eb 04(jmp 005a3233)，则内讧可对周边是兵器的部队施展】
+005A3ECF - 6a 01                      - push 01                            判断附近一格
+005A3ED1 - 50                         - push eax
+005A3ED2 - b9 68 0e fb 06             - mov ecx,06fb0e68
+005A3ED7 - e8 c4 04 ee ff             - call 004843a0                      判断附近一格内是否有符合条件（005a31f0）的部队
+005A3EDC - 85 c0                      - test eax,eax
+005A3EDE - 74 05                      - je 005a3ee5
+005A3EE0 - 83 4c 24 0c 40             - or dword ptr [esp+0c],40           [esp+0c]第7位（内讧）置为1
+005A3EE5 - 8b 7c 24 18                - mov edi,[esp+18]
+
+005A3EE9 - f6 44 24 24 20             - test byte ptr [esp+24],20          00100000b＝伏兵
+005A3EEE - 74 43                      - je 005a3f33
+005A3EF0 - 8b 44 24 20                - mov eax,[esp+20]
+005A3EF4 - 8d 4d 01                   - lea ecx,[ebp+01]                   伏兵距离1
+005A3EF7 - 3b c1                      - cmp eax,ecx
+005A3EF9 - 7f 38                      - jg 005a3f33
+005A3EFB - 0f bf 44 24 14             - movsx eax,word ptr [esp+14]
+005A3F00 - 0f bf 54 24 16             - movsx edx,word ptr [esp+16]
+005A3F05 - 69 c0 c8 00 00 00          - imul eax,eax,000000c8
+005A3F0B - 03 c2                      - add eax,edx
+005A3F0D - 8d 04 80                   - lea eax,[eax+eax*4]
+005A3F10 - 8b 0c 85 6c 0e fb 06       - mov ecx,[eax*4+06fb0e6c]           取得被用计地图格指针＋4
+005A3F17 - 83 e1 1f                   - and ecx,1f
+005A3F1A - 80 f9 05                   - cmp cl,05                          判断是否是森地形
+005A3F1D - 75 14                      - jne 005a3f33
+005A3F1F - 53                         - push ebx
+005A3F20 - 8b f7                      - mov esi,edi
+005A3F22 - e8 f9 fc ff ff             - call 005a3c20
+005A3F27 - 83 c4 04                   - add esp,04
+005A3F2A - 85 c0                      - test eax,eax
+005A3F2C - 74 05                      - je 005a3f33
+005A3F2E - 83 4c 24 0c 20             - or dword ptr [esp+0c],20           [esp+0c]第6位（伏兵）置为1
+
+005A3F33 - 8a 44 24 24                - mov al,[esp+24]
+005A3F37 - 84 c0                      - test al,al                         10000000b＝妖术（由于第八位是符号位，所以用jump not sign）
+005A3F39 - 79 22                      - jns 005a3f5d
+005A3F3B - 8b 44 24 20                - mov eax,[esp+20]
+005A3F3F - 8d 55 02                   - lea edx,[ebp+02]                   妖术距离2
+005A3F42 - 3b c2                      - cmp eax,edx
+005A3F44 - 7f 17                      - jg 005a3f5d
+005A3F46 - 53                         - push ebx
+005A3F47 - 8b f7                      - mov esi,edi
+005A3F49 - e8 d2 fc ff ff             - call 005a3c20
+005A3F4E - 83 c4 04                   - add esp,04
+005A3F51 - 85 c0                      - test eax,eax
+005A3F53 - 74 08                      - je 005a3f5d
+005A3F55 - 81 4c 24 0c 80 00 00 00    - or [esp+0c],00000080                [esp+0c]第8位（妖术）置为1
+
+005A3F5D - 8b 44 24 24                - mov eax,[esp+24]
+005A3F61 - be 00 01 00 00             - mov esi,00000100
+005A3F66 - 85 c6                      - test esi,eax                        100000000b＝落雷
+005A3F68 - 74 1c                      - je 005a3f86
+005A3F6A - 8b 44 24 20                - mov eax,[esp+20]
+005A3F6E - 83 c5 02                   - add ebp,02                          落雷距离2
+005A3F71 - 3b c5                      - cmp eax,ebp
+005A3F73 - 7f 11                      - jg 005a3f86
+005A3F75 - 57                         - push edi
+005A3F76 - e8 65 bc 00 00             - call 005afbe0
+005A3F7B - 83 c4 04                   - add esp,04
+005A3F7E - 85 c0                      - test eax,eax
+005A3F80 - 75 04                      - jne 005a3f86
+005A3F82 - 09 74 24 0c                - or [esp+0c],esi                     [esp+0c]第9位（落雷）置为1
+005A3F86 - 8b 44 24 0c                - mov eax,[esp+0c]                    返回[esp+0c]中的值
+005A3F8A - 5f                         - pop edi
+005A3F8B - 5e                         - pop esi
+005A3F8C - 5d                         - pop ebp
+005A3F8D - 59                         - pop ecx
+005A3F8E - c3                         - ret
+
+以下两行是调用此函数之前的一个参数定义，就是[esp+20]中的值
+005A4D9E - 83 f8 04                   - cmp eax,04
+005A4DA1 - c7 44 24 0c 04 00 00 00    - mov [esp+0c],00000004               可将4改为5，超过5跳出
+005A4DA9 - 7f 04                      - jg 005a4daf                         这里要改成jmp

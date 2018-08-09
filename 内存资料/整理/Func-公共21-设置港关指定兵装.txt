@@ -1,0 +1,31 @@
+设置城市指定兵装
+参数表: [esp+04]=兵装类型，[esp+08]=兵装值，ecx=港关指针
+
+*****************************************************************************************************************************************************
+
+0048DA80 - 56                         - push esi
+0048DA81 - 8b 74 24 08                - mov esi,[esp+08]               esi = 兵装类型
+0048DA85 - 85 f6                      - test esi,esi
+0048DA87 - 57                         - push edi
+0048DA88 - 8b f9                      - mov edi,ecx
+0048DA8A - 7c 28                      - jnge 0048dab4
+0048DA8C - 83 fe 0b                   - cmp esi,0b
+0048DA8F - 7f 23                      - jg 0048dab4                    确保兵装类型在0～11之间
+
+0048DA91 - 56                         - push esi
+0048DA92 - e8 09 fe ff ff             - call 0048d8a0                  获取港关指定兵装上限
+0048DA97 - 8b 4c 24 10                - mov ecx,[esp+10]               edx = 兵装值
+0048DA9B - 85 c9                      - test ecx,ecx
+0048DA9D - 77 0b                      - ja 0048daaa
+0048DA9F - 33 c0                      - xor eax,eax
+0048DAA1 - 89 44 b7 30                - mov [edi+esi*4+30],eax         设置指定兵装值
+0048DAA5 - 5f                         - pop edi
+0048DAA6 - 5e                         - pop esi
+0048DAA7 - c2 08 00                   - ret 0008
+0048DAAA - 3b c1                      - cmp eax,ecx                    比较设置值和上限
+0048DAAC - 76 02                      - jna 0048dab0
+0048DAAE - 8b c1                      - mov eax,ecx
+0048DAB0 - 89 44 b7 30                - mov [edi+esi*4+30],eax         设置指定兵装值
+0048DAB4 - 5f                         - pop edi
+0048DAB5 - 5e                         - pop esi
+0048DAB6 - c2 08 00                   - ret 0008

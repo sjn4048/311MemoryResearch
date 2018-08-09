@@ -1,0 +1,102 @@
+功能: 计算城市港关兵粮支出
+参数表: [esp+04]=设施指针，ecx=0780b3cc
+
+*****************************************************************************************************************************************************
+
+【获取指针并校验】
+0049D200 - 51                         - push ecx
+0049D201 - 56                         - push esi
+0049D202 - 8b 74 24 0c                - mov esi,[esp+0c]               esi = 设施指针
+0049D206 - 57                         - push edi
+0049D207 - 56                         - push esi
+0049D208 - 33 ff                      - xor edi,edi                    edi = 0
+0049D20A - e8 21 d4 fd ff             - call 0047a630                  校验指针
+0049D20F - 83 c4 04                   - add esp,04
+0049D212 - 85 c0                      - test eax,eax
+0049D214 - 0f 84 b9 00 00 00          - je 0049d2d3                    校验失败则跳转到返回0
+0049D21A - 8b 06                      - mov eax,[esi]
+0049D21C - 8b ce                      - mov ecx,esi
+0049D21E - ff 50 40                   - call dword ptr [eax+40]        获得所属势力ID
+0049D221 - 85 c0                      - test eax,eax
+0049D223 - 0f 8c aa 00 00 00          - jl 0049d2d3
+0049D229 - 83 f8 2e                   - cmp eax,2e
+0049D22C - 0f 8f a1 00 00 00          - jg 0049d2d3                    势力ID若不在0～46之间则跳转到返回0
+
+【城市、港、关着火耗粮判定】
+[获得太守指针]
+0049D232 - 8b ce                      - mov ecx,esi                    esi = 设施指针
+0049D234 - e8 57 96 fe ff             - call 00486890                  获取城市、港、关太守ID
+0049D239 - 50                         - push eax
+0049D23A - b9 58 19 20 07             - mov ecx,07201958
+0049D23F - e8 bc 38 ff ff             - call 00490b00                  根据武将ID获得武将指针
+[判断城市、港、关是否着火]
+0049D244 - 8b 16                      - mov edx,[esi]                  esi = 设施指针
+0049D246 - 8b ce                      - mov ecx,esi
+0049D248 - 8b f8                      - mov edi,eax                    edi = 武将指针
+0049D24A - c7 44 24 10 00 00 00 00    - mov [esp+10],00000000
+0049D252 - ff 52 4c                   - call dword ptr [edx+4c]        判断设施是否着火
+0049D255 - 85 c0                      - test eax,eax
+0049D257 - 74 47                      - je 0049d2a0                    若没有着火则跳转到兵力耗粮计算
+[获得太守政治]
+0049D259 - 85 ff                      - test edi,edi
+0049D25B - 74 10                      - je 0049d26d                    无太守则跳转到武将政治设置为0
+0049D25D - 8b cf                      - mov ecx,edi                    edi = 武将指针
+0049D25F - e8 3c be fe ff             - call 004890a0                  获得武将政治
+0049D264 - 0f b6 c0                   - movzx eax,al                   eax = 武将政治
+0049D267 - 89 44 24 10                - mov [esp+10],eax
+0049D26B - eb 08                      - jmp 0049d275
+0049D26D - c7 44 24 10 00 00 00 00    - mov [esp+10],00000000
+
+【着火耗粮计算】
+0049D275 - 8b ce                      - mov ecx,esi                    esi = 设施指针
+0049D277 - e8 74 9b fe ff             - call 00486df0                  获得城市、港、关兵粮
+0049D27C - 89 44 24 08                - mov [esp+08],eax
+0049D280 - db 44 24 08                - fild dword ptr [esp+08]        [esp+0c] = 当前兵粮
+0049D284 - db 44 24 10                - fild dword ptr [esp+10]        [esp+10] = 太守政治
+0049D288 - d8 0d 48 36 76 00          - fmul dword ptr [00763648]      [00763648] = 0.05f
+0049D28E - d8 2d f8 68 77 00          - fsubr dword ptr [007768f8]     [007768f8] = 6.00f
+0049D294 - de c9                      - fmulp st(9),st(0)
+0049D296 - d8 0d 88 aa 77 00          - fmul dword ptr [0077aa88]      [0077aa88] = 0.01f
+0049D29C - d9 5c 24 10                - fstp dword ptr [esp+10]        [esp+10] = 当前兵粮*(6-太守政治*0.05)*0.01
+
+【兵力耗粮计算】
+0049D2A0 - 8b 16                      - mov edx,[esi]                  esi = 设施指针
+0049D2A2 - 8b ce                      - mov ecx,esi
+0049D2A4 - ff 52 50                   - call dword ptr [edx+50]        获得城市、港、关兵力
+0049D2A7 - 8b f0                      - mov esi,eax                    esi = 兵力
+0049D2A9 - 89 74 24 08                - mov [esp+08],esi
+0049D2AD - db 44 24 08                - fild dword ptr [esp+08]        [esp+0c] = 兵力
+0049D2B1 - d8 0d 2c 7b 7e 00          - fmul dword ptr [007e7b2c]      [007e7b2c] = 0.025f(10000兵基本耗粮250)              【修改】部队城内耗粮倍率
+0049D2B7 - d8 44 24 10                - fadd dword ptr [esp+10]        [esp+10] = 着火耗粮
+0049D2BB - e8 b4 a7 26 00             - call 00707a74                  浮点计算结果转整数置入eax
+0049D2C0 - 85 c0                      - test eax,eax
+0049D2C2 - 7f 11                      - jg 0049d2d5                    兵粮支出大于0则跳转到返回兵粮支出
+0049D2C4 - 85 f6                      - test esi,esi
+0049D2C6 - 7e 0d                      - jle 0049d2d5                   兵力等于0则跳转到返回0
+
+0049D2C8 - 5f                         - pop edi
+0049D2C9 - b8 01 00 00 00             - mov eax,00000001               最小耗粮为1
+0049D2CE - 5e                         - pop esi
+0049D2CF - 59                         - pop ecx
+0049D2D0 - c2 04 00                   - ret 0004
+0049D2D3 - 8b c7                      - mov eax,edi
+0049D2D5 - 5f                         - pop edi
+0049D2D6 - 5e                         - pop esi
+0049D2D7 - 59                         - pop ecx
+0049D2D8 - c2 04 00                   - ret 0004
+
+
+=====================================================================================================================================================
+
+修改 - 马匹也耗费等量军粮
+0049D2A7 - e9 6c c8 40 00             - jmp 008a9b18
+0049D2AC - 90                         - nop
+
+008A9B18 - 8b ce                      - mov ecx,esi                    ecx = 设施指针
+008A9B1A - 8b f0                      - mov esi,eax                    esi = 兵力
+008A9B1C - 6a 04                      - push 04                        0x04 = 马
+008A9B1E - e8 2d ce bd ff             - call 00486950                  获取城市、港、关指定兵装数量
+008A9B23 - 01 c6                      - add esi,eax                    esi = 兵力+马匹
+008A9B25 - 89 74 24 08                - mov [esp+08],esi              [esp+0c] = 兵力+马匹
+008A9B29 - e9 7f 37 bf ff             - jmp 0049d2ad
+008A9B2E - cc                         - int 3

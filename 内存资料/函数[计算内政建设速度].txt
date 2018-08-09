@@ -1,0 +1,93 @@
+005BB1D0 - 51                         - push ecx
+005BB1D1 - 53                         - push ebx
+005BB1D2 - 55                         - push ebp
+005BB1D3 - 56                         - push esi
+005BB1D4 - 33 ed                      - xor ebp,ebp                    EBP=0
+005BB1D6 - 57                         - push edi
+005BB1D7 - 33 db                      - xor ebx,ebx
+005BB1D9 - 89 6c 24 10                - mov [esp+10],ebp               [esp+10]=EBP=0
+005BB1DD - 33 ff                      - xor edi,edi                    EDI=0
+005BB1DF - 90                         - nop
+005BB1E0 - 8b 44 24 18                - mov eax,[esp+18]
+005BB1E4 - 8b 34 b8                   - mov esi,[eax+edi*4]
+005BB1E7 - 85 f6                      - test esi,esi
+005BB1E9 - 74 24                      - je 005bb20f
+005BB1EB - 8b ce                      - mov ecx,esi
+005BB1ED - e8 ae de ec ff             - call 004890a0
+005BB1F2 - 0f b6 c8                   - movzx ecx,al
+005BB1F5 - 03 e9                      - add ebp,ecx                        EBP中是三个武将的政治总合
+005BB1F7 - 8b ce                      - mov ecx,esi
+005BB1F9 - e8 a2 de ec ff             - call 004890a0
+005BB1FE - 0f b6 d0                   - movzx edx,al
+005BB201 - 3b da                      - cmp ebx,edx
+005BB203 - 7d 0a                      - jnl 005bb20f
+005BB205 - 8b ce                      - mov ecx,esi
+005BB207 - e8 94 de ec ff             - call 004890a0
+005BB20C - 0f b6 d8                   - movzx ebx,al                       EBX中存放了最高政治
+005BB20F - 47                         - inc edi
+005BB210 - 83 ff 03                   - cmp edi,03
+005BB213 - 7c cb                      - jnge 005bb1e0
+005BB215 - 8b 74 24 1c                - mov esi,[esp+1c]                   [esp+1c]中存放了建设的设施类型ID
+005BB219 - 56                         - push esi
+005BB21A - b9 58 19 20 07             - mov ecx,07201958
+005BB21F - 89 6c 24 14                - mov [esp+14],ebp                   EBP置入[esp+14]
+005BB223 - e8 68 59 ed ff             - call 00490b90                      根据设施类型ID获得设施类型指针
+005BB228 - 8b f8                      - mov edi,eax                        EAX是设施类型指针，置入EDI
+005BB22A - 66 8b af c2 00 00 00       - mov bp,[edi+000000c2]              EBP中应该被置入了耐久
+005BB231 - 56                         - push esi
+005BB232 - b9 58 19 20 07             - mov ecx,07201958
+005BB237 - e8 54 59 ed ff             - call 00490b90                      再次根据设施类型ID获得设施类型指针
+005BB23C - 8b c8                      - mov ecx,eax                        EAX是设施类型指针，置入ECX
+005BB23E - 8b 44 24 10                - mov eax,[esp+10]
+005BB242 - 99                         - cdq
+005BB243 - 2b c2                      - sub eax,edx
+005BB245 - d1 f8                      - sar eax,1
+005BB247 - 03 d8                      - add ebx,eax                        EBX＝最高政＋总和/2
+005BB249 - 0f b7 81 c2 00 00 00       - movzx eax,word ptr [ecx+000000c2]  EAX＝设施类型的耐久
+005BB250 - c1 e8 02                   - shr eax,02                         EAX＝耐久/4
+005BB253 - 0f b7 cd                   - movzx ecx,bp                       耐久置入ECX
+005BB256 - 2b c8                      - sub ecx,eax                        ECX=ECX-EAX(耐久/4)，即3/4耐久
+005BB258 - b8 39 8e e3 38             - mov eax,38e38e39
+005BB25D - f7 e9                      - imul ecx
+005BB25F - d1 fa                      - sar edx,1
+005BB261 - 8b ca                      - mov ecx,edx
+005BB263 - c1 e9 1f                   - shr ecx,1f
+005BB266 - 03 ca                      - add ecx,edx                        ECX＝1/12耐久
+*005BB263 - e9 80 eb 2e 00             - jmp 008a9de8
+*008A9DE8 - c1 e9 1f                   - shr ecx,1f
+*008A9DEB - 01 d1                      - add ecx,edx
+*008A9DED - 69 c3 64 00 00 00          - imul eax,ebx,00000064
+*008A9DF3 - bb 64 00 00 00             - mov ebx,00000064
+*008A9DF8 - 99                         - cdq
+*008A9DF9 - f7 fb                      - idiv ebx
+*008A9DFB - 8b d8                      - mov ebx,eax
+*008A9DFD - e9 66 14 d1 ff             - jmp 005bb268
+005BB268 - 3b cb                      - cmp ecx,ebx
+005BB26A - 7e 37                      - jle 005bb2a3                       如果ECX<EBX则直接返回EAX=EBX  [若改为jmp 005bb2a3则取消10旬的最大时间限制]
+005BB26C - 66 8b bf c2 00 00 00       - mov di,[edi+000000c2]              EDI＝设施类型耐久
+005BB273 - 56                         - push esi
+005BB274 - b9 58 19 20 07             - mov ecx,07201958
+005BB279 - e8 12 59 ed ff             - call 00490b90                      再次根据设施类型ID获得设施类型指针
+005BB27E - 0f b7 90 c2 00 00 00       - movzx edx,word ptr [eax+000000c2]  EDX＝设施类型耐久
+005BB285 - c1 ea 02                   - shr edx,02                         EDX＝耐久/4
+005BB288 - 0f b7 cf                   - movzx ecx,di
+005BB28B - 2b ca                      - sub ecx,edx                        ECX=3/4耐久
+005BB28D - b8 39 8e e3 38             - mov eax,38e38e39
+005BB292 - f7 e9                      - imul ecx
+005BB294 - 5f                         - pop edi
+005BB295 - d1 fa                      - sar edx,1
+005BB297 - 5e                         - pop esi
+005BB298 - 8b c2                      - mov eax,edx
+005BB29A - c1 e8 1f                   - shr eax,1f
+005BB29D - 5d                         - pop ebp
+005BB29E - 03 c2                      - add eax,edx                        EAX＝1/12耐久
+005BB2A0 - 5b                         - pop ebx
+005BB2A1 - 59                         - pop ecx
+005BB2A2 - c3                         - ret
+005BB2A3 - 5f                         - pop edi
+005BB2A4 - 5e                         - pop esi
+005BB2A5 - 5d                         - pop ebp
+005BB2A6 - 8b c3                      - mov eax,ebx                         
+005BB2A8 - 5b                         - pop ebx
+005BB2A9 - 59                         - pop ecx
+005BB2AA - c3                         - ret

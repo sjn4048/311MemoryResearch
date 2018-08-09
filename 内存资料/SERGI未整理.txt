@@ -1,0 +1,254 @@
+由于AI不懂得跟随修改器的自定规则, 所以个人找了一些代码, 尝试让AI的编队符合修改器的自定规则.
+
+AI派出部队时决定由谁当主将的部份代码如下
+005F6D4E - e8 5d f0 ff ff              - call 005f5db0计算武将适性+势力技术加成值
+005F6D53 - 8b d8                       - mov ebx,eax            ebx=武将适性+势力技术加成值
+005F6D55 - 83 c3 07                    - add ebx,07
+005F6D58 - 8b cd                       - mov ecx,ebp             ebp=武将地址
+005F6D5A - 89 1e                       - mov [esi],ebx            
+005F6D5C - e8 1f 23 e9 ff              - call 00489080读取武力
+005F6D61 - 8b 54 24 18                 - mov edx,[esp+18]              [esp+18]=兵装数据地址
+005F6D65 - 0f b6 c0                    - movzx eax,al
+005F6D68 - 0f af 06                    - imul eax,[esi] 
+005F6D6B - 89 06                       - mov [esi],eax    
+005F6D6D - 0f b6 4a 55                 - movzx ecx,byte ptr [edx+55] 兵种攻击力
+005F6D71 - 0f af c8                    - imul ecx,eax
+005F6D74 - b8 d3 4d 62 10              - mov eax,10624dd3
+005F6D79 - f7 e9                       - imul ecx
+005F6D7B - c1 fa 06                    - sar dl,06
+005F6D7E - 8b c2                       - mov eax,edx
+005F6D80 - c1 e8 1f                    - shr eax,1f
+005F6D83 - 03 c2                       - add eax,edx
+005F6D85 - 69 c0 d0 07 00 00           - imul eax,eax,000007d0
+005F6D8B - 89 06                       - mov [esi],eax
+[esi]=兵种攻击力*武力*(武将适性+势力技术加成值+7)*0.001*2000=部队攻击力参数(用来比较并决定主将)
+把读取武力的函数改为读取统率, 或者读取两者并由自定百分比计算两者所占比例然后加总,
+就可让AI由自定的规则来决定主将.
+
+AI决定好主将之后, 挑选副将时有一些限制, 副将的带兵量or统率or武力or功绩必须低于主将(前者已满足则后面项目无影响),
+如果想让AI也会倾向搭配高武力的副将, 这里要先解除一些限制.
+004CF1E9改为0, 副将的武力与功绩限制取消.
+AI挑选副将时, 当部队最高智力未满75, 会以智力为考虑的依据, 这条规则应该不用改.
+下一规则是当目前队中最高武力未满50时会以武力为考虑的依据,
+005EE5F4改为0可以保持以武力为考虑的依据.
+以上只是很粗略的修改, 不可能让AI编队变得聪明绝顶, 只是改变编队的方向性而已.
+
+
+AI挑选武将修行能吏繁殖发明造船的重视能力改为政治: 005E6DCC改为D0h
+
+
+以下修改应该就可以达到部队气力上限变动的效果了.
+00495419 - 8b 01                      - mov eax,[ecx]
+0049541B - 57                         - push edi
+0049541C - 8b f9                      - mov edi,ecx
+0049541E - eb 02                      - jmp 00495422
+00495420 - eb f7                      - jmp 00495419
+
+00495457 - 50                         - push eax
+00495458 - 8b cf                      - mov ecx,edi
+0049545A - e9 21 2b 41 00             - jmp 008a7f80
+
+008A7F80 - e8 3b 00 00 00             - call 008a7fc0
+008A7F85 - 5e                         - pop esi
+008A7F86 - 5f                         - pop edi
+008A7F87 - c3                         - ret
+
+004964CA - 51                         - push ecx
+004964CB - e9 b8 1a 41 00             - jmp 008a7f88
+
+008A7F88 - 8b ce                      - mov ecx,esi
+008A7F8A - e8 31 00 00 00             - call 008a7fc0
+008A7F8F - 8b c8                      - mov ecx,eax
+008A7F91 - 8b 44 24 0c                - mov eax,[esp+0c]
+008A7F95 - 85 c0                      - test eax,eax
+008A7F97 - e9 34 e5 be ff             - jmp 004964d0
+
+00496534 - 57                         - push edi
+00496535 - 8b ce                      - mov ecx,esi
+00496537 - eb 21                      - jmp 0049655a
+00496539 - 90                         - nop
+
+00496558 - eb e6                      - jmp 00496540
+0049655A - e8 61 1a 41 00             - call 008a7fc0
+0049655F - 8b f8                      - mov edi,eax
+00496561 - 8b 44 24 10                - mov eax,[esp+10]
+00496565 - 01 d8                      - add eax,ebx
+00496567 - eb d1                      - jmp 0049653a
+00496569 - 90                         - nop
+
+0049374D - e9 4a 48 41 00             - jmp 008a7f9c
+00493752 - 90                         - nop
+
+008A7F9C - 8b 06                      - mov eax,[esi]
+008A7F9E - 8b ce                      - mov ecx,esi
+008A7FA0 - ff 50 54                   - call dword ptr [eax+54]
+008A7FA3 - 50                         - push eax
+008A7FA4 - 8b ce                      - mov ecx,esi
+008A7FA6 - e8 15 00 00 00             - call 008a7fc0
+008A7FAB - 50                         - push eax
+008A7FAC - 8b ce                      - mov ecx,esi
+008A7FAE - e8 dd e4 be ff             - call 00496490
+008A7FB3 - 8d 9f 74 9b 1f 00          - lea ebx,[edi+001f9b74]
+008A7FB9 - e9 94 b7 be ff             - jmp 00493752
+
+008A7FC0 - 31 c0                      - xor eax,eax
+008A7FC2 - 83 79 08 01                - cmp dword ptr [ecx+08],01
+008A7FC6 - 74 08                      - je 008a7fd0
+008A7FC8 - e8 a3 ed be ff             - call 00496d70
+008A7FCD - 6b c0 05                   - imul eax,eax,05
+008A7FD0 - 8b 4c 24 04                - mov ecx,[esp+04]
+008A7FD4 - 01 c1                      - add ecx,eax
+008A7FD6 - b8 ff 00 00 00             - mov eax,000000ff
+008A7FDB - 39 c8                      - cmp eax,ecx
+008A7FDD - 7e 02                      - jle 008a7fe1
+008A7FDF - 8b c1                      - mov eax,ecx
+008A7FE1 - c2 04 00                   - ret 0004
+
+00584AD1 - 8b cf                      - mov ecx,edi
+00584AD3 - e9 28 35 32 00             - jmp 008a8000
+
+008A8000 - e8 1b d4 be ff             - call 00495420
+008A8005 - 50                         - push eax
+008A8006 - 8b 17                      - mov edx,[edi]
+008A8008 - 8b cf                      - mov ecx,edi
+008A800A - ff 52 34                   - call dword ptr [edx+34]
+008A800D - 8b cf                      - mov ecx,edi
+008A800F - e8 0c d4 be ff             - call 00495420
+008A8014 - f7 1c 24                   - neg [esp]
+008A8017 - 01 04 24                   - add [esp],eax
+008A801A - 8b cf                      - mov ecx,edi
+008A801C - e8 cf e4 be ff             - call 004964f0
+008A8021 - e9 b2 ca cd ff             - jmp 00584ad8
+
+部队气力上限增加(对应兵种之适性*5)(上限255), 从据点派出部队时部队气力也会等量增加. 部队在水陆之间移动后气力上限如果有变化,
+部队的气力会随之增减. 例如骑马S水军C的骑兵从陆地移到水上, 气力与气力上限都减15, 反之则都加15.
+在下就改到这里, 后续调整or完善就请对这项修改有兴趣的人出手吧.
+
+
+
+
+顺便附上”游戏开始or读档时根据地图格是否具有内政属性, 判断是否加入城市内政用地”的代码
+0057EB68 - 33 db                      - xor ebx,ebx
+0057EB6A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+0057EB70 - 0f bf eb                   - movsx ebp,bx
+0057EB73 - 33 f6                      - xor esi,esi
+0057EB75 - 69 ed c8 00 00 00          - imul ebp,ebp,000000c8
+0057EB7B - 66 89 5c 24 18             - mov [esp+18],ebx
+0057EB80 - 0f bf c6                   - movsx eax,si
+0057EB83 - 03 c5                      - add eax,ebp
+0057EB85 - 8d 04 80                   - lea eax,[eax+eax*4]
+0057EB88 - 8d 04 85 68 0e fb 06       - lea eax,[eax*4+06fb0e68]
+0057EB8F - 8b 40 04                   - mov eax,[eax+04]
+0057EB92 - a9 00 00 04 00             - test eax,00040000判断可否建内政设施
+0057EB97 - 66 89 74 24 1a             - mov [esp+1a],esi=写入Y坐标数值
+0057EB9C - 74 2f                      - je 0057ebcd不可则跳下
+0057EB9E - c1 e8 05                   - shr eax,05
+0057EBA1 - 83 e0 7f                   - and eax,7f
+0057EBA4 - 50                         - push eax=此地图格所属据点代号
+0057EBA5 - e8 46 4e f0 ff             - call 004839f0
+0057EBAA - 83 c4 04                   - add esp,04
+0057EBAD - 50                         - push eax=该据点所属都市代号
+0057EBAE - b9 58 19 20 07             - mov ecx,07201958
+0057EBB3 - e8 58 1e f1 ff             - call 00490a10计算该所属都市的地址
+0057EBB8 - 8b 7c 24 18                - mov edi,[esp+18]
+0057EBBC - 57                         - push edi
+0057EBBD - 8b c8                      - mov ecx,eax
+0057EBBF - e8 0c cb ef ff             - call 0047b6d0写入都市信息中的内政相关资料
+    0047B6D0 - 8b 81 e8 00 00 00          - mov eax,[ecx+000000e8]
+   0047B6D6 - 8d 50 01                   - lea edx,[eax+01]总数加1
+   0047B6D9 - 89 91 e8 00 00 00          - mov [ecx+000000e8],edx写入新总数
+    0047B6DF - 8b 54 24 04                - mov edx,[esp+04]=该格坐标
+    0047B6E3 - 89 94 c1 f0 00 00 00       - mov [ecx+eax*8+000000f0],edx
+   0047B6EA - c2 04 00                   - ret 0004
+0057EBC4 - 57                         - push edi
+0057EBC5 - e8 46 11 02 00             - call 0059fd10
+0057EBCA - 83 c4 04                   - add esp,04
+0057EBCD - 46                         - inc esi                Y坐标加1
+0057EBCE - 81 fe c8 00 00 00          - cmp esi,000000c8
+0057EBD4 - 7c aa                      - jnge 0057eb80
+0057EBD6 - 43                         - inc ebx                X坐标加1
+0057EBD7 - 81 fb c8 00 00 00          - cmp ebx,000000c8
+0057EBDD - 7c 91                      - jnge 0057eb70
+再附上判断某地图格是否可开发的函数call 005bbbf0 (push 格坐标, push 城市地址)
+
+
+
+
+
+获得指定状态武将列表的函数：
+004CF360 - 53                         - push ebx
+004CF361 - 8b 5c 24 08                - mov ebx,[esp+08]
+004CF365 - 56                         - push esi
+004CF366 - 8b cb                      - mov ecx,ebx
+004CF368 - e8 e3 ca fa ff             - call 0047be50                不看，可能是准备堆栈
+004CF36D - 8b 74 24 10                - mov esi,[esp+10]             esi = 设施指针
+004CF371 - 8b ce                      - mov ecx,esi
+004CF373 - e8 98 8a fb ff             - call 00487e10                获取城市、港、关的设施ID并校验
+004CF378 - 85 c0                      - test eax,eax
+004CF37A - 74 6e                      - je 004cf3ea
+004CF37C - 57                         - push edi
+004CF37D - 8b ce                      - mov ecx,esi
+004CF37F - e8 3c 88 fb ff             - call 00487bc0
+004CF384 - 8b f8                      - mov edi,eax                 edi = esi+b4（城市），esi+70（港关）
+004CF386 - 85 ff                      - test edi,edi
+004CF388 - 74 57                      - je 004cf3e1
+004CF38A - 8b 47 04                   - mov eax,[edi+04]
+004CF38D - 85 c0                      - test eax,eax
+004CF38F - 89 44 24 10                - mov [esp+10],eax
+004CF393 - 74 4c                      - je 004cf3e1
+004CF395 - 55                         - push ebp
+004CF396 - 8b 6c 24 1c                - mov ebp,[esp+1c]             ebp状态标志位
+004CF39A - 8d 9b 00 00 00 00          - lea ebx,[ebx+00000000]
+
+004CF3A0 - 8d 44 24 14                - lea eax,[esp+14]
+004CF3A4 - 50                         - push eax
+004CF3A5 - 8b cf                      - mov ecx,edi
+004CF3A7 - e8 24 cb fa ff             - call 0047bed0                出栈（从栈中获得下一个武将指针）
+004CF3AC - 8b 30                      - mov esi,[eax]
+004CF3AE - 56                         - push esi
+004CF3AF - e8 4c b2 fa ff             - call 0047a600                    校验指针（武将指针）
+004CF3B4 - 83 c4 04                   - add esp,04
+004CF3B7 - 85 c0                      - test eax,eax
+004CF3B9 - 74 14                      - je 004cf3cf
+004CF3BB - 55                         - push ebp
+004CF3BC - 8b ce                      - mov ecx,esi
+004CF3BE - e8 1d ac fb ff             - call 00489fe0              判断武将身份是否是包含在武将身份标志位(push身份位数组，ecx=武将指针)
+004CF3C3 - 85 c0                      - test eax,eax
+004CF3C5 - 74 08                      - je 004cf3cf
+004CF3C7 - 56                         - push esi
+004CF3C8 - 8b cb                      - mov ecx,ebx
+004CF3CA - e8 e1 cd fa ff             - call 0047c1b0           放入列表
+
+004CF3CF - 8b 44 24 14                - mov eax,[esp+14]
+004CF3D3 - 85 c0                      - test eax,eax
+004CF3D5 - 75 c9                      - jne 004cf3a0            循环
+
+004CF3D7 - 8b 43 0c                   - mov eax,[ebx+0c]
+004CF3DA - 5d                         - pop ebp
+004CF3DB - 5f                         - pop edi
+004CF3DC - 5e                         - pop esi
+004CF3DD - 5b                         - pop ebx
+004CF3DE - c2 0c 00                   - ret 000c
+
+004CF3E1 - 8b 43 0c                   - mov eax,[ebx+0c]
+004CF3E4 - 5f                         - pop edi
+004CF3E5 - 5e                         - pop esi
+004CF3E6 - 5b                         - pop ebx
+004CF3E7 - c2 0c 00                   - ret 000c
+004CF3EA - 8b 43 0c                   - mov eax,[ebx+0c]
+004CF3ED - 5e                         - pop esi
+004CF3EE - 5b                         - pop ebx
+004CF3EF - c2 0c 00                   - ret 000c
+
+
+
+顺便提供可以看见AI势力武将命令与部队目标等情报的修改.
+004C9E81: 改为ebh, 非玩家势力武将的任务名称可以显示
+004C9EF4: 改为ebh, 非玩家势力武将的任务对象可以显示
+004C9F75: 改为ebh, 非玩家势力武将的任务期间可以显示
+004C9708: 改为ebh, 非玩家势力武将的任务命令数据可以正常排序
+
+004CD1AB: 改为ebh28h, 非玩家势力部队的任务名称可以显示
+004CCF37: 改为ebh28h, 非玩家势力部队的任务名称可以正常排序
+004CD277: 改为ebh5bh, 非玩家势力部队的任务对象可以显示
+004CCFC5: 改为ebh5ah, 非玩家势力部队的任务对象可以正常排序

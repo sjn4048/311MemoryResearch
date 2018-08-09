@@ -1,0 +1,659 @@
+函数1 击破设施获得资源
+004BA610 - 83 EC 44              - sub esp,44
+004BA613 - 53                    - push ebx
+004BA614 - 8B 5C 24 50           - mov ebx,[esp+50]			ebx = 被破坏设施指针
+004BA618 - 53                    - push ebx
+004BA619 - E8 1200FCFF           - call 0047A630			校验指针
+004BA61E - 83 C4 04              - add esp,04
+004BA621 - 85 C0                 - test eax,eax
+004BA623 - 0F84 E0050000         - je 004BAC09
+
+004BA629 - 8B 44 24 58           - mov eax,[esp+58]
+004BA62D - 56                    - push esi
+004BA62E - 33 F6                 - xor esi,esi				esi = 0
+004BA630 - 3B C6                 - cmp eax,esi
+004BA632 - 0F8C D0050000         - jl 004BAC08
+004BA638 - 83 F8 3F              - cmp eax,3F
+004BA63B - 0F8F C7050000         - jg 004BAC08				校验被破坏设施的类型
+
+004BA641 - 55                    - push ebp
+004BA642 - 8B 6C 24 54           - mov ebp,[esp+54]
+004BA646 - 57                    - push edi
+004BA647 - 33 C0                 - xor eax,eax
+004BA649 - 89 75 00              - mov [ebp+00],esi
+004BA64C - 89 75 04              - mov [ebp+04],esi
+004BA64F - 89 75 08              - mov [ebp+08],esi
+004BA652 - 89 75 3C              - mov [ebp+3C],esi
+004BA655 - 89 75 40              - mov [ebp+40],esi
+004BA658 - 89 75 44              - mov [ebp+44],esi
+004BA65B - 8D 7D 0C              - lea edi,[ebp+0C]
+004BA65E - B9 0C000000           - mov ecx,0000000C
+004BA663 - F3 AB                 - repe stosd 
+
+【取得击破设施部队的政治或者魅力】
+004BA665 - 8B 7C 24 60           - mov edi,[esp+60]			edi = 部队指针
+004BA669 - 57                    - push edi
+004BA66A - 89 74 24 18           - mov [esp+18],esi
+004BA66E - 89 74 24 24           - mov [esp+24],esi
+004BA672 - E8 B9FFFBFF           - call 0047A630
+004BA677 - 83 C4 04              - add esp,04
+004BA67A - 85 C0                 - test eax,eax
+004BA67C - 74 1E                 - je 004BA69C				校验失败（表示被火烧毁）则跳过取部队政治和魅力
+004BA67E - 0FB6 87 C7000000      - movzx eax,byte ptr [edi+000000C7]	部队政治
+004BA685 - 3B C6                 - cmp eax,esi
+004BA687 - 7C 04                 - jl 004BA68D				小于0则计为0
+004BA689 - 89 44 24 14           - mov [esp+14],eax
+004BA68D - 0FB6 87 C8000000      - movzx eax,byte ptr [edi+000000C8]	部队魅力
+004BA694 - 3B C6                 - cmp eax,esi
+004BA696 - 7C 04                 - jl 004BA69C				小于0则计为0
+004BA698 - 89 44 24 20           - mov [esp+20],eax	
+
+【取得被击破设施所属城市太守的政治或者魅力】
+004BA69C - 8B CB                 - mov ecx,ebx				ebx = 被破坏设施指针
+004BA69E - E8 7DD2FCFF           - call 00487920			获取设施所属城市ID
+004BA6A3 - 50                    - push eax
+004BA6A4 - B9 58192007           - mov ecx,07201958
+004BA6A9 - E8 6263FDFF           - call 00490A10			根据城市ID获取城市指针
+004BA6AE - 8B D8                 - mov ebx,eax				ebx = 被破坏设施所属城市指针
+004BA6B0 - 53                    - push ebx
+004BA6B1 - E8 7AFFFBFF           - call 0047A630			校验城市指针
+004BA6B6 - 83 C4 04              - add esp,04
+004BA6B9 - 85 C0                 - test eax,eax
+004BA6BB - 0F84 45050000         - je 004BAC06				校验失败则跳转到返回
+004BA6C1 - 8B 03                 - mov eax,[ebx]
+004BA6C3 - 33 FF                 - xor edi,edi				edi = 0
+004BA6C5 - 8B CB                 - mov ecx,ebx
+004BA6C7 - 89 7C 24 18           - mov [esp+18],edi
+004BA6CB - 89 7C 24 1C           - mov [esp+1C],edi
+004BA6CF - FF 50 54              - call dword ptr [eax+54]		获得城市太守ID
+004BA6D2 - 50                    - push eax
+004BA6D3 - B9 58192007           - mov ecx,07201958
+004BA6D8 - E8 2364FDFF           - call 00490B00			根据武将ID获取武将指针
+004BA6DD - 8B F0                 - mov esi,eax
+004BA6DF - 56                    - push esi
+004BA6E0 - E8 4BFFFBFF           - call 0047A630			校验太守指针
+004BA6E5 - 83 C4 04              - add esp,04
+004BA6E8 - 85 C0                 - test eax,eax
+004BA6EA - 74 24                 - je 004BA710				校验失败则跳过
+004BA6EC - 8B CE                 - mov ecx,esi
+004BA6EE - E8 ADE9FCFF           - call 004890A0			获得武将政治
+004BA6F3 - 0FB6 C0               - movzx eax,al
+004BA6F6 - 3B C7                 - cmp eax,edi
+004BA6F8 - 7C 04                 - jl 004BA6FE				小于0则计为0
+004BA6FA - 89 44 24 18           - mov [esp+18],eax
+004BA6FE - 8B CE                 - mov ecx,esi
+004BA700 - E8 ABE9FCFF           - call 004890B0			获得武将魅力
+004BA705 - 0FB6 C0               - movzx eax,al
+004BA708 - 3B C7                 - cmp eax,edi
+004BA70A - 7C 04                 - jl 004BA710				小于0则计为0
+004BA70C - 89 44 24 1C           - mov [esp+1C],eax
+
+【考虑科技等因素】
+004BA710 - 8B 13                 - mov edx,[ebx]			ebx = 被破坏设施所属城市指针
+004BA712 - 33 C0                 - xor eax,eax
+004BA714 - B9 0C000000           - mov ecx,0000000C
+004BA719 - 8D 7C 24 24           - lea edi,[esp+24]
+004BA71D - F3 AB                 - repe stosd 
+004BA71F - 8B CB                 - mov ecx,ebx
+004BA721 - FF 52 40              - call dword ptr [edx+40]		获得所属势力ID
+004BA724 - 50                    - push eax
+004BA725 - B9 58192007           - mov ecx,07201958
+004BA72A - E8 7163FDFF           - call 00490AA0			根据势力ID获取势力指针
+004BA72F - 8B F0                 - mov esi,eax				esi = 被破坏设施所属势力指针
+004BA731 - 56                    - push esi
+004BA732 - E8 F9FEFBFF           - call 0047A630			校验势力指针
+004BA737 - 83 C4 04              - add esp,04
+004BA73A - 85 C0                 - test eax,eax
+004BA73C - 74 3B                 - je 004BA779				校验失败则跳过
+004BA73E - 6A 1C                 - push 1C				1C（科技） = 开发木兽
+004BA740 - 8B CE                 - mov ecx,esi
+004BA742 - E8 996AFCFF           - call 004811E0			判断势力是否拥有某项科技
+004BA747 - 85 C0                 - test eax,eax
+004BA749 - BF 01000000           - mov edi,00000001
+004BA74E - 74 06                 - je 004BA756
+004BA750 - 89 7C 24 44           - mov [esp+44],edi
+004BA754 - EB 04                 - jmp 004BA75A
+004BA756 - 89 7C 24 38           - mov [esp+38],edi
+004BA75A - 6A 16                 - push 16				16（科技） = 开发投石
+004BA75C - 8B CE                 - mov ecx,esi
+004BA75E - E8 7D6AFCFF           - call 004811E0			判断势力是否拥有某项科技
+004BA763 - 85 C0                 - test eax,eax
+004BA765 - 74 0A                 - je 004BA771
+004BA767 - 89 7C 24 40           - mov [esp+40],edi
+004BA76B - 89 7C 24 50           - mov [esp+50],edi
+004BA76F - EB 08                 - jmp 004BA779
+004BA771 - 89 7C 24 3C           - mov [esp+3C],edi
+004BA775 - 89 7C 24 4C           - mov [esp+4C],edi
+004BA779 - 8B 44 24 18           - mov eax,[esp+18]			eax = 太守政治
+004BA77D - BF 46000000           - mov edi,00000046
+004BA782 - 3B C7                 - cmp eax,edi
+004BA784 - 89 44 24 10           - mov [esp+10],eax
+004BA788 - 7F 04                 - jg 004BA78E
+004BA78A - 89 7C 24 10           - mov [esp+10],edi
+004BA78E - 8B 44 24 14           - mov eax,[esp+14]			eax = 部队政治
+004BA792 - B9 32000000           - mov ecx,00000032
+004BA797 - 3B C1                 - cmp eax,ecx
+004BA799 - 89 44 24 14           - mov [esp+14],eax
+004BA79D - 7F 04                 - jg 004BA7A3
+004BA79F - 89 4C 24 14           - mov [esp+14],ecx
+004BA7A3 - 8B 44 24 1C           - mov eax,[esp+1C]			eax = 太守魅力
+004BA7A7 - 3B C7                 - cmp eax,edi
+004BA7A9 - 7E 02                 - jle 004BA7AD
+004BA7AB - 8B F8                 - mov edi,eax
+004BA7AD - 8B 44 24 20           - mov eax,[esp+20]			eax = 部队魅力
+004BA7B1 - 3B C1                 - cmp eax,ecx
+004BA7B3 - 89 44 24 20           - mov [esp+20],eax
+004BA7B7 - 7F 04                 - jg 004BA7BD
+
+004BA7B9 - 89 4C 24 20           - mov [esp+20],ecx
+004BA7BD - 8B 74 24 64           - mov esi,[esp+64]			esi = 设施类型ID
+004BA7C1 - 8D 4E E1              - lea ecx,[esi-1F]			ecx = esi - 31
+004BA7C4 - 83 F9 1C              - cmp ecx,1C { 28 }                    1C(31+28=59) = 马厩3
+004BA7C7 - 0F87 39040000         - ja 004BAC06				设施类型大于59则返回
+004BA7CD - 0FB6 81 30AC4B00      - movzx eax,byte ptr [ecx+004BAC30]
+004BA7D4 - FF 24 85 10AC4B00     - jmp dword ptr [eax*4+004BAC10]	跳转到相应处理
+
+【后面就是不同设施被破坏的实际计算了】
+004BA7DB - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BA7E0 - F7 63 44              - mul [ebx+44]
+004BA7E3 - C1 EA 03              - shr edx,03 { 3 }
+004BA7E6 - 83 F9 14              - cmp ecx,14 { 20 }
+004BA7E9 - 77 23                 - ja 004BA80E
+004BA7EB - 0FB6 89 60AC4B00      - movzx ecx,byte ptr [ecx+004BAC60]
+004BA7F2 - FF 24 8D 50AC4B00     - jmp dword ptr [ecx*4+004BAC50]
+004BA7F9 - B8 0A000000           - mov eax,0000000A { 10 }
+004BA7FE - EB 13                 - jmp 004BA813
+004BA800 - B8 0C000000           - mov eax,0000000C { 12 }
+004BA805 - EB 0C                 - jmp 004BA813
+004BA807 - B8 0F000000           - mov eax,0000000F { 15 }
+004BA80C - EB 05                 - jmp 004BA813
+004BA80E - B8 14000000           - mov eax,00000014 { 20 }
+004BA813 - 0FAF C2               - imul eax,edx
+004BA816 - 8B C8                 - mov ecx,eax
+004BA818 - B8 67666666           - mov eax,66666667
+004BA81D - F7 E9                 - imul ecx
+004BA81F - C1 FA 02              - sar edx,02 { 2 }
+004BA822 - 8B C2                 - mov eax,edx
+004BA824 - C1 E8 1F              - shr eax,1F { 31 }
+004BA827 - 03 C2                 - add eax,edx
+004BA829 - 6B C0 46              - imul eax,eax,46
+004BA82C - 99                    - cdq 
+004BA82D - F7 7C 24 10           - idiv [esp+10]
+004BA831 - 83 F8 01              - cmp eax,01 { 1 }
+004BA834 - 7F 05                 - jg 004BA83B
+004BA836 - B8 01000000           - mov eax,00000001 { 1 }
+004BA83B - 89 45 00              - mov [ebp+00],eax
+004BA83E - 0FAF 44 24 14         - imul eax,[esp+14]
+004BA843 - 8B C8                 - mov ecx,eax
+004BA845 - B8 1F85EB51           - mov eax,51EB851F
+004BA84A - F7 E9                 - imul ecx
+004BA84C - C1 FA 07              - sar edx,07 { 7 }
+004BA84F - 8B C2                 - mov eax,edx
+004BA851 - C1 E8 1F              - shr eax,1F { 31 }
+004BA854 - 5F                    - pop edi
+004BA855 - 03 C2                 - add eax,edx
+004BA857 - 89 45 3C              - mov [ebp+3C],eax
+004BA85A - 5D                    - pop ebp
+004BA85B - 5E                    - pop esi
+004BA85C - 5B                    - pop ebx
+004BA85D - 83 C4 44              - add esp,44 { 68 }
+004BA860 - C3                    - ret 
+004BA861 - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BA866 - F7 63 48              - mul [ebx+48]
+004BA869 - 8D 46 E0              - lea eax,[esi-20]
+004BA86C - C1 EA 03              - shr edx,03 { 3 }
+004BA86F - 83 F8 15              - cmp eax,15 { 21 }
+004BA872 - 77 23                 - ja 004BA897
+004BA874 - 0FB6 88 88AC4B00      - movzx ecx,byte ptr [eax+004BAC88]
+004BA87B - FF 24 8D 78AC4B00     - jmp dword ptr [ecx*4+004BAC78]
+004BA882 - B8 0A000000           - mov eax,0000000A { 10 }
+004BA887 - EB 13                 - jmp 004BA89C
+004BA889 - B8 0C000000           - mov eax,0000000C { 12 }
+004BA88E - EB 0C                 - jmp 004BA89C
+004BA890 - B8 0F000000           - mov eax,0000000F { 15 }
+004BA895 - EB 05                 - jmp 004BA89C
+004BA897 - B8 14000000           - mov eax,00000014 { 20 }
+004BA89C - 0FAF C2               - imul eax,edx
+004BA89F - 8B C8                 - mov ecx,eax
+004BA8A1 - B8 67666666           - mov eax,66666667
+004BA8A6 - F7 E9                 - imul ecx
+004BA8A8 - C1 FA 02              - sar edx,02 { 2 }
+004BA8AB - 8B C2                 - mov eax,edx
+004BA8AD - C1 E8 1F              - shr eax,1F { 31 }
+004BA8B0 - 03 C2                 - add eax,edx
+004BA8B2 - 6B C0 46              - imul eax,eax,46
+004BA8B5 - 99                    - cdq 
+004BA8B6 - F7 7C 24 10           - idiv [esp+10]
+004BA8BA - 83 F8 01              - cmp eax,01 { 1 }
+004BA8BD - 7F 05                 - jg 004BA8C4
+004BA8BF - B8 01000000           - mov eax,00000001 { 1 }
+004BA8C4 - 89 45 04              - mov [ebp+04],eax
+004BA8C7 - 0FAF 44 24 14         - imul eax,[esp+14]
+004BA8CC - 8B C8                 - mov ecx,eax
+004BA8CE - B8 1F85EB51           - mov eax,51EB851F
+004BA8D3 - F7 E9                 - imul ecx
+004BA8D5 - C1 FA 07              - sar edx,07 { 7 }
+004BA8D8 - 8B C2                 - mov eax,edx
+004BA8DA - C1 E8 1F              - shr eax,1F { 31 }
+004BA8DD - 5F                    - pop edi
+004BA8DE - 03 C2                 - add eax,edx
+004BA8E0 - 89 45 40              - mov [ebp+40],eax
+004BA8E3 - 5D                    - pop ebp
+004BA8E4 - 5E                    - pop esi
+004BA8E5 - 5B                    - pop ebx
+004BA8E6 - 83 C4 44              - add esp,44 { 68 }
+004BA8E9 - C3                    - ret 
+004BA8EA - 8B 5B 40              - mov ebx,[ebx+40]
+004BA8ED - B8 67666666           - mov eax,66666667
+004BA8F2 - F7 EB                 - imul ebx
+004BA8F4 - C1 FA 02              - sar edx,02 { 2 }
+004BA8F7 - 8B C2                 - mov eax,edx
+004BA8F9 - C1 E8 1F              - shr eax,1F { 31 }
+004BA8FC - 03 C2                 - add eax,edx
+004BA8FE - 8D 56 DF              - lea edx,[esi-21]
+004BA901 - 83 FA 16              - cmp edx,16 { 22 }
+004BA904 - B9 0A000000           - mov ecx,0000000A { 10 }
+004BA909 - 77 21                 - ja 004BA92C
+004BA90B - 0FB6 92 B0AC4B00      - movzx edx,byte ptr [edx+004BACB0]
+004BA912 - FF 24 95 A0AC4B00     - jmp dword ptr [edx*4+004BACA0]
+004BA919 - B9 0A000000           - mov ecx,0000000A { 10 }
+004BA91E - EB 0C                 - jmp 004BA92C
+004BA920 - B9 0C000000           - mov ecx,0000000C { 12 }
+004BA925 - EB 05                 - jmp 004BA92C
+004BA927 - B9 0F000000           - mov ecx,0000000F { 15 }
+004BA92C - 0FAF C8               - imul ecx,eax
+004BA92F - B8 67666666           - mov eax,66666667
+004BA934 - F7 E9                 - imul ecx
+004BA936 - C1 FA 02              - sar edx,02 { 2 }
+004BA939 - 8B C2                 - mov eax,edx
+004BA93B - C1 E8 1F              - shr eax,1F { 31 }
+004BA93E - 03 C2                 - add eax,edx
+004BA940 - 6B C0 46              - imul eax,eax,46
+004BA943 - 99                    - cdq 
+004BA944 - F7 FF                 - idiv edi
+004BA946 - 83 F8 01              - cmp eax,01 { 1 }
+004BA949 - 7F 05                 - jg 004BA950
+004BA94B - B8 01000000           - mov eax,00000001 { 1 }
+004BA950 - 89 45 08              - mov [ebp+08],eax
+004BA953 - 0FAF 44 24 20         - imul eax,[esp+20]
+004BA958 - 8B C8                 - mov ecx,eax
+004BA95A - B8 1F85EB51           - mov eax,51EB851F
+004BA95F - F7 E9                 - imul ecx
+004BA961 - C1 FA 07              - sar edx,07 { 7 }
+004BA964 - 8B C2                 - mov eax,edx
+004BA966 - C1 E8 1F              - shr eax,1F { 31 }
+004BA969 - 5F                    - pop edi
+004BA96A - 03 C2                 - add eax,edx
+004BA96C - 89 45 44              - mov [ebp+44],eax
+004BA96F - 5D                    - pop ebp
+004BA970 - 5E                    - pop esi
+004BA971 - 5B                    - pop ebx
+004BA972 - 83 C4 44              - add esp,44 { 68 }
+004BA975 - C3                    - ret 
+004BA976 - 8B 44 24 64           - mov eax,[esp+64]
+004BA97A - 33 C9                 - xor ecx,ecx
+004BA97C - 83 E8 22              - sub eax,22 { 34 }
+004BA97F - 89 4C 24 18           - mov [esp+18],ecx
+004BA983 - BD 0A000000           - mov ebp,0000000A { 10 }
+004BA988 - 74 16                 - je 004BA9A0
+004BA98A - 83 E8 16              - sub eax,16 { 22 }
+004BA98D - 74 0A                 - je 004BA999
+004BA98F - 48                    - dec eax
+004BA990 - 75 13                 - jne 004BA9A5
+004BA992 - BD 0F000000           - mov ebp,0000000F { 15 }
+004BA997 - EB 0C                 - jmp 004BA9A5
+004BA999 - BD 0C000000           - mov ebp,0000000C { 12 }
+004BA99E - EB 05                 - jmp 004BA9A5
+004BA9A0 - BD 0A000000           - mov ebp,0000000A { 10 }
+004BA9A5 - 8B 7C 24 58           - mov edi,[esp+58]
+004BA9A9 - 33 F6                 - xor esi,esi
+004BA9AB - 83 C7 0C              - add edi,0C { 12 }
+004BA9AE - 8B FF                 - mov edi,edi
+004BA9B0 - 85 F6                 - test esi,esi
+004BA9B2 - 0F84 7C000000         - je 004BAA34
+004BA9B8 - 83 FE 04              - cmp esi,04 { 4 }
+004BA9BB - 74 77                 - je 004BAA34
+004BA9BD - 56                    - push esi
+004BA9BE - 8B CB                 - mov ecx,ebx
+004BA9C0 - E8 8B09FCFF           - call 0047B350
+004BA9C5 - 8B C8                 - mov ecx,eax
+004BA9C7 - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BA9CC - F7 E1                 - mul ecx
+004BA9CE - C1 EA 03              - shr edx,03 { 3 }
+004BA9D1 - 8B CA                 - mov ecx,edx
+004BA9D3 - 0FAF CD               - imul ecx,ebp
+004BA9D6 - B8 67666666           - mov eax,66666667
+004BA9DB - F7 E9                 - imul ecx
+004BA9DD - C1 FA 02              - sar edx,02 { 2 }
+004BA9E0 - 8B C2                 - mov eax,edx
+004BA9E2 - C1 E8 1F              - shr eax,1F { 31 }
+004BA9E5 - 03 C2                 - add eax,edx
+004BA9E7 - 6B C0 46              - imul eax,eax,46
+004BA9EA - 99                    - cdq 
+004BA9EB - F7 7C 24 10           - idiv [esp+10]
+004BA9EF - 8B C8                 - mov ecx,eax
+004BA9F1 - B8 56555555           - mov eax,55555556
+004BA9F6 - F7 E9                 - imul ecx
+004BA9F8 - 8B C2                 - mov eax,edx
+004BA9FA - C1 E8 1F              - shr eax,1F { 31 }
+004BA9FD - 03 C2                 - add eax,edx
+004BA9FF - 83 F8 01              - cmp eax,01 { 1 }
+004BAA02 - 7F 05                 - jg 004BAA09
+004BAA04 - B8 01000000           - mov eax,00000001 { 1 }
+004BAA09 - 56                    - push esi
+004BAA0A - 89 07                 - mov [edi],eax
+004BAA0C - E8 8FEEFFFF           - call 004B98A0
+004BAA11 - 8B C8                 - mov ecx,eax
+004BAA13 - 0FAF 0F               - imul ecx,[edi]
+004BAA16 - B8 D34D6210           - mov eax,10624DD3 { [0] }
+004BAA1B - F7 E9                 - imul ecx
+004BAA1D - 8B 4C 24 1C           - mov ecx,[esp+1C]
+004BAA21 - C1 FA 06              - sar edx,06 { 6 }
+004BAA24 - 8B C2                 - mov eax,edx
+004BAA26 - C1 E8 1F              - shr eax,1F { 31 }
+004BAA29 - 03 C2                 - add eax,edx
+004BAA2B - 83 C4 04              - add esp,04 { 4 }
+004BAA2E - 03 C8                 - add ecx,eax
+004BAA30 - 89 4C 24 18           - mov [esp+18],ecx
+004BAA34 - 46                    - inc esi
+004BAA35 - 83 C7 04              - add edi,04 { 4 }
+004BAA38 - 83 FE 04              - cmp esi,04 { 4 }
+004BAA3B - 0F8E 6FFFFFFF         - jng 004BA9B0
+004BAA41 - 0FAF 4C 24 14         - imul ecx,[esp+14]
+004BAA46 - B8 1F85EB51           - mov eax,51EB851F
+004BAA4B - F7 E9                 - imul ecx
+004BAA4D - C1 FA 07              - sar edx,07 { 7 }
+004BAA50 - 8B CA                 - mov ecx,edx
+004BAA52 - 5F                    - pop edi
+004BAA53 - C1 E9 1F              - shr ecx,1F { 31 }
+004BAA56 - 5D                    - pop ebp
+004BAA57 - 03 CA                 - add ecx,edx
+004BAA59 - 8B 54 24 50           - mov edx,[esp+50]
+004BAA5D - 5E                    - pop esi
+004BAA5E - 89 4A 3C              - mov [edx+3C],ecx
+004BAA61 - 5B                    - pop ebx
+004BAA62 - 83 C4 44              - add esp,44 { 68 }
+004BAA65 - C3                    - ret 
+004BAA66 - 6A 04                 - push 04 { 4 }
+004BAA68 - 8B CB                 - mov ecx,ebx
+004BAA6A - E8 E108FCFF           - call 0047B350
+004BAA6F - 8B C8                 - mov ecx,eax
+004BAA71 - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BAA76 - F7 E1                 - mul ecx
+004BAA78 - 8B CE                 - mov ecx,esi
+004BAA7A - C1 EA 03              - shr edx,03 { 3 }
+004BAA7D - 83 E9 23              - sub ecx,23 { 35 }
+004BAA80 - B8 0A000000           - mov eax,0000000A { 10 }
+004BAA85 - 74 16                 - je 004BAA9D
+004BAA87 - 83 E9 17              - sub ecx,17 { 23 }
+004BAA8A - 74 0A                 - je 004BAA96
+004BAA8C - 49                    - dec ecx
+004BAA8D - 75 13                 - jne 004BAAA2
+004BAA8F - B8 0F000000           - mov eax,0000000F { 15 }
+004BAA94 - EB 0C                 - jmp 004BAAA2
+004BAA96 - B8 0C000000           - mov eax,0000000C { 12 }
+004BAA9B - EB 05                 - jmp 004BAAA2
+004BAA9D - B8 0A000000           - mov eax,0000000A { 10 }
+004BAAA2 - 0FAF C2               - imul eax,edx
+004BAAA5 - 8B C8                 - mov ecx,eax
+004BAAA7 - B8 67666666           - mov eax,66666667
+004BAAAC - F7 E9                 - imul ecx
+004BAAAE - C1 FA 02              - sar edx,02 { 2 }
+004BAAB1 - 8B C2                 - mov eax,edx
+004BAAB3 - C1 E8 1F              - shr eax,1F { 31 }
+004BAAB6 - 03 C2                 - add eax,edx
+004BAAB8 - 6B C0 46              - imul eax,eax,46
+004BAABB - 99                    - cdq 
+004BAABC - F7 7C 24 10           - idiv [esp+10]
+004BAAC0 - 83 F8 01              - cmp eax,01 { 1 }
+004BAAC3 - 7F 05                 - jg 004BAACA
+004BAAC5 - B8 01000000           - mov eax,00000001 { 1 }
+004BAACA - 6A 04                 - push 04 { 4 }
+004BAACC - 89 45 1C              - mov [ebp+1C],eax
+004BAACF - E8 CCEDFFFF           - call 004B98A0
+004BAAD4 - 8B C8                 - mov ecx,eax
+004BAAD6 - 0FAF 4D 1C            - imul ecx,[ebp+1C]
+004BAADA - B8 D34D6210           - mov eax,10624DD3 { [0] }
+004BAADF - F7 E9                 - imul ecx
+004BAAE1 - C1 FA 06              - sar edx,06 { 6 }
+004BAAE4 - 8B C2                 - mov eax,edx
+004BAAE6 - C1 E8 1F              - shr eax,1F { 31 }
+004BAAE9 - 03 C2                 - add eax,edx
+004BAAEB - 8B C8                 - mov ecx,eax
+004BAAED - 0FAF 4C 24 18         - imul ecx,[esp+18]
+004BAAF2 - B8 1F85EB51           - mov eax,51EB851F
+004BAAF7 - F7 E9                 - imul ecx
+004BAAF9 - C1 FA 07              - sar edx,07 { 7 }
+004BAAFC - 83 C4 04              - add esp,04 { 4 }
+004BAAFF - 8B CA                 - mov ecx,edx
+004BAB01 - C1 E9 1F              - shr ecx,1F { 31 }
+004BAB04 - 5F                    - pop edi
+004BAB05 - 03 CA                 - add ecx,edx
+004BAB07 - 89 4D 3C              - mov [ebp+3C],ecx
+004BAB0A - 5D                    - pop ebp
+004BAB0B - 5E                    - pop esi
+004BAB0C - 5B                    - pop ebx
+004BAB0D - 83 C4 44              - add esp,44 { 68 }
+004BAB10 - C3                    - ret 
+004BAB11 - 8B 6C 24 58           - mov ebp,[esp+58]
+004BAB15 - C7 44 24 20 00000000  - mov [esp+20],00000000 { 0 }
+004BAB1D - BE 05000000           - mov esi,00000005 { 5 }
+004BAB22 - 83 C5 20              - add ebp,20 { 32 }
+004BAB25 - 8B 7C B4 24           - mov edi,[esp+esi*4+24]
+004BAB29 - 56                    - push esi
+004BAB2A - 8B CB                 - mov ecx,ebx
+004BAB2C - E8 1F08FCFF           - call 0047B350
+004BAB31 - 8B D0                 - mov edx,eax
+004BAB33 - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BAB38 - F7 E2                 - mul edx
+004BAB3A - 8B C2                 - mov eax,edx
+004BAB3C - C1 E8 02              - shr eax,02 { 2 }
+004BAB3F - 6B C0 46              - imul eax,eax,46
+004BAB42 - 99                    - cdq 
+004BAB43 - F7 7C 24 10           - idiv [esp+10]
+004BAB47 - 99                    - cdq 
+004BAB48 - 83 E2 03              - and edx,03 { 3 }
+004BAB4B - 03 C2                 - add eax,edx
+004BAB4D - C1 F8 02              - sar eax,02 { 2 }
+004BAB50 - 3B C7                 - cmp eax,edi
+004BAB52 - 7F 02                 - jg 004BAB56
+004BAB54 - 8B C7                 - mov eax,edi
+004BAB56 - 56                    - push esi
+004BAB57 - 89 45 00              - mov [ebp+00],eax
+004BAB5A - E8 41EDFFFF           - call 004B98A0
+004BAB5F - 8B C8                 - mov ecx,eax
+004BAB61 - 0FAF 4D 00            - imul ecx,[ebp+00]
+004BAB65 - 8B 44 24 24           - mov eax,[esp+24]
+004BAB69 - 03 C1                 - add eax,ecx
+004BAB6B - 83 C4 04              - add esp,04 { 4 }
+004BAB6E - 46                    - inc esi
+004BAB6F - 83 C5 04              - add ebp,04 { 4 }
+004BAB72 - 83 FE 08              - cmp esi,08 { 8 }
+004BAB75 - 89 44 24 20           - mov [esp+20],eax
+004BAB79 - 7E AA                 - jle 004BAB25
+004BAB7B - EB 6A                 - jmp 004BABE7
+004BAB7D - 8B 6C 24 58           - mov ebp,[esp+58]
+004BAB81 - 33 C0                 - xor eax,eax
+004BAB83 - 89 44 24 18           - mov [esp+18],eax
+004BAB87 - BE 09000000           - mov esi,00000009 { 9 }
+004BAB8C - 83 C5 30              - add ebp,30 { 48 }
+004BAB8F - 90                    - nop 
+004BAB90 - 83 FE 09              - cmp esi,09 { 9 }
+004BAB93 - 74 49                 - je 004BABDE
+004BAB95 - 8B 7C B4 24           - mov edi,[esp+esi*4+24]
+004BAB99 - 56                    - push esi
+004BAB9A - 8B CB                 - mov ecx,ebx
+004BAB9C - E8 AF07FCFF           - call 0047B350
+004BABA1 - 8B D0                 - mov edx,eax
+004BABA3 - B8 CDCCCCCC           - mov eax,CCCCCCCD
+004BABA8 - F7 E2                 - mul edx
+004BABAA - 8B C2                 - mov eax,edx
+004BABAC - C1 E8 02              - shr eax,02 { 2 }
+004BABAF - 6B C0 46              - imul eax,eax,46
+004BABB2 - 99                    - cdq 
+004BABB3 - F7 7C 24 10           - idiv [esp+10]
+004BABB7 - 99                    - cdq 
+004BABB8 - 2B C2                 - sub eax,edx
+004BABBA - D1 F8                 - sar eax,1
+004BABBC - 3B C7                 - cmp eax,edi
+004BABBE - 7F 02                 - jg 004BABC2
+004BABC0 - 8B C7                 - mov eax,edi
+004BABC2 - 56                    - push esi
+004BABC3 - 89 45 00              - mov [ebp+00],eax
+004BABC6 - E8 D5ECFFFF           - call 004B98A0
+004BABCB - 0FAF 45 00            - imul eax,[ebp+00]
+004BABCF - 8B 4C 24 1C           - mov ecx,[esp+1C]
+004BABD3 - 83 C4 04              - add esp,04 { 4 }
+004BABD6 - 03 C8                 - add ecx,eax
+004BABD8 - 89 4C 24 18           - mov [esp+18],ecx
+004BABDC - 8B C1                 - mov eax,ecx
+004BABDE - 46                    - inc esi
+004BABDF - 83 C5 04              - add ebp,04 { 4 }
+004BABE2 - 83 FE 0B              - cmp esi,0B { 11 }
+004BABE5 - 7E A9                 - jle 004BAB90
+004BABE7 - 0FAF 44 24 14         - imul eax,[esp+14]
+004BABEC - 8B C8                 - mov ecx,eax
+004BABEE - B8 1F85EB51           - mov eax,51EB851F
+004BABF3 - F7 E9                 - imul ecx
+004BABF5 - 8B 4C 24 58           - mov ecx,[esp+58]
+004BABF9 - C1 FA 07              - sar edx,07 { 7 }
+004BABFC - 8B C2                 - mov eax,edx
+004BABFE - C1 E8 1F              - shr eax,1F { 31 }
+004BAC01 - 03 C2                 - add eax,edx
+004BAC03 - 89 41 3C              - mov [ecx+3C],eax
+004BAC06 - 5F                    - pop edi
+004BAC07 - 5D                    - pop ebp
+004BAC08 - 5E                    - pop esi
+004BAC09 - 5B                    - pop ebx
+004BAC0A - 83 C4 44              - add esp,44
+004BAC0D - C3                    - ret 
+
+数据区1 - 004BAC10: DB A7 4B 00 61 A8 4B 00 EA A8 4B 00 76 A9 4B 00 
+                    66 AA 4B 00 11 AB 4B 00 7D AB 4B 00 06 AC 4B 00
+数据区2 - 004BAC30: 00 01 02 03 04 05 06 00 01 00 00 00 00 00 02 00 
+                    00 07 01 00 00 01 01 02 02 03 03 04 04
+
+解读：市场、造币、鱼市、六府（不含练兵）——掉钱（0）
+      农场、谷仓、军屯——掉粮（2）
+      兵舍1，练兵所——掉兵（3）
+      锻造厂——掉兵器（4）
+      马厩——掉马（5）
+      工坊——掉攻城武器（6）
+      造船厂——掉船（7）
+      黑市——特殊处理（8）
+      
+      
+函数2 破城保留资源
+004B329B - 8B 74 24 20           - mov esi,[esp+20]
+004B329F - 56                    - push esi				esi = 破城部队指针
+004B32A0 - BD 05000000           - mov ebp,00000005                     最小5%
+004B32A5 - E8 8673FCFF           - call 0047A630			校验指针
+004B32AA - 83 C4 04              - add esp,04
+004B32AD - 85 C0                 - test eax,eax
+004B32AF - 74 26                 - je 004B32D7
+004B32B1 - 8B CE                 - mov ecx,esi
+004B32B3 - E8 F85DFDFF           - call 004890B0			eax = 部队魅力
+004B32B8 - 0FB6 C8               - movzx ecx,al
+*修改比率可调
+004B32BB - B8 67666666           - mov eax,66666667
+004B32C0 - F7 E9                 - imul ecx
+004B32C2 - C1 FA 02              - sar edx,02
+004B32C5 - 8B C2                 - mov eax,edx
+004B32C7 - C1 E8 1F              - shr eax,1F
+004B32CA - 03 C2                 - add eax,edx                          eax = 魅力 * 10%
+ 004B32BB - 8B C1                 - mov eax,ecx
+ 004B32BD - 6B C0 0A              - imul eax,eax,0A
+ 004B32C0 - B9 64000000           - mov ecx,00000064
+ 004B32C5 - 99                    - cdq 
+ 004B32C6 - F7 F9                 - idiv ecx
+ 004B32C8 - 90 90 90 90           - nop nop nop nop 
+004B32CC - 3B C5                 - cmp eax,ebp                          
+004B32CE - 8B E8                 - mov ebp,eax
+004B32D0 - 7F 05                 - jg 004B32D7
+004B32D2 - BD 05000000           - mov ebp,00000005                     最小5
+004B32D7 - 8B CF                 - mov ecx,edi				edi = 设施指针
+004B32D9 - E8 A239FDFF           - call 00486C80			获取城市、港、关金钱
+004B32DE - 8B C8                 - mov ecx,eax
+004B32E0 - 0FAF CD               - imul ecx,ebp
+004B32E3 - B8 1F85EB51           - mov eax,51EB851F
+004B32E8 - F7 E9                 - imul ecx
+004B32EA - C1 FA 05              - sar edx,05
+004B32ED - 8B F2                 - mov esi,edx
+004B32EF - C1 EE 1F              - shr esi,1F
+004B32F2 - 57                    - push edi				edi = 设施指针
+004B32F3 - 03 F2                 - add esi,edx				esi = 原有物资的1% * 魅力的10%
+004B32F5 - E8 3673FCFF           - call 0047A630
+004B32FA - 83 C4 04              - add esp,04
+004B32FD - 85 C0                 - test eax,eax
+004B32FF - 74 08                 - je 004B3309
+004B3301 - 56                    - push esi
+004B3302 - 8B CF                 - mov ecx,edi
+004B3304 - E8 0740FDFF           - call 00487310			设置城市、港、关金钱
+004B3309 - 8B CF                 - mov ecx,edi
+004B330B - E8 E03AFDFF           - call 00486DF0			获取城市、港、关兵粮
+004B3310 - 8B C8                 - mov ecx,eax
+004B3312 - 0FAF CD               - imul ecx,ebp
+004B3315 - B8 1F85EB51           - mov eax,51EB851F
+004B331A - F7 E9                 - imul ecx
+004B331C - C1 FA 05              - sar edx,05
+004B331F - 8B F2                 - mov esi,edx
+004B3321 - C1 EE 1F              - shr esi,1F
+004B3324 - 57                    - push edi
+004B3325 - 03 F2                 - add esi,edx				esi = 原有物资的1% * 魅力的10%
+004B3327 - E8 0473FCFF           - call 0047A630
+004B332C - 83 C4 04              - add esp,04
+004B332F - 85 C0                 - test eax,eax
+004B3331 - 74 08                 - je 004B333B
+004B3333 - 56                    - push esi
+004B3334 - 8B CF                 - mov ecx,edi
+004B3336 - E8 B540FDFF           - call 004873F0			设置城市、港、关金钱
+004B333B - 8B 07                 - mov eax,[edi]
+004B333D - 8B CF                 - mov ecx,edi
+004B333F - FF 50 50              - call dword ptr [eax+50]		获取城市、港、关兵力
+004B3342 - 8B C8                 - mov ecx,eax
+004B3344 - 0FAF CD               - imul ecx,ebp
+004B3347 - B8 1F85EB51           - mov eax,51EB851F
+004B334C - F7 E9                 - imul ecx
+004B334E - C1 FA 05              - sar edx,05
+004B3351 - 8B F2                 - mov esi,edx
+004B3353 - C1 EE 1F              - shr esi,1F
+004B3356 - 57                    - push edi
+004B3357 - 03 F2                 - add esi,edx				esi = 原有兵力的1% * 魅力的10%
+004B3359 - E8 D272FCFF           - call 0047A630
+004B335E - 83 C4 04              - add esp,04
+004B3361 - 85 C0                 - test eax,eax
+004B3363 - 74 14                 - je 004B3379
+004B3365 - 56                    - push esi
+004B3366 - 8B CF                 - mov ecx,edi
+004B3368 - E8 C33EFDFF           - call 00487230			设置城市、港、关兵力
+004B336D - 3B F3                 - cmp esi,ebx
+004B336F - 75 08                 - jne 004B3379
+004B3371 - 53                    - push ebx
+004B3372 - 8B CF                 - mov ecx,edi
+004B3374 - E8 4742FDFF           - call 004875C0			设置城市、港、关气力
+004B3379 - 89 5C 24 10           - mov [esp+10],ebx
+004B337D - 8D 49 00              - lea ecx,[ecx+00]
+004B3380 - 8B 4C 24 10           - mov ecx,[esp+10]
+004B3384 - 51                    - push ecx
+004B3385 - 8B CF                 - mov ecx,edi
+004B3387 - E8 C435FDFF           - call 00486950			获取城市、港、关指定兵装数量
+004B338C - 8B D0                 - mov edx,eax
+004B338E - 0FAF D5               - imul edx,ebp
+004B3391 - B8 1F85EB51           - mov eax,51EB851F
+004B3396 - F7 E2                 - mul edx
+004B3398 - 8B F2                 - mov esi,edx
+004B339A - 57                    - push edi
+004B339B - C1 EE 05              - shr esi,05
+004B339E - E8 8D72FCFF           - call 0047A630
+004B33A3 - 83 C4 04              - add esp,04
+004B33A6 - 85 C0                 - test eax,eax
+004B33A8 - 74 0D                 - je 004B33B7
+004B33AA - 8B 44 24 10           - mov eax,[esp+10]
+004B33AE - 56                    - push esi
+004B33AF - 50                    - push eax
+004B33B0 - 8B CF                 - mov ecx,edi
+004B33B2 - E8 1941FDFF           - call 004874D0			设置城市、港、关指定兵装
+004B33B7 - 8B 44 24 10           - mov eax,[esp+10]
+004B33BB - 40                    - inc eax
+004B33BC - 83 F8 0C              - cmp eax,0C				循环12种兵装
+ 
