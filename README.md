@@ -7,7 +7,7 @@ This project contains the research of the game's memory data. By referring to th
 
 This project is initially started and developped in Chinese social networks. We don't (yet) have an English official site, and you can contact us in [here](https://tieba.baidu.com/f?kw=ryan_knight_12).
 
-This project has lasted for more than 8 years (2010 - now), and is still active. We hereby release all of our lastest researches, in order to help anyone interested in this game. Also, we have long been short-handed, and thus we are sincerely looking forward to more and more people joining us. Feel free to contact us and submit pull-requests.
+This project has lasted for 10 years (2009 - now), and is still active. We hereby release all of our lastest researches, in order to help anyone interested in this game. Also, we have long been short-handed, and thus we are sincerely looking forward to more and more people joining us. Feel free to contact us and submit pull-requests.
 
 # Main Contributers
 ryan_knight_12
