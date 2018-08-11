@@ -1,0 +1,86 @@
+从msg获取字符串
+[edi]=MSG序号，[edi+04]=1号武将，[edi+08]=2号武将。。。
+返回eax为字符串指针
+push edi
+call 0049B390
+
+武将说话、旁白
+push 01
+push 00
+push 00//旁白，此处push 0.武将说话，此处push武将指针
+push eax//eax指向所说的话的字符串
+call 4F5450
+
+消息框更新
+push 00/01 这个参数似乎没有被实际调用到
+push 字符串地址
+push 势力色
+push 事件发生坐标指针
+call 63ADD0
+
+选项显示：（无法在AI线程中调用）
+push ebx//选项数量，最多6个
+push esi//指向最多6个选项的字符串地址的指针
+//[esi+0]=第一个选项的字符串地址
+//[esi+4]=第二个选项的字符串地址
+。。。以此类推
+call 674C00//返回eax为最终选择的选项序号
+
+
+选项显示的同时显示武将说话框，在674C00调用之前调用4F5500：
+push 01
+push 00
+push eax//说话武将指针
+push esi//说话字符串指针
+call 4F5500
+add esp,10
+
+CG显示
+push 05
+push eax//eax为CG编号
+push 04
+call 4F56B0
+
+取消cg显示
+call 4F56D0
+
+切换音乐
+push BF800000
+push 00
+push 01F4
+push 01
+push 音乐序号
+mov ecx,09119810
+call 4D04F0
+
+[09119870] = 当前游戏播放音乐序号
+
+闪cg（一闪而过的动画）（无法在AI线程调用）
+push -1
+push -1
+push -1
+push -1
+push -1
+push 闪CG序号
+call 67D410
+
+在AI线程中前后加上EnterCriticalSection和LeaveCriticalSectin的函数，可以调用闪CG函数
+
+push 06EE7868
+call [74E360]//EnterCriticalSection
+push -1
+push -1
+push -1
+push -1
+push -1
+push 闪CG序号
+call 67D410
+push 06EE7868
+call [74E35C]//LeaveCriticalSection
+
+地图移动
+push 3E8
+push 移动目标指针（可以是设施、武将、部队）
+call 67D3B0
+
+计划点击进行后，5F9F59、57467B 两个点插入玩家事件（有选项），每旬过场，59C2EF，插入AI事件（无选项）。
