@@ -1,0 +1,45 @@
+游戏中有3个调用到移动力消耗函数的地方：
+
+5A4598: 此处[esp+2C]为父地格坐标，点击部队计算可到达地格时调用
+5A5ED3: 此处[[esi+08]+0C]为父地格坐标，计算委任路线消耗天数时调用
+56772C: 此处[[esp+18]+0C]为父地格坐标，委任部队寻路算法调用
+
+入口一，函数参数为地格坐标，先转成地格信息指针，再跳转到正常入口
+san11pk.exe+16DD60 - movsx eax,word ptr [esp+04]	[esp+04]为坐标参数，高16位、低16位分别为X，Y
+san11pk.exe+16DD65 - mov edx,[esp+04]
+san11pk.exe+16DD69 - imul eax,eax,000000C8 { 200 }
+san11pk.exe+16DD6F - sar edx,10 { 16 }
+san11pk.exe+16DD72 - add eax,edx
+san11pk.exe+16DD74 - lea eax,[eax+eax*4]
+san11pk.exe+16DD77 - lea edx,[eax*4+san11pk.exe+6BB0E68]
+san11pk.exe+16DD7E - mov [esp+04],edx	以上得到edi为进入地格的地址
+san11pk.exe+16DD82 - jmp san11pk.exe+16DD00
+
+正常入口
+san11pk.exe+16DD00 - push esi
+san11pk.exe+16DD01 - push edi
+san11pk.exe+16DD02 - mov edi,[esp+0C]
+san11pk.exe+16DD06 - mov esi,[edi+04]
+san11pk.exe+16DD09 - and esi,1F { 31 }	得到esi为地形编号
+san11pk.exe+16DD0C - cmp esi,07 { 7 }	河
+san11pk.exe+16DD0F - je san11pk.exe+16DD16
+san11pk.exe+16DD11 - cmp esi,08 { 8 }	海
+san11pk.exe+16DD14 - jne san11pk.exe+16DD2D	陆上移动力计算
+san11pk.exe+16DD16 - movzx ecx,word ptr [ecx+08]	水上移动力计算
+san11pk.exe+16DD1A - imul ecx,ecx,000000F4 { 244 }
+san11pk.exe+16DD20 - add ecx,san11pk.exe+6F6B088 { [0079CC18] }
+san11pk.exe+16DD26 - call san11pk.exe+95490	水上运输队返回9，其他返回ecx+50,水上船种
+san11pk.exe+16DD2B - jmp san11pk.exe+16DD42
+san11pk.exe+16DD2D - movzx ecx,word ptr [ecx+08]	部队id
+san11pk.exe+16DD31 - imul ecx,ecx,000000F4 { 244 }
+san11pk.exe+16DD37 - add ecx,san11pk.exe+6F6B088 { [0079CC18] } 部队地址
+san11pk.exe+16DD3D - call san11pk.exe+95480	运输队返回eax=0，其他返回ecx+48,陆地部队兵种
+san11pk.exe+16DD42 - mov ecx,[edi]
+san11pk.exe+16DD44 - shl eax,05 { 5 }	每个兵种有32个字节存储各地形移动力
+san11pk.exe+16DD47 - test ecx,3800000 { [00003C01] }	判定是否着火
+san11pk.exe+16DD4D - mov al,[eax+esi+san11pk.exe+9149830]	9549830+兵种序号*32+地形编号，得到消耗移动力
+san11pk.exe+16DD54 - pop edi
+san11pk.exe+16DD55 - pop esi
+san11pk.exe+16DD56 - jna san11pk.exe+16DD5B
+san11pk.exe+16DD58 - shl al,02 { 2 }	如果着火，消耗移动力乘以4
+san11pk.exe+16DD5B - ret 0004 { 4 }
