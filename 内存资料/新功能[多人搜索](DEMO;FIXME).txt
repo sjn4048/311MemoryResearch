@@ -1,0 +1,55 @@
+﻿[多人搜索]
+
+*FIXME：目前的多人搜索框架已完成，并且克服了PKME中遇到事件与人才会终止的BUG。但是目前代码仍有严重BUG，会导致堆栈不平衡跳出。且目前多人搜索仍然是基于褒赏之上修改的DEMO，仍需要Coding。
+
+*TODO：
+1.建立新的代码块、绑定新函数
+2.限制本城武将进行，目前为全武将均可搜索
+
+搜索的最高层函数(被操作调用集中入口575370调用)：5B95D0
+搜索的第二层函数：5D5970(参数为数组,push 城市指针，push (城市指针、武将指针)的指针)
+
+相比之下，褒赏传进去的是一个城市ID和一个武将链表(在堆内存6EEFxxx上)。在褒赏的基础上，只要把链表内的武将指针一一遍历取出，再输入给搜索函数就可以了。
+
+[DEMO改法]
+*共两种改法，前者调用最高层搜索函数，后者调用第二层搜索函数。共同点是都有导致堆栈无法平衡的BUG，留待修补。
+先在褒赏上边改，第一种改法：
+5B5E21:
+lea    eax,[esp+18]
+push   eax
+lea    ecx,[edi+04]
+call   47BED0     // 调用对链表的函数，获得下一个指针
+mov    esi, [eax] // esi <- 武将指针，以上操作为褒赏自带的
+push   esi        // 把武将指针推进去
+push   [edi]      // [edi]为城池指针
+mov    esi, esp   // esi 存的是栈指针，指向元组(城市，武将)
+push   [edi]
+push   esi
+call   5D5970     // 调用搜索的第二层函数（下一种改法是调用第一层函数，原理大同小异）
+add    esp, 10    // 补回栈帧
+mov    eax,[esp+14] // 以下操作为褒赏自带的
+mov    edi,[ebp+08]
+inc    eax
+mov    [esp+14],eax
+mov    eax,[esp+18]
+test   eax,eax
+jne    005B5E21    // 跳回do...while
+jmp    5D5ED2      // 遍历到链表的最后一个指针时，eax为NULL(0)，跳出。
+
+另一种改法：
+5B5E21:
+lea    eax,[esp+18]
+push   eax
+lea    ecx,[edi+04]
+call   47BED0     // 调用对链表的函数，获得下一个指针
+mov    esi, [eax] // esi <- 武将指针
+push   esi        // push 武将指针
+push   [edi]      // push 城池指针
+mov    esi, esp   // esi 存的是栈指针，指向元组(城市，武将)
+push   [edi]      // push 元组指针
+mov    edx, [9771590]  // edx <= 0084C068
+mov    ecx, 9771590    // ecx <- 9771590
+call   dword ptr [edx+2C]
+test   eax eax
+jne    005B5E21    // 跳回do...while
+jmp    5D5ED2

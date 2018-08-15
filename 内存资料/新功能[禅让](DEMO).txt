@@ -1,0 +1,24 @@
+﻿[禅让·DEMO]
+
+*注意：目前还没搞定UI的新增选单，只能在已有选单上改。这里替换了原有吸收合并功能。
+
+TODO:
+1.修改MSG调用。目前会使用君主死亡的MSG
+2.与新函数绑定，而非直接覆盖吸收合并
+**3.让AI学会禅让（不抱希望）
+
+57555C(覆盖了吸收合并):
+mov ecx, esi
+call     4866F0            // 取城市指针，eax<-城市首地址
+mov      ecx, eax
+mov      eax, [eax]
+call     dword ptr [eax+40] // 通过城市指针取势力ID
+push     eax               // eax<-势力编号
+mov      ecx, 7201958
+call     490AA0           // 通过势力ID获得势力指针，存于eax
+push     0                // int
+push     0                // void *
+push     eax              // push势力指针
+mov      ecx, 755895C
+call     4B9080
+jmp      576232           //结束跳出
