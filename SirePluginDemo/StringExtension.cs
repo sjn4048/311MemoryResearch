@@ -75,7 +75,7 @@ namespace SirePluginDemo
         /// </summary>
         /// <param name="ch">字符</param>
         /// <returns></returns>
-        static private bool IsHexDigit(this char ch)
+        public static bool IsHexDigit(this char ch)
         {
             return ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F';
         }
@@ -93,6 +93,10 @@ namespace SirePluginDemo
 
             for (int i = 0; i < lines.Length; i += 2)
             {
+                if (lines[i].Any(x => !x.IsHexDigit()))
+                    throw new FormatException("检测到了非16进制字符：" + lines[i].First(x => !x.IsHexDigit()));
+                if (lines[i + 1].Any(x => !x.IsHexDigit()))
+                    throw new FormatException("检测到了非16进制字符：" + lines[i + 1].First(x => !x.IsHexDigit()));
                 int address = Int32.Parse(lines[i], System.Globalization.NumberStyles.HexNumber);
                 byte[] value = Enumerable.Range(0, lines[i + 1].Length)
                  .Where(x => x % 2 == 0)

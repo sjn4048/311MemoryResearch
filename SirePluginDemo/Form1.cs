@@ -48,8 +48,18 @@ namespace SirePluginDemo
             script = UnitTest.sample;
 #endif
             // 将脚本转化为InjectData[]并写入
-            memManager.WriteMemoryValue(script.ToInjectData());
-            MessageBox.Show("Finished.");
+            try
+            {
+                memManager.WriteMemoryValue(script.ToInjectData());
+                MessageBox.Show("Finished.", "修改成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                if (MessageBox.Show(ex.Message, "修改失败", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Retry)
+                {
+                    button1.PerformClick();
+                }
+            }
         }
 
         private void 载入脚本ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -104,6 +114,11 @@ namespace SirePluginDemo
         private void 关于AToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("TODO");
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 }

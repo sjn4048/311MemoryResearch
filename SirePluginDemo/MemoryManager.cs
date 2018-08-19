@@ -16,6 +16,7 @@ namespace SirePluginDemo
 
         static readonly string ProcessName = "san11pk";
 
+        #region imported dll functions
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory
             (
@@ -49,31 +50,9 @@ namespace SirePluginDemo
             (
             IntPtr hObject
             );
+        #endregion
 
         #region public interfaces
-
-        /// <summary>
-        /// 根据窗口标题查找窗口句柄
-        /// </summary>
-        /// <param name="title">窗口标题</param>
-        /// <param name="allowDuplicate">是否允许存在多个同样进程，默认为false</param>
-        /// <returns>窗口句柄</returns>
-        public IntPtr FindWindow(string title, bool allowDuplicate = false)
-        {
-            var handleList = Process.GetProcesses()
-                .Where(x => x.MainWindowTitle.IndexOf(title) != -1)
-                .Select(x => x.MainWindowHandle)
-                .ToArray();
-            // 未找到
-            if (handleList.Length == 0)
-                return IntPtr.Zero;
-            // 找到了不允许的重复值
-            if (handleList.Length > 1 && allowDuplicate == false)
-                return IntPtr.Zero;
-            // 返回第一个
-            return handleList[0];
-        }
-
         /// <summary>
         /// 读指定进程的4字节内存
         /// </summary>
@@ -103,7 +82,10 @@ namespace SirePluginDemo
         /// <param name="injectNodes">InjectData数组，存放了所有需要注入的代码以及相应的内容(参见InjectData类说明)</param>
         public void WriteMemoryValue(InjectData[] injectNodes)
         {
-            IntPtr hProcess = OpenProcess(0x1F0FFF, false, GetPidByProcessName()); //0x1F0FFF 最高权限
+            int pid = GetPidByProcessName();
+            if (pid == -1)
+                throw new NullReferenceException("未打开311pk.exe");
+            IntPtr hProcess = OpenProcess(0x1F0FFF, false, pid); //0x1F0FFF 最高权限
             foreach (var injection in injectNodes)
             {
                 for (int i = 0; i < injection.Length; i = i + 4)
@@ -164,18 +146,6 @@ namespace SirePluginDemo
                 return -1;
             // 返回PID
             return processList[0].Id;
-        }
-
-        /// <summary>
-        /// 写指定进程的4字节内存
-        /// </summary>
-        /// <param name="baseAddress">进程内存基地址</param>
-        /// <param name="value">写入内容</param>
-        private void WriteMemoryValue(int baseAddress, int value)
-        {
-            IntPtr hProcess = OpenProcess(0x1F0FFF, false, GetPidByProcessName()); //0x1F0FFF 最高权限
-            WriteProcessMemory(hProcess, (IntPtr)baseAddress, new[] { value }, 4, IntPtr.Zero);
-            CloseHandle(hProcess);
         }
         #endregion
     }
