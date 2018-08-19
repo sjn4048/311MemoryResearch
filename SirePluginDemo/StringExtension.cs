@@ -54,5 +54,54 @@ namespace SirePluginDemo
                 },
                 RegexOptions.Singleline);
         }
+
+        public static string RemoveBlanks(this string s)
+        {
+            return s.Replace(" ", string.Empty).Replace("\t", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
+        }
+
+        public static string[] Split(this string s, string splitter)
+        {
+            return s.Split(new[] { splitter }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static string[] Split(this string s, string[] splitter)
+        {
+            return s.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        /// <summary>
+        /// 判断输入的字符是否是16进制数字
+        /// </summary>
+        /// <param name="ch">字符</param>
+        /// <returns></returns>
+        static private bool IsHexDigit(this char ch)
+        {
+            return ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F';
+        }
+
+
+        /// <summary>
+        /// 从脚本中读取注入点的核心函数
+        /// </summary>
+        /// <param name="str">格式：每个注入点为2行，首行为 注入代码地址: 第二行为机器码，以16进制编写，只有一位的byte必须补足为2位。可以有空格等分隔符。</param>
+        /// <returns></returns>
+        static public InjectData[] ToInjectData(this string str)
+        {
+            string[] lines = str.Trim().RemoveComments().RemoveBlanks().Split(new[] { "<Address>", "<Code>" });
+            var ret = new List<InjectData>();
+
+            for (int i = 0; i < lines.Length; i += 2)
+            {
+                int address = Int32.Parse(lines[i], System.Globalization.NumberStyles.HexNumber);
+                byte[] value = Enumerable.Range(0, lines[i + 1].Length)
+                 .Where(x => x % 2 == 0)
+                 .Select(x => Convert.ToByte(lines[i + 1].Substring(x, 2), 16))
+                 .ToArray();
+                ret.Add(new InjectData(value, address));
+            }
+
+            return ret.ToArray();
+        }
     }
 }

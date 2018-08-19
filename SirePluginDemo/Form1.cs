@@ -6,24 +6,27 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Windows.Forms;
 
 namespace SirePluginDemo
 {
     public partial class Form1 : Form
     {
-        Modifier modifier;
+        MemoryManager memManager;
+
+        string CurrentFileName = string.Empty;
 
         public Form1()
         {
             InitializeComponent();
-            modifier = new Modifier();
+            memManager = new MemoryManager();
             judgePOpenTimer.Start();
         }
 
         private void judgePOpenTimer_Tick(object sender, EventArgs e)
         {
-            if (modifier.IsProcessOpen())
+            if (memManager.IsProcessOpen())
             {
                 statusLabel.Text = "游戏已启动";
                 statusLabel.ForeColor = Color.DarkGreen;
@@ -41,9 +44,66 @@ namespace SirePluginDemo
         {
             var script = scriptTextbox.Text;
 #if DEBUG
-            script = UnitTest.beforeComment;
+            if (script == string.Empty)
+            script = UnitTest.sample;
 #endif
-            var res = InjectData.ReadScript(script);
+            // 将脚本转化为InjectData[]并写入
+            memManager.WriteMemoryValue(script.ToInjectData());
+            MessageBox.Show("Finished.");
+        }
+
+        private void 载入脚本ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var ofDialog = new OpenFileDialog()
+            {
+                // InitialDirectory = "",
+                Filter = "所有文件|*.*"
+            };
+            if (ofDialog.ShowDialog() == DialogResult.OK)
+            {
+                CurrentFileName = ofDialog.FileName;
+                scriptTextbox.Text = File.ReadAllText(CurrentFileName);
+                //return true;
+            }
+        }
+
+        private void 保存脚本ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CurrentFileName != string.Empty)
+            {
+                File.WriteAllText(CurrentFileName, scriptTextbox.Text);
+                //return true;
+            }
+            else
+            {
+                另存为ToolStripMenuItem.PerformClick();
+            }
+            //return false;
+        }
+
+        private void 另存为ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var sfdialog = new SaveFileDialog()
+            {
+                Filter = "所有文件|*.*",
+            };
+            if (sfdialog.ShowDialog() == DialogResult.OK)
+            {
+                CurrentFileName = sfdialog.FileName;
+                File.WriteAllText(CurrentFileName, scriptTextbox.Text);
+                //return true;
+            }
+            //return false;
+        }
+
+        private void 退出XToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void 关于AToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("TODO");
         }
     }
 }

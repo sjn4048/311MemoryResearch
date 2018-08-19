@@ -39,7 +39,6 @@ by sjn4048@ZJU
 我的改法（改掉除20的参数）：
 005D5B45  0f b6 57 3c       movzx   edx, byte ptr [edi+3Ch] // edx = 宝物价值，不变
 *005D5B49 e9 b2 a4 34 00    jmp 00920000
-*005D5B4A-4D 90             nop
 // 新增代码段，位于920000
 00920000  b8 3d 00 00 00    mov     eax, 3Dh                // eax = 61
 00920005  2b c2             sub     eax, edx                // eax = eax - edx
@@ -53,7 +52,7 @@ by sjn4048@ZJU
 00920019  85 C0             test    eax, eax
 0092001B  58                pop     eax                     // 恢复eax
 0092001C  0f 84 06 00 00 00 je      00920028                // 不是风水的话直接跳过乘法
-00920022  6b c0 14 00 00 00 imul    eax,eax,14              // *20
+00920022  69 c0 14 00 00 00 imul    eax,eax,14              // *20
 00920028  e9 34 5b cb ff    jmp     005D5B61                // 跳回
 
 [君主技·内政行动力消耗-1]
@@ -139,46 +138,74 @@ by sjn4048@ZJU
 决定是否亮起：5B58FA -> 5BBA6E
 
 [多人搜索]
-最高层：5B95D0
-第二层：5D5970(参数为数组,push 城市指针，push (城市指针、武将指针)的指针)
+搜索的最高层：5B95D0
+搜索的第二层：5D5970(参数为数组,push 城市指针，push (城市指针、武将指针)的指针)
 
 相比之下，褒赏传进去的是一个城市ID和一个武将链表(在堆内存6EEFxxx上)。只要把链表内的一个一个遍历就可以了。
 
 先在褒赏上边改，改法：
 5B5E21:
-push   ecx
-push   edx
 lea    eax,[esp+18]
 push   eax
 lea    ecx,[edi+04]
-call   47BED0    // 调用对链表的函数，获得下一个指针
-mov    esi, [eax] // esi <- 武将指针
-push   esi       // 把武将指针推进去
-push   [edi]     // [edi]为城池指针
-mov    esi, esp  // esi 存的是栈指针，指向元组(城市，武将)
+call   47BED0     // 调用对链表的函数，获得下一个指针
+mov    esi, [eax] // esi <- 武将指针，以上操作为褒赏自带的
+push   esi        // 把武将指针推进去
+push   [edi]      // [edi]为城池指针
+mov    esi, esp   // esi 存的是栈指针，指向元组(城市，武将)
 push   [edi]
 push   esi
-call   5D5970
-add    esp, 10
-mov    eax,[esp+14]
+call   5D5970     // 调用搜索的第二层函数（下一种改法是调用第一层函数，原理大同小异）
+add    esp, 10    // 补回栈帧
+mov    eax,[esp+14] // 以下操作为褒赏自带的
 mov    edi,[ebp+08]
 inc    eax
 mov    [esp+14],eax
 mov    eax,[esp+18]
 test   eax,eax
 jne    005B5E21    // 跳回do...while
-pop    edx
-pop    ecx
+jmp    5D5ED2      // 遍历到链表的最后一个指针时，eax为NULL(0)，跳出。
+
+另一种改法：
+5B5E21:
+lea    eax,[esp+18]
+push   eax
+lea    ecx,[edi+04]
+call   47BED0     // 调用对链表的函数，获得下一个指针
+mov    esi, [eax] // esi <- 武将指针
+push   esi        // push 武将指针
+push   [edi]      // push 城池指针
+mov    esi, esp   // esi 存的是栈指针，指向元组(城市，武将)
+push   [edi]      // push 元组指针
+
+mov    edx, [9771590]  // edx <= 0084C068
+mov    ecx, 9771590    // ecx <- 9771590
+call   dword ptr [edx+2C]
+test   eax eax
+jne    005B5E21    // 跳回do...while
 jmp    5D5ED2
 
-6EEF1F8
-0000193
-0000062
-0000005
-019F09C
-019F060
-019E898
-05B5E21
+单人褒赏：
+EAX 06EEF1F8  00000000  00000000  // 这个不用管
+EBX 00000193  00000193  00000193  // 似乎不会动
+ECX 00000062  00000222  0000028A
+EDX 00000005  0721D000  07243000
+ESI 0720B520  0721D284  072430C4
+EDI 0019F09C  0019F09C  0019F09C  // 不会动
+EBP 0019F060  0019F060  0019E060  // 不会动
+ESP 0019E898  0019E898  0019E898  // 堆栈似乎平衡了
+
+堆栈(880->8A0)
+20 B5 20 07 FA 0F 48 00
+01 00 00 00 20 B5 20 07 
+E2 5D 5B 00 ED 5D 5B 00 
+14 00 00 00 9C F0 19 00
+
+4E 56 4A 00 01 00 00 00 
+84 D2 21 07 BA 5E 5B 00 
+84 D2 21 07 01 00 00 00 
+14 00 00 00 9C F0 19 00 
+00 00 00 00 84 D2 21 07
 
 
 [禅让]
