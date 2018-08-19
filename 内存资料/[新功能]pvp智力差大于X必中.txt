@@ -1,0 +1,88 @@
+920500:
+// 判定虚实
+push 2
+push 39   // 虚实
+call 495680
+cmp eax, edi
+jg 92051D // 有虚实则跳转至ret
+// 判定新增的全局特性
+mov eax, 0
+mov al, [ecx+C6] // 取不对智力
+sub eax, 0A // 0A为智力差，可调
+cmp eax, edi // 比较、返回
+ret
+
+5AEC07: // 以下均为不同计略的位点。修改了虚实，将虚实部分抹去，改为跳转至新函数，一起判断虚实与新特性
+mov ecx, esi
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AEC58:
+mov ecx, esi
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AED39:
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AEEBB:
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AF00C:
+mov ecx, esi
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AF0C7:
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
+
+5AF227:
+call 920500
+jg 5AEC38
+nop
+nop
+nop
+nop
+nop
+nop
