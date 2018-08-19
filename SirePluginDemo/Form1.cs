@@ -113,12 +113,30 @@ namespace SirePluginDemo
 
         private void 关于AToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("TODO");
+            MessageBox.Show("Written By sjn4048@ZJU");
         }
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
+        }
+
+        private void 帮助HToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("在与EXE同目录下新建Initial.txt，存放默认加载的脚本。");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            string initial = "Initial.txt";
+            if (!File.Exists(initial))
+                File.Create(initial);
+            else
+            {
+                string content = File.ReadAllText(initial);
+                if (content != string.Empty)
+                    scriptTextbox.Text = content;
+            }
         }
     }
 }
