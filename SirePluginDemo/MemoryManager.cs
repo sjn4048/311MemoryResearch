@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -15,6 +17,18 @@ namespace SirePluginDemo
         /// </summary>
 
         static readonly string ProcessName = "san11pk";
+        const int ExeOffset = 0x400000;
+        public struct Segment { public int start, end; public byte[] oldMem, newMem; }
+        // 要扫描的代码区域
+        Segment[] segs = {
+            new Segment{ start = 0x401000, end = 0x74E000 },
+            // RK 使用
+            new Segment{ start = 0x8A5000, end = 0x90B000 },
+            // txz_mk 使用
+            new Segment{ start = 0x912000, end = 0x914000 },
+            // sjn4048 使用
+            new Segment{ start = 0x920000, end = 0x930000 }
+        };
 
         #region imported dll functions
         [DllImport("kernel32.dll")]
@@ -59,20 +73,23 @@ namespace SirePluginDemo
         /// <param name="baseAddress">进程内存基地址</param>
         /// <param name="length">读取长度</param>
         /// <returns>指定字节内存</returns>
-        public int ReadMemoryValue(int baseAddress, int length = 4)
+        public byte[] ReadMemoryValue(int baseAddress, int length = 4)
         {
+            int pid = GetPidByProcessName();
+            if (pid == -1)
+                throw new NullReferenceException(@"游戏未启动。如已启动，请检查exe文件名是否为""san11pk.exe""");
             try
             {
                 var buffer = new byte[length];
                 IntPtr byteAddress = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0); //获取缓冲区地址
-                IntPtr hProcess = OpenProcess(0x1F0FFF, false, GetPidByProcessName());
+                IntPtr hProcess = OpenProcess(0x1F0FFF, false, pid);
                 ReadProcessMemory(hProcess, (IntPtr)baseAddress, byteAddress, length, IntPtr.Zero); //将制定内存中的值读入缓冲区
                 CloseHandle(hProcess);
-                return Marshal.ReadInt32(byteAddress);
+                return buffer;
             }
             catch
             {
-                return 0;
+                throw new NullReferenceException("读取进程内存时出错");
             }
         }
 
@@ -84,7 +101,7 @@ namespace SirePluginDemo
         {
             int pid = GetPidByProcessName();
             if (pid == -1)
-                throw new NullReferenceException("未打开311pk.exe");
+                throw new NullReferenceException(@"游戏未启动。如已启动，请检查exe文件名是否为""san11pk.exe""");
             IntPtr hProcess = OpenProcess(0x1F0FFF, false, pid); //0x1F0FFF 最高权限
             foreach (var injection in injectNodes)
             {
@@ -93,10 +110,89 @@ namespace SirePluginDemo
                     // length为要注入的字节数
                     int length = (injection.Length - i) >= 4 ? 4 : injection.Length - i;
                     int[] content = new[] { BitConverter.ToInt32(injection.Value.Skip(i).Take(4).ToArray(), 0) };
-                    WriteProcessMemory(hProcess, (IntPtr)(injection.Address + i),content, length, IntPtr.Zero);
+                    WriteProcessMemory(hProcess, (IntPtr)(injection.Address + i), content, length, IntPtr.Zero);
                 }
             }
             CloseHandle(hProcess);
+        }
+
+        /// <summary>
+        /// 将当前进程写入到exe中
+        /// </summary>
+        /// <param name="exePath">exe路径</param>
+        public void WriteToEXE(string exePath, InjectData[] injectNodes)
+        {
+            using (var stream = new FileStream(exePath, FileMode.Open, FileAccess.ReadWrite))
+            {
+                foreach (var injection in injectNodes)
+                {
+                    stream.Position = injection.Address - ExeOffset;
+                    stream.Write(injection.Value, 0, injection.Length);
+                }
+            }
+        }
+
+        public void RecordOldMem()
+        {
+            for (int i = 0; i < segs.Length; i++)
+            {
+                int length = segs[i].end - segs[i].start;
+                segs[i].oldMem = ReadMemoryValue(segs[i].start, length);
+            }
+        }
+
+        /// <summary>
+        /// 高级功能·将内存镜像写入至EXE
+        /// </summary>
+        /// <param name="exePath"></param>
+        public int DumpToEXE(string exePath)
+        {
+            string newPath = exePath + "_NEW";
+            File.Copy(exePath, newPath, true);
+            int count = 0;
+            using (var stream = new FileStream(newPath, FileMode.Open, FileAccess.ReadWrite))
+            {
+                using (var sw = new StreamWriter(new FileStream("log.txt", FileMode.Create, FileAccess.ReadWrite)))
+                {
+                    // 遍历所有代码SEGMENT
+                    for (int i = 0; i < segs.Length; i++)
+                    {
+                        int length = segs[i].end - segs[i].start;
+                        segs[i].newMem = ReadMemoryValue(segs[i].start, length);
+                        // 遍历新老内存，寻找差异
+                        for (int j = 0; j < length; j++)
+                        {
+                            if (segs[i].oldMem[j] != segs[i].newMem[j])
+                            {
+                                // 定位到有差异的byte
+                                stream.Position = segs[i].start + j;
+                                // 写入新的
+                                stream.WriteByte(segs[i].newMem[j]);
+                                count++;
+                                // 输出到log中，这个log可作为script直接使用。
+                                sw.WriteLine($"<Address> {stream.Position:X} <Code> {segs[i].newMem[j]:X2}");
+                            }
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
+        public void DumpToEXE_old(string exePath)
+        {
+            string newPath = exePath + "_NEW";
+            File.Copy(exePath, newPath, true);
+            using (var stream = new FileStream(newPath, FileMode.Open, FileAccess.ReadWrite))
+            {
+                foreach (var seg in segs)
+                {
+                    int length = seg.end - seg.start + 1; // 要+1，因为要考虑末端的问题
+                    byte[] content = ReadMemoryValue(seg.start, length);
+                    stream.Position = seg.start - ExeOffset;
+                    stream.Write(content, 0, content.Length);
+                }
+            }
         }
 
         /// <summary>

@@ -41,9 +41,13 @@
             this.另存为ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.退出XToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.高级ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.内存镜像写入ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于AToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助HToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.联系作者CToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.button2 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -81,18 +85,19 @@
             this.scriptTextbox.Size = new System.Drawing.Size(570, 405);
             this.scriptTextbox.TabIndex = 1;
             this.scriptTextbox.Text = "// 格式：<Address> 地址 <Code> 机器码\n// 示例：\n<Address>\n00920000  // 16进制\n<Code>\n// 输入16进制" +
-    "机器码，以byte为单位\n90\n90\n66 90\n/* 支持单行注释\n与多行注释\n支持多个修改位点\n每个修改位点格式相同\n */\n";
+    "机器码，以byte为单位，每个byte必须由两位十六进制表示\n90\n90\n66 90\n/* 支持单行注释\n与多行注释\n支持多个修改位点\n每个修改位点格式相同\n " +
+    "*/\n";
             // 
             // button1
             // 
             this.button1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button1.BackColor = System.Drawing.Color.White;
             this.button1.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button1.Location = new System.Drawing.Point(248, 445);
+            this.button1.Location = new System.Drawing.Point(133, 442);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(100, 32);
+            this.button1.Size = new System.Drawing.Size(134, 32);
             this.button1.TabIndex = 3;
-            this.button1.Text = "应用";
+            this.button1.Text = "应用到内存";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -101,6 +106,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.文件ToolStripMenuItem,
+            this.高级ToolStripMenuItem,
             this.帮助ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -159,11 +165,27 @@
             this.退出XToolStripMenuItem.Text = "退出(&X)";
             this.退出XToolStripMenuItem.Click += new System.EventHandler(this.退出XToolStripMenuItem_Click);
             // 
+            // 高级ToolStripMenuItem
+            // 
+            this.高级ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.内存镜像写入ToolStripMenuItem});
+            this.高级ToolStripMenuItem.Name = "高级ToolStripMenuItem";
+            this.高级ToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
+            this.高级ToolStripMenuItem.Text = "高级";
+            // 
+            // 内存镜像写入ToolStripMenuItem
+            // 
+            this.内存镜像写入ToolStripMenuItem.Name = "内存镜像写入ToolStripMenuItem";
+            this.内存镜像写入ToolStripMenuItem.Size = new System.Drawing.Size(200, 26);
+            this.内存镜像写入ToolStripMenuItem.Text = "内存镜像写入EXE";
+            this.内存镜像写入ToolStripMenuItem.Click += new System.EventHandler(this.内存镜像写入ToolStripMenuItem_Click);
+            // 
             // 帮助ToolStripMenuItem
             // 
             this.帮助ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.关于AToolStripMenuItem,
-            this.帮助HToolStripMenuItem});
+            this.帮助HToolStripMenuItem,
+            this.联系作者CToolStripMenuItem});
             this.帮助ToolStripMenuItem.Name = "帮助ToolStripMenuItem";
             this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
             this.帮助ToolStripMenuItem.Text = "帮助";
@@ -171,22 +193,43 @@
             // 关于AToolStripMenuItem
             // 
             this.关于AToolStripMenuItem.Name = "关于AToolStripMenuItem";
-            this.关于AToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.关于AToolStripMenuItem.Size = new System.Drawing.Size(164, 26);
             this.关于AToolStripMenuItem.Text = "关于(&A)";
             this.关于AToolStripMenuItem.Click += new System.EventHandler(this.关于AToolStripMenuItem_Click);
             // 
             // 帮助HToolStripMenuItem
             // 
             this.帮助HToolStripMenuItem.Name = "帮助HToolStripMenuItem";
-            this.帮助HToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.帮助HToolStripMenuItem.Size = new System.Drawing.Size(164, 26);
             this.帮助HToolStripMenuItem.Text = "帮助(&H)";
             this.帮助HToolStripMenuItem.Click += new System.EventHandler(this.帮助HToolStripMenuItem_Click);
+            // 
+            // 联系作者CToolStripMenuItem
+            // 
+            this.联系作者CToolStripMenuItem.Name = "联系作者CToolStripMenuItem";
+            this.联系作者CToolStripMenuItem.Size = new System.Drawing.Size(164, 26);
+            this.联系作者CToolStripMenuItem.Text = "联系作者(&C)";
+            this.联系作者CToolStripMenuItem.Click += new System.EventHandler(this.联系作者CToolStripMenuItem_Click);
+            // 
+            // button2
+            // 
+            this.button2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.button2.BackColor = System.Drawing.Color.White;
+            this.button2.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button2.Location = new System.Drawing.Point(315, 442);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(134, 32);
+            this.button2.TabIndex = 3;
+            this.button2.Text = "应用到EXE";
+            this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(599, 520);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.scriptTextbox);
             this.Controls.Add(this.statusStrip1);
@@ -221,6 +264,10 @@
         private System.Windows.Forms.ToolStripMenuItem 另存为ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 关于AToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 帮助HToolStripMenuItem;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ToolStripMenuItem 高级ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 内存镜像写入ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 联系作者CToolStripMenuItem;
     }
 }
 
