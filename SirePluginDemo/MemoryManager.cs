@@ -60,7 +60,6 @@ namespace SirePluginDemo
         /// 从kernel32.dll中引入的4个关于进程与内存的函数
         /// </summary>
 
-        private static readonly string PROCESS_NAME = "san11pk";
         private static readonly int EXE_OFFSET = 0x400000;
         public struct Segment { public int start, end; public byte[] oldMem, newMem; }
         // 要扫描的代码区域
@@ -128,6 +127,7 @@ namespace SirePluginDemo
         /// 将当前进程写入到exe中
         /// </summary>
         /// <param name="exePath">exe路径</param>
+        /// <param name="injectNodes">注入的节点</param>
         public void WriteToEXE(string exePath, InjectData[] injectNodes)
         {
             using (var stream = new FileStream(exePath, FileMode.Open, FileAccess.ReadWrite))
@@ -178,7 +178,7 @@ namespace SirePluginDemo
                                 stream.WriteByte(segs[i].newMem[j]);
                                 count++;
                                 // 输出到log中，这个log可作为script直接使用。
-                                sw.WriteLine($"<Address> {stream.Position:X} <Code> {segs[i].newMem[j]:X2}");
+                                sw.WriteLine($"{Resources.AddressSplitter} {stream.Position:X} {Resources.CodeSplitter} {segs[i].newMem[j]:X2}");
                             }
                         }
                     }
@@ -241,7 +241,7 @@ namespace SirePluginDemo
         /// <returns>进程ID</returns>
         private int GetPidByProcessName(bool allowDuplicate = false)
         {
-            var processList = Process.GetProcesses().Where(x => x.ProcessName == PROCESS_NAME).ToArray();
+            var processList = Process.GetProcesses().Where(x => x.ProcessName == Resources.ProcessName).ToArray();
             // 未找到进程
             if (processList.Length == 0)
                 return -1;

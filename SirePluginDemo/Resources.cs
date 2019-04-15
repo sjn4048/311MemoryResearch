@@ -2,6 +2,15 @@
 {
     public static class Resources
     {
+        #region Code_Format_Definition
+        
+        // 与脚本语法/工具逻辑相关的变量。请谨慎修改。
+        public static readonly string AddressSplitter = "<Address>";
+        public static readonly string CodeSplitter = "<Code>";
+        public static readonly string ProcessName = "san11pk";
+
+        #endregion
+
         #region GUI_Strings
         public static readonly string GameStartedStr = "游戏已启动";
         public static readonly string GameNotStartedStr = "游戏未启动";
@@ -38,16 +47,10 @@
         #endregion
 
         #region Exception_Messages
-        public static readonly string GameNotStartedExMsg = @"游戏未启动。如已启动，请检查exe文件名是否为""san11pk.exe""";
+        public static readonly string GameNotStartedExMsg = $@"游戏未启动。如已启动，请检查exe文件名是否为{ProcessName}.exe";
         public static readonly string ReadMemExMsg = "读取进程内存时出错";
-        public static readonly string NotHexMsg = "检测到了非16进制字符：";
-
-        #endregion
-
-        #region Code_Format_Definition
-
-        public static readonly string AddressSplitter = "<Address>";
-        public static readonly string CodeSplitter = "<Code>";
+        public static readonly string InvalidHexExMsg = "检测到了非16进制字符：";
+        public static readonly string InvalidScriptExMsg = "The following script in is invalid: ";
 
         #endregion
     }

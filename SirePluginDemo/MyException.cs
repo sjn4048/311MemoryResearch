@@ -17,10 +17,17 @@ namespace SirePluginDemo
         { }
     }
 
-    public class InvalidCodeInput : Exception
+    public class InvalidHexException : Exception
     {
-        public InvalidCodeInput(char input) :
-            base(Resources.NotHexMsg + input)
+        public InvalidHexException(char input) :
+            base(Resources.InvalidHexExMsg + input)
+        { }
+    }
+
+    public class InvalidScriptException : Exception
+    {
+        public InvalidScriptException(string scriptName) :
+            base(Resources.InvalidHexExMsg + scriptName)
         { }
     }
 }

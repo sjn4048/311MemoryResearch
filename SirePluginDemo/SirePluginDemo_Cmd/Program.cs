@@ -25,7 +25,7 @@ namespace SirePluginDemo_Cmd
             }
             catch (Exception ex)
             {
-                throw new ArgumentException($@"The script in ""Initial.txt"" is invalid. Error msg: {ex.Message}");
+                throw new InvalidScriptException("Initial.txt");
             }
         }
     }

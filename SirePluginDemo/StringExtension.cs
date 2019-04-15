@@ -94,9 +94,9 @@ namespace SirePluginDemo
             for (int i = 0; i < lines.Length; i += 2)
             {
                 if (lines[i].Any(x => !x.IsHexDigit()))
-                    throw new InvalidCodeInput(lines[i].First(x => !x.IsHexDigit()));
+                    throw new InvalidHexException(lines[i].First(x => !x.IsHexDigit()));
                 if (lines[i + 1].Any(x => !x.IsHexDigit()))
-                    throw new InvalidCodeInput(lines[i].First(x => !x.IsHexDigit()));
+                    throw new InvalidHexException(lines[i].First(x => !x.IsHexDigit()));
                 int address = Int32.Parse(lines[i], System.Globalization.NumberStyles.HexNumber);
                 byte[] value = Enumerable.Range(0, lines[i + 1].Length)
                  .Where(x => x % 2 == 0)
