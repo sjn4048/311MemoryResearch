@@ -38,10 +38,10 @@ namespace SirePluginDemo
             if (s == null)
                 throw new ArgumentNullException("s");
 
-            var blockComments = @"/\*(.*?)\*/";
-            var lineComments = @"//(.*?)\r?\n";
-            var strings = @"""((\\[^\n]|[^""\n])*)""";
-            var verbatimStrings = @"@(""[^""]*"")+";
+            const string blockComments = @"/\*(.*?)\*/";
+            const string lineComments = @"//(.*?)\r?\n";
+            const string strings = @"""((\\[^\n]|[^""\n])*)""";
+            const string verbatimStrings = @"@(""[^""]*"")+";
 
             return Regex.Replace(s,
                 blockComments + "|" + lineComments + "|" + strings + "|" + verbatimStrings,
@@ -88,15 +88,15 @@ namespace SirePluginDemo
         /// <returns></returns>
         static public InjectData[] ToInjectData(this string str)
         {
-            string[] lines = str.Trim().RemoveComments().RemoveBlanks().Split(new[] { "<Address>", "<Code>" });
+            string[] lines = str.Trim().RemoveComments().RemoveBlanks().Split(new[] { Resources.AddressSplitter, Resources.CodeSplitter });
             var ret = new List<InjectData>();
 
             for (int i = 0; i < lines.Length; i += 2)
             {
                 if (lines[i].Any(x => !x.IsHexDigit()))
-                    throw new FormatException("检测到了非16进制字符：" + lines[i].First(x => !x.IsHexDigit()));
+                    throw new InvalidCodeInput(lines[i].First(x => !x.IsHexDigit()));
                 if (lines[i + 1].Any(x => !x.IsHexDigit()))
-                    throw new FormatException("检测到了非16进制字符：" + lines[i + 1].First(x => !x.IsHexDigit()));
+                    throw new InvalidCodeInput(lines[i].First(x => !x.IsHexDigit()));
                 int address = Int32.Parse(lines[i], System.Globalization.NumberStyles.HexNumber);
                 byte[] value = Enumerable.Range(0, lines[i + 1].Length)
                  .Where(x => x % 2 == 0)

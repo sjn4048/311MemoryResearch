@@ -10,17 +10,61 @@ using System.Runtime.InteropServices;
 
 namespace SirePluginDemo
 {
-    class MemoryManager
+    internal static class NativeMethods
+    {
+        #region imported dll functions
+
+        [DllImport("kernel32.dll")]
+        public static extern bool ReadProcessMemory
+        (
+            IntPtr hProcess,
+            IntPtr lpBaseAddress,
+            IntPtr lpBuffer,
+            int nSize,
+            IntPtr lpNumberOfBytesRead
+        );
+
+        [DllImport("kernel32.dll")]
+        public static extern bool WriteProcessMemory
+        (
+            IntPtr hProcess,
+            IntPtr lpBaseAddress,
+            int[] lpBuffer,
+            int nSize,
+            IntPtr lpNumberOfBytesWritten
+        );
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr OpenProcess
+        (
+            int dwDesiredAccess,
+            bool bInheritHandle,
+            int dwProcessId
+        );
+
+        [DllImport("kernel32.dll")]
+        public static extern void CloseHandle
+        (
+            IntPtr hObject
+        );
+
+        #endregion
+
+        #region public interfaces
+
+    }
+
+    public class MemoryManager
     {
         /// <summary>
         /// 从kernel32.dll中引入的4个关于进程与内存的函数
         /// </summary>
 
-        static readonly string ProcessName = "san11pk";
-        const int ExeOffset = 0x400000;
+        private static readonly string PROCESS_NAME = "san11pk";
+        private static readonly int EXE_OFFSET = 0x400000;
         public struct Segment { public int start, end; public byte[] oldMem, newMem; }
         // 要扫描的代码区域
-        Segment[] segs = {
+        private readonly Segment[] segs = {
             new Segment{ start = 0x401000, end = 0x74E000 },
             // RK 使用
             new Segment{ start = 0x8A5000, end = 0x90B000 },
@@ -30,43 +74,6 @@ namespace SirePluginDemo
             new Segment{ start = 0x920000, end = 0x930000 }
         };
 
-        #region imported dll functions
-        [DllImport("kernel32.dll")]
-        public static extern bool ReadProcessMemory
-            (
-            IntPtr hProcess,
-            IntPtr lpBaseAddress,
-            IntPtr lpBuffer,
-            int nSize,
-            IntPtr lpNumberOfBytesRead
-            );
-
-        [DllImport("kernel32.dll")]
-        public static extern bool WriteProcessMemory
-            (
-            IntPtr hProcess,
-            IntPtr lpBaseAddress,
-            int[] lpBuffer,
-            int nSize,
-            IntPtr lpNumberOfBytesWritten
-            );
-
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr OpenProcess
-            (
-            int dwDesiredAccess,
-            bool bInheritHandle,
-            int dwProcessId
-            );
-
-        [DllImport("kernel32.dll")]
-        private static extern void CloseHandle
-            (
-            IntPtr hObject
-            );
-        #endregion
-
-        #region public interfaces
         /// <summary>
         /// 读指定进程的4字节内存
         /// </summary>
@@ -77,19 +84,19 @@ namespace SirePluginDemo
         {
             int pid = GetPidByProcessName();
             if (pid == -1)
-                throw new NullReferenceException(@"游戏未启动。如已启动，请检查exe文件名是否为""san11pk.exe""");
+                throw new GameNotStartedException();
             try
             {
                 var buffer = new byte[length];
                 IntPtr byteAddress = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0); //获取缓冲区地址
-                IntPtr hProcess = OpenProcess(0x1F0FFF, false, pid);
-                ReadProcessMemory(hProcess, (IntPtr)baseAddress, byteAddress, length, IntPtr.Zero); //将制定内存中的值读入缓冲区
-                CloseHandle(hProcess);
+                IntPtr hProcess = NativeMethods.OpenProcess(0x1F0FFF, false, pid);
+                NativeMethods.ReadProcessMemory(hProcess, (IntPtr)baseAddress, byteAddress, length, IntPtr.Zero); //将制定内存中的值读入缓冲区
+                NativeMethods.CloseHandle(hProcess);
                 return buffer;
             }
             catch
             {
-                throw new NullReferenceException("读取进程内存时出错");
+                throw new ReadMemoryException();
             }
         }
 
@@ -101,19 +108,20 @@ namespace SirePluginDemo
         {
             int pid = GetPidByProcessName();
             if (pid == -1)
-                throw new NullReferenceException(@"游戏未启动。如已启动，请检查exe文件名是否为""san11pk.exe""");
-            IntPtr hProcess = OpenProcess(0x1F0FFF, false, pid); //0x1F0FFF 最高权限
+                throw new GameNotStartedException();
+            IntPtr hProcess = NativeMethods.OpenProcess(0x1F0FFF, false, pid); //0x1F0FFF 最高权限
             foreach (var injection in injectNodes)
             {
                 for (int i = 0; i < injection.Length; i = i + 4)
                 {
                     // length为要注入的字节数
                     int length = (injection.Length - i) >= 4 ? 4 : injection.Length - i;
-                    int[] content = new[] { BitConverter.ToInt32(injection.Value.Skip(i).Take(4).ToArray(), 0) };
-                    WriteProcessMemory(hProcess, (IntPtr)(injection.Address + i), content, length, IntPtr.Zero);
+                    int[] content = { BitConverter.ToInt32(injection.Value.Skip(i).Take(4).ToArray(), 0) };
+                    NativeMethods.WriteProcessMemory(hProcess, (IntPtr)(injection.Address + i), content, length, IntPtr.Zero);
                 }
             }
-            CloseHandle(hProcess);
+
+            NativeMethods.CloseHandle(hProcess);
         }
 
         /// <summary>
@@ -126,7 +134,7 @@ namespace SirePluginDemo
             {
                 foreach (var injection in injectNodes)
                 {
-                    stream.Position = injection.Address - ExeOffset;
+                    stream.Position = injection.Address - EXE_OFFSET;
                     stream.Write(injection.Value, 0, injection.Length);
                 }
             }
@@ -189,7 +197,7 @@ namespace SirePluginDemo
                 {
                     int length = seg.end - seg.start + 1; // 要+1，因为要考虑末端的问题
                     byte[] content = ReadMemoryValue(seg.start, length);
-                    stream.Position = seg.start - ExeOffset;
+                    stream.Position = seg.start - EXE_OFFSET;
                     stream.Write(content, 0, content.Length);
                 }
             }
@@ -233,7 +241,7 @@ namespace SirePluginDemo
         /// <returns>进程ID</returns>
         private int GetPidByProcessName(bool allowDuplicate = false)
         {
-            var processList = Process.GetProcesses().Where(x => x.ProcessName == ProcessName).ToArray();
+            var processList = Process.GetProcesses().Where(x => x.ProcessName == PROCESS_NAME).ToArray();
             // 未找到进程
             if (processList.Length == 0)
                 return -1;
