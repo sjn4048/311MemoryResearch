@@ -1,0 +1,30 @@
+san11pk.exe+218682 - E9 79893900           - jmp san11pk.exe+5B1000
+
+
+
+san11pk.exe+5B1000 - 81 FB 8C596A09        - cmp ebx,san11pk.exe+92A598C { [00000000] }
+san11pk.exe+5B1006 - 74 73                 - je san11pk.exe+5B107B
+san11pk.exe+5B1008 - 8B 44 24 1C           - mov eax,[esp+1C]
+san11pk.exe+5B100C - 83 F8 15              - cmp eax,0F { 21 }.....................调整此数值
+san11pk.exe+5B100F - 0F85 57000000         - jne san11pk.exe+5B106C
+san11pk.exe+5B1015 - 83 FF 12              - cmp edi,0E { 18 }
+san11pk.exe+5B1018 - 0F85 5D000000         - jne san11pk.exe+5B107B
+san11pk.exe+5B101E - A1 900E9B00           - mov eax,[san11pk.exe+5B0E90] { [00000000] }
+san11pk.exe+5B1023 - 85 C0                 - test eax,eax
+san11pk.exe+5B1025 - C7 05 900E9B00 00000000 - mov [san11pk.exe+5B0E90],00000000 { 0 }
+san11pk.exe+5B102F - 0F85 46000000         - jne san11pk.exe+5B107B
+san11pk.exe+5B1035 - C7 05 600F9B00 01000000 - mov [san11pk.exe+5B0F60],00000001 { 1 }
+san11pk.exe+5B103F - C7 05 900E9B00 01000000 - mov [san11pk.exe+5B0E90],00000001 { 1 }
+san11pk.exe+5B1049 - C7 44 24 04 08000000  - mov [esp+04],00000008 { 8 }
+san11pk.exe+5B1051 - 8D 05 940E9B00        - lea eax,[san11pk.exe+5B0E94] { [5FC46AB7] }
+san11pk.exe+5B1057 - 89 04 24              - mov [esp],eax
+san11pk.exe+5B105A - B8 B0F45900           - mov eax,san11pk.exe+19F4B0 { [0C24448B] }
+san11pk.exe+5B105F - FF D0                 - call eax
+san11pk.exe+5B1061 - BF 11000000           - mov edi,0000000D { 17 }.................调整此数值
+san11pk.exe+5B1066 - 68 87866100           - push san11pk.exe+218687 { [133] }
+san11pk.exe+5B106B - C3                    - ret 
+san11pk.exe+5B106C - C7 05 600F9B00 00000000 - mov [san11pk.exe+5B0F60],00000000 { 0 }
+san11pk.exe+5B1076 - B8 B0F45900           - mov eax,san11pk.exe+19F4B0 { [0C24448B] }
+san11pk.exe+5B107B - E8 30E4BEFF           - call san11pk.exe+19F4B0
+san11pk.exe+5B1080 - 68 87866100           - push san11pk.exe+218687 { [133] }
+san11pk.exe+5B1085 - C3                    - ret 

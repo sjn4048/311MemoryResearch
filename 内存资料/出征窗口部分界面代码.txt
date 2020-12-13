@@ -1,0 +1,119 @@
+00647AC0 函数：
+00647EBE - 8B CE                 - mov ecx,esi				esi = 设施指针
+00647EC0 - E8 9BEFFFFF           - call 00646E60			获得城市中最高官职能带兵的数量
+00647EC5 - 68 941E0000           - push 00001E94			默认出兵数量
+00647ECA - 8B CE                 - mov ecx,esi
+00647ECC - 89 86 08020000        - mov [esi+00000208],eax
+00647ED2 - E8 4947E9FF           - call 004DC620
+
+00647250 函数：出兵上下限（006473A3调用，就是后面一个函数）
+00647250 - 53                    - push ebx
+00647251 - 56                    - push esi
+00647252 - 8B F1                 - mov esi,ecx				esi = 结构体
+00647254 - 8B 86 98010000        - mov eax,[esi+00000198]		[esi+198] = 主将ID
+0064725A - 8B 9E A4010000        - mov ebx,[esi+000001A4]		[esi+1A4] = 兵种
+00647260 - 57                    - push edi
+00647261 - 50                    - push eax
+00647262 - B9 58192007           - mov ecx,07201958
+00647267 - E8 9498E4FF           - call 00490B00			根据武将ID获取武将指针
+0064726C - 8B F8                 - mov edi,eax				edi = 主将指针
+0064726E - 57                    - push edi
+0064726F - C7 86 08020000 00000000 - mov [esi+00000208],00000000	[esi+208] = 出兵上限
+00647279 - E8 B233E3FF           - call 0047A630			校验主将指针
+0064727E - 83 C4 04              - add esp,04
+00647281 - 85 C0                 - test eax,eax
+00647283 - 74 0C                 - je 00647291				未选定主将则跳转到取城市最大带兵数
+00647285 - 8B CF                 - mov ecx,edi
+00647287 - E8 6432E4FF           - call 0048A4F0			获取指定武将能带的最大兵数
+0064728C - 0FB7 C0               - movzx eax,ax
+0064728F - EB 07                 - jmp 00647298				跳转到已经选定了武将的情况
+00647291 - 8B CE                 - mov ecx,esi
+00647293 - E8 C8FBFFFF           - call 00646E60			获得城市中最高官职能带兵的数量
+00647298 - 8B 8E 90010000        - mov ecx,[esi+00000190]		[esi+190] = 设施指针
+0064729E - 89 86 08020000        - mov [esi+00000208],eax		[esi+208] = 出兵上限
+006472A4 - 8B 11                 - mov edx,[ecx]
+006472A6 - 8B F8                 - mov edi,eax
+006472A8 - FF 52 50              - call dword ptr [edx+50]		获得设施兵力
+006472AB - 3B F8                 - cmp edi,eax				比较设施兵力和可带兵上限
+006472AD - 7D 04                 - jnl 006472B3
+006472AF - 8B C7                 - mov eax,edi
+006472B1 - EB 0B                 - jmp 006472BE
+006472B3 - 8B 8E 90010000        - mov ecx,[esi+00000190]
+006472B9 - 8B 01                 - mov eax,[ecx]
+006472BB - FF 50 50              - call dword ptr [eax+50]		获得设施兵力
+006472BE - 83 FB 01              - cmp ebx,01				ebx = 兵种
+006472C1 - 89 86 08020000        - mov [esi+00000208],eax		[esi+208] = 出兵上限（在设施兵力和可带兵上限中取小）
+006472C7 - 7C 29                 - jl 006472F2
+006472C9 - 83 FB 04              - cmp ebx,04
+006472CC - 7F 24                 - jg 006472F2
+006472CE - 8B 8E A4010000        - mov ecx,[esi+000001A4]
+006472D4 - 51                    - push ecx
+006472D5 - 8B 8E 90010000        - mov ecx,[esi+00000190]
+006472DB - E8 70F6E3FF           - call 00486950			获得设施指定类型兵装
+006472E0 - 8B 8E 08020000        - mov ecx,[esi+00000208]
+006472E6 - 3B C8                 - cmp ecx,eax				比较设施兵装和可带兵上限
+006472E8 - 7D 02                 - jnl 006472EC
+006472EA - 8B C1                 - mov eax,ecx
+006472EC - 89 86 08020000        - mov [esi+00000208],eax
+006472F2 - 8B 86 08020000        - mov eax,[esi+00000208]		[esi+208] = 出兵上限（在设施兵力、设施指定兵装和可带兵上限中取小）
+006472F8 - 83 F8 01              - cmp eax,01
+006472FB - BB 01000000           - mov ebx,00000001                	出兵下限为1【可修改此处来限制玩家每支部队的最小出兵数】
+00647300 - 7F 02                 - jg 00647304
+00647302 - 8B D8                 - mov ebx,eax				如果上限小于1，则下限为上限
+00647304 - 68 941E0000           - push 00001E94 { 7828 }		控件ID
+00647309 - 8B CE                 - mov ecx,esi
+0064730B - E8 1053E9FF           - call 004DC620
+00647310 - 8B F8                 - mov edi,eax
+00647312 - 85 FF                 - test edi,edi
+00647314 - 74 17                 - je 0064732D
+00647316 - 8B 17                 - mov edx,[edi]
+00647318 - 68 00200000           - push 00002000 { 8192 }
+0064731D - 8B CF                 - mov ecx,edi
+0064731F - FF 92 80010000        - call dword ptr [edx+00000180]
+00647325 - 85 C0                 - test eax,eax
+00647327 - 74 04                 - je 0064732D
+00647329 - 8B CF                 - mov ecx,edi
+0064732B - EB 02                 - jmp 0064732F
+0064732D - 33 C9                 - xor ecx,ecx
+0064732F - 8B 86 08020000        - mov eax,[esi+00000208]		[esi+208] = 出兵上限
+00647335 - 50                    - push eax				eax = 出兵上限
+00647336 - 53                    - push ebx				ebx = 出兵下限
+00647337 - E8 A42FEAFF           - call 004EA2E0
+0064733C - 68 941E0000           - push 00001E94 { 7828 }
+00647341 - 8B CE                 - mov ecx,esi
+00647343 - E8 D852E9FF           - call 004DC620
+00647348 - 8B F8                 - mov edi,eax
+0064734A - 85 FF                 - test edi,edi
+0064734C - 74 13                 - je 00647361
+0064734E - 8B 17                 - mov edx,[edi]
+00647350 - 68 00200000           - push 00002000 { 8192 }
+00647355 - 8B CF                 - mov ecx,edi
+00647357 - FF 92 80010000        - call dword ptr [edx+00000180]
+0064735D - 85 C0                 - test eax,eax
+0064735F - 75 02                 - jne 00647363
+00647361 - 33 FF                 - xor edi,edi
+00647363 - 8B 9F B4000000        - mov ebx,[edi+000000B4]
+00647369 - 68 941E0000           - push 00001E94 { 7828 }
+0064736E - 8B CE                 - mov ecx,esi
+00647370 - E8 AB52E9FF           - call 004DC620
+00647375 - 8B F8                 - mov edi,eax
+00647377 - 85 FF                 - test edi,edi
+00647379 - 74 13                 - je 0064738E
+0064737B - 8B 07                 - mov eax,[edi]
+0064737D - 68 00200000           - push 00002000 { 8192 }
+00647382 - 8B CF                 - mov ecx,edi
+00647384 - FF 90 80010000        - call dword ptr [eax+00000180]
+0064738A - 85 C0                 - test eax,eax
+0064738C - 75 02                 - jne 00647390
+0064738E - 33 FF                 - xor edi,edi
+00647390 - 53                    - push ebx
+00647391 - 57                    - push edi
+00647392 - 8B CE                 - mov ecx,esi
+00647394 - E8 47FDFFFF           - call 006470E0
+00647399 - 5F                    - pop edi
+0064739A - 5E                    - pop esi
+0064739B - 5B                    - pop ebx
+0064739C - C3                    - ret 
+
+00 85 ac 20 开头的内存块
++

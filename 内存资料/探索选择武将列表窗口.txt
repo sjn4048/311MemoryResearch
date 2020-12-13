@@ -1,0 +1,134 @@
+0060DDA0 - 6A FF                 - push -01
+0060DDA2 - 68 96617300           - push 00736196
+0060DDA7 - 64 A1 00000000        - mov eax,fs:[00000000]
+0060DDAD - 50                    - push eax
+0060DDAE - 64 89 25 00000000     - mov fs:[00000000],esp
+0060DDB5 - 81 EC 10080000        - sub esp,00000810
+
+0060DDBB - A1 AC0B8E00           - mov eax,[008E0BAC]
+0060DDC0 - 53                    - push ebx
+0060DDC1 - 56                    - push esi
+0060DDC2 - 8B F1                 - mov esi,ecx
+0060DDC4 - 8D 8C 24 F8030000     - lea ecx,[esp+000003F8]
+0060DDCB - 89 84 24 14080000     - mov [esp+00000814],eax
+0060DDD2 - E8 6904EAFF           - call 004AE240
+
+0060DDD7 - 8D 86 94010000        - lea eax,[esi+00000194]				eax = 可选武将的链表（与选择武将窗口对应）
+0060DDDD - 68 AF130000           - push 000013AF
+0060DDE2 - 8D 4C 24 2C           - lea ecx,[esp+2C]
+0060DDE6 - C7 84 24 08040000 088A7E00 - mov [esp+00000408],007E8A08 { [DCBEEFBF] }
+0060DDF1 - 89 84 24 40050000     - mov [esp+00000540],eax
+0060DDF8 - C7 84 24 44050000 1A000000 - mov [esp+00000544],0000001A { 26 }
+0060DE03 - C7 84 24 18040000 01000000 - mov [esp+00000418],00000001 { 1 }		可选武将数量
+*0060DE03 - 8B 40 FC              - mov eax,[eax-04]					此时eax = esi+194，eax-04 = esi+190，[eax-04] = 可选武将数量
+*0060DE06 - 89 84 24 18040000     - mov [esp+00000418],eax
+*0060DE0D - 90                    - nop 
+0060DE0E - E8 4DEDE8FF           - call 0049CB60
+0060DE13 - 50                    - push eax
+0060DE14 - E8 77D5E8FF           - call 0049B390
+0060DE19 - 83 C4 04              - add esp,04
+0060DE1C - 50                    - push eax
+0060DE1D - 8D 8C 24 20040000     - lea ecx,[esp+00000420]
+0060DE24 - E8 C73BE6FF           - call 004719F0
+0060DE29 - 8D 8C 24 44050000     - lea ecx,[esp+00000544]
+0060DE30 - E8 EB610400           - call 00654020
+0060DE35 - 8D 8C 24 F8030000     - lea ecx,[esp+000003F8]
+0060DE3C - 51                    - push ecx
+0060DE3D - 33 DB                 - xor ebx,ebx
+0060DE3F - 8D 8C 24 48050000     - lea ecx,[esp+00000548]
+0060DE46 - 89 9C 24 24080000     - mov [esp+00000824],ebx
+0060DE4D - E8 EE6E0400           - call 00654D40
+0060DE52 - 85 C0                 - test eax,eax
+0060DE54 - 0F84 D8000000         - je 0060DF32
+
+0060DE5A - 8B 96 90010000        - mov edx,[esi+00000190]				edx = 被选中武将的指针（与选择武将窗口对应）
+*0060DE5A - 8B 15 04868A00        - mov edx,[008A8604]					edx = 被选中武将的指针（与选择武将窗口对应）
+0060DE60 - 52                    - push edx
+0060DE61 - E8 CAC7E6FF           - call 0047A630
+0060DE66 - 83 C4 04              - add esp,04
+0060DE69 - 85 C0                 - test eax,eax
+0060DE6B - 74 13                 - je 0060DE80
+0060DE6D - 8B 86 90010000        - mov eax,[esi+00000190]
+*0060DE6D - E9 EAC12900           - jmp 008AA05C			循环选中暂存区的武将，返回时跳过后面三句
+*0060DE72 - 90                    - nop 
+  *008AA05C - 53                    - push ebx
+  *008AA05D - 31 DB                 - xor ebx,ebx
+  *008AA05F - 8B 1D 00868A00        - mov ebx,[008A8600] { [00000003] }
+  *008AA065 - 8B 04 9D 00868A00     - mov eax,[ebx*4+008A8600]
+  *008AA06C - 50                    - push eax
+  *008AA06D - 8D 8C 24 4C050000     - lea ecx,[esp+0000054C]
+  *008AA074 - E8 E79FDAFF           - call 00654060
+  *008AA079 - 4B                    - dec ebx
+  *008AA07A - 85 DB                 - test ebx,ebx
+  *008AA07C - 75 E7                 - jne 008AA065
+  *008AA07E - E9 FD3DD6FF           - jmp 0060DE80
+0060DE73 - 50                    - push eax
+0060DE74 - 8D 8C 24 48050000     - lea ecx,[esp+00000548]
+0060DE7B - E8 E0610400           - call 00654060			选中武将
+
+0060DE80 - 57                    - push edi
+0060DE81 - 68 A820A909           - push 09A920A8 { [0000005E] }
+0060DE86 - 8D 8C 24 4C050000     - lea ecx,[esp+0000054C]
+0060DE8D - E8 EEF80300           - call 0064D780
+0060DE92 - 8D 8C 24 48050000     - lea ecx,[esp+00000548]
+0060DE99 - E8 82EC0300           - call 0064CB20			显示列表窗口，等待选择确定
+
+0060DE9E - 68 A820A909           - push 09A920A8 { [0000005E] }
+0060DEA3 - 8D 8C 24 4C050000     - lea ecx,[esp+0000054C]
+0060DEAA - 8B F8                 - mov edi,eax
+0060DEAC - E8 6FF90300           - call 0064D820
+0060DEB1 - 81 FF 10270000        - cmp edi,00002710 { 10000 }		10000 = 窗口选择“决定”
+0060DEB7 - 5F                    - pop edi
+0060DEB8 - 75 78                 - jne 0060DF32				跳转到选择“返回”处理
+0060DEBA - 89 9E 90010000        - mov [esi+00000190],ebx
+*0060DEBA - EB 04                 - jmp 0060DEC0
+*0060DEBC - 90 90 90 90           - nop * 4 
+0060DEC0 - 89 5C 24 14           - mov [esp+14],ebx
+0060DEC4 - 89 5C 24 18           - mov [esp+18],ebx
+0060DEC8 - 89 5C 24 10           - mov [esp+10],ebx
+0060DECC - 89 5C 24 0C           - mov [esp+0C],ebx
+0060DED0 - 89 5C 24 1C           - mov [esp+1C],ebx
+0060DED4 - C7 44 24 20 0A000000  - mov [esp+20],0000000A
+0060DEDC - 89 5C 24 24           - mov [esp+24],ebx
+0060DEE0 - C7 44 24 08 44BF7900  - mov [esp+08],0079BF44		以上重新初始化部分参数
+0060DEE8 - 8D 4C 24 08           - lea ecx,[esp+08]
+0060DEEC - 51                    - push ecx
+0060DEED - 8D 8C 24 48050000     - lea ecx,[esp+00000548]
+0060DEF4 - C6 84 24 24080000 01  - mov byte ptr [esp+00000824],01
+0060DEFC - E8 CF700400           - call 00654FD0			根据列表的选择结果创建被选武将链表
+0060DF01 - 39 5C 24 14           - cmp [esp+14],ebx
+0060DF05 - 7E 1B                 - jle 0060DF22
+0060DF07 - 8D 4C 24 08           - lea ecx,[esp+08]
+0060DF0B - E8 00EDF8FF           - call 0059CC10			取得链表的第一个武将
+*0060DF0B - E9 24C12900           - jmp 008AA034			循环将链表武将指针填充到暂存区，返回时跳过后面两句
+  *008AA034 - E8 D72BCFFF           - call 0059CC10
+  *008AA039 - 83 E8 08              - sub eax,08
+  *008AA03C - 31 D2                 - xor edx,edx
+  *008AA03E - 42                    - inc edx
+  *008AA03F - 8B 48 08              - mov ecx,[eax+08]
+  *008AA042 - 89 0C 95 00868A00     - mov [edx*4+008A8600],ecx
+  *008AA049 - 8B 00                 - mov eax,[eax]
+  *008AA04B - 85 C0                 - test eax,eax
+  *008AA04D - 75 EF                 - jne 008AA03E
+  *008AA04F - 89 15 00868A00        - mov [008A8600],edx
+  *008AA055 - E9 BE3ED6FF           - jmp 0060DF18  
+0060DF10 - 8B 10                 - mov edx,[eax]
+0060DF12 - 89 96 90010000        - mov [esi+00000190],edx		[esi+190] = 被选择武将
+0060DF18 - C7 86 B4010000 01000000 - mov [esi+000001B4],00000001
+0060DF22 - 8D 4C 24 08           - lea ecx,[esp+08]
+0060DF26 - 88 9C 24 20080000     - mov [esp+00000820],bl
+0060DF2D - E8 CEE1E6FF           - call 0047C100			清除链表
+0060DF32 - 8B CE                 - mov ecx,esi
+0060DF34 - E8 D7FCFFFF           - call 0060DC10			刷新探索选择武将窗口中的动态内容
+0060DF39 - 8D 8C 24 44050000     - lea ecx,[esp+00000544]
+0060DF40 - C7 84 24 20080000 FFFFFFFF - mov [esp+00000820],FFFFFFFF { -1 }
+0060DF4B - E8 20640400           - call 00654370
+0060DF50 - 8B 8C 24 18080000     - mov ecx,[esp+00000818]
+0060DF57 - 5E                    - pop esi
+0060DF58 - 64 89 0D 00000000     - mov fs:[00000000],ecx { 0 }
+0060DF5F - 8B 8C 24 10080000     - mov ecx,[esp+00000810]
+0060DF66 - 5B                    - pop ebx
+0060DF67 - E8 AE9B0F00           - call 00707B1A
+0060DF6C - 81 C4 1C080000        - add esp,0000081C { 2076 }
+0060DF72 - C3                    - ret 
+

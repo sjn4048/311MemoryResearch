@@ -1,0 +1,283 @@
+005FD380 - 6A FF                 - push -01
+005FD382 - 68 BB597300           - push 007359BB
+005FD387 - 64 A1 00000000        - mov eax,fs:[00000000]
+005FD38D - 50                    - push eax
+005FD38E - 64 89 25 00000000     - mov fs:[00000000],esp
+005FD395 - 81 EC F4070000        - sub esp,000007F4
+
+005FD39B - A1 AC0B8E00           - mov eax,[008E0BAC]
+005FD3A0 - 56                    - push esi
+005FD3A1 - 8B F1                 - mov esi,ecx					传入参数结构指针
+005FD3A3 - 8D 8C 24 D8030000     - lea ecx,[esp+000003D8]
+005FD3AA - 89 84 24 F4070000     - mov [esp+000007F4],eax
+005FD3B1 - E8 8A0EEBFF           - call 004AE240
+
+005FD3B6 - 8B 8E D0010000        - mov ecx,[esi+000001D0]			ecx = 可选择个数
+005FD3BC - 8D 86 B0010000        - lea eax,[esi+000001B0]			[eax] = 可选武将链表表头
+005FD3C2 - 89 8C 24 F4030000     - mov [esp+000003F4],ecx
+005FD3C9 - 68 EF130000           - push 000013EF { 5103 }
+005FD3CE - 8D 4C 24 0C           - lea ecx,[esp+0C]
+005FD3D2 - C7 84 24 E8030000 E88A7E00 - mov [esp+000003E8],007E8AE8		标题：选择对象武将
+005FD3DD - 89 84 24 20050000     - mov [esp+00000520],eax
+005FD3E4 - C7 84 24 24050000 1D000000 - mov [esp+00000524],0000001D { 29 }	29 = 褒赏
+005FD3EF - E8 6CF7E9FF           - call 0049CB60				准备msg数据结构
+005FD3F4 - 50                    - push eax
+005FD3F5 - E8 96DFE9FF           - call 0049B390				根据对应msg返回字符串
+005FD3FA - 83 C4 04              - add esp,04
+
+005FD3FD - 50                    - push eax
+005FD3FE - 8D 8C 24 00040000     - lea ecx,[esp+00000400]
+005FD405 - E8 E645E7FF           - call 004719F0
+005FD40A - 8B 86 D4010000        - mov eax,[esi+000001D4]
+005FD410 - 50                    - push eax
+005FD411 - 8D 8C 24 8C040000     - lea ecx,[esp+0000048C]
+005FD418 - E8 D345E7FF           - call 004719F0
+005FD41D - 8D 8C 24 24050000     - lea ecx,[esp+00000524]
+005FD424 - E8 F76B0500           - call 00654020
+005FD429 - 8D 94 24 D8030000     - lea edx,[esp+000003D8]
+005FD430 - 52                    - push edx
+005FD431 - 8D 8C 24 28050000     - lea ecx,[esp+00000528]
+005FD438 - C7 84 24 04080000 00000000 - mov [esp+00000804],00000000
+005FD443 - E8 F8780500           - call 00654D40				构建武将列表
+005FD448 - 85 C0                 - test eax,eax
+005FD44A - 0F84 9A000000         - je 005FD4EA
+
+
+【处理步骤X：循环选中武将（为武将打勾）】
+005FD450 - 8B 86 94010000        - mov eax,[esi+00000194]
+005FD456 - 85 C0                 - test eax,eax
+005FD458 - 57                    - push edi
+005FD459 - 89 44 24 08           - mov [esp+08],eax
+005FD45D - 74 38                 - je 005FD497
+005FD45F - 53                    - push ebx
+005FD460 - 8D 9E 90010000        - lea ebx,[esi+00000190]			[eax] = 已选武将链表表头			
+005FD466 - 8D 44 24 0C           - lea eax,[esp+0C]
+005FD46A - 50                    - push eax
+005FD46B - 8B CB                 - mov ecx,ebx
+005FD46D - E8 5EEAE7FF           - call 0047BED0				链表后移一个单元
+005FD472 - 8B 38                 - mov edi,[eax]				edi = 武将指针
+005FD474 - 57                    - push edi
+005FD475 - E8 B6D1E7FF           - call 0047A630				校验指针
+005FD47A - 83 C4 04              - add esp,04
+005FD47D - 85 C0                 - test eax,eax
+005FD47F - 74 0D                 - je 005FD48E
+005FD481 - 57                    - push edi
+005FD482 - 8D 8C 24 30050000     - lea ecx,[esp+00000530]
+005FD489 - E8 D26B0500           - call 00654060				选中武将
+005FD48E - 8B 44 24 0C           - mov eax,[esp+0C]
+005FD492 - 85 C0                 - test eax,eax
+005FD494 - 75 D0                 - jne 005FD466
+005FD496 - 5B                    - pop ebx
+
+005FD497 - 68 7017A909           - push 09A91770 { [00000017] }
+005FD49C - 8D 8C 24 2C050000     - lea ecx,[esp+0000052C]
+005FD4A3 - E8 D8020500           - call 0064D780
+005FD4A8 - 8D 8C 24 28050000     - lea ecx,[esp+00000528]
+005FD4AF - E8 6CF60400           - call 0064CB20				显示列表窗口，等待选择确定
+
+005FD4B4 - 68 7017A909           - push 09A91770 { [00000017] }
+005FD4B9 - 8D 8C 24 2C050000     - lea ecx,[esp+0000052C]
+005FD4C0 - 8B F8                 - mov edi,eax
+005FD4C2 - E8 59030500           - call 0064D820
+005FD4C7 - 85 FF                 - test edi,edi
+005FD4C9 - 5F                    - pop edi
+005FD4CA - 7C 1E                 - jl 005FD4EA
+005FD4CC - 8D 8E 90010000        - lea ecx,[esi+00000190]
+005FD4D2 - 51                    - push ecx
+005FD4D3 - 8D 8C 24 28050000     - lea ecx,[esp+00000528]
+005FD4DA - E8 F17A0500           - call 00654FD0
+005FD4DF - 85 C0                 - test eax,eax
+005FD4E1 - 74 07                 - je 005FD4EA
+005FD4E3 - 8B CE                 - mov ecx,esi
+005FD4E5 - E8 26FDFFFF           - call 005FD210
+005FD4EA - 8D 8C 24 24050000     - lea ecx,[esp+00000524]
+005FD4F1 - C7 84 24 00080000 FFFFFFFF - mov [esp+00000800],FFFFFFFF { -1 }
+005FD4FC - E8 6F6E0500           - call 00654370
+005FD501 - 8B 8C 24 F8070000     - mov ecx,[esp+000007F8]
+005FD508 - 64 89 0D 00000000     - mov fs:[00000000],ecx { 0 }
+005FD50F - 8B 8C 24 F4070000     - mov ecx,[esp+000007F4]
+005FD516 - 5E                    - pop esi
+005FD517 - E8 FEA51000           - call 00707B1A
+005FD51C - 81 C4 00080000        - add esp,00000800 { 2048 }
+005FD522 - C3                    - ret 
+
+
+调用00654D40的地方（显示武将列表）
+004B0327 - E8 144A1A00 - CALL 00654D40
+004B6E5E - E8 DDDE1900 - CALL 00654D40
+0058B21E - E8 1D9B0C00 - CALL 00654D40
+0059D1A6 - E8 957B0B00 - CALL 00654D40
+0059D6BC - E8 7F760B00 - CALL 00654D40
+005B561E - E8 1DF70900 - CALL 00654D40
+005BB0B5 - E8 869C0900 - CALL 00654D40
+005BD542 - E8 F9770900 - CALL 00654D40
+005BDEEB - E8 506E0900 - CALL 00654D40
+005C88B3 - E8 88C40800 - CALL 00654D40
+005C89D0 - E8 6BC30800 - CALL 00654D40
+005C957A - E8 C1B70800 - CALL 00654D40
+005FCBFD - E8 3E810500 - CALL 00654D40
+005FD443 - E8 F8780500 - CALL 00654D40		褒赏
+005FDF7D - E8 BE6D0500 - CALL 00654D40
+005FFD01 - E8 3A500500 - CALL 00654D40
+005FFE31 - E8 0A4F0500 - CALL 00654D40
+00601EAD - E8 8E2E0500 - CALL 00654D40
+00604B90 - E8 AB010500 - CALL 00654D40
+006054F0 - E8 4BF80400 - CALL 00654D40
+00605F4D - E8 EEED0400 - CALL 00654D40
+0060611D - E8 1EEC0400 - CALL 00654D40
+00607F95 - E8 A6CD0400 - CALL 00654D40
+0060946D - E8 CEB80400 - CALL 00654D40
+00609E8D - E8 AEAE0400 - CALL 00654D40
+0060AAA0 - E8 9BA20400 - CALL 00654D40
+0060C855 - E8 E6840400 - CALL 00654D40
+0060D1ED - E8 4E7B0400 - CALL 00654D40
+0060DE4D - E8 EE6E0400 - CALL 00654D40		探索
+0060E936 - E8 05640400 - CALL 00654D40
+006130DC - E8 5F1C0400 - CALL 00654D40
+006550DC - E8 5FFCFFFF - CALL 00654D40
+006739B8 - E8 8313FEFF - CALL 00654D40
+00675499 - E8 A2F8FDFF - CALL 00654D40
+00682A14 - E8 2723FDFF - CALL 00654D40
+0069A84D - E8 EEA4FBFF - CALL 00654D40
+0069F656 - E8 E556FBFF - CALL 00654D40
+
+调用00654060的地方（选中武将）
+005FCC2B - E8 30740500 - CALL 00654060
+005FD489 - E8 D26B0500 - CALL 00654060		褒赏
+005FDFAB - E8 B0600500 - CALL 00654060
+006006DC - E8 7F390500 - CALL 00654060		开发
+00601EDB - E8 80210500 - CALL 00654060
+00604BD9 - E8 82F40400 - CALL 00654060
+00605539 - E8 22EB0400 - CALL 00654060		训练
+00605F7B - E8 E0E00400 - CALL 00654060
+0060614B - E8 10DF0400 - CALL 00654060
+00607FC9 - E8 92C00400 - CALL 00654060
+006081BD - E8 9EBE0400 - CALL 00654060
+0060949B - E8 C0AB0400 - CALL 00654060
+00609ED3 - E8 88A10400 - CALL 00654060
+0060AAE9 - E8 72950400 - CALL 00654060
+0060C883 - E8 D8770400 - CALL 00654060
+0060D21B - E8 406E0400 - CALL 00654060
+0060DE7B - E8 E0610400 - CALL 00654060		探索
+0060E983 - E8 D8560400 - CALL 00654060
+0060F350 - E8 0B4D0400 - CALL 00654060
+00611719 - E8 42290400 - CALL 00654060
+00613107 - E8 540F0400 - CALL 00654060
+00616B96 - E8 C5D40300 - CALL 00654060
+00648826 - E8 35B80000 - CALL 00654060
+0069F6A9 - E8 B249FBFF - CALL 00654060
+
+---------------------------------------------------------------------------------------------------------------------------
+00654D40 - 81 EC 54010000        - sub esp,00000154 { 340 }
+00654D46 - A1 AC0B8E00           - mov eax,[008E0BAC] { [D593C318] }
+00654D4B - 56                    - push esi
+00654D4C - 8B B4 24 5C010000     - mov esi,[esp+0000015C]
+00654D53 - 89 84 24 54010000     - mov [esp+00000154],eax
+00654D5A - 8B 86 44010000        - mov eax,[esi+00000144]
+00654D60 - 85 C0                 - test eax,eax
+00654D62 - 57                    - push edi
+00654D63 - 8B F9                 - mov edi,ecx
+00654D65 - 74 67                 - je 00654DCE
+00654D67 - 56                    - push esi
+00654D68 - 8D 4C 24 10           - lea ecx,[esp+10]
+00654D6C - E8 CF66FFFF           - call 0064B440
+00654D71 - 8B 86 44010000        - mov eax,[esi+00000144]
+00654D77 - 8B B6 48010000        - mov esi,[esi+00000148]		esi = 1D（褒赏）/1A（探索）
+00654D7D - 85 F6                 - test esi,esi
+00654D7F - 89 84 24 50010000     - mov [esp+00000150],eax
+00654D86 - 89 B4 24 54010000     - mov [esp+00000154],esi
+00654D8D - 7C 1B                 - jl 00654DAA
+00654D8F - 83 FE 35              - cmp esi,35
+00654D92 - 7D 16                 - jnl 00654DAA
+00654D94 - 8B 4C 24 1C           - mov ecx,[esp+1C]
+00654D98 - 85 C9                 - test ecx,ecx
+00654D9A - 75 0E                 - jne 00654DAA
+00654D9C - 8D 0C 76              - lea ecx,[esi+esi*2]
+00654D9F - 8D 14 8D D0D18B00     - lea edx,[ecx*4+008BD1D0]
+00654DA6 - 89 54 24 1C           - mov [esp+1C],edx
+00654DAA - 8B 40 0C              - mov eax,[eax+0C]			eax = 待选列表数量
+00654DAD - 39 44 24 28           - cmp [esp+28],eax                     ？应该是一屏显示的行数或者纵向滚动条的位置
+00654DB1 - 7C 04                 - jl 00654DB7
+00654DB3 - 89 44 24 28           - mov [esp+28],eax
+00654DB7 - 8D 44 24 0C           - lea eax,[esp+0C]
+00654DBB - 50                    - push eax
+00654DBC - 8B CF                 - mov ecx,edi
+00654DBE - E8 0D94FFFF           - call 0064E1D0
+00654DC3 - 85 C0                 - test eax,eax
+00654DC5 - 8B CF                 - mov ecx,edi
+00654DC7 - 75 1E                 - jne 00654DE7
+
+00654DC9 - 8B 17                 - mov edx,[edi]
+00654DCB - FF 52 04              - call dword ptr [edx+04]
+00654DCE - 5F                    - pop edi
+00654DCF - 33 C0                 - xor eax,eax
+00654DD1 - 5E                    - pop esi
+00654DD2 - 8B 8C 24 50010000     - mov ecx,[esp+00000150]
+00654DD9 - E8 3C2D0B00           - call 00707B1A
+00654DDE - 81 C4 54010000        - add esp,00000154
+00654DE4 - C2 0400               - ret 0004
+
+00654DE7 - 53                    - push ebx    				ebx，探索是0，褒赏是1                    
+00654DE8 - E8 53F8FFFF           - call 00654640
+00654DED - 8B CF                 - mov ecx,edi
+00654DEF - E8 3C87FFFF           - call 0064D530
+00654DF4 - 8B D8                 - mov ebx,eax
+00654DF6 - 53                    - push ebx
+00654DF7 - E8 D48CE9FF           - call 004EDAD0
+00654DFC - 83 C4 04              - add esp,04 { 4 }
+00654DFF - 85 C0                 - test eax,eax
+00654E01 - 74 4D                 - je 00654E50
+00654E03 - 8B 84 24 54010000     - mov eax,[esp+00000154]
+00654E0A - 8B 40 04              - mov eax,[eax+04]
+00654E0D - 85 C0                 - test eax,eax
+00654E0F - 89 44 24 0C           - mov [esp+0C],eax
+00654E13 - 74 3B                 - je 00654E50
+00654E15 - EB 09                 - jmp 00654E20
+00654E17 - 8D A4 24 00000000     - lea esp,[esp+00000000]
+00654E1E - 8B FF                 - mov edi,edi
+
+00654E20 - 8D 4C 24 0C           - lea ecx,[esp+0C]
+00654E24 - 51                    - push ecx
+00654E25 - 8B 8C 24 58010000     - mov ecx,[esp+00000158]
+00654E2C - E8 9F70E2FF           - call 0047BED0			链表后移一个单元
+00654E31 - 8B 30                 - mov esi,[eax]
+00654E33 - 56                    - push esi
+00654E34 - E8 C757E2FF           - call 0047A600			校验指针
+00654E39 - 83 C4 04              - add esp,04 { 4 }
+00654E3C - 85 C0                 - test eax,eax
+00654E3E - 74 08                 - je 00654E48
+00654E40 - 56                    - push esi
+00654E41 - 8B CB                 - mov ecx,ebx
+00654E43 - E8 6882E8FF           - call 004DD0B0
+00654E48 - 8B 44 24 0C           - mov eax,[esp+0C]
+00654E4C - 85 C0                 - test eax,eax
+00654E4E - 75 D0                 - jne 00654E20
+
+00654E50 - 8B 84 24 58010000     - mov eax,[esp+00000158]		eax = 1D（褒赏）/1A（探索）
+00654E57 - 83 F8 2B              - cmp eax,2B { 43 }
+00654E5A - 5B                    - pop ebx
+00654E5B - 74 05                 - je 00654E62
+00654E5D - 83 F8 2C              - cmp eax,2C { 44 }
+00654E60 - 75 13                 - jne 00654E75
+00654E62 - 6A 01                 - push 01 { 1 }
+00654E64 - 68 58877E00           - push 007E8758			字符串“中止”
+00654E69 - 68 3C0B0000           - push 00000B3C { 2876 }
+00654E6E - 8B CF                 - mov ecx,edi
+00654E70 - E8 4B8FFFFF           - call 0064DDC0
+
+00654E75 - 8B 17                 - mov edx,[edi]
+00654E77 - 8B CF                 - mov ecx,edi
+00654E79 - FF 92 DC010000        - call dword ptr [edx+000001DC]
+00654E7F - 8B 07                 - mov eax,[edi]
+00654E81 - 6A 00                 - push 00 { 0 }
+00654E83 - 8B CF                 - mov ecx,edi
+00654E85 - FF 90 E0010000        - call dword ptr [eax+000001E0]
+00654E8B - 8B CF                 - mov ecx,edi
+00654E8D - E8 3E82FFFF           - call 0064D0D0
+00654E92 - 8B 8C 24 58010000     - mov ecx,[esp+00000158]
+00654E99 - 5F                    - pop edi
+00654E9A - B8 01000000           - mov eax,00000001
+00654E9F - 5E                    - pop esi
+00654EA0 - E8 752C0B00           - call 00707B1A
+00654EA5 - 81 C4 54010000        - add esp,00000154
+00654EAB - C2 0400               - ret 0004

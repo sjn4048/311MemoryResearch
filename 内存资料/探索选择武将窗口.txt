@@ -1,0 +1,388 @@
+005D15D0 - 6A FF                 - push -01
+005D15D2 - 68 EB4A7300           - push 00734AEB
+005D15D7 - 64 A1 00000000        - mov eax,fs:[00000000]
+005D15DD - 50                    - push eax
+005D15DE - 64 89 25 00000000     - mov fs:[00000000],esp
+005D15E5 - 81 EC BC010000        - sub esp,000001BC
+005D15EB - 56                    - push esi
+005D15EC - 8D 4C 24 04           - lea ecx,[esp+04]
+005D15F0 - E8 CBC60300           - call 0060DCC0
+ [构建探索窗体参数]
+005D15F5 - 8B B4 24 D4010000     - mov esi,[esp+000001D4]			esi = 设施指针
+005D15FC - 6A 00                 - push 00
+005D15FE - 56                    - push esi
+005D15FF - 8D 4C 24 0C           - lea ecx,[esp+0C]
+005D1603 - C7 84 24 D0010000 00000000 - mov [esp+000001D0],00000000
+005D160E - E8 7DCA0300           - call 0060E090				函数2：构建探索窗体参数
+005D1613 - 85 C0                 - test eax,eax
+005D1615 - 8D 4C 24 04           - lea ecx,[esp+04]
+005D1619 - 75 28                 - jne 005D1643					如果构建成功，跳转到弹出窗口
+ [构建失败，清除窗体参数，返回]
+005D161B - C7 84 24 C8010000 FFFFFFFF - mov [esp+000001C8],FFFFFFFF
+005D1626 - E8 F5C90300           - call 0060E020				函数3：清除探索窗体参数，关闭窗口
+005D162B - 33 C0                 - xor eax,eax
+005D162D - 5E                    - pop esi
+005D162E - 8B 8C 24 BC010000     - mov ecx,[esp+000001BC]
+005D1635 - 64 89 0D 00000000     - mov fs:[00000000],ecx
+005D163C - 81 C4 C8010000        - add esp,000001C8
+005D1642 - C3                    - ret 
+ [弹出窗口，接收玩家选择]
+005D1643 - E8 0867F0FF           - call 004D7D50				弹出探索窗口，接收玩家选择（点“决定”则返回1，点“返回”则返回0，选择结果放回窗体处理过程变量中）
+005D1648 - 85 C0                 - test eax,eax
+005D164A - C7 84 24 C8010000 FFFFFFFF - mov [esp+000001C8],FFFFFFFF
+005D1655 - 7D 21                 - jnl 005D1678					选中了武将，跳转到“决定”处理
+ [“返回”：如果没有选中武将或点击了返回，则进行以下处理]
+005D1657 - 8D 4C 24 04           - lea ecx,[esp+04]				ecx = 窗体处理过程结构的起始地址
+005D165B - E8 C0C90300           - call 0060E020				函数3：清除探索窗体参数，关闭窗口
+005D1660 - 33 C0                 - xor eax,eax
+005D1662 - 5E                    - pop esi
+005D1663 - 8B 8C 24 BC010000     - mov ecx,[esp+000001BC]
+005D166A - 64 89 0D 00000000     - mov fs:[00000000],ecx
+005D1671 - 81 C4 C8010000        - add esp,000001C8
+005D1677 - C3                    - ret 
+ [“决定”：如果选中了至少一个武将并点击了决定，则进行以下处理]
+005D1678 - 8B 84 24 D0010000     - mov eax,[esp+000001D0]			eax = 返回结构体
+005D167F - 8B 8C 24 94010000     - mov ecx,[esp+00000194]			ecx = 被选中武将
+005D1686 - 89 48 04              - mov [eax+04],ecx				[eax+04] = 被选中武将
+005D1689 - 8D 4C 24 04           - lea ecx,[esp+04]
+005D168D - 89 30                 - mov [eax],esi
+005D168F - E8 8CC90300           - call 0060E020				函数3：清除探索窗体参数，关闭窗口
+005D1694 - 8B 8C 24 C0010000     - mov ecx,[esp+000001C0]
+005D169B - B8 01000000           - mov eax,00000001
+005D16A0 - 5E                    - pop esi
+005D16A1 - 64 89 0D 00000000     - mov fs:[00000000],ecx
+005D16A8 - 81 C4 C8010000        - add esp,000001C8
+005D16AE - C3                    - ret 
+
+-----------------------------------------------------------------------------------------------------------------------
+函数2：构建探索窗体参数
+-----------------------------------------------------------------------------------------------------------------------
+0060E090 - 83 EC 6C              - sub esp,6C
+0060E093 - A1 AC0B8E00           - mov eax,[008E0BAC]
+0060E098 - 56                    - push esi
+0060E099 - 57                    - push edi
+0060E09A - 8B 7C 24 78           - mov edi,[esp+78]				edi = 设施指针
+0060E09E - 57                    - push edi
+0060E09F - 89 44 24 74           - mov [esp+74],eax
+0060E0A3 - 8B F1                 - mov esi,ecx					esi = ecx实际上是调用函数前的[esp+0C]，即构建窗体所需参数的起始地址
+0060E0A5 - E8 86C5E6FF           - call 0047A630				校验指针
+0060E0AA - 83 C4 04              - add esp,04
+0060E0AD - 85 C0                 - test eax,eax
+0060E0AF - 75 11                 - jne 0060E0C2
+0060E0B1 - 5F                    - pop edi
+0060E0B2 - 5E                    - pop esi
+0060E0B3 - 8B 4C 24 68           - mov ecx,[esp+68]
+0060E0B7 - E8 5E9A0F00           - call 00707B1A
+0060E0BC - 83 C4 6C              - add esp,6C
+0060E0BF - C2 0800               - ret 0008
+【处理步骤一：获得窗口参数对象指针】
+0060E0C2 - 55                    - push ebp
+0060E0C3 - 8B AC 24 80000000     - mov ebp,[esp+00000080]			ebp = 调用时传入的默认值是0
+0060E0CA - 85 ED                 - test ebp,ebp
+0060E0CC - 89 BE 8C010000        - mov [esi+0000018C],edi			[esi+18C] = 设施指针
+0060E0D2 - 75 1D                 - jne 0060E0F1					ebp不为0则继续处理
+0060E0D4 - E8 A7E7EDFF           - call 004EC880				查看窗口参数对象指针是否存在，如不存在则返回0
+0060E0D9 - 8B E8                 - mov ebp,eax					ebp = 04EFF7C0（窗口参数对象指针）
+0060E0DB - 85 ED                 - test ebp,ebp
+0060E0DD - 75 12                 - jne 0060E0F1					窗口参数对象指针存在则继续处理
+0060E0DF - 5D                    - pop ebp
+0060E0E0 - 5F                    - pop edi
+0060E0E1 - 5E                    - pop esi
+0060E0E2 - 8B 4C 24 68           - mov ecx,[esp+68]
+0060E0E6 - E8 2F9A0F00           - call 00707B1A
+0060E0EB - 83 C4 6C              - add esp,6C
+0060E0EE - C2 0800               - ret 0008
+【处理步骤二：计算窗口定位和长宽，构建窗体】
+0060E0F1 - 53                    - push ebx
+0060E0F2 - 8D 44 24 10           - lea eax,[esp+10]
+0060E0F6 - 68 A6000000           - push 000000A6
+0060E0FB - 50                    - push eax
+0060E0FC - E8 AFB5ECFF           - call 004D96B0				获得与窗体实例ID关联的左上X、左上Y、长、宽4个参数
+0060E101 - 8B 7C 24 24           - mov edi,[esp+24]
+0060E105 - 8B 4C 24 1C           - mov ecx,[esp+1C]
+0060E109 - 8B 5C 24 20           - mov ebx,[esp+20]
+0060E10D - 8B 44 24 18           - mov eax,[esp+18]
+0060E111 - 83 C4 08              - add esp,08 { 8 }
+0060E114 - 2B F9                 - sub edi,ecx
+0060E116 - 2B D8                 - sub ebx,eax
+0060E118 - E8 931FE2FF           - call 004300B0				获得游戏窗口Y轴像素
+0060E11D - 2B C7                 - sub eax,edi
+0060E11F - 99                    - cdq 
+0060E120 - 2B C2                 - sub eax,edx
+0060E122 - 8B F8                 - mov edi,eax
+0060E124 - D1 FF                 - sar edi,1
+0060E126 - E8 751FE2FF           - call 004300A0				获得游戏窗口X轴像素
+0060E12B - 8B 4C 24 18           - mov ecx,[esp+18]
+0060E12F - 2B C3                 - sub eax,ebx
+0060E131 - 8B 5C 24 14           - mov ebx,[esp+14]
+0060E135 - 99                    - cdq 
+0060E136 - 2B C2                 - sub eax,edx
+0060E138 - 2B 4C 24 10           - sub ecx,[esp+10]
+0060E13C - 8B 54 24 1C           - mov edx,[esp+1C]
+0060E140 - D1 F8                 - sar eax,1
+0060E142 - 89 44 24 24           - mov [esp+24],eax
+0060E146 - 83 C8 FF              - or eax,-01
+0060E149 - 89 4C 24 2C           - mov [esp+2C],ecx				窗口的长
+0060E14D - 2B D3                 - sub edx,ebx
+0060E14F - 8D 4C 24 20           - lea ecx,[esp+20]
+0060E153 - 89 44 24 38           - mov [esp+38],eax				置-1
+0060E157 - 89 44 24 3C           - mov [esp+3C],eax				置-1
+0060E15B - B8 08000000           - mov eax,00000008
+0060E160 - 51                    - push ecx
+0060E161 - 33 DB                 - xor ebx,ebx
+0060E163 - 8B CE                 - mov ecx,esi
+0060E165 - 89 6C 24 24           - mov [esp+24],ebp				ebp = 04EFF7C0（窗口参数对象指针）
+0060E169 - 89 7C 24 2C           - mov [esp+2C],edi
+0060E16D - 89 54 24 34           - mov [esp+34],edx
+0060E171 - C7 44 24 38 A6000000  - mov [esp+38],000000A6			窗体实例ID
+0060E179 - 89 44 24 44           - mov [esp+44],eax				置8
+0060E17D - 89 44 24 48           - mov [esp+48],eax				置8
+0060E181 - 89 5C 24 4C           - mov [esp+4C],ebx
+0060E185 - E8 16C3ECFF           - call 004DA4A0				根据参数列表来构建窗体，构建成功返回1，否则返回0
+0060E18A - 85 C0                 - test eax,eax
+0060E18C - 75 13                 - jne 0060E1A1
+0060E18E - 5B                    - pop ebx
+0060E18F - 5D                    - pop ebp
+0060E190 - 5F                    - pop edi
+0060E191 - 5E                    - pop esi
+0060E192 - 8B 4C 24 68           - mov ecx,[esp+68]
+0060E196 - E8 7F990F00           - call 00707B1A
+0060E19B - 83 C4 6C              - add esp,6C
+0060E19E - C2 0800               - ret 0008
+【处理步骤三：构建窗口静态显示的字符串】
+0060E1A1 - 68 F0897E00           - push 007E89F0				窗口标题 = 探索
+0060E1A6 - 68 4C210000           - push 0000214C
+0060E1AB - 8B CE                 - mov ecx,esi
+0060E1AD - E8 0EB3ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+0060E1B2 - 68 FC897E00           - push 007E89FC				列表按钮 = 对象武将
+0060E1B7 - 68 59210000           - push 00002159
+0060E1BC - 8B CE                 - mov ecx,esi
+0060E1BE - E8 FDB2ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+0060E1C3 - 68 60887E00           - push 007E8860				显示信息 = 行动力
+0060E1C8 - 68 5E210000           - push 0000215E
+0060E1CD - 8B CE                 - mov ecx,esi
+0060E1CF - E8 ECB2ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+0060E1D4 - 68 48877E00           - push 007E8748				绿色按钮 = 决定
+0060E1D9 - 68 61210000           - push 00002161
+0060E1DE - 8B CE                 - mov ecx,esi
+0060E1E0 - E8 DBB2ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+0060E1E5 - 68 50877E00           - push 007E8750				红色按钮 = 返回
+0060E1EA - 68 62210000           - push 00002162
+0060E1EF - 8B CE                 - mov ecx,esi
+0060E1F1 - E8 CAB2ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+【处理步骤四：准备动态数据 - 需要行动力/总行动力】
+0060E1F6 - 8B 8E 8C010000        - mov ecx,[esi+0000018C]			[esi+18C] = 设施指针
+0060E1FC - 8B 11                 - mov edx,[ecx]
+0060E1FE - FF 52 44              - call dword ptr [edx+44]			获取所属军团ID
+0060E201 - 50                    - push eax
+0060E202 - B9 58192007           - mov ecx,07201958
+0060E207 - E8 C428E8FF           - call 00490AD0				根据军团ID获取军团指针
+0060E20C - 8B F8                 - mov edi,eax
+0060E20E - 57                    - push edi
+0060E20F - E8 1CC4E6FF           - call 0047A630				校验指针
+0060E214 - 83 C4 04              - add esp,04
+0060E217 - 85 C0                 - test eax,eax
+0060E219 - 74 04                 - je 0060E21F
+0060E21B - 0FB6 5F 2C            - movzx ebx,byte ptr [edi+2C]			ebx = 军团行动力
+0060E21F - 6A 1F                 - push 1F
+0060E221 - 8D 44 24 5C           - lea eax,[esp+5C]
+0060E225 - 50                    - push eax
+0060E226 - 8D 4C 24 54           - lea ecx,[esp+54]
+0060E22A - E8 8137E6FF           - call 004719B0				将指定地址开始的指定数量个内存空间清零
+0060E22F - 8B 8E 8C010000        - mov ecx,[esi+0000018C]			[esi+18C] = 设施指针
+0060E235 - 53                    - push ebx					%d
+0060E236 - 51                    - push ecx
+0060E237 - E8 F43CFCFF           - call 005D1F30				获得设施所需要探索的行动力（有人才府10，无人才府20）
+0060E23C - 83 C4 04              - add esp,04
+0060E23F - 50                    - push eax					%2d
+0060E240 - 8D 54 24 54           - lea edx,[esp+54]				存放组合后字符串的指针
+0060E244 - 68 68887E00           - push 007E8868 { ["%2d/%d"] }			字符串Patten指针
+0060E249 - 52                    - push edx
+0060E24A - E8 C13AE6FF           - call 00471D10				基于Patten的字符串构建
+0060E24F - 83 C4 10              - add esp,10
+0060E252 - 8D 44 24 58           - lea eax,[esp+58]
+0060E256 - 50                    - push eax					拼接好的字符串（"X/Y"）
+0060E257 - 68 60210000           - push 00002160				显示信息 = 需要行动力/总行动力
+0060E25C - 8B CE                 - mov ecx,esi
+0060E25E - E8 5DB2ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+【处理步骤五：获得可探索武将列表】
+0060E263 - 8B CE                 - mov ecx,esi					ecx = esi = 构建窗体结构
+0060E265 - E8 86FDFFFF           - call 0060DFF0				获得可探索武将列表，可选武将链表在[esi+194]
+*0060E265 - E9 7ABD2900           - jmp 008A9FE4
+  008A9FE4 - E8 0740D6FF           - call 0060DFF0
+  008A9FE9 - 8B 8E 8C010000        - mov ecx,[esi+0000018C]			[esi+18C] = 设施指针
+  008A9FEF - 51                    - push ecx
+  008A9FF0 - E8 3B7FD2FF           - call 005D1F30				获得设施所需要探索的行动力
+  008A9FF5 - 83 C4 04              - add esp,04
+  008A9FF8 - 85 C0                 - test eax,eax
+  008A9FFA - 75 03                 - jne 008A9FFF
+  008A9FFC - 83 C0 14              - add eax,14					如果所需行动力为0则默认为20，保护不跳出
+  008A9FFF - 8B C8                 - mov ecx,eax				ecx = 每次探索的行动力
+  008AA001 - 8B C3                 - mov eax,ebx				ebx = 总行动力
+  008AA003 - 99                    - cdq 
+  008AA004 - F7 F1                 - div ecx
+  008AA006 - 89 86 90010000        - mov [esi+00000190],eax			[esi+190] = 可选人数
+  008AA00C - B9 00868A00           - mov ecx,008A8600
+  008AA011 - 31 C0                 - xor eax,eax
+  008AA013 - 89 01                 - mov [ecx],eax
+  008AA015 - 89 41 04              - mov [ecx+04],eax
+  008AA018 - E9 4D42D6FF           - jmp 0060E26A
+【处理步骤六：构建窗口动态显示的字符串和图像】
+0060E26A - 8B CE                 - mov ecx,esi					ecx = esi = 构建窗体结构
+0060E26C - E8 9FF9FFFF           - call 0060DC10
+  0060DC10 - 83 EC 30              - sub esp,30
+  0060DC13 - A1 AC0B8E00           - mov eax,[008E0BAC]
+  [准备动态数据 - 武将头像、名字、五维、雷达图]
+  0060DC18 - 56                    - push esi
+  0060DC19 - 57                    - push edi
+  0060DC1A - 68 5A210000           - push 0000215A				显示信息 = 武将头像、名字、五维、雷达图
+  0060DC1F - 89 44 24 38           - mov [esp+38],eax
+  0060DC23 - 8B F1                 - mov esi,ecx
+  0060DC25 - E8 F6E9ECFF           - call 004DC620				准备信息Step1
+  0060DC2A - 8B F8                 - mov edi,eax
+  0060DC2C - 57                    - push edi
+  0060DC2D - E8 9EFEEDFF           - call 004EDAD0				准备信息Step2
+  0060DC32 - 83 C4 04              - add esp,04
+  0060DC35 - 85 C0                 - test eax,eax
+  0060DC37 - 74 10                 - je 0060DC49
+  0060DC39 - 8B 86 90010000        - mov eax,[esi+00000190]			eax = 选中武将指针
+  *0060DC39 - A1 04868A00           - mov eax,[008A8604]			eax = 选中武将指针
+  *0060DC3E - 90                    - nop 
+  0060DC3F - 6A 00                 - push 00
+  0060DC41 - 50                    - push eax
+  0060DC42 - 8B CF                 - mov ecx,edi
+  0060DC44 - E8 A7EE0200           - call 0063CAF0				构建武将头像、名字、五维、雷达图
+  [构建被选中武将特技]
+  0060DC49 - 6A 1F                 - push 1F { 31 }
+  0060DC4B - 8D 4C 24 18           - lea ecx,[esp+18]
+  0060DC4F - 51                    - push ecx
+  0060DC50 - 8D 4C 24 10           - lea ecx,[esp+10]
+  0060DC54 - E8 573DE6FF           - call 004719B0				将指定地址开始的指定数量个内存空间清零
+  0060DC59 - 8B 96 90010000        - mov edx,[esi+00000190]			edx = 选中武将指针
+  *0060DC59 - 8B 15 04868A00        - mov edx,[008A8604]			edx = 选中武将指针
+  0060DC5F - 52                    - push edx
+  0060DC60 - E8 CBC9E6FF           - call 0047A630				校验指针
+  0060DC65 - 83 C4 04              - add esp,04
+  0060DC68 - 85 C0                 - test eax,eax
+  0060DC6A - 74 25                 - je 0060DC91
+  0060DC6C - 8B 86 90010000        - mov eax,[esi+00000190]			eax = 选中武将指针
+  *0060DC6C - A1 04868A00           - mov eax,[008A8604]			eax = 选中武将指针
+  *0060DC71 - 90                    - nop 
+  0060DC72 - 8B 80 E8000000        - mov eax,[eax+000000E8]			eax = 选中武将特技
+  0060DC78 - 50                    - push eax
+  0060DC79 - B9 58192007           - mov ecx,07201958
+  0060DC7E - E8 CD2FE8FF           - call 00490C50				根据特技ID获取特技指针
+  0060DC83 - 50                    - push eax
+  0060DC84 - 8D 4C 24 0C           - lea ecx,[esp+0C]
+  0060DC88 - 51                    - push ecx
+  0060DC89 - E8 2229E8FF           - call 004905B0				获得特技名字字符串
+  0060DC8E - 83 C4 08              - add esp,08
+  0060DC91 - 8D 54 24 14           - lea edx,[esp+14]
+  0060DC95 - 52                    - push edx
+  0060DC96 - 68 5C210000           - push 0000215C				显示信息 = 特技
+  0060DC9B - 8B CE                 - mov ecx,esi
+  0060DC9D - E8 1EB8ECFF           - call 004D94C0				设置窗体上指定控件的字符串
+  *0060DC9D - E9 E6C32900           - jmp 008AA088                              重新计算并显示需要行动力
+    *008AA088 - E8 33F4C2FF           - call 004D94C0
+    *008AA08D - 6A 1F                 - push 1F { 31 }
+    *008AA08F - 8D 4C 24 18           - lea ecx,[esp+18]
+    *008AA093 - 51                    - push ecx
+    *008AA094 - 8D 4C 24 10           - lea ecx,[esp+10]
+    *008AA098 - E8 1379BCFF           - call 004719B0
+    *008AA09D - 8B 8E 8C010000        - mov ecx,[esi+0000018C]
+    *008AA0A3 - 8B 11                 - mov edx,[ecx]
+    *008AA0A5 - FF 52 44              - call dword ptr [edx+44]
+    *008AA0A8 - 50                    - push eax
+    *008AA0A9 - B9 58192007           - mov ecx,07201958 { [0079C134] }
+    *008AA0AE - E8 1D6ABEFF           - call 00490AD0
+    *008AA0B3 - 0FB6 78 2C            - movzx edi,byte ptr [eax+2C]
+    *008AA0B7 - 57                    - push edi
+    *008AA0B8 - 8B 8E 8C010000        - mov ecx,[esi+0000018C]
+    *008AA0BE - 51                    - push ecx
+    *008AA0BF - E8 6C7ED2FF           - call 005D1F30
+    *008AA0C4 - 83 C4 04              - add esp,04 { 4 }
+    *008AA0C7 - 0FAF 05 00868A00      - imul eax,[008A8600] { [00000001] }
+    *008AA0CE - 50                    - push eax
+    *008AA0CF - 8D 54 24 10           - lea edx,[esp+10]
+    *008AA0D3 - 68 68887E00           - push 007E8868 { ["%2d/%d"] }
+    *008AA0D8 - 52                    - push edx
+    *008AA0D9 - E8 327CBCFF           - call 00471D10
+    *008AA0DE - 83 C4 10              - add esp,10 { 16 }
+    *008AA0E1 - 8D 44 24 14           - lea eax,[esp+14]
+    *008AA0E5 - 50                    - push eax
+    *008AA0E6 - 68 60210000           - push 00002160 { 8544 }
+    *008AA0EB - 8B CE                 - mov ecx,esi
+    *008AA0ED - E8 CEF3C2FF           - call 004D94C0
+    *008AA0F2 - E9 AB3BD6FF           - jmp 0060DCA2
+  0060DCA2 - 8B 4C 24 34           - mov ecx,[esp+34]
+  0060DCA6 - 5F                    - pop edi
+  0060DCA7 - 5E                    - pop esi
+  0060DCA8 - E8 6D9E0F00           - call 00707B1A
+  0060DCAD - 83 C4 30              - add esp,30
+  0060DCB0 - C3                    - ret 
+【处理步骤七：根据选择人数Enable/Disable决定按钮，构建在Disable时显示的Hint】
+0060E271 - 8B CE                 - mov ecx,esi					ecx = esi = 构建窗体结构
+0060E273 - E8 D8F8FFFF           - call 0060DB50
+  0060DB50 - 81 EC D0030000        - sub esp,000003D0
+  0060DB56 - 56                    - push esi
+  0060DB57 - 57                    - push edi
+  0060DB58 - 8B F9                 - mov edi,ecx
+  0060DB5A - 8B 87 90010000        - mov eax,[edi+00000190]			eax = 选中武将指针
+  *0060DB5A - A1 04868A00           - mov eax,[008A8604]			eax = 选中武将指针
+  *0060DB5F - 90                    - nop 
+  0060DB60 - 50                    - push eax
+  0060DB61 - BE 01000000           - mov esi,00000001
+  0060DB66 - E8 C5CAE6FF           - call 0047A630				校验指针
+  0060DB6B - 83 C4 04              - add esp,04
+  0060DB6E - 85 C0                 - test eax,eax
+  0060DB70 - 75 02                 - jne 0060DB74
+  [如果未选择武将，则鼠标移动到选择键时选择键是灰色的，且鼠标移动上去会有Hint]
+  0060DB72 - 33 F6                 - xor esi,esi				校验失败esi置0（即没有选中任何武将）
+  0060DB74 - 56                    - push esi					0 = Disable, 1 = Enable
+  0060DB75 - 68 61210000           - push 00002161				绿色按钮“决定”的控件ID
+  0060DB7A - 8B CF                 - mov ecx,edi
+  0060DB7C - E8 BF9FECFF           - call 004D7B40				设置窗体上指定控件Disable/Enable
+  0060DB81 - 33 C0                 - xor eax,eax
+  0060DB83 - 85 F6                 - test esi,esi				Enable时跳过下一段准备提示
+  0060DB85 - 75 17                 - jne 0060DB9E
+  [准备未选择任何武将的提示]
+  0060DB87 - 68 B6140000           - push 000014B6
+  0060DB8C - 8D 4C 24 0C           - lea ecx,[esp+0C]
+  0060DB90 - E8 CBEFE8FF           - call 0049CB60				根据MSG ID准备msg数据结构
+  0060DB95 - 50                    - push eax
+  0060DB96 - E8 F5D7E8FF           - call 0049B390				根据对应msg返回字符串
+  0060DB9B - 83 C4 04              - add esp,04
+  [显示按钮提示]
+  0060DB9E - 6A 01                 - push 01					0 = 不显示, 1 = 按钮Disable时显示, 2 = 都显示
+  0060DBA0 - 50                    - push eax					eax = 提示字符串指针
+  0060DBA1 - 68 61210000           - push 00002161				绿色按钮“决定”的控件ID
+  0060DBA6 - 8B CF                 - mov ecx,edi
+  0060DBA8 - E8 A3C6ECFF           - call 004DA250				设置窗体上指定控件鼠标浮动时在最下方显示的Hint
+  0060DBAD - 5F                    - pop edi
+  0060DBAE - 5E                    - pop esi
+  0060DBAF - 81 C4 D0030000        - add esp,000003D0
+  0060DBB5 - C3                    - ret 
+【函数结束】
+0060E278 - 8B 4C 24 78           - mov ecx,[esp+78]
+0060E27C - 5B                    - pop ebx
+0060E27D - 5D                    - pop ebp
+0060E27E - B8 01000000           - mov eax,00000001				窗口准备完毕，返回1
+0060E283 - 5F                    - pop edi
+0060E284 - 89 86 B8010000        - mov [esi+000001B8],eax
+0060E28A - 5E                    - pop esi
+0060E28B - E8 8A980F00           - call 00707B1A
+0060E290 - 83 C4 6C              - add esp,6C
+0060E293 - C2 0800               - ret 0008
+
+-----------------------------------------------------------------------------------------------------------------------
+一个修改点：军师推荐探索武将
+-----------------------------------------------------------------------------------------------------------------------
+0060E465 - 8B CE                 - mov ecx,esi
+0060E467 - 89 9E 90010000        - mov [esi+00000190],ebx
+*0060E465 - E9 B6BB2900           - jmp 008AA020
+*0060E46A - 90                    - nop 
+*0060E46B - 8B CE                 - mov ecx,esi
+  *008AA020 - B9 00868A00           - mov ecx,008A8600
+  *008AA025 - C7 01 01000000        - mov [ecx],00000001 { 1 }
+  *008AA02B - 89 59 04              - mov [ecx+04],ebx
+  *008AA02E - E9 3844D6FF           - jmp 0060E46B

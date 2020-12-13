@@ -1,0 +1,21 @@
+san11pk.exe+5B0A00 - B9 50197709           - mov ecx,san11pk.exe+9371950 { (33) }
+san11pk.exe+5B0A05 - A1 600F9B00           - mov eax,[san11pk.exe+5B0F60] { (0) }
+san11pk.exe+5B0A0A - 85 C0                 - test eax,eax
+san11pk.exe+5B0A0C - 0F84 35000000         - je san11pk.exe+5B0A47
+san11pk.exe+5B0A12 - FF 52 2C              - call dword ptr [edx+2C]
+san11pk.exe+5B0A15 - 50                    - push eax
+san11pk.exe+5B0A16 - 8B 44 24 30           - mov eax,[esp+30]
+san11pk.exe+5B0A1A - 89 44 24 2C           - mov [esp+2C],eax
+san11pk.exe+5B0A1E - 8B 44 24 34           - mov eax,[esp+34]
+san11pk.exe+5B0A22 - 89 44 24 30           - mov [esp+30],eax
+san11pk.exe+5B0A26 - C7 44 24 34 00000000  - mov [esp+34],00000000 { 0 }
+san11pk.exe+5B0A2E - 8B 44 24 2C           - mov eax,[esp+2C]
+san11pk.exe+5B0A32 - 85 C0                 - test eax,eax
+san11pk.exe+5B0A34 - 58                    - pop eax
+san11pk.exe+5B0A35 - 0F84 06000000         - je san11pk.exe+5B0A41
+san11pk.exe+5B0A3B - 68 A5555700           - push san11pk.exe+1755A5 { (139) }
+san11pk.exe+5B0A40 - C3                    - ret 
+san11pk.exe+5B0A41 - 68 32625700           - push san11pk.exe+176232 { (141) }
+san11pk.exe+5B0A46 - C3                    - ret 
+san11pk.exe+5B0A47 - 68 B5555700           - push san11pk.exe+1755B5 { (255) }
+san11pk.exe+5B0A4C - C3                    - ret 
