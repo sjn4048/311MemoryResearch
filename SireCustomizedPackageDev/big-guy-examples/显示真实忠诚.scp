@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>显示真实忠诚</PackageName>
+	<PackageAuthor>龙哥</PackageAuthor>
+	<PackageDiscription>显示超过100的忠诚的真实数值</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>开启</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>004C8A9B</Address>					<!--长度:5-->
+					<EnableCode>B8 64 00 00 00</EnableCode>
+					<DisableCode>BE 64 00 00 00</DisableCode>
+				</Code>
+			</Codes>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>后台可运行</PackageName>
+	<PackageAuthor>Stefan_Ding</PackageAuthor>
+	<PackageDiscription>无需激活311窗口,切到其他应用,最小化等,都能运行311,主要用于过回合与CvC。应用此包1次,之后即可一直后台运行,源于van隐藏功能。&#x000D;
+	</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>开启后台运行</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>8A5A38</Address><!--长度:4-->
+					<EnableCode>01</EnableCode>
+					<DisableCode>00</DisableCode>
+				</Code>	
+			</Codes>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>			
+				
+				
+					
