@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>浮动情报窗显示战力</PackageName>
+	<PackageAuthor>江东旧梦</PackageAuthor>
+	<PackageDiscription>鼠标移动到部队上时显示的情报窗口，将士兵显示改为士气显示，气力显示改为战力显示。从主界面重新进入大地图时，士气标签、战力标签的修改生效。</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>浮动情报窗显示战力(20220716)</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>006447C9</Address><!--长度:5-->
+					<EnableCode>68 2E 1C 00 00</EnableCode>
+					<DisableCode>68 28 1C 00 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>00644806</Address><!--长度:5-->
+					<EnableCode>68 28 1C 00 00</EnableCode>
+					<DisableCode>68 2E 1C 00 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>0064186E</Address><!--长度:6-->
+					<EnableCode>8B 0D 64 69 71 07</EnableCode>
+					<DisableCode>8B 0D 68 D7 8A 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>00641885</Address><!--长度:6-->
+					<EnableCode>8B 15 68 69 71 07</EnableCode>
+					<DisableCode>8B 15 64 D7 8A 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>0064480D</Address><!--长度:5-->
+					<EnableCode>E9 5A 21 0D 07</EnableCode>
+					<DisableCode>E8 2E C3 FF FF</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>07716950</Address><!--长度:97-->
+					<EnableCode>A4 68 AE F0 00 00 00 00 BE D4 A4 4F 00 00 00 00 64 00 00 00 50 69 71 07 58 69 71 07 E8 CF A1 F2 F8 8B BE A4 01 00 00 0F B6 97 A6 00 00 00 FF 35 60 69 71 07 52 8D 44 24 28 68 C8 9C 7E 00 50 E8 7C B3 D5 F8 83 C4 10 83 C8 FF 50 8D 4C 24 30 51 68 2E 1C 00 00 8B CE E8 94 A1 F2 F8 E9 61 DE F2 F8</EnableCode>
+					<DisableCode>00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</DisableCode>
+				</Code>	
+			</Codes>
+			<Params>
+				<Param>
+					<Name>士气标签</Name>
+					<Address>07716950</Address>
+					<Length>4</Length>
+					<Type>String</Type>
+					<Value>士气</Value>
+				</Param>
+				<Param>
+					<Name>战力标签</Name>
+					<Address>07716958</Address>
+					<Length>4</Length>
+					<Type>String</Type>
+					<Value>战力</Value>
+				</Param>
+				<Param>
+					<Name>战力上限</Name>
+					<Address>07716960</Address>
+					<Length>4</Length>
+					<Type>Number</Type>
+					<Value>100</Value>
+					<Min>0</Min>
+					<Max>120</Max>
+				</Param>
+			</Params>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>

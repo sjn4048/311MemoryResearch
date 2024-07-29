@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>宝物附加信息显示</PackageName>
+	<PackageAuthor>一名one家</PackageAuthor>
+	<PackageDiscription>“道具一览”显示宝物附加的特技、五维、适性类型（扩充了宝物信息：b=特技，c~10=五维,11=适性）</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>宝物附加信息显示</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>004C606D</Address><!--长度:5-->
+					<EnableCode>E9 9A EF 2E 07</EnableCode>
+					<DisableCode>83 F8 0A 77 6E</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>004C6142</Address><!--长度:6-->
+					<EnableCode>0F 87 6A 00 00 00</EnableCode>
+					<DisableCode>0F 87 D2 00 00 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>004C6279</Address><!--长度:6-->
+					<EnableCode>0F 87 B2 ED 2E 07</EnableCode>
+					<DisableCode>0F 87 EC 00 00 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>004C5FEE</Address><!--长度:5-->
+					<EnableCode>E9 C0 F0 2E 07</EnableCode>
+					<DisableCode>83 F8 0A 7E 2C</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>00652075</Address><!--长度:2-->
+					<EnableCode>6A 12</EnableCode>
+					<DisableCode>6A 0B</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>008BC87C</Address><!--长度:8-->
+					<EnableCode>D5 50 7B 07 0C 00 00 00</EnableCode>
+					<DisableCode>54 C8 8B 00 05 00 00 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>077B5000</Address><!--长度:397-->
+					<EnableCode>50 57 E8 49 10 D1 F8 83 C4 08 C3 CC 83 F8 0A 0F 86 5D 10 D1 F8 83 F8 11 0F 87 C2 10 D1 F8 83 E8 0C 0F B6 44 38 30 7D 04 0F B7 47 2E 5E 5B 5F C3 CC 83 F8 11 0F 87 31 13 D1 F8 83 F8 11 74 30 83 F8 0B 74 15 E8 B7 FF FF FF 85 C0 0F 84 1A 13 D1 F8 83 EC 08 E9 9E 12 D1 F8 E8 A2 FF FF FF 50 B9 58 19 20 07 E8 E7 BB CD F8 50 E9 18 12 D1 F8 E8 8C FF FF FF 85 C0 74 35 53 57 8B F8 31 DB D1 EF 73 23 8B 46 08 85 C0 74 0D A1 1C E3 8A 00 50 8B CE E8 2A CF CB F8 8D 04 9D 75 51 7B 07 50 8B CE E8 1B CF CB F8 43 83 FB 06 7C D3 5F 5B E9 B9 12 D1 F8 CC 83 F8 0A 0F 86 63 0F D1 F8 83 F8 11 0F 87 2E 0F D1 F8 83 E8 0B C1 E0 04 05 05 51 7B 07 E9 52 0F D1 F8 01 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 0B 00 00 00 0C 00 00 00 0D 00 00 00 0E 00 00 00 0F 00 00 00 10 00 00 00 11 00 00 00 09 00 00 00 80 8C 7E 00 04 00 00 00 02 00 00 00 01 00 00 00 B4 B3 7E 00 03 00 00 00 02 00 00 00 02 00 00 00 E8 B1 7E 00 03 00 00 00 02 00 00 00 02 00 00 00 78 B4 7E 00 03 00 00 00 02 00 00 00 02 00 00 00 80 B5 7E 00 03 00 00 00 02 00 00 00 02 00 00 00 34 B1 7E 00 03 00 00 00 02 00 00 00 02 00 00 00 BC 88 7E 00 16 00 00 00 00 00 00 00 02 00 00 00 BA 6A 00 00 B4 75 00 00 A9 B8 00 00 C3 4D 00 00 A4 75 00 00 A4 F4 00 00</EnableCode>
+					<DisableCode>00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</DisableCode>
+				</Code>	
+			</Codes>
+			<Params><Param>
+				<Name>枪适性描述</Name>
+				<Address>077B5175</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>枪</Value>
+			</Param><Param>
+				<Name>戟适性描述</Name>
+				<Address>077B5179</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>戟</Value>
+			</Param><Param>
+				<Name>弩适性描述</Name>
+				<Address>077B517D</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>弩</Value>
+			</Param><Param>
+				<Name>骑适性描述</Name>
+				<Address>077B5181</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>骑</Value>
+			</Param><Param>
+				<Name>工适性描述</Name>
+				<Address>077B5185</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>工</Value>
+			</Param><Param>
+				<Name>水适性描述</Name>
+				<Address>077B5189</Address>
+				<Length>2</Length>
+				<Type>String</Type>
+				<Value>水</Value>
+			</Param></Params>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>

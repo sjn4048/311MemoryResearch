@@ -571,7 +571,7 @@
 004C8B41 - 5b                         - pop ebx
 004C8B42 - 5f                         - pop edi
 004C8B43 - c3                         - ret
-[命令编号为73、263：]
+[命令编号为73、263：返回武将年龄]
 004C8B44 - 8b cf                      - mov ecx,edi
 004C8B46 - e8 d5 fe fb ff             - call 00488a20
 004C8B4B - 8b f0                      - mov esi,eax
@@ -579,7 +579,7 @@
 004C8B4E - 5b                         - pop ebx
 004C8B4F - 5f                         - pop edi
 004C8B50 - c3                         - ret
-[命令编号为74、261：]
+[命令编号为74、261：返回武将最大能带兵数]
 004C8B51 - 8b cf                      - mov ecx,edi
 004C8B53 - e8 98 19 fc ff             - call 0048a4f0
 004C8B58 - 0f b7 f0                   - movzx esi,ax

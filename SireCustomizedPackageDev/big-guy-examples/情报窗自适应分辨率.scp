@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>情报窗自适应分辨率</PackageName>
+	<PackageAuthor>Stefan_Ding</PackageAuthor>
+	<PackageDiscription>涉及武将,城市,港关,势力,军团,部队,道具等表格窗口。打开窗口会更新应用,窗体内所有涉及元素都会移动到正确的新位置,适用于不同显示器与窗口模式的玩家。窗体大小=基值+分辨率*k,使k=0实现固定大小。</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>设置一览窗口大小</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>0064E20D</Address><!--长度:5-->
+					<EnableCode>E9 0E 53 1E 07</EnableCode>
+					<DisableCode>E9 0E 53 1E 07</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>07833500</Address><!--长度:506-->
+					<EnableCode>CD CC CC 3D CD CC 4C 3E 90 01 00 00 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 A1 94 6F ED 06 39 05 18 35 83 07 0F 85 1E 00 00 00 A1 98 6F ED 06 39 05 1C 35 83 07 0F 85 0D 00 00 00 83 3D 10 35 83 07 00 0F 85 A1 01 00 00 DB 05 94 6F ED 06 D8 0D 00 35 83 07 DA 05 08 35 83 07 DB 1D 6A 2B 80 00 DB 05 98 6F ED 06 D8 0D 04 35 83 07 DA 05 0C 35 83 07 DB 1D 14 35 83 07 66 A1 14 35 83 07 66 A3 6C 2B 80 00 A1 6A 2B 80 00 8D 40 01 66 A3 EE 27 80 00 A1 6A 2B 80 00 8D 40 E9 66 A3 96 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 26 29 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 3E 29 80 00 A1 6A 2B 80 00 8D 40 1D 66 A3 1E 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 0E 29 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 50 28 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 98 28 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 80 2B 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 98 2B 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 B0 2B 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 38 28 80 00 A1 6A 2B 80 00 8D 40 12 66 A3 92 27 80 00 A1 6A 2B 80 00 8D 80 E5 FE FF FF 66 A3 DA 27 80 00 A1 6A 2B 80 00 8D 80 E8 FE FF FF 66 A3 3A 28 80 00 A1 6A 2B 80 00 8D 40 FE 66 A3 B2 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 CA 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 E2 28 80 00 A1 6C 2B 80 00 8D 80 9A 00 00 00 66 A3 94 27 80 00 A1 6C 2B 80 00 8D 80 8A 00 00 00 66 A3 0C 28 80 00 A1 6C 2B 80 00 8D 80 8A 00 00 00 66 A3 24 28 80 00 C7 05 10 35 83 07 01 00 00 00 A1 94 6F ED 06 A3 18 35 83 07 A1 98 6F ED 06 A3 1C 35 83 07 E8 BB 5F CA F8 E9 18 AB E1 F8</EnableCode>
+					<DisableCode>CD CC CC 3D CD CC 4C 3E 90 01 00 00 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 A1 94 6F ED 06 39 05 18 35 83 07 0F 85 1E 00 00 00 A1 98 6F ED 06 39 05 1C 35 83 07 0F 85 0D 00 00 00 83 3D 10 35 83 07 00 0F 85 A1 01 00 00 DB 05 94 6F ED 06 D8 0D 00 35 83 07 DA 05 08 35 83 07 DB 1D 6A 2B 80 00 DB 05 98 6F ED 06 D8 0D 04 35 83 07 DA 05 0C 35 83 07 DB 1D 14 35 83 07 66 A1 14 35 83 07 66 A3 6C 2B 80 00 A1 6A 2B 80 00 8D 40 01 66 A3 EE 27 80 00 A1 6A 2B 80 00 8D 40 E9 66 A3 96 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 26 29 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 3E 29 80 00 A1 6A 2B 80 00 8D 40 1D 66 A3 1E 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 0E 29 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 50 28 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 98 28 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 80 2B 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 98 2B 80 00 A1 6C 2B 80 00 8D 80 A4 00 00 00 66 A3 B0 2B 80 00 A1 6C 2B 80 00 8D 80 CA 00 00 00 66 A3 38 28 80 00 A1 6A 2B 80 00 8D 40 12 66 A3 92 27 80 00 A1 6A 2B 80 00 8D 80 E5 FE FF FF 66 A3 DA 27 80 00 A1 6A 2B 80 00 8D 80 E8 FE FF FF 66 A3 3A 28 80 00 A1 6A 2B 80 00 8D 40 FE 66 A3 B2 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 CA 28 80 00 A1 6A 2B 80 00 8D 40 F5 66 A3 E2 28 80 00 A1 6C 2B 80 00 8D 80 9A 00 00 00 66 A3 94 27 80 00 A1 6C 2B 80 00 8D 80 8A 00 00 00 66 A3 0C 28 80 00 A1 6C 2B 80 00 8D 80 8A 00 00 00 66 A3 24 28 80 00 C7 05 10 35 83 07 01 00 00 00 A1 94 6F ED 06 A3 18 35 83 07 A1 98 6F ED 06 A3 1C 35 83 07 E8 BB 5F CA F8 E9 18 AB E1 F8</DisableCode>
+				</Code>	
+			</Codes>
+			<Params>
+				<Param>
+					<Name>宽度基值</Name>
+					<Address>07833508</Address>
+					<Length>4</Length>
+					<Type>Number</Type>
+					<Value>650</Value>
+					<Min>0</Min>
+					<Max>5000</Max>
+				</Param>
+				<Param>
+					<Name>高度基值</Name>
+					<Address>0783350C</Address>
+					<Length>4</Length>
+					<Type>Number</Type>
+					<Value>0</Value>
+					<Min>0</Min>
+					<Max>5000</Max>
+				</Param>
+				<Param>
+					<Name>宽度k</Name>
+					<Address>07833500</Address>
+					<Length>4</Length>
+					<Type>Float</Type>
+					<Value>0.15</Value>
+					<Min>0.1</Min>
+					<Max>0.9</Max>
+				</Param>
+				<Param>
+					<Name>高度k</Name>
+					<Address>07833504</Address>
+					<Length>4</Length>
+					<Type>Float</Type>
+					<Value>0.6</Value>
+					<Min>0.1</Min>
+					<Max>0.9</Max>
+				</Param>
+			</Params>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>
+

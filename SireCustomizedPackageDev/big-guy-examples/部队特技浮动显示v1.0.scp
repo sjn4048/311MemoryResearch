@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>部队特技浮动显示</PackageName>
+	<PackageAuthor>as</PackageAuthor>
+	<PackageDiscription>建议此包放在自动跳过菜单包之前加载，如加载不成功重新载入存档即可，不支持千宝道具包</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>测试</Caption>
+			<Enabled>TRUE</Enabled>
+			<Codes>
+			<Code>
+				<Description>代码</Description>
+				<Address>092D6900</Address><!--长度:1024-->
+				<EnableCode>00 00 00 00 50 69 2D 09 E4 69 2D 09 60 70 2D 09 00 6E 2D 09 30 6E 2D 09 80 69 2D 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 56 89 D8 36 8B 34 AA 6B C0 0A B9 08 00 00 00 99 F7 F9 0F B7 44 30 1B 8B CA BA FF 03 00 00 D3 E2 21 D0 D3 E8 48 5E 5A 59 C3 CC CC CC CC CC 51 8B 44 AA 00 8B 80 AE 00 00 00 66 8B 0C 5D 20 69 2D 09 66 39 C8 59 72 04 31 C0 40 C3 31 C0 C3 36 8B 34 AA 81 FE 5F 09 00 00 77 35 5F 31 DB 53 B9 58 19 20 07 E8 76 A1 1B F7 85 C0 74 1C 83 78 48 01 75 16 3B 70 40 75 11 0F B7 40 2E 50 E8 7D A2 1B F7 85 C0 74 03 50 FF 02 43 83 FB 64 7C CF 57 C3 CC CC 36 8B 04 AA 0F B7 44 58 1B 48 C3 CC 72 00 00 00 E8 14 06 00 FF FF FF FF FF FF 36 03 60 02 20 00 10 00 50 00 72 00 00 00 E7 14 06 00 FF FF FF FF FF FF 16 03 80 02 FC 00 10 00 90 00 72 00 00 00 E9 14 06 00 FF FF FF FF FF FF 00 00 C0 02 22 04 10 00 50 00 00 00 00 00 00 00 00 00 8B 35 18 A0 1B 09 8B 76 08 8D B6 B8 01 00 00 C3 8B 35 18 A0 1B 09 8B 76 08 8D B6 5C 03 00 00 C3 E9 5B 05 00 00 81 EC 00 02 00 00 8D 3C 24 B9 80 00 00 00 31 C0 F3 AB E8 34 06 00 00 FF 72 14 FF 72 10 FF 72 0C 31 ED 55 8D 14 24 33 C0 66 3B 05 48 69 2D 09 74 0E 45 FF 15 0C 69 2D 09 83 FD 03 7C F4 31 ED 45 8B 04 AA 50 B9 58 19 20 07 E8 4D A0 1B F7 89 04 AA 85 C0 74 44 8B 80 E8 00 00 00 50 E8 8A A1 1B F7 85 C0 74 03 50 FF 02 8B 1D 1C 69 2D 09 85 DB 74 27 4B FF 15 18 69 2D 09 85 C0 74 F1 8B 35 44 69 2D 09 FF 14 B5 04 69 2D 09 50 E8 5B A1 1B F7 85 C0 74 DA 50 FF 02 EB D5 83 FD 03 7C A1 8B 3A 83 FF 02 72 45 8D 4F FF 8D 39 8B 2C 8C 4F 8B 04 BC 39 C5 75 16 8B 04 24 89 04 BC 83 C4 04 FF 0A 85 FF 74 1F 49 85 C9 74 1F EB E6 50 55 8B 6D 60 8B 40 60 39 C5 5D 58 73 06 89 2C BC 89 04 8C 85 FF 75 C7 49 85 C9 75 C0 8B 3A 8D B2 90 00 00 00 85 FF 74 5D 8D 0C BC 8B 41 FC 31 DB 8D 48 04 8B 40 60 3C 04 72 08 C7 06 1B 5B 31 38 EB 1E 3C 03 72 08 C7 06 1B 5B 32 32 EB 12 3C 02 72 08 C7 06 1B 5B 32 31 EB 06 C7 06 1B 5B 33 31 C6 46 04 78 8D 76 05 31 ED 8A 04 29 45 84 C0 75 F8 4D 8A 01 88 06 41 46 83 FD 01 75 F4 C6 06 20 46 43 4F EB 9F C6 46 FF 00 8D 62 10 8D B4 24 80 00 00 00 56 E8 76 FE FF FF A1 38 6A 2D 09 85 C0 75 23 FF 15 10 69 2D 09 6A 00 68 20 6A 2D 09 68 E9 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 66 FF 05 38 6A 2D 09 68 E9 14 00 00 89 F1 E8 BE 28 20 F7 81 C4 00 02 00 00 31 C0 3B 05 3C 6A 2D 09 75 06 40 A3 3C 6A 2D 09 61 E8 32 3D 34 F7 E9 CA DD 29 F7 CC CC CC CC CC CC CC CC CC CC CC CC CC A1 94 6F ED 06 3B 05 3C 69 2D 09 74 19 A3 3C 69 2D 09 A1 98 6F ED 06 A3 40 69 2D 09 C7 05 38 6A 2D 09 00 00 00 00 66 83 3D 4C 69 2D 09 00 74 0B 8D 44 24 04 52 E8 06 00 00 00 5A C3 CC CC CC CC 8D 70 0C 89 30 C7 40 04 08 00 00 00 8D 78 20 31 ED BE 90 6E 2D 09 B9 0A 00 00 00 F3 A4 45 83 FD 09 7C EE 83 EF 5A 8D 32 50 31 ED 0F B6 8D 9C 6E 2D 09 51 8D 84 0E C4 00 00 00 50 0F B6 08 51 68 A7 6E 2D 09 8B 44 24 10 50 E8 52 B0 19 F7 83 C4 08 8B 4C 24 28 6B C5 0A 89 4C 07 05 59 58 5A 3A 15 AC 6E 2D 09 75 36 6B D5 0A 3A 0D AD 6E 2D 09 72 44 3A 0D AE 6E 2D 09 72 1A 3A 0D AF 6E 2D 09 72 09 66 C7 44 17 02 31 38 EB 2B 66 C7 44 17 02</EnableCode>
+				<DisableCode>00 00 00 00 50 69 2D 09 E4 69 2D 09 60 70 2D 09 00 6E 2D 09 30 6E 2D 09 80 69 2D 09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 56 89 D8 36 8B 34 AA 6B C0 0A B9 08 00 00 00 99 F7 F9 0F B7 44 30 1B 8B CA BA FF 03 00 00 D3 E2 21 D0 D3 E8 48 5E 5A 59 C3 CC CC CC CC CC 51 8B 44 AA 00 8B 80 AE 00 00 00 66 8B 0C 5D 20 69 2D 09 66 39 C8 59 72 04 31 C0 40 C3 31 C0 C3 36 8B 34 AA 81 FE 5F 09 00 00 77 35 5F 31 DB 53 B9 58 19 20 07 E8 76 A1 1B F7 85 C0 74 1C 83 78 48 01 75 16 3B 70 40 75 11 0F B7 40 2E 50 E8 7D A2 1B F7 85 C0 74 03 50 FF 02 43 83 FB 64 7C CF 57 C3 CC CC 36 8B 04 AA 0F B7 44 58 1B 48 C3 CC 72 00 00 00 E8 14 06 00 FF FF FF FF FF FF 36 03 60 02 20 00 10 00 50 00 72 00 00 00 E7 14 06 00 FF FF FF FF FF FF 16 03 80 02 FC 00 10 00 90 00 72 00 00 00 E9 14 06 00 FF FF FF FF FF FF 00 00 C0 02 22 04 10 00 50 00 00 00 00 00 00 00 00 00 8B 35 18 A0 1B 09 8B 76 08 8D B6 B8 01 00 00 C3 8B 35 18 A0 1B 09 8B 76 08 8D B6 5C 03 00 00 C3 E9 5B 05 00 00 81 EC 00 02 00 00 8D 3C 24 B9 80 00 00 00 31 C0 F3 AB E8 34 06 00 00 FF 72 14 FF 72 10 FF 72 0C 31 ED 55 8D 14 24 33 C0 66 3B 05 48 69 2D 09 74 0E 45 FF 15 0C 69 2D 09 83 FD 03 7C F4 31 ED 45 8B 04 AA 50 B9 58 19 20 07 E8 4D A0 1B F7 89 04 AA 85 C0 74 44 8B 80 E8 00 00 00 50 E8 8A A1 1B F7 85 C0 74 03 50 FF 02 8B 1D 1C 69 2D 09 85 DB 74 27 4B FF 15 18 69 2D 09 85 C0 74 F1 8B 35 44 69 2D 09 FF 14 B5 04 69 2D 09 50 E8 5B A1 1B F7 85 C0 74 DA 50 FF 02 EB D5 83 FD 03 7C A1 8B 3A 83 FF 02 72 45 8D 4F FF 8D 39 8B 2C 8C 4F 8B 04 BC 39 C5 75 16 8B 04 24 89 04 BC 83 C4 04 FF 0A 85 FF 74 1F 49 85 C9 74 1F EB E6 50 55 8B 6D 60 8B 40 60 39 C5 5D 58 73 06 89 2C BC 89 04 8C 85 FF 75 C7 49 85 C9 75 C0 8B 3A 8D B2 90 00 00 00 85 FF 74 5D 8D 0C BC 8B 41 FC 31 DB 8D 48 04 8B 40 60 3C 04 72 08 C7 06 1B 5B 31 38 EB 1E 3C 03 72 08 C7 06 1B 5B 32 32 EB 12 3C 02 72 08 C7 06 1B 5B 32 31 EB 06 C7 06 1B 5B 33 31 C6 46 04 78 8D 76 05 31 ED 8A 04 29 45 84 C0 75 F8 4D 8A 01 88 06 41 46 83 FD 01 75 F4 C6 06 20 46 43 4F EB 9F C6 46 FF 00 8D 62 10 8D B4 24 80 00 00 00 56 E8 76 FE FF FF A1 38 6A 2D 09 85 C0 75 23 FF 15 10 69 2D 09 6A 00 68 20 6A 2D 09 68 E9 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 66 FF 05 38 6A 2D 09 68 E9 14 00 00 89 F1 E8 BE 28 20 F7 81 C4 00 02 00 00 31 C0 3B 05 3C 6A 2D 09 75 06 40 A3 3C 6A 2D 09 61 E8 32 3D 34 F7 E9 CA DD 29 F7 CC CC CC CC CC CC CC CC CC CC CC CC CC A1 94 6F ED 06 3B 05 3C 69 2D 09 74 19 A3 3C 69 2D 09 A1 98 6F ED 06 A3 40 69 2D 09 C7 05 38 6A 2D 09 00 00 00 00 66 83 3D 4C 69 2D 09 00 74 0B 8D 44 24 04 52 E8 06 00 00 00 5A C3 CC CC CC CC 8D 70 0C 89 30 C7 40 04 08 00 00 00 8D 78 20 31 ED BE 90 6E 2D 09 B9 0A 00 00 00 F3 A4 45 83 FD 09 7C EE 83 EF 5A 8D 32 50 31 ED 0F B6 8D 9C 6E 2D 09 51 8D 84 0E C4 00 00 00 50 0F B6 08 51 68 A7 6E 2D 09 8B 44 24 10 50 E8 52 B0 19 F7 83 C4 08 8B 4C 24 28 6B C5 0A 89 4C 07 05 59 58 5A 3A 15 AC 6E 2D 09 75 36 6B D5 0A 3A 0D AD 6E 2D 09 72 44 3A 0D AE 6E 2D 09 72 1A 3A 0D AF 6E 2D 09 72 09 66 C7 44 17 02 31 38 EB 2B 66 C7 44 17 02</DisableCode>
+			</Code>
+			<Code>
+				<Description>代码</Description>
+				<Address>092D6D00</Address><!--长度:973-->
+				<EnableCode>32 31 EB 22 66 C7 44 17 02 32 33 EB 19 82 FA 05 73 14 8B 92 B0 6E 2D 09 38 D1 7C 0A 6B D5 0A 66 C7 44 17 02 32 33 0F B6 40 24 38 C1 73 0A 6B D5 0A 66 C7 44 17 02 32 34 45 83 FD 09 0F 8C 59 FF FF FF 58 57 E8 F7 FC FF FF 83 3D 34 69 2D 09 00 74 45 A1 38 6A 2D 09 85 C0 75 1B E8 90 02 00 00 6A 00 68 C0 6E 2D 09 68 EA 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 C6 47 27 00 68 EA 14 00 00 89 F1 E8 3A 27 20 F7 80 3D BB 6E 2D 09 AD 75 07 C6 05 BB 6E 2D 09 45 57 8D 7F 28 89 3C 24 A1 38 6A 2D 09 85 C0 75 32 FF 15 14 69 2D 09 6A 00 68 08 6A 2D 09 68 E7 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 6A 00 68 F0 69 2D 09 68 E8 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 68 E7 14 00 00 89 F1 E8 DC 26 20 F7 68 B6 6E 2D 09 68 E8 14 00 00 89 F1 E8 CB 26 20 F7 C3 CC CC CC CC CC CC CC CC CC CC 31 C0 2D 34 01 00 00 03 05 3C 69 2D 09 66 A3 32 6A 2D 09 A1 40 69 2D 09 83 E8 40 66 A3 30 6A 2D 09 C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC 31 C0 2D 00 02 00 00 66 2B 05 02 6A 2D 09 03 05 3C 69 2D 09 66 A3 FE 69 2D 09 A1 40 69 2D 09 2D A0 00 00 00 66 A3 00 6A 2D 09 31 C0 2D 44 01 00 00 66 2B 05 1A 6A 2D 09 03 05 3C 69 2D 09 66 A3 16 6A 2D 09 A1 40 69 2D 09 2D 80 00 00 00 66 A3 18 6A 2D 09 C3 CC CC CC CC CC CC CC CC CC CC CC 1B 5B 33 31 78 20 20 20 20 20 00 00 00 01 03 04 05 06 02 07 08 00 00 25 2D 34 64 00 00 5A 60 64 5A 5A 5A 5A 5A 00 B3 A1 B6 A4 A4 AD BA FB 00 00 72 00 00 00 EA 14 06 00 FF FF FF FF FF FF 69 03 60 02 A0 00 10 00 90 00 CC CC CC CC CC CC CC CC 83 3D 00 69 2D 09 00 74 3C 56 E8 51 FB FF FF 50 8B 46 14 3B 05 94 6F ED 06 74 1E C7 46 0C 00 00 00 00 C7 46 10 00 00 00 00 A1 94 6F ED 06 89 46 14 A1 98 6F ED 06 89 46 18 58 5E C7 05 00 69 2D 09 00 00 00 00 83 3D 3C 6A 2D 09 00 74 67 60 E8 0C FB FF FF 83 3D 4C 69 2D 09 00 74 3C 68 BE 6E 2D 09 68 E7 14 00 00 89 F1 E8 72 25 20 F7 68 BE 6E 2D 09 68 E8 14 00 00 89 F1 E8 61 25 20 F7 83 3D 34 69 2D 09 00 74 11 68 BE 6E 2D 09 68 EA 14 00 00 89 F1 E8 47 25 20 F7 68 BE 6E 2D 09 68 E9 14 00 00 89 F1 E8 36 25 20 F7 C7 05 3C 6A 2D 09 00 00 00 00 61 48 8B 15 18 A0 1B 09 E9 D4 D9 29 F7 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC E8 9B 0D 20 F7 FF 05 00 69 2D 09 E9 F6 56 34 F7 83 3D 3C 6A 2D 09 00 75 0A 60 8B 54 24 20 E9 92 FA FF FF 8B 04 24 3B 05 30 69 2D 09 74 07 A3 30 69 2D 09 EB E4 E9 2F FC FF FF CC CC CC CC CC CC 31 C0 2D 4D 01 00 00 66 2B 05 D2 6E 2D 09 03 05 3C 69 2D 09 66 A3 CE 6E 2D 09 A1 40 69 2D 09 2D A0 00 00 00 66 A3 D0 6E 2D 09 C3 CC CC CC CC CC E8 8B 26 20 F7 8B 84 24 BC 00 00 00 89 44 24 2C 8B 84 24 C0 00 00 00 89 44 24 30 C7 05 38 6A 2D 09 00 00 00 00 E9 7F AB 35 F7 00 00 00 00 00 00 A0 69 2D 09 6C 70 2D 09 00 00 00 00 00 00 00 00 A1 48 69 2D 09 FF 24 85 4C 70 2D 09 8B 34 AA 56 B9 58 19 20 07 E8 86 9A 1B F7 85 C0 74 2D 31 DB 8D 30 0F B6 44 1E 2D 48 50 E8 A2 9A 1B F7 85 C0 74 13 0F B7 40 2E 50 E8 B4 9B 1B F7 85 C0 74 05 5F 50 FF 02 57 43 83 FB 03 7C D7 C3 00 00 00 00 83 3D 38 69 2D 09 00 0F 85 73 FB FF FF A1 94 6F ED 06 FF 05 38 69 2D 09 E9 70 FB FF FF</EnableCode>
+				<DisableCode>32 31 EB 22 66 C7 44 17 02 32 33 EB 19 82 FA 05 73 14 8B 92 B0 6E 2D 09 38 D1 7C 0A 6B D5 0A 66 C7 44 17 02 32 33 0F B6 40 24 38 C1 73 0A 6B D5 0A 66 C7 44 17 02 32 34 45 83 FD 09 0F 8C 59 FF FF FF 58 57 E8 F7 FC FF FF 83 3D 34 69 2D 09 00 74 45 A1 38 6A 2D 09 85 C0 75 1B E8 90 02 00 00 6A 00 68 C0 6E 2D 09 68 EA 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 C6 47 27 00 68 EA 14 00 00 89 F1 E8 3A 27 20 F7 80 3D BB 6E 2D 09 AD 75 07 C6 05 BB 6E 2D 09 45 57 8D 7F 28 89 3C 24 A1 38 6A 2D 09 85 C0 75 32 FF 15 14 69 2D 09 6A 00 68 08 6A 2D 09 68 E7 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 6A 00 68 F0 69 2D 09 68 E8 14 00 00 89 F1 8B 06 FF 90 B8 01 00 00 68 E7 14 00 00 89 F1 E8 DC 26 20 F7 68 B6 6E 2D 09 68 E8 14 00 00 89 F1 E8 CB 26 20 F7 C3 CC CC CC CC CC CC CC CC CC CC 31 C0 2D 34 01 00 00 03 05 3C 69 2D 09 66 A3 32 6A 2D 09 A1 40 69 2D 09 83 E8 40 66 A3 30 6A 2D 09 C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC 31 C0 2D 00 02 00 00 66 2B 05 02 6A 2D 09 03 05 3C 69 2D 09 66 A3 FE 69 2D 09 A1 40 69 2D 09 2D A0 00 00 00 66 A3 00 6A 2D 09 31 C0 2D 44 01 00 00 66 2B 05 1A 6A 2D 09 03 05 3C 69 2D 09 66 A3 16 6A 2D 09 A1 40 69 2D 09 2D 80 00 00 00 66 A3 18 6A 2D 09 C3 CC CC CC CC CC CC CC CC CC CC CC 1B 5B 33 31 78 20 20 20 20 20 00 00 00 01 03 04 05 06 02 07 08 00 00 25 2D 34 64 00 00 5A 60 64 5A 5A 5A 5A 5A 00 B3 A1 B6 A4 A4 AD BA FB 00 00 72 00 00 00 EA 14 06 00 FF FF FF FF FF FF 69 03 60 02 A0 00 10 00 90 00 CC CC CC CC CC CC CC CC 83 3D 00 69 2D 09 00 74 3C 56 E8 51 FB FF FF 50 8B 46 14 3B 05 94 6F ED 06 74 1E C7 46 0C 00 00 00 00 C7 46 10 00 00 00 00 A1 94 6F ED 06 89 46 14 A1 98 6F ED 06 89 46 18 58 5E C7 05 00 69 2D 09 00 00 00 00 83 3D 3C 6A 2D 09 00 74 67 60 E8 0C FB FF FF 83 3D 4C 69 2D 09 00 74 3C 68 BE 6E 2D 09 68 E7 14 00 00 89 F1 E8 72 25 20 F7 68 BE 6E 2D 09 68 E8 14 00 00 89 F1 E8 61 25 20 F7 83 3D 34 69 2D 09 00 74 11 68 BE 6E 2D 09 68 EA 14 00 00 89 F1 E8 47 25 20 F7 68 BE 6E 2D 09 68 E9 14 00 00 89 F1 E8 36 25 20 F7 C7 05 3C 6A 2D 09 00 00 00 00 61 48 8B 15 18 A0 1B 09 E9 D4 D9 29 F7 CC CC CC CC CC CC CC CC CC CC CC CC CC CC CC E8 9B 0D 20 F7 FF 05 00 69 2D 09 E9 F6 56 34 F7 83 3D 3C 6A 2D 09 00 75 0A 60 8B 54 24 20 E9 92 FA FF FF 8B 04 24 3B 05 30 69 2D 09 74 07 A3 30 69 2D 09 EB E4 E9 2F FC FF FF CC CC CC CC CC CC 31 C0 2D 4D 01 00 00 66 2B 05 D2 6E 2D 09 03 05 3C 69 2D 09 66 A3 CE 6E 2D 09 A1 40 69 2D 09 2D A0 00 00 00 66 A3 D0 6E 2D 09 C3 CC CC CC CC CC E8 8B 26 20 F7 8B 84 24 BC 00 00 00 89 44 24 2C 8B 84 24 C0 00 00 00 89 44 24 30 C7 05 38 6A 2D 09 00 00 00 00 E9 7F AB 35 F7 00 00 00 00 00 00 A0 69 2D 09 6C 70 2D 09 00 00 00 00 00 00 00 00 A1 48 69 2D 09 FF 24 85 4C 70 2D 09 8B 34 AA 56 B9 58 19 20 07 E8 86 9A 1B F7 85 C0 74 2D 31 DB 8D 30 0F B6 44 1E 2D 48 50 E8 A2 9A 1B F7 85 C0 74 13 0F B7 40 2E 50 E8 B4 9B 1B F7 85 C0 74 05 5F 50 FF 02 57 43 83 FB 03 7C D7 C3 00 00 00 00 83 3D 38 69 2D 09 00 0F 85 73 FB FF FF A1 94 6F ED 06 FF 05 38 69 2D 09 E9 70 FB FF FF</DisableCode>
+			</Code>
+			<Code>
+				<Description>代码</Description>
+				<Address>005749E8</Address><!--长度:5-->
+				<EnableCode>E9 73 20 D6 08</EnableCode>
+				<DisableCode>E9 73 20 D6 08</DisableCode>
+			</Code>
+			<Code>
+				<Description>代码</Description>
+				<Address>00631BC4</Address><!--长度:5-->
+				<EnableCode>E9 57 54 CA 08</EnableCode>
+				<DisableCode>E9 57 54 CA 08</DisableCode>
+			</Code>
+			<Code>
+				<Description>代码</Description>
+				<Address>0057496E</Address><!--长度:5-->
+				<EnableCode>E9 6D 25 D6 08</EnableCode>
+				<DisableCode>E9 6D 25 D6 08</DisableCode>
+			</Code>
+			<Code>
+				<Description>代码</Description>
+				<Address>0061C6B1</Address><!--长度:5-->
+				<EnableCode>E9 FA A8 CB 08</EnableCode>
+				<DisableCode>E9 FA A8 CB 08</DisableCode>
+			</Code>
+			</Codes>
+			<Params>
+			<Param>
+				<Name>字体大小</Name>
+				<Address>092D6A36</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>00</Value>
+  				<ValueList>
+  					<Item name="小">50</Item>
+  					<Item name="大">58</Item>
+  				</ValueList>
+			</Param>
+			<Param>
+				<Name>显示道具特技</Name>
+				<Address>092D6948</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>0</Value>
+  				<ValueList>
+   					<Item name="否">00</Item>
+  					<Item name="算法1 原sire">01</Item>
+ 					<Item name="算法2">02</Item>
+  				</ValueList>
+			</Param>
+			</Params>
+		</CustomModifyItem>
+		<CustomModifyItem>
+			<Caption>功阶设置</Caption>
+			<Enabled>FALSE</Enabled>
+			<Params>
+			<Param>
+				<Name>阶数</Name>
+				<Address>092D691C</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>00</Value>
+  				<ValueList>
+  					<Item name="无">00</Item>
+  					<Item name="1">01</Item>
+  					<Item name="双阶">02</Item>
+  					<Item name="3">03</Item>
+  					<Item name="4">04</Item>
+ 					<Item name="五阶">05</Item>
+  				</ValueList>
+			</Param>
+			<Param>
+				<Name>64位特技</Name>
+				<Address>092D6944</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>00</Value>
+  				<ValueList>
+  					<Item name="是">00</Item>
+  					<Item name="否">01</Item>
+  				</ValueList>
+			</Param>
+			<Param>
+				<Name>一阶功绩</Name>
+				<Address>092D6920</Address>
+				<Length>2</Length>
+				<Type>Number</Type>
+				<Value>0</Value>
+				<Min>0</Min>
+				<Max>60000</Max>
+			</Param>
+			<Param>
+				<Name>二阶功绩</Name>
+				<Address>092D6922</Address>
+				<Length>2</Length>
+				<Type>Number</Type>
+				<Value>0</Value>
+				<Min>0</Min>
+				<Max>60000</Max>
+			</Param>
+			<Param>
+				<Name>三阶功绩</Name>
+				<Address>092D6924</Address>
+				<Length>2</Length>
+				<Type>Number</Type>
+				<Value>0</Value>
+				<Min>0</Min>
+				<Max>60000</Max>
+			</Param>
+			<Param>
+				<Name>四阶功绩</Name>
+				<Address>092D6926</Address>
+				<Length>2</Length>
+				<Type>Number</Type>
+				<Value>0</Value>
+				<Min>0</Min>
+				<Max>60000</Max>
+			</Param>
+			<Param>
+				<Name>五阶功绩</Name>
+				<Address>092D6928</Address>
+				<Length>2</Length>
+				<Type>Number</Type>
+				<Value>0</Value>
+				<Min>0</Min>
+				<Max>60000</Max>
+			</Param>
+			</Params>
+		</CustomModifyItem>
+		<CustomModifyItem>
+			<Caption>附加显示5维</Caption>
+			<Enabled>FALSE</Enabled>
+			<Codes>
+				<Code>
+				<Description>代码</Description>
+				<Address>092D694C</Address><!--长度:1-->
+				<EnableCode>01</EnableCode>
+				<DisableCode>00</DisableCode>
+			</Code>
+			</Codes>
+		<Params>
+			<Param>
+				<Name>再加4维</Name>
+				<Address>092D6934</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>00</Value>
+  				<ValueList>
+  					<Item name="否">00</Item>
+  					<Item name="是">01</Item>
+  				</ValueList>
+			</Param>
+			<Param>
+				<Name>基础光环属性</Name>
+				<Address>092D6EAC</Address>
+				<Length>1</Length>
+				<Type>ValueList</Type>
+  				<Value>00</Value>
+  				<ValueList>
+  					<Item name="统">00</Item>
+  					<Item name="武">01</Item>
+  					<Item name="智">02</Item>
+  					<Item name="政">03</Item>
+  					<Item name="魅">04</Item>
+ 				</ValueList>
+			</Param>
+			<Param>
+				<Name>一级</Name>
+				<Address>092D6EAD</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			<Param>
+				<Name>二级</Name>
+				<Address>092D6EAE</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>96</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			<Param>
+				<Name>三级</Name>
+				<Address>092D6EAF</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>100</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			<Param>
+				<Name>统率阈值</Name>
+				<Address>092D6EB0</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			<Param>
+				<Name>武力阈值</Name>
+				<Address>092D6EB1</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			<Param>
+				<Name>智力阈值</Name>
+				<Address>092D6EB2</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+				<Param>
+				<Name>政治阈值</Name>
+				<Address>092D6EB3</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+		<Param>
+				<Name>魅力阈值</Name>
+				<Address>092D6EB4</Address>
+				<Length>1</Length>
+				<Type>Number</Type>
+				<Value>90</Value>
+				<Min>0</Min>
+				<Max>255</Max>
+			</Param>
+			</Params>
+		</CustomModifyItem>
+		<CustomModifyItem>
+			<Caption>设置显示颜色</Caption>
+			<Enabled>FALSE</Enabled>
+			<Params>
+			<Param>
+				<Name>1级</Name>
+				<Address>092D6B8F</Address>
+				<Length>2</Length>
+				<Type>ValueList</Type>
+  				<Value>0</Value>
+  				<ValueList>
+  					<Item name="白色">33 31</Item>
+  					<Item name="红色">32 32</Item>
+  					<Item name="橙色">32 34</Item>
+  					<Item name="黄色">31 38</Item>
+  					<Item name="绿色">32 33</Item>
+  					<Item name="浅蓝">32 31</Item>
+  					<Item name="蓝色">33 32</Item>
+  					<Item name="灰色">32 30</Item>
+				</ValueList>
+			</Param>
+			<Param>
+				<Name>2级</Name>
+				<Address>092D6B87</Address>
+				<Length>2</Length>
+				<Type>ValueList</Type>
+  				<Value>0</Value>
+  				<ValueList>
+  					<Item name="白色">33 31</Item>
+  					<Item name="红色">32 32</Item>
+  					<Item name="橙色">32 34</Item>
+  					<Item name="黄色">31 38</Item>
+  					<Item name="绿色">32 33</Item>
+  					<Item name="浅蓝">32 31</Item>
+  					<Item name="蓝色">33 32</Item>
+  					<Item name="灰色">32 30</Item>
+				</ValueList>
+			</Param>
+			<Param>
+				<Name>3级</Name>
+				<Address>092D6B7B</Address>
+				<Length>2</Length>
+				<Type>ValueList</Type>
+  				<Value>0</Value>
+  				<ValueList>
+  					<Item name="白色">33 31</Item>
+  					<Item name="红色">32 32</Item>
+  					<Item name="橙色">32 34</Item>
+  					<Item name="黄色">31 38</Item>
+  					<Item name="绿色">32 33</Item>
+  					<Item name="浅蓝">32 31</Item>
+  					<Item name="蓝色">33 32</Item>
+  					<Item name="灰色">32 30</Item>
+				</ValueList>
+			</Param>
+			<Param>
+				<Name>4级</Name>
+				<Address>092D6B6F</Address>
+				<Length>2</Length>
+				<Type>ValueList</Type>
+  				<Value>0</Value>
+  				<ValueList>
+  					<Item name="白色">33 31</Item>
+  					<Item name="红色">32 32</Item>
+  					<Item name="橙色">32 34</Item>
+  					<Item name="黄色">31 38</Item>
+  					<Item name="绿色">32 33</Item>
+  					<Item name="浅蓝">32 31</Item>
+  					<Item name="蓝色">33 32</Item>
+  					<Item name="灰色">32 30</Item>
+				</ValueList>
+			</Param>
+			</Params>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>

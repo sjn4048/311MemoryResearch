@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>显示地格实际归属</PackageName>
+	<PackageAuthor>梦溪比潭</PackageAuthor>
+	<PackageDiscription>无</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>显示地格实际归属</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>代码</Description>
+					<Address>00575000</Address><!--长度:6-->
+					<EnableCode>E9 4B C0 17 07 90</EnableCode>
+					<DisableCode>50 E8 EA E9 F0 FF</DisableCode>
+				</Code>	
+				<Code>
+					<Description>代码</Description>
+					<Address>076F1050</Address><!--长度:76-->
+					<EnableCode>83 F8 56 7F 37 83 F8 29 7F 0D 50 B9 58 19 20 07 E8 AB F9 D9 F8 EB 30 83 F8 33 7F 10 83 E8 2A 50 B9 58 19 20 07 E8 C6 F9 D9 F8 EB 1B 83 E8 34 50 B9 58 19 20 07 E8 E6 F9 D9 F8 EB 0B 83 E8 57 6B C0 0C 05 FC 0F 6F 07 E9 78 3F E8 F8</EnableCode>
+					<DisableCode>00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</DisableCode>
+				</Code>	
+			</Codes>
+			<Params>
+				<Param>
+					<Name>87</Name>
+					<Address>076f1000</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>87</Value>
+				</Param>
+				<Param>
+					<Name>88</Name>
+					<Address>076f100C</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>88</Value>
+				</Param>
+				<Param>
+					<Name>89</Name>
+					<Address>076f1018</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>89</Value>
+				</Param>
+				<Param>
+					<Name>90</Name>
+					<Address>076f1024</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>90</Value>
+				</Param>
+				<Param>
+					<Name>91</Name>
+					<Address>076f1030</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>91</Value>
+				</Param>
+				<Param>
+					<Name>92</Name>
+					<Address>076f103C</Address>
+					<Length>10</Length>
+					<Type>String</Type>
+					<Value>92</Value>
+				</Param>
+			</Params>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>

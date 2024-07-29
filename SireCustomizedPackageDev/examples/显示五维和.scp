@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+    <PackageName>显示五维和v0.1 (备注：地址沿用的显示相性差包的地址，因此不与之兼容，后续版本修改)</PackageName>
+    <PackageAuthor>张扬</PackageAuthor>
+    <PackageDiscription>武将列表能力页新增一列：五维和</PackageDiscription>
+    <CustomModifyItems>
+        <CustomModifyItem>
+            <Caption>开启</Caption>
+            <Enabled>true</Enabled>
+            <Codes>
+                <!-- TODO: 地址沿用的显示相性差包的地址，需要修改 -->
+                <Code>
+                    <Description>修改武将能力页数组地址</Description>
+                    <Address>008BD460</Address>
+                    <EnableCode>40 01 95 00 0B</EnableCode>
+                    <DisableCode>20 CF 8B 00 0A</DisableCode>
+                </Code>
+                <Code>
+                    <Description>武将能力页新数组</Description>
+                    <Address>00950140</Address>
+                    <EnableCode>01 00 00 00 14 00 00 00 44 00 00 00 45 00 00 00 46 00 00 00 47 00 00 00 48 00 00 00 0E 00 00 00 28 00 00 00 39 00 00 00 54 00 00 00</EnableCode>
+                    <DisableCode>01 00 00 00 14 00 00 00 44 00 00 00 45 00 00 00 46 00 00 00 47 00 00 00 48 00 00 00 28 00 00 00 39 00 00 00 54 00 00 00</DisableCode>
+                </Code>
+                <Code>
+                    <Description>替换命令编号0E对应的函数地址</Description>
+                    <Address>004C8EBC</Address>
+                    <EnableCode>E0 01 95 00</EnableCode>
+                    <DisableCode>6A 8A 4C 00</DisableCode>
+                </Code>
+                <Code>
+                    <Description>取五维和的函数</Description>
+                    <Address>009501E0</Address>
+                    <EnableCode>51 53 31 DB 89 F9 6A 00 E8 43 8E B3 FF 01 C3 6A 01 E8 3A 8E B3 FF 01 C3 6A 02 E8 31 8E B3 FF 01 C3 6A 03 E8 28 8E B3 FF 01 C3 6A 04 E8 1F 8E B3 FF 01 C3 89 D8 5B 59 5E 5B 5F C3</EnableCode>
+                    <DisableCode>00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</DisableCode>
+                </Code>
+                <Code>
+                    <Description>修改文字“世代”至“五维和”</Description>
+                    <Address>007ECABC</Address>
+                    <EnableCode>A4 AD BA FB A9 4D</EnableCode>
+                    <DisableCode>A5 40 A5 4E</DisableCode>
+                </Code>
+            </Codes>
+        </CustomModifyItem>
+    </CustomModifyItems>
+</CustomModifyPackage>

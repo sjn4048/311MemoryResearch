@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CustomModifyPackage>
+	<PackageName>势力外交界面交情显示实数</PackageName>
+	<PackageAuthor>Godtype</PackageAuthor>
+	<PackageDiscription>势力的外交界面中，交情列改成显示实际数值</PackageDiscription>
+	<CustomModifyItems>
+		<CustomModifyItem>
+			<Caption>交情显示实数</Caption>
+			<Enabled>true</Enabled>
+			<Codes>
+				<Code>
+					<Description>右键城池看势力情报</Description>
+					<Address>004C2387</Address><!--长度:2-->
+					<EnableCode>A8 01</EnableCode>
+					<DisableCode>E0 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>全势力外交界面以及执行外交指令时的外交界面（此项可扩展列）</Description>
+					<Address>008BC5B8</Address><!--长度:2-->
+					<EnableCode>A8 01</EnableCode>
+					<DisableCode>E0 00</DisableCode>
+				</Code>	
+				<Code>
+					<Description>执行外交指令时的行动界面</Description>
+					<Address>005BD262</Address><!--长度:2-->
+					<EnableCode>A8 01</EnableCode>
+					<DisableCode>E0 00</DisableCode>
+				</Code>	
+			</Codes>
+		</CustomModifyItem>
+	</CustomModifyItems>
+</CustomModifyPackage>
